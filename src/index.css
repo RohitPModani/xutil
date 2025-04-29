@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  html,
+  body,
+  .section,
+  .card,
+  .input-field,
+  .result-box {
+    @apply transition-colors duration-300;
+  }
+
+  body {
+    @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white;
+  }
+
+  .section {
+    @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white;
+  }
+
+  .card {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white;
+  }
+
+  .text-muted {
+    @apply text-gray-600 dark:text-gray-300;
+  }
+
+  .button-primary {
+    @apply text-sm px-3 py-1.5
+            sm:text-base sm:px-4 sm:py-2 
+            text-white bg-zinc-800 hover:bg-zinc-700 
+            dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300 
+            rounded-full font-medium 
+            transition-colors duration-100 
+            disabled:bg-zinc-300 dark:disabled:bg-zinc-400 disabled:cursor-not-allowed;
+  }  
+
+  .hover-surface {
+    @apply hover:bg-gray-200 dark:hover:bg-gray-700;
+  }
+
+  .input-field {
+    @apply border rounded px-3 py-2 w-full dark:text-white bg-white text-sm sm:text-base rounded-md shadow-sm
+    dark:bg-gray-800 border-gray-300 dark:border-gray-600 disabled:opacity-50;
+  }
+  
+  .input-field[type='number']::-webkit-inner-spin-button,
+  .input-field[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+  } 
+  
+  .form-label {
+    @apply block mb-1 text-gray-700 dark:text-gray-300 font-medium;
+  }
+
+  .result-box {
+    @apply border rounded mt-4 p-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded dark:border-gray-500;
+  }
+
+  .mono-output {
+    @apply font-mono break-all whitespace-pre-wrap;
+  }
+
+  .checkbox-label {
+    @apply flex items-center text-sm text-gray-700 dark:text-gray-300;
+  }
+
+  .form-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4;
+  }
+
+  .scrollbox {
+    @apply max-h-64 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-500 dark:scrollbar-track-gray-800 rounded;
+  }
+
+  .checkbox-primary {
+    @apply h-3 w-3 sm:h-4 sm:w-4 rounded accent-zinc-600 dark:accent-zinc-300 mr-2;
+  }
+  
+}
