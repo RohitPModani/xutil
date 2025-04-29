@@ -22,6 +22,7 @@ const JSONPythonClassConverter = lazy(() => import('../pages/Converters-Formatte
 const JSONPydanticClassConverter = lazy(() => import('../pages/Converters-Formatters/JsonPydanticConverter'));
 const BaseNumberConverter = lazy(() => import('../pages/Converters-Formatters/BaseNumberConverter'));
 const TextBaseConverter = lazy(() => import('../pages/Converters-Formatters/TextBaseConverter'));
+const ComingSoon = lazy(() => import('../pages/ComingSoon'));
 
 export const appRoutes = [
   {
@@ -47,6 +48,7 @@ export const appRoutes = [
       { path: 'json_pydantic', element: <JSONPydanticClassConverter />, errorElement: <ErrorBoundary />},
       { path: 'number_base', element: <BaseNumberConverter />, errorElement: <ErrorBoundary />},
       { path: 'text_base', element: <TextBaseConverter />, errorElement: <ErrorBoundary />},
+      { path: 'coming-soon', element: <ComingSoon />, errorElement: <ErrorBoundary /> },
       { path: '*', element: <NotFound /> },
     ],
   }

@@ -1,8 +1,20 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import UtilityCard from '../components/UtilityCard';
 
 function Home() {
-
+  useEffect(() => {
+    const toolName = sessionStorage.getItem('lastClickedTool');
+    if (toolName) {
+      const elementId = toolName.replace(/\s+/g, '-').toLowerCase();
+      const element = document.getElementById(elementId);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100); // slight delay to allow page to fully render
+      }
+      sessionStorage.removeItem('lastClickedTool'); // clear after scrolling
+    }
+  }, []);
   const utilities = useMemo(() => [
     {
       title: 'Encoding / Decoding',

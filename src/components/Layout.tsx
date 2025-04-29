@@ -4,6 +4,7 @@ import AboutUsSection from './AboutUsSection';
 import aboutUsDescription from '../context/about';
 import BuyMeCoffee from './BuyMeCoffee';
 import ThemeToggle from './ThemeToggle';
+import ScrollToTop from './ScrollToTop';
 
 function Layout() {
   const location = useLocation();
@@ -41,6 +42,7 @@ function Layout() {
       )}
 
       <main className="px-3 pb-6 sm:px-4 sm:pb-8 max-w-7xl mx-auto">
+        <ScrollToTop />
         <Outlet />
       </main>
 
