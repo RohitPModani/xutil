@@ -20,7 +20,6 @@ const BASE_OPTIONS = [
 
 function TextBaseConverter() {
   const seo = seoDescriptions.textBase;
-
   const [inputText, setInputText] = useState('');
   const [baseInput, setBaseInput] = useState('');
   const [targetBase, setTargetBase] = useState('2');
@@ -47,8 +46,14 @@ function TextBaseConverter() {
       });
       setConvertedToBase(response.data.result);
     } catch (err: any) {
-      setConvertedToBase('');
-      setTextError(err.response?.data?.detail || 'Error converting text to base.');
+        let errorMessage = err.response?.data?.detail || err.message;
+        if (Array.isArray(errorMessage)) {
+          errorMessage = errorMessage.map((e: any) => e.msg).join(', ');
+        } else if (typeof errorMessage === 'object') {
+          errorMessage = JSON.stringify(errorMessage);
+        }
+        setConvertedToBase('');
+        setTextError(errorMessage);
     } finally {
       setIsLoadingText(false);
     }
@@ -66,9 +71,16 @@ function TextBaseConverter() {
         source_base: parseInt(sourceBase, 10),
       });
       setConvertedToText(response.data.result);
-    } catch (err: any) {
-      setConvertedToText('');
-      setBaseError(err.response?.data?.detail || 'Error converting base to text.');
+    } 
+    catch (err: any) {
+        let errorMessage = err.response?.data?.detail || err.message;
+        if (Array.isArray(errorMessage)) {
+          errorMessage = errorMessage.map((e: any) => e.msg).join(', ');
+        } else if (typeof errorMessage === 'object') {
+          errorMessage = JSON.stringify(errorMessage);
+        }
+        setConvertedToText('');
+        setBaseError(errorMessage);
     } finally {
       setIsLoadingBase(false);
     }

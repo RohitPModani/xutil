@@ -135,12 +135,12 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Perfect for developers, students, engineers, and anyone who thinks counting beyond 10 shouldn’t require a whiteboard.`
   },
   textBase: {
-    title: "Base Number Converter",
-    body: `A Base Number Converter is like a universal remote for numbers — flip effortlessly between binary, decimal, octal, and hexadecimal without needing a math degree.
-  Whether you're debugging code, solving puzzles, or just showing off your number wizardry, this tool has your back.
-  Instantly convert numbers across different bases and impress your friends (or at least confuse them a little).
-  Perfect for developers, students, engineers, and anyone who thinks counting beyond 10 shouldn’t require a whiteboard.`
-  },   
+    title: "Text ↔ Base Converter",
+    body: `A Text ↔ Base Converter is like a universal translator for humans and machines — it flips your readable text into Base64, Base32, or Base58, and then back like it never left.
+  Whether you're encoding data for URLs, APIs, or secret messages (we won’t judge), this tool does the job instantly and painlessly.
+  No more decoding headaches or guessing games — just clean, reversible conversions between text and base formats.
+  Perfect for developers, tinkerers, and anyone who’s ever asked, “What even is this gibberish?” Spoiler: it’s Base64. And now you can read it.`
+  },  
 };
 
 export default seoDescriptions;
