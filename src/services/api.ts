@@ -1,10 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://xutil-backend-production.up.railway.app/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
-  
-  // Add response interceptor for error logging
+
 api.interceptors.response.use(
     (response) => response,
     (error) => {
