@@ -1,7 +1,10 @@
 import { useEffect, useMemo } from 'react';
 import UtilityCard from '../components/UtilityCard';
+import { useOutletContext } from 'react-router-dom';
 
 function Home() {
+  const { searchQuery } = useOutletContext<{ searchQuery: string }>();
+  
   useEffect(() => {
     const toolName = sessionStorage.getItem('lastClickedTool');
     if (toolName) {
@@ -15,7 +18,8 @@ function Home() {
       sessionStorage.removeItem('lastClickedTool'); // clear after scrolling
     }
   }, []);
-  const utilities = useMemo(() => [
+
+  const allUtilities = useMemo(() => [
     {
       title: 'Encoding / Decoding',
       icon: '🧠',
@@ -113,17 +117,29 @@ function Home() {
     },
   ], []); // Only create once on initial render
 
+  const filteredUtilities = useMemo(() => {
+    if (!searchQuery.trim()) return allUtilities;
+
+    const query = searchQuery.toLowerCase();
+    return allUtilities
+      .map(group => {
+        const filteredItems = group.items.filter(item => {
+          const name = typeof item === 'string' ? item : item.name;
+          return name.toLowerCase().includes(query);
+        });
+        return filteredItems.length
+          ? { ...group, items: filteredItems }
+          : null;
+      })
+      .filter((group): group is typeof allUtilities[number] => group !== null);
+  }, [searchQuery, allUtilities]);
+
   return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {utilities.map((util, index) => (
-            <UtilityCard
-              key={index}
-              title={util.title}
-              icon={util.icon}
-              items={util.items}
-            />
-          ))}
-        </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {filteredUtilities.map((util, index) => (
+        <UtilityCard key={index} title={util.title} icon={util.icon} items={util.items} />
+      ))}
+    </div>
   );
 }
 
