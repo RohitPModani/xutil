@@ -78,18 +78,18 @@ function DownloadButton({
     <>
       <button
         onClick={handleDownloadClick}
-        className={`text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none disabled:cursor-default disabled:opacity-50 ${className}`}
+        className={`text-zinc-600 dark:text-zinc-300 hover:text-zinc-600 dark:hover:text-zinc-400 focus:outline-none disabled:cursor-default disabled:opacity-50 ${className}`}
         title="Download converted file"
         aria-label="Download converted file"
         disabled={isDisabled}
       >
-        <Download className="sm:w-6 sm:h-6 w-5 h-5 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors duration-100" />
+        <Download className="sm:w-6 sm:h-6 w-5 h-5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-100" />
       </button>
 
       {isPromptOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-80">
-            <h2 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-200">Save As</h2>
+          <div className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow-lg w-80">
+            <h2 className="text-lg font-bold mb-4 text-zinc-800 dark:text-zinc-200">Save As</h2>
             <div className="flex items-center">
               <input
                 ref={inputRef}
@@ -100,18 +100,18 @@ function DownloadButton({
                 className="input-field flex-1 mr-2"
                 placeholder="File name"
               />
-              <span className="text-gray-600 dark:text-gray-300">{getExtension(fileName)}</span>
+              <span className="text-zinc-600 dark:text-zinc-300">{getExtension(fileName)}</span>
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setIsPromptOpen(false)}
-                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 rounded"
+                className="px-4 py-2 bg-zinc-300 hover:bg-zinc-400 dark:bg-zinc-700 dark:hover:bg-zinc-600 font-semibold rounded-full"
               >
                 Cancel
               </button>
               <button
                 onClick={handlePromptConfirm}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+                className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 dark:bg-white dark:hover:bg-zinc-300 text-white dark:text-zinc-900 font-semibold rounded-full"
               >
                 Download
               </button>

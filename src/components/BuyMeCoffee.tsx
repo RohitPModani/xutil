@@ -7,7 +7,7 @@ interface BuyMeCoffeeProps {
 
 const BuyMeCoffee = ({ variant = 'bottom' }: BuyMeCoffeeProps) => {
   const baseStyle =
-    'inline-flex items-center gap-2 text-sm px-3 py-1.5 sm:text-base sm:px-4 sm:py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200';
+    'inline-flex items-center gap-2 text-sm px-3 py-1.5 sm:text-base sm:px-4 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200';
 
   if (variant === 'inline') {
     return (

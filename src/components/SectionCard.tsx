@@ -5,7 +5,7 @@ interface SectionCardProps {
   
   function SectionCard({ children, className = '' }: SectionCardProps) {
     return (
-      <div className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white shadow-lg rounded-lg sm:p-6 p-4 ${className}`}>
+      <div className={`bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white shadow-lg rounded-lg sm:p-6 p-4 ${className}`}>
         {children}
       </div>
     );

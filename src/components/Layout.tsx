@@ -14,20 +14,23 @@ function Layout() {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
-const handleLogoClick = () => {
-  setSearchQuery('');
-  sessionStorage.removeItem('lastClickedTool');
-  navigate('/', { replace: true });
-};
+  const handleLogoClick = () => {
+    resetState();
+    navigate('/');
+  };
+
+  const resetState = () => {
+    setSearchQuery('');
+    sessionStorage.removeItem('lastClickedTool');
+  };
 
   return (
     <div className="section min-h-screen transition-colors duration-300">
       <header className="flex items-center justify-between px-4 py-4 sm:py-6 max-w-7xl mx-auto gap-4">
-        {/* Logo/Title */}
         <div className="flex-shrink-0 flex items-center">
           <button
             onClick={handleLogoClick}
-            className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white hover:text-gray-700 dark:hover:text-gray-400 transition focus:outline-none"
+            className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-white hover:text-zinc-700 dark:hover:text-zinc-400 transition focus:outline-none"
           >
             XUtil
           </button>
@@ -36,18 +39,18 @@ const handleLogoClick = () => {
         <div className="flex-1 max-w-[50%] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg mx-auto flex items-center">
           {isHomePage ? (
             <div className="relative w-full">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search tools..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-8 py-1.5 sm:py-2 text-sm rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-900 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-8 pr-8 py-1.5 sm:py-2 text-sm rounded-full border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white"
                   aria-label="Clear search"
                 >
                   <X className="w-4 h-4" />
@@ -59,24 +62,25 @@ const handleLogoClick = () => {
           )}
         </div>
 
-        {/* Theme toggle */}
         <div className="flex-shrink-0 flex items-center">
           <ThemeToggle />
         </div>
       </header>
 
-      {isHomePage && (
-        <div className="px-4 max-w-7xl mx-auto sm:mb-4 mb-2">
-          <AboutUsSection>{aboutUsDescription}</AboutUsSection>
-        </div>
-      )}
+      {/* Remove min-h allocation */}
+      <div className="px-4 max-w-7xl mx-auto sm:mb-4 mb-2">
+        {isHomePage && <AboutUsSection>{aboutUsDescription}</AboutUsSection>}
+      </div>
 
       <main className="px-3 pb-6 sm:px-4 sm:pb-8 max-w-7xl mx-auto">
         <ScrollToTop />
-        <Outlet context={{ searchQuery }} />
+        <Outlet context={{ searchQuery, resetState }} />
       </main>
 
-      {isHomePage && <BuyMeCoffee />}
+      {/* Remove min-h allocation */}
+      <div>
+        {isHomePage && <BuyMeCoffee />}
+      </div>
     </div>
   );
 }

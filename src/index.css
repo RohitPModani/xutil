@@ -19,19 +19,19 @@
   }
 
   body {
-    @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white;
+    @apply bg-zinc-100 text-zinc-800 dark:bg-zinc-900 dark:text-white;
   }
 
   .section {
-    @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white;
+    @apply bg-zinc-100 text-zinc-800 dark:bg-zinc-900 dark:text-white;
   }
 
   .card {
-    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white;
+    @apply bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white;
   }
 
   .text-muted {
-    @apply text-gray-600 dark:text-gray-300;
+    @apply text-zinc-600 dark:text-zinc-300;
   }
 
   .button-primary {
@@ -45,12 +45,12 @@
   }  
 
   .hover-surface {
-    @apply hover:bg-gray-200 dark:hover:bg-gray-700;
+    @apply hover:bg-zinc-200 dark:hover:bg-zinc-700;
   }
 
   .input-field {
     @apply border rounded px-3 py-2 w-full dark:text-white bg-white text-sm sm:text-base rounded-md shadow-sm
-    dark:bg-gray-800 border-gray-300 dark:border-gray-600 disabled:opacity-50;
+    dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 disabled:opacity-50;
   }
   
   .input-field[type='number']::-webkit-inner-spin-button,
@@ -61,11 +61,11 @@
   } 
   
   .form-label {
-    @apply block mb-1 text-gray-700 dark:text-gray-300 font-medium;
+    @apply block mb-1 text-zinc-700 dark:text-zinc-300 font-medium;
   }
 
   .result-box {
-    @apply border rounded mt-4 p-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded dark:border-gray-500;
+    @apply border rounded mt-4 p-3 bg-zinc-100 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 rounded dark:border-zinc-500;
   }
 
   .mono-output {
@@ -73,7 +73,7 @@
   }
 
   .checkbox-label {
-    @apply flex items-center text-sm text-gray-700 dark:text-gray-300;
+    @apply flex items-center text-sm text-zinc-700 dark:text-zinc-300;
   }
 
   .form-grid {
@@ -81,7 +81,7 @@
   }
 
   .scrollbox {
-    @apply max-h-64 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-500 dark:scrollbar-track-gray-800 rounded;
+    @apply max-h-64 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-zinc-500 dark:scrollbar-track-zinc-800 rounded;
   }
 
   .checkbox-primary {

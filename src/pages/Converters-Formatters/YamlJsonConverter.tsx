@@ -231,7 +231,7 @@ function YAMLJSONConverter() {
                     disabled={!yamlToJsonResult && !jsonToYamlResult}
                     placeholder="Converted result will appear here..."
                     className={`input-field w-full ${
-                    !yamlToJsonResult && !jsonToYamlResult ? 'text-gray-400 dark:text-gray-500' : ''
+                    !yamlToJsonResult && !jsonToYamlResult ? 'text-zinc-400 dark:text-zinc-500' : ''
                     }`}
                 />
                 {(yamlToJsonResult || jsonToYamlResult) && (
@@ -265,7 +265,7 @@ function YAMLJSONConverter() {
             )}
             <div className="flex flex-col md:flex-row gap-4 mb-4">
                 <div className="flex-1">
-                <label className="form-label block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="form-label block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
                     Upload YAML File
                 </label>
                 <FileUploader
@@ -279,7 +279,7 @@ function YAMLJSONConverter() {
                 </div>
 
                 <div className="flex-1">
-                <label className="form-label block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="form-label block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
                     Upload JSON File
                 </label>
                 <FileUploader
@@ -302,7 +302,7 @@ function YAMLJSONConverter() {
                     disabled={!yamlFileText && !jsonFileText}
                     placeholder="Input text will appear here after uploading a file..."
                     className={`input-field w-full h-64 ${
-                    !yamlFileText && !jsonFileText ? 'text-gray-400 dark:text-gray-500' : ''
+                    !yamlFileText && !jsonFileText ? 'text-zinc-400 dark:text-zinc-500' : ''
                     }`}
                 />
                 </div>
@@ -340,7 +340,7 @@ function YAMLJSONConverter() {
                     readOnly
                     disabled={!fileResult}
                     placeholder="Converted result will appear here after upload..."
-                    className={`input-field w-full h-64 ${!fileResult ? 'text-gray-400 dark:text-gray-500' : ''}`}
+                    className={`input-field w-full h-64 ${!fileResult ? 'text-zinc-400 dark:text-zinc-500' : ''}`}
                 />
                     {fileResult && (
                         <p className="text-sm text-muted mt-1">

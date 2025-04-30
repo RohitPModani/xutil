@@ -25,20 +25,20 @@ function CopyButton({ text, copyType = '', className = '', onCopied }: CopyButto
     <button
       onClick={handleCopy}
       disabled={isDisabled}
-      className={`p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white focus:outline-none disabled:cursor-default disabled:opacity-50 ${className}`}
+      className={`p-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white focus:outline-none disabled:cursor-default disabled:opacity-50 ${className}`}
       aria-label="Copy"
       title='Copy'
     >
       {copyType === 'CopyAll' ? (
         copiedAll ? (
-          <ListCheck className="sm:w-7 sm:h-7 w-6 h-6 text-gray-500 dark:text-gray-400" />
+          <ListCheck className="sm:w-7 sm:h-7 w-6 h-6 text-zinc-500 dark:text-zinc-400" />
         ) : (
-          <ClipboardCopy className="sm:w-7 sm:h-7 w-6 h-6 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors duration-100" />
+          <ClipboardCopy className="sm:w-7 sm:h-7 w-6 h-6 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-100" />
         )
       ) : copied ? (
-        <CircleCheckBig className="sm:w-5 sm:h-5 w-4 h-4 text-gray-500 dark:text-gray-400" />
+        <CircleCheckBig className="sm:w-5 sm:h-5 w-4 h-4 text-zinc-500 dark:text-zinc-400" />
       ) : (
-        <Copy className="sm:w-5 sm:h-5 w-4 h-4 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors duration-100" />
+        <Copy className="sm:w-5 sm:h-5 w-4 h-4 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-100" />
       )}
     </button>
   );

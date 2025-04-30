@@ -23,14 +23,14 @@ function ClearButton({ onClick, className = '', disabled = false }: ClearButtonP
     <button
       onClick={handleClear}
       disabled={disabled || cleared}
-      className={`p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white focus:outline-none disabled:cursor-default disabled:opacity-50 ${className}`}
+      className={`p-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white focus:outline-none disabled:cursor-default disabled:opacity-50 ${className}`}
       aria-label="Clear all values"
       title='Clear contents'
     >
       {cleared ? (
-        <XCircle className="sm:w-6 sm:h-6 w-5 h-5 text-gray-500 dark:text-gray-400" />
+        <XCircle className="sm:w-6 sm:h-6 w-5 h-5 text-zinc-500 dark:text-zinc-400" />
       ) : (
-        <Eraser className="sm:w-6 sm:h-6 w-5 h-5 text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors duration-100" />
+        <Eraser className="sm:w-6 sm:h-6 w-5 h-5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors duration-100" />
       )}
     </button>
   );

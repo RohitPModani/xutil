@@ -37,7 +37,7 @@ export default function SEODescription({
   }, [isOpen]);
 
   return (
-    <div className={`mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white shadow-lg rounded-lg sm:p-6 p-4 ${className}`}>
+    <div className={`mb-6 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white shadow-lg rounded-lg sm:p-6 p-4 ${className}`}>
       <div
         ref={headerRef}
         onClick={() => setIsOpen(!isOpen)}
@@ -56,7 +56,7 @@ export default function SEODescription({
       >
         <h3 className="sm:text-lg text-md font-semibold">What is {title}?</h3>
         <ChevronUp
-          className={`w-5 h-5 sm:w-6 sm:h-6 text-gray-500 dark:text-gray-400 transition-transform duration-300 ${
+          className={`w-5 h-5 sm:w-6 sm:h-6 text-zinc-500 dark:text-zinc-400 transition-transform duration-300 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />

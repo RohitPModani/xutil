@@ -14,10 +14,10 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={() => setDarkMode(!darkMode)}
-      className="relative border border-gray-400 dark:border-gray-500 inline-flex items-center sm:h-8 sm:w-16 h-6 w-12 rounded-full bg-gray-300 dark:bg-gray-700 transition-colors focus:outline-none shadow-inner"
+      className="relative border border-zinc-400 dark:border-zinc-500 inline-flex items-center sm:h-8 sm:w-16 h-6 w-12 rounded-full bg-zinc-300 dark:bg-zinc-700 transition-colors focus:outline-none shadow-inner"
     >
       <span
-        className={`absolute left-1 flex items-center justify-center sm:h-6 sm:w-6 h-4 w-4 rounded-full bg-white dark:bg-gray-900 shadow-md transform transition-all duration-500 ease-in-out ${
+        className={`absolute left-1 flex items-center justify-center sm:h-6 sm:w-6 h-4 w-4 rounded-full bg-white dark:bg-zinc-900 shadow-md transform transition-all duration-500 ease-in-out ${
           darkMode ? 'translate-x-6 sm:translate-x-8' : ''
         }`}
       >

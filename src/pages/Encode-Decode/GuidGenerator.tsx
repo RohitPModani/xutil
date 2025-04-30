@@ -130,19 +130,19 @@ function GuidGenerator() {
               {bulkGuids.map((guid, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-gray-800 dark:text-gray-100"
+                className="flex items-center justify-between p-2 bg-zinc-50 dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 rounded text-zinc-800 dark:text-zinc-100"
               >
                 <span className="truncate">{guid}</span>
                 <button
                   onClick={() => copy(guid, { index })}
                   disabled={copied}
-                  className="ml-2 p-1 text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 focus:outline-none disabled:cursor-default"
+                  className="ml-2 p-1 text-zinc-600 dark:text-zinc-300 hover:text-blue-500 dark:hover:text-blue-400 focus:outline-none disabled:cursor-default"
                   aria-label="Copy GUID"
                 >
                 {copiedIndex === index ? (
-                  <CircleCheckBig className="w-5 h-5 text-gray-800" />
+                  <CircleCheckBig className="w-5 h-5 text-zinc-800" />
                 ) : (
-                  <Copy className="w-5 h-5 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors duration-100" />
+                  <Copy className="w-5 h-5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-100" />
                 )}
                 </button>
               </div>

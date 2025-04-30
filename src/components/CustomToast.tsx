@@ -24,7 +24,7 @@ const CustomToast = ({ type, message, closeToast }: CustomToastProps) => {
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className={clsx(
         'w-fit max-w-[90vw] sm:max-w-md flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-4 rounded-xl shadow-lg border',
-        'bg-zinc-900/80 dark:bg-gray-900/80 text-white transition-all duration-300 hover:shadow-2xl',
+        'bg-zinc-900/80 dark:bg-zinc-900/80 text-white transition-all duration-300 hover:shadow-2xl',
         'border-zinc-700 ml-auto mr-4 sm:mr-6'
       )}
       role="alert"

@@ -124,12 +124,12 @@ function BaseNumberConverter() {
           <BackToHome />
           <BuyMeCoffee variant="inline" />
         </div>
-        <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">{seo.title}</h2>
+        <h2 className="text-3xl font-bold mb-6 text-zinc-900 dark:text-white">{seo.title}</h2>
         <SEODescription title={'a ' + seo.title}>{seo.body}</SEODescription>
 
         <SectionCard>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Base Number Converter</h3>
+            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Base Number Converter</h3>
             <ClearButton onClick={handleClear} disabled={!inputNumber && !convertedNumber && !error} />
           </div>
 
@@ -137,7 +137,7 @@ function BaseNumberConverter() {
             {/* Input and Result Section */}
             <div className="flex flex-col gap-4">
               <div>
-                <label htmlFor="number" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="number" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Input Number
                 </label>
                 <input
@@ -153,7 +153,7 @@ function BaseNumberConverter() {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
-                  <label htmlFor="source_base" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="source_base" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                     Source Base
                   </label>
                   <select
@@ -174,7 +174,7 @@ function BaseNumberConverter() {
                 <div className="flex items-center justify-center sm:mt-6">
                   <button
                     onClick={handleSwap}
-                    className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-1 rounded"
+                    className="bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 px-2 py-1 rounded"
                     disabled={isLoading}
                     title="Swap Source and Target Bases"
                     aria-label="Swap source and target bases"
@@ -183,7 +183,7 @@ function BaseNumberConverter() {
                   </button>
                 </div>
                 <div className="flex-1">
-                  <label htmlFor="target_base" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="target_base" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                     Target Base
                   </label>
                   <select
@@ -210,7 +210,7 @@ function BaseNumberConverter() {
               </div>
 
               <div className="mt-2">
-                <label htmlFor="result" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="result" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Converted Number
                 </label>
                 <div className="flex items-center justify-between input-field">
@@ -220,7 +220,7 @@ function BaseNumberConverter() {
                       <CopyButton text={convertedNumber} />
                     </>
                   ) : (
-                    <span className="text-gray-400 dark:text-gray-500">Result will appear here</span>
+                    <span className="text-zinc-400 dark:text-zinc-500">Result will appear here</span>
                   )}
                 </div>
               </div>

@@ -173,7 +173,7 @@ function HtmlEntities() {
                   readOnly
                   disabled
                   placeholder="Converted result will appear here..."
-                  className="input-field w-full text-gray-400 dark:text-gray-500"
+                  className="input-field w-full text-zinc-400 dark:text-zinc-500"
                 />
               )}
             </div>

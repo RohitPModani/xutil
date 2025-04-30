@@ -170,7 +170,7 @@ function JSONTypescriptConverter() {
                 disabled={!textResult}
                 placeholder="Converted result will appear here..."
                 className={`input-field w-full ${
-                  !textResult? 'text-gray-400 dark:text-gray-500' : ''
+                  !textResult? 'text-zinc-400 dark:text-zinc-500' : ''
                 }`}
               />
             </div>
@@ -187,8 +187,8 @@ function JSONTypescriptConverter() {
           </div>
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex-1">
-              <label className="form-label block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                Upload XML File
+              <label className="form-label block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Upload JSON File
               </label>
               <FileUploader
                 accept=".json"
@@ -220,7 +220,7 @@ function JSONTypescriptConverter() {
                 readOnly
                 placeholder="Input text will appear here after uploading a file..."
                 className={`input-field w-full h-64 ${
-                  !jsonFileText ? 'text-gray-400 dark:text-gray-500' : ''
+                  !jsonFileText ? 'text-zinc-400 dark:text-zinc-500' : ''
                 }`}
               />
             </div>
@@ -244,7 +244,7 @@ function JSONTypescriptConverter() {
                 readOnly
                 disabled={!fileResult}
                 placeholder="Converted result will appear here after upload..."
-                className={`input-field w-full h-64 ${!fileResult ? 'text-gray-400 dark:text-gray-500' : ''}`}
+                className={`input-field w-full h-64 ${!fileResult ? 'text-zinc-400 dark:text-zinc-500' : ''}`}
               />
             </div>
           </div>
