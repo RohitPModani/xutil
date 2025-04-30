@@ -1,11 +1,12 @@
 import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import UtilityCard from '../components/UtilityCard';
+import { BrainCircuit, Code2, File, FileText, Image, Network } from 'lucide-react';
 
 const allUtilities = [
   {
     title: 'Encoding / Decoding',
-    icon: '🧠',
+    icon: BrainCircuit,
     items: [
       { name: 'GUID Generator', path: '/guid' },
       { name: 'ULID Generator', path: '/ulid' },
@@ -21,7 +22,7 @@ const allUtilities = [
   },
   {
     title: 'Converters & Formatters',
-    icon: '🧾',
+    icon: FileText,
     items: [
       { name: 'XML ↔ JSON', path: '/xml_json' },
       { name: 'YAML ↔ JSON', path: '/yaml_json' },
@@ -42,7 +43,7 @@ const allUtilities = [
   },
   {
     title: 'Text & Code Utilities',
-    icon: '✍️',
+    icon: Code2,
     items: [
       'Lorem Ipsum Generator',
       'SLUG Generator',
@@ -60,7 +61,7 @@ const allUtilities = [
   },
   {
     title: 'Web & Network Tools',
-    icon: '🌐',
+    icon: Network,
     items: [
       'IP Info Finder',
       'DNS Lookup',
@@ -73,7 +74,7 @@ const allUtilities = [
   },
   {
     title: 'Barcode, QR & Image Tools',
-    icon: '🖼️',
+    icon: Image,
     items: [
       'QR Code Generator',
       'Barcode Generator (With Format Selector)',
@@ -89,7 +90,7 @@ const allUtilities = [
   },
   {
     title: 'File & Misc Utilities',
-    icon: '📄',
+    icon: File,
     items: [
       'CSV Column Extractor',
       'HTML/CSS/JS Minifier',
@@ -104,6 +105,7 @@ function Home() {
   const { searchQuery } = useOutletContext<{ searchQuery: string }>();
 
   useEffect(() => {
+    document.title = 'XUtil | Developer Tools';
     const toolName = sessionStorage.getItem('lastClickedTool');
     const isMobile = window.innerWidth < 768;
 

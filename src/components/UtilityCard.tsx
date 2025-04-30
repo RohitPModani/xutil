@@ -7,11 +7,11 @@ interface UtilityItem {
 
 interface UtilityCardProps {
   title: string;
-  icon: string;
+  icon: React.ElementType;
   items: (string | UtilityItem)[];
 }
 
-function UtilityCard({ title, icon, items }: UtilityCardProps) {
+function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
   const navigate = useNavigate();
 
   const handleImplementedClick = (path: string, toolName: string) => {
@@ -22,8 +22,10 @@ function UtilityCard({ title, icon, items }: UtilityCardProps) {
   return (
     <div className="card shadow-md rounded-lg p-4 sm:p-6 hover:shadow-lg transition">
       <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center text-zinc-800 dark:text-white">
-        <span className="mr-2">{icon}</span> {title}
+        <Icon className="w-5 h-5 mr-2" />
+        {title}
       </h3>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {items.map((item, index) => {
           const toolName = typeof item === 'string' ? item : item.name;
@@ -47,7 +49,7 @@ function UtilityCard({ title, icon, items }: UtilityCardProps) {
             <div
               key={index}
               id={elementId}
-              className="bg-zinc-100 dark:bg-zinc-600 border border-transparent hover:border-zinc-800 dark:hover:border-white transition-all duration-300 text-zinc-800 dark:text-white sm:p-3 p-2 rounded cursor-pointer transition"
+              className="bg-zinc-100 dark:bg-zinc-600 border border-transparent hover:border-zinc-800 dark:hover:border-white transition-all duration-300 text-zinc-800 dark:text-white sm:p-3 p-2 rounded cursor-pointer"
               onClick={() => handleImplementedClick(path, toolName)}
             >
               {toolName}
