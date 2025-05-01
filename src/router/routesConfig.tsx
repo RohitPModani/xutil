@@ -22,7 +22,8 @@ const JSONPythonClassConverter = lazy(() => import('../pages/Converters-Formatte
 const JSONPydanticClassConverter = lazy(() => import('../pages/Converters-Formatters/JsonPydanticConverter'));
 const BaseNumberConverter = lazy(() => import('../pages/Converters-Formatters/BaseNumberConverter'));
 const TextBaseConverter = lazy(() => import('../pages/Converters-Formatters/TextBaseConverter'));
-const ComingSoon = lazy(() => import('../pages/ComingSoon'));
+const UnixUtcConverter = lazy(() => import('../pages/Converters-Formatters/UnixUTCTimeConverter'));
+const TimezoneConverter = lazy(() => import('../pages/Converters-Formatters/TimezoneConverter'));
 
 export const appRoutes = [
   {
@@ -48,7 +49,8 @@ export const appRoutes = [
       { path: 'json_pydantic', element: <JSONPydanticClassConverter />, errorElement: <ErrorBoundary />},
       { path: 'number_base', element: <BaseNumberConverter />, errorElement: <ErrorBoundary />},
       { path: 'text_base', element: <TextBaseConverter />, errorElement: <ErrorBoundary />},
-      { path: 'coming-soon', element: <ComingSoon />, errorElement: <ErrorBoundary /> },
+      { path: 'unix_utc', element: <UnixUtcConverter />, errorElement: <ErrorBoundary />},
+      { path: 'timezone', element: <TimezoneConverter />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

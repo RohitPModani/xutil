@@ -21,7 +21,11 @@ function Layout() {
 
   const resetState = () => {
     setSearchQuery('');
-    sessionStorage.removeItem('lastClickedTool');
+    // Check if in mobile view (width < 768px, matching the condition in Home.tsx)
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) {
+      sessionStorage.removeItem('lastClickedTool');
+    }
   };
 
   return (

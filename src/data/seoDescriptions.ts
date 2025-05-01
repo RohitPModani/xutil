@@ -141,6 +141,13 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   No more decoding headaches or guessing games — just clean, reversible conversions between text and base formats.
   Perfect for developers, tinkerers, and anyone who’s ever asked, “What even is this gibberish?” Spoiler: it’s Base64. And now you can read it.`
   },  
+  unixUtc: {
+    title: "UNIX ↔ UTC Timestamp Converter",
+    body: `A UNIX ↔ UTC Timestamp Converter is like a time whisperer for developers — translating those cryptic seconds-since-1970 into human-readable dates (and back again) without breaking a sweat.
+  Whether you're debugging logs, scheduling jobs, or just trying to figure out if “1683025923” is from the past, future, or now — this tool's got you.
+  Instantly flip between UNIX epoch timestamps and formatted UTC time with zero mental math involved.
+  Perfect for backend engineers, log analysts, cron job wranglers, or anyone who's ever said, "Wait… what time is that really?"`
+  },  
 };
 
 export default seoDescriptions;
