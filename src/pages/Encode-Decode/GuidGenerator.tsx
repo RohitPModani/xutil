@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { useClipboard } from '../../hooks/useClipboard';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
 import SectionCard from '../../components/SectionCard';
 import api from '../../services/api';
-import { CircleCheckBig, Copy } from 'lucide-react';
 import CopyButton from '../../components/CopyButton';
 import ClearButton from '../../components/ClearButton';
 import SEODescription from '../../components/SEODescription';
@@ -30,7 +28,6 @@ function GuidGenerator() {
   const [errorBulk, setErrorBulk] = useState<string | null>(null);
   const [isLoadingSingle, setIsLoadingSingle] = useState(false);
   const [isLoadingBulk, setIsLoadingBulk] = useState(false);
-  const { copy, copiedIndex, copied } = useClipboard();
 
   const fetchSingleGuid = async () => {
     setIsLoadingSingle(true);
@@ -74,8 +71,8 @@ function GuidGenerator() {
       <PageSEO title={seo.title} description={seo.body} />
       <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
         <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-            <BackToHome />
-            <BuyMeCoffee variant="inline" />
+          <BackToHome />
+          <BuyMeCoffee variant="inline" />
         </div>
         <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
         <SEODescription title={'a GUID'}>{seo.body}</SEODescription>
@@ -98,8 +95,8 @@ function GuidGenerator() {
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Generate Bulk GUIDs</h3>
-              <ClearButton onClick={handleClearAll} disabled = {bulkGuids.length === 0}/>
+            <h3 className="text-lg font-semibold">Generate Bulk GUIDs</h3>
+            <ClearButton onClick={handleClearAll} disabled = {bulkGuids.length === 0}/>
           </div>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
             <div className="flex items-center">
@@ -122,35 +119,26 @@ function GuidGenerator() {
             </div>
           </div>
 
-          <div className="result-box min-h-[100px]">
+          <div className="result-box min-h-[100px] max-h-96 overflow-y-auto scrollbox">
             {isLoadingBulk ? (
-            <p className="text-muted">Loading GUIDs...</p>
+              <p className="text-muted">Loading GUIDs...</p>
             ) : bulkGuids.length > 0 ? (
-            <div className="scrollbox space-y-2">
-              {bulkGuids.map((guid, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-2 bg-zinc-50 dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 rounded text-zinc-800 dark:text-zinc-100"
-              >
-                <span className="truncate">{guid}</span>
-                <button
-                  onClick={() => copy(guid, { index })}
-                  disabled={copied}
-                  className="ml-2 p-1 text-zinc-600 dark:text-zinc-300 hover:text-blue-500 dark:hover:text-blue-400 focus:outline-none disabled:cursor-default"
-                  aria-label="Copy GUID"
-                >
-                {copiedIndex === index ? (
-                  <CircleCheckBig className="w-5 h-5 text-zinc-800" />
-                ) : (
-                  <Copy className="w-5 h-5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-100" />
-                )}
-                </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {bulkGuids.map((guid, index) => (
+                  <div
+                    key={index}
+                    className="bg-zinc-100 dark:bg-zinc-800 p-3 rounded flex justify-between items-center"
+                  >
+                    <span className="font-mono text-zinc-800 dark:text-white truncate">
+                      {guid}
+                    </span>
+                    <CopyButton text={guid} />
+                  </div>
+                ))}
               </div>
-              ))}
-            </div>
-          ) : (
-          <p className="text-muted">No GUIDs generated yet.</p>
-          )}
+            ) : (
+              <p className="text-muted">No GUIDs generated yet.</p>
+            )}
           </div>
 
           <ErrorBox message={errorBulk} />

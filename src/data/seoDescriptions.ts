@@ -155,6 +155,27 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   No more Googling offsets or decoding GMT madness — just pick your zones and watch the magic happen.
   Perfect for remote teams, digital nomads, and anyone who's ever rage-quit over daylight saving time.`
   },  
+  pxRemEm: {
+    title: "PX ↔ REM ↔ EM Converter",
+    body: `A PX ↔ REM ↔ EM Converter is like a style whisperer for front-end devs — translating between absolute and relative units without frying your brain over root font sizes.
+  Whether you're scaling a UI, fine-tuning responsiveness, or just want to stop guessing what 1.25rem actually means, this tool does the math instantly.
+  Convert pixels to rem and em (and back) with full control over the root font size — because your design deserves precision, not approximation.
+  Perfect for web developers, designers, and anyone who's ever muttered, “Why does 16px feel so different here?”`
+  }, 
+  timeUnit: {
+    title: "Time Unit Converter",
+    body: `A Time Unit Converter is like a digital timekeeper with a calculator — converting milliseconds to days, minutes to hours, or weeks to seconds without breaking a sweat.
+  Whether you're debugging performance, building countdowns, or just figuring out how long “900000 ms” really is, this tool has your back.
+  Convert between any time units instantly and precisely — from nanoseconds to centuries, no time frame is too weird.
+  Perfect for developers, data analysts, and anyone who’s ever Googled, “How many seconds in a month?”`
+  },
+  bitByte: {
+    title: "Bit ↔ Byte Converter",
+    body: `A Bit ↔ Byte Converter is like a Rosetta Stone for digital storage — translating between bits, bytes, kilobytes, megabytes, and beyond with pixel-perfect accuracy.
+  Whether you're estimating file sizes, decoding bandwidth limits, or arguing about whether 1 MB is 1000 KB or 1024, this tool sets the record straight.
+  Instantly convert between bits and bytes in all their metric and binary glory — from b to TB, it's all covered.
+  Perfect for developers, sysadmins, network nerds, and anyone who’s ever yelled at a download speed meter.`
+  },    
 };
 
 export default seoDescriptions;

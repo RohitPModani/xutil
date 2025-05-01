@@ -30,7 +30,7 @@ function Layout() {
 
   return (
     <div className="section min-h-screen transition-colors duration-300">
-      <header className="flex items-center justify-between px-4 py-4 sm:py-6 max-w-7xl mx-auto gap-4">
+      <header className="w-full flex items-center justify-between px-4 py-4 sm:py-6 max-w-7xl mx-auto gap-4">
         <div className="flex-shrink-0 flex items-center">
           <button
             onClick={handleLogoClick}

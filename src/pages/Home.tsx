@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import UtilityCard from '../components/UtilityCard';
-import { BrainCircuit, Code2, File, FileText, Image, Network } from 'lucide-react';
+import { ArrowLeftRight, BrainCircuit, Code2, File, FileText, Image, Network } from 'lucide-react';
 
 const allUtilities = [
   {
@@ -21,7 +21,7 @@ const allUtilities = [
     ],
   },
   {
-    title: 'Converters & Formatters',
+    title: 'Formatters',
     icon: FileText,
     items: [
       { name: 'XML ↔ JSON', path: '/xml_json' },
@@ -30,15 +30,22 @@ const allUtilities = [
       { name: 'JSON to TypeScript', path: '/json_ts' },
       { name: 'JSON to Python Dataclass', path: '/json_python' },
       { name: 'JSON to Pydantic Model', path: '/json_pydantic' },
-      { name: 'Number Base Converter', path: '/number_base' },
+      { name: 'Base Number', path: '/base_number' },
       { name: 'Text ↔ Binary / Hex / Octal / Decimal', path: '/text_base' },
       { name: 'Unix ↔ UTC', path: '/unix_utc' },
-      { name: 'Timezone Converter', path: '/timezone' },
-      'DPI ↔ PPI',
-      'px ↔ rem/em',
-      'ms ↔ sec ↔ min',
-      'Bits/Bytes ↔ KB/MB/GB',
-      'Temperature, Distance, Weight Converters',
+      { name: 'px ↔ rem ↔ em', path: '/px_rem_em' },
+    ],
+  },
+  {
+    title: 'Converters',
+    icon: ArrowLeftRight,
+    items: [
+      { name: 'Timezone', path: '/timezone' },
+      { name: 'Time Unit', path: '/time' },
+      { name: 'Bits/Bytes', path: '/bit_byte' },
+      'Temperature', 
+      'Distance',
+      'Weight', 
     ],
   },
   {

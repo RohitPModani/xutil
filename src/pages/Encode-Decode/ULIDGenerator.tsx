@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { useClipboard } from '../../hooks/useClipboard';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
 import SectionCard from '../../components/SectionCard';
 import api from '../../services/api';
-import { CircleCheckBig, Copy } from 'lucide-react';
 import CopyButton from '../../components/CopyButton';
 import ClearButton from '../../components/ClearButton';
 import SEODescription from '../../components/SEODescription';
@@ -34,7 +32,6 @@ function ULIDGenerator() {
   const [isLoadingSingle, setIsLoadingSingle] = useState(false);
   const [isLoadingBulk, setIsLoadingBulk] = useState(false);
   const [isLoadingTimestamp, setIsLoadingTimestamp] = useState(false);
-  const { copy, copiedIndex, copied } = useClipboard();
 
   const fetchSingleUlid = async () => {
     setIsLoadingSingle(true);
@@ -141,29 +138,20 @@ function ULIDGenerator() {
             </div>
           </div>
 
-          <div className="result-box min-h-[100px]">
+          <div className="result-box min-h-[100px] max-h-96 overflow-y-auto scrollbox">
             {isLoadingBulk ? (
               <p className="text-muted">Loading ULIDs...</p>
             ) : bulkUlids.length > 0 ? (
-              <div className="scrollbox space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {bulkUlids.map((ulid, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-2 bg-zinc-50 dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 rounded text-zinc-800 dark:text-zinc-100"
+                    className="bg-zinc-100 dark:bg-zinc-800 p-3 rounded flex justify-between items-center"
                   >
-                    <span className="truncate">{ulid}</span>
-                    <button
-                      onClick={() => copy(ulid, { index })}
-                      disabled={copied}
-                      className="ml-2 p-1 text-zinc-600 dark:text-zinc-300 hover:text-blue-500 dark:hover:text-blue-400 focus:outline-none disabled:cursor-default"
-                      aria-label="Copy ULID"
-                    >
-                      {copiedIndex === index ? (
-                        <CircleCheckBig className="w-5 h-5 text-zinc-800" />
-                      ) : (
-                        <Copy className="w-5 h-5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-100" />
-                      )}
-                    </button>
+                    <span className="font-mono text-zinc-800 dark:text-white truncate">
+                      {ulid}
+                    </span>
+                    <CopyButton text={ulid} />
                   </div>
                 ))}
               </div>

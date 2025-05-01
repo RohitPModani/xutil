@@ -14,16 +14,19 @@ const HtmlEntities = lazy(() => import('../pages/Encode-Decode/HTMLEntities'));
 const ULIDGenerator = lazy(() => import('../pages/Encode-Decode/ULIDGenerator'));
 const MorseCodeTranslator = lazy(() => import('../pages/Encode-Decode/MorseCodeTranslator'));
 const URLEncoderDecoder = lazy(() => import('../pages/Encode-Decode/URLEncoderDecoder'));
-const XMLJSONConverter = lazy(() => import('../pages/Converters-Formatters/XmlJsonConverter'));
-const YAMLJSONConverter = lazy(() => import('../pages/Converters-Formatters/YamlJsonConverter'));
-const CSVJSONConverter = lazy(() => import('../pages/Converters-Formatters/CsvJsonConverter'));
-const JSONTypescriptConverter = lazy(() => import('../pages/Converters-Formatters/JsonTypescriptConverter'));
-const JSONPythonClassConverter = lazy(() => import('../pages/Converters-Formatters/JsonPythonConverter'));
-const JSONPydanticClassConverter = lazy(() => import('../pages/Converters-Formatters/JsonPydanticConverter'));
-const BaseNumberConverter = lazy(() => import('../pages/Converters-Formatters/BaseNumberConverter'));
-const TextBaseConverter = lazy(() => import('../pages/Converters-Formatters/TextBaseConverter'));
-const UnixUtcConverter = lazy(() => import('../pages/Converters-Formatters/UnixUTCTimeConverter'));
-const TimezoneConverter = lazy(() => import('../pages/Converters-Formatters/TimezoneConverter'));
+const XMLJSONConverter = lazy(() => import('../pages/Formatters/XmlJsonConverter'));
+const YAMLJSONConverter = lazy(() => import('../pages/Formatters/YamlJsonConverter'));
+const CSVJSONConverter = lazy(() => import('../pages/Formatters/CsvJsonConverter'));
+const JSONTypescriptConverter = lazy(() => import('../pages/Formatters/JsonTypescriptConverter'));
+const JSONPythonClassConverter = lazy(() => import('../pages/Formatters/JsonPythonConverter'));
+const JSONPydanticClassConverter = lazy(() => import('../pages/Formatters/JsonPydanticConverter'));
+const BaseNumberConverter = lazy(() => import('../pages/Formatters/BaseNumberConverter'));
+const TextBaseConverter = lazy(() => import('../pages/Formatters/TextBaseConverter'));
+const UnixUtcConverter = lazy(() => import('../pages/Converters/UnixUTCTimeConverter'));
+const TimezoneConverter = lazy(() => import('../pages/Converters/TimezoneConverter'));
+const PxRemEmConverter = lazy(() => import('../pages/Formatters/PxRemEmConverter'));
+const TimeUnitConverter = lazy(() => import('../pages/Converters/TimeUnitConverter'));
+const BitByteConverter = lazy(() => import('../pages/Converters/BitByteConverter'));
 
 export const appRoutes = [
   {
@@ -47,10 +50,13 @@ export const appRoutes = [
       { path: 'json_ts', element: <JSONTypescriptConverter />, errorElement: <ErrorBoundary />},
       { path: 'json_python', element: <JSONPythonClassConverter />, errorElement: <ErrorBoundary />},
       { path: 'json_pydantic', element: <JSONPydanticClassConverter />, errorElement: <ErrorBoundary />},
-      { path: 'number_base', element: <BaseNumberConverter />, errorElement: <ErrorBoundary />},
+      { path: 'base_number', element: <BaseNumberConverter />, errorElement: <ErrorBoundary />},
       { path: 'text_base', element: <TextBaseConverter />, errorElement: <ErrorBoundary />},
       { path: 'unix_utc', element: <UnixUtcConverter />, errorElement: <ErrorBoundary />},
       { path: 'timezone', element: <TimezoneConverter />, errorElement: <ErrorBoundary />},
+      { path: 'px_rem_em', element: <PxRemEmConverter />, errorElement: <ErrorBoundary />},
+      { path: 'time', element: <TimeUnitConverter />, errorElement: <ErrorBoundary />},
+      { path: 'bit_byte', element: <BitByteConverter />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }
