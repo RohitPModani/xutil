@@ -12,7 +12,7 @@ import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
 
 function TimezoneConverter() {
-  const seo = seoDescriptions.csvJson;
+  const seo = seoDescriptions.timezone;
   const [datetimeStr, setDatetimeStr] = useState('');
   const [fromZone, setFromZone] = useState('');
   const [toZone, setToZone] = useState('');

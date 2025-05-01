@@ -148,6 +148,13 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly flip between UNIX epoch timestamps and formatted UTC time with zero mental math involved.
   Perfect for backend engineers, log analysts, cron job wranglers, or anyone who's ever said, "Wait… what time is that really?"`
   },  
+  timezone: {
+    title: "Timezone Converter",
+    body: `A Timezone Converter is like your personal time-travel assistant — turning “What time is it there?” into instant clarity across continents.
+  Whether you're scheduling meetings, launching global events, or just trying to avoid messaging someone at 3AM, this tool converts any time between timezones effortlessly.
+  No more Googling offsets or decoding GMT madness — just pick your zones and watch the magic happen.
+  Perfect for remote teams, digital nomads, and anyone who's ever rage-quit over daylight saving time.`
+  },  
 };
 
 export default seoDescriptions;
