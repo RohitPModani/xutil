@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import UtilityCard from '../components/UtilityCard';
-import { ArrowLeftRight, BrainCircuit, Code2, File, FileText, Image, Network } from 'lucide-react';
+import { ArrowLeftRight, BrainCircuit, Code2, File, Image, Network } from 'lucide-react';
 
 const allUtilities = [
   {
