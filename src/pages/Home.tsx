@@ -21,8 +21,8 @@ const allUtilities = [
     ],
   },
   {
-    title: 'Formatters',
-    icon: FileText,
+    title: 'Converters',
+    icon: ArrowLeftRight,
     items: [
       { name: 'XML ↔ JSON', path: '/xml_json' },
       { name: 'YAML ↔ JSON', path: '/yaml_json' },
@@ -34,12 +34,6 @@ const allUtilities = [
       { name: 'Text ↔ Binary / Hex / Octal / Decimal', path: '/text_base' },
       { name: 'Unix ↔ UTC', path: '/unix_utc' },
       { name: 'px ↔ rem ↔ em', path: '/px_rem_em' },
-    ],
-  },
-  {
-    title: 'Converters',
-    icon: ArrowLeftRight,
-    items: [
       { name: 'Timezone', path: '/timezone' },
       { name: 'Time Unit', path: '/time' },
       { name: 'Bits/Bytes', path: '/bit_byte' },
