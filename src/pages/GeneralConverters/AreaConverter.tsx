@@ -150,7 +150,7 @@ function AreaConverter() {
               </LoadingButton>
             </div>
 
-            <div className="result-box max-h-[500px] mt-1">
+            <div className="result-box mt-1">
               <div className="flex justify-between items-center">
                 <label className="form-label text-base">
                   Conversion Result
@@ -160,7 +160,7 @@ function AreaConverter() {
                 )}
               </div>
               {result && (
-                <div className='mt-2'>
+                <div className='scrollbox mt-2'>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {Object.entries(result).map(([key, val]) => {
                       const unit = units.find(u => u.value === key);

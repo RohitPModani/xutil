@@ -105,17 +105,19 @@ function MorseCodeTranslator() {
             </div>
           </div>
 
-          {morseResult && (
-            <div className="result-box">
+          <div className="result-box">
               <div className="flex justify-between items-center mb-2">
                 <label className="form-label">Text to Morse Result</label>
                 <CopyButton text={morseResult} />
               </div>
-              <div className="inner-result">
-                <div className="w-full mono-output">{morseResult}</div>
-              </div>
-            </div>
-          )}
+              {morseResult && (
+                <div className="scrollbox mt-2">
+                  <div className="inner-result">
+                    <div className="w-full mono-output">{morseResult}</div>
+                  </div>
+                </div>
+              )}
+          </div>
 
           <ErrorBox message={errorText} />
         </SectionCard>
@@ -141,17 +143,19 @@ function MorseCodeTranslator() {
                 </LoadingButton>
           </div>
 
-          {textResult && (
-            <div className="result-box">
+          <div className="result-box">
               <div className="flex justify-between items-center mb-2">
                 <label className="form-label">Morse to Text Result</label>
                 <CopyButton text={textResult} />
               </div>
-              <div className="inner-result">
-                <div className="w-full mono-output">{textResult}</div>
-              </div>
+              {textResult && (
+                <div className="scrollbox mt-2">
+                  <div className="inner-result">
+                    <div className="w-full mono-output">{textResult}</div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
 
           <ErrorBox message={errorMorse} />
         </SectionCard>

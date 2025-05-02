@@ -212,45 +212,49 @@ function JWTEncoderDecoder() {
             <LoadingButton onClick={decodeJWT} isLoading={isLoading}>Decode</LoadingButton>
           </div>
 
-          {encodeResult && (
-            <div className="result-box">
+          <div className="result-box">
               <div className="flex justify-between items-center mb-2">
                 <label className="form-label">Encoded Result</label>
-                <CopyButton text={encodeResult.token} />
+                {encodeResult && <CopyButton text={encodeResult.token} />}
               </div>
-              <div className="inner-result flex items-center">
-                <div className="w-full mono-output">{encodeResult.token}</div>
-              </div>
-              {encodeResult.expires_at && (
-                <p className="text-sm text-muted mt-2">
-                  Expires At: {new Date(encodeResult.expires_at).toLocaleString()}
-                </p>
+              {encodeResult && (
+                <div className="scrollbox mt-2">
+                  <div className="inner-result flex items-center">
+                    <div className="w-full mono-output">{encodeResult.token}</div>
+                  </div>
+                  {encodeResult.expires_at && (
+                    <p className="text-sm text-muted mt-2">
+                      Expires At: {new Date(encodeResult.expires_at).toLocaleString()}
+                    </p>
+                  )}
+                </div>
               )}
-            </div>
-          )}
+          </div>
 
-          {decodeResult && (
-            <div className="result-box">
+          <div className="result-box">
               <div className="flex justify-between items-center mb-2">
                 <label className="form-label">Decoded Result</label>
-                <CopyButton text={JSON.stringify(decodeResult.payload)} />
+                {decodeResult && <CopyButton text={JSON.stringify(decodeResult.payload)} />}
               </div>
-              <div className="inner-result flex items-center">
-                <div className="w-full mono-output">
-                  <pre>{JSON.stringify(decodeResult.payload, null, 2)}</pre>
+              {decodeResult && (
+                <div className="scrollbox mt-2">
+                  <div className="inner-result flex items-center">
+                    <div className="w-full mono-output">
+                      <pre>{JSON.stringify(decodeResult.payload, null, 2)}</pre>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted mt-2">
+                    Headers: {JSON.stringify(decodeResult.headers)}
+                  </p>
+                  {decodeResult.issued_at && (
+                    <p className="text-sm text-muted">Issued At: {new Date(decodeResult.issued_at).toLocaleString()}</p>
+                  )}
+                  {decodeResult.expires_at && (
+                    <p className="text-sm text-muted">Expires At: {new Date(decodeResult.expires_at).toLocaleString()}</p>
+                  )}
                 </div>
-              </div>
-              <p className="text-sm text-muted mt-2">
-                Headers: {JSON.stringify(decodeResult.headers)}
-              </p>
-              {decodeResult.issued_at && (
-                <p className="text-sm text-muted">Issued At: {new Date(decodeResult.issued_at).toLocaleString()}</p>
-              )}
-              {decodeResult.expires_at && (
-                <p className="text-sm text-muted">Expires At: {new Date(decodeResult.expires_at).toLocaleString()}</p>
               )}
             </div>
-          )}
 
           <ErrorBox message={error} />
         </SectionCard>

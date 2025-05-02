@@ -209,17 +209,19 @@ function BaseNumberConverter() {
                 </LoadingButton>
               </div>
 
-              {convertedNumber && (
-                <div className="result-box">
+              <div className="result-box">
                   <div className="flex justify-between items-center mb-2">
                     <label className="form-label">Converted Number</label>
                     <CopyButton text={convertedNumber} />
                   </div>
-                  <div className="inner-result">
-                    <div className="mono-output">{convertedNumber}</div>
+                  {convertedNumber && (
+                  <div className='scrollbox mt-2'>
+                    <div className="inner-result">
+                      <div className="mono-output">{convertedNumber}</div>
+                    </div>
                   </div>
+                  )}
                 </div>
-              )}
             </div>
 
             {error && (

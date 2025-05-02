@@ -142,17 +142,19 @@ function TextBaseConverter() {
                 <LoadingButton onClick={handleTextToBase} isLoading={isLoadingText}>Convert</LoadingButton>
             </div>
 
-            {convertedToBase && (
-              <div className="result-box mt-4">
+            <div className="result-box mt-4">
                 <div className="flex justify-between items-center mb-2">
                   <label className="form-label">Text to Base Result</label>
                   <CopyButton text={convertedToBase} />
                 </div>
-                <div className="inner-result">
-                  <div className="w-full mono-output break-all">{convertedToBase}</div>
-                </div>
-              </div>
-            )}
+                {convertedToBase && (
+                  <div className="scrollbox mt-2">
+                    <div className="inner-result">
+                      <div className="w-full mono-output break-all">{convertedToBase}</div>
+                    </div>
+                  </div>
+                )}
+            </div>
           <ErrorBox message={textError} />
         </SectionCard>
 
@@ -186,17 +188,19 @@ function TextBaseConverter() {
                 <LoadingButton onClick={handleBaseToText} isLoading={isLoadingBase}>Convert</LoadingButton>
             </div>
 
-            {convertedToText && (
-              <div className="result-box mt-4">
+            <div className="result-box mt-4">
                 <div className="flex justify-between items-center mb-2">
                   <label className="form-label">Base to Text Result</label>
                   <CopyButton text={convertedToText} />
                 </div>
-                <div className="inner-result">
-                  <div className="w-full mono-output break-all">{convertedToText}</div>
-                </div>
-              </div>
-            )}
+                {convertedToText && (
+                  <div className='scrollbox mt-2'>
+                    <div className="inner-result">
+                      <div className="w-full mono-output break-all">{convertedToText}</div>
+                    </div>
+                  </div>
+                )}
+            </div>
           <ErrorBox message={baseError} />
         </SectionCard>
       </div>

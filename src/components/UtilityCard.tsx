@@ -55,7 +55,7 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
         role="button"
         className="flex items-center justify-between sm:cursor-default cursor-pointer sm:mb-4"
         style={{
-          marginBottom: window.innerWidth < 640 ? (isOpen ? '0.5rem' : '0px') : undefined,
+          marginBottom: window.innerWidth < 640 ? (isOpen ? '1rem' : '0px') : undefined,
           transition: 'margin-bottom 300ms ease',
         }}
       >
