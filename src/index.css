@@ -84,7 +84,7 @@
   }
 
   .scrollbox {
-    @apply max-h-64 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-zinc-500 dark:scrollbar-track-zinc-800 rounded;
+    @apply max-h-[500px] overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-zinc-500 dark:scrollbar-track-zinc-800 rounded;
   }
 
   .checkbox-primary {
