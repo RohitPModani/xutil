@@ -37,7 +37,7 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
               <div
                 key={index}
                 id={elementId}
-                className="bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400 sm:p-3 p-2 rounded cursor-not-allowed select-none"
+                className="bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 sm:p-3 p-2 rounded cursor-not-allowed select-none"
                 title="Coming soon"
               >
                 {toolName}
