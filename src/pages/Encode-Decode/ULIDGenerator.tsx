@@ -102,7 +102,7 @@ function ULIDGenerator() {
           </LoadingButton>
           {singleUlid && (
             <div className="result-box mt-4">
-              <div className="flex items-center justify-between">
+              <div className="inner-result">
                 <span className="truncate">{singleUlid}</span>
                 <CopyButton text={singleUlid} />
               </div>
@@ -119,7 +119,7 @@ function ULIDGenerator() {
           </div>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
             <div className="flex items-center">
-              <label className="form-label mr-2">Count (1-1000):</label>
+              <label className="form-label text-base mr-2">Count (1-1000):</label>
               <input
                 type="number"
                 min="1"
@@ -146,7 +146,7 @@ function ULIDGenerator() {
                 {bulkUlids.map((ulid, index) => (
                   <div
                     key={index}
-                    className="bg-zinc-100 dark:bg-zinc-800 p-3 rounded flex justify-between items-center"
+                    className="inner-result"
                   >
                     <span className="font-mono text-zinc-800 dark:text-white truncate">
                       {ulid}
@@ -185,10 +185,10 @@ function ULIDGenerator() {
 
       {timestamp && (
           <div className="result-box mt-4">
-          <div className="flex items-center justify-between">
+            <div className="inner-result">
               <span className="truncate">DateTime: {timestamp}</span>
               <CopyButton text={new Date(timestamp).toLocaleString()} />
-          </div>
+            </div>
           </div>
       )}
 

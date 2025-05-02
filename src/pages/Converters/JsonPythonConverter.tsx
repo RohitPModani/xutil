@@ -135,11 +135,14 @@ function JSONPythonClassConverter() {
               />
 
               <div className="flex gap-2 my-4">
-                <input
-                  value={className}
-                  onChange={(e) => setClassName(e.target.value)}
-                  className="input-field rounded-md w-auto"
-                />
+              <div className="flex items-center justify-center">
+                  <label className="form-label text-base mr-2">Class Name:</label>
+                  <input
+                    value={className}
+                    onChange={(e) => setClassName(e.target.value)}
+                    className="input-field rounded-md w-auto"
+                  />
+                </div>
 
                 <LoadingButton onClick={handleTextConversion} isLoading={isTextConverting}>
                   Convert
@@ -183,7 +186,7 @@ function JSONPythonClassConverter() {
           </div>
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex-1">
-              <label className="form-label block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="form-label">
                 Upload JSON File
               </label>
               <FileUploader
@@ -194,11 +197,14 @@ function JSONPythonClassConverter() {
                 resetSignal={fileReset.resetSignal}
               />
               <div className="flex gap-2 my-4">
-                <input
-                  value={fileClassName}
-                  onChange={(e) => setFileClassName(e.target.value)}
-                  className="input-field rounded-md w-auto"
-                />
+                <div className="flex items-center justify-center">
+                  <label className="form-label text-base mr-2">Class Name:</label>
+                  <input
+                    value={fileClassName}
+                    onChange={(e) => setFileClassName(e.target.value)}
+                    className="input-field rounded-md w-auto"
+                  />
+                </div>
 
                 <LoadingButton onClick={handleFileConversion} isLoading={isFileConverting}>
                   Convert

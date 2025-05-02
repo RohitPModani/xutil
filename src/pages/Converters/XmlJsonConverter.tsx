@@ -215,9 +215,15 @@ function XMLJSONConverter() {
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
                 <label className="form-label">Converted Result:</label>
-                {(xmlToJsonResult || jsonToXmlResult) && (
-                  <CopyButton text={xmlToJsonResult?.result || jsonToXmlResult?.result || ''} />
-                )}
+                <div className="flex items-center gap-2">
+                  <CopyButton text={xmlToJsonResult?.result || jsonToXmlResult?.result || ''} className='mr-2' />
+                  <DownloadButton
+                    content={xmlToJsonResult?.result || jsonToXmlResult?.result || ''}
+                    fileName={`converted_result.${xmlToJsonResult ? 'json' : 'xml'}`}
+                    fileType={xmlToJsonResult ? 'json' : 'xml'}
+                    disabled={!xmlToJsonResult && !jsonToXmlResult}
+                  />
+                </div>
               </div>
               <AutoTextarea
                 value={xmlToJsonResult?.result || jsonToXmlResult?.result || ''}
@@ -253,7 +259,7 @@ function XMLJSONConverter() {
           )}
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex-1">
-              <label className="form-label block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="form-label">
                 Upload XML File
               </label>
               <FileUploader
@@ -267,7 +273,7 @@ function XMLJSONConverter() {
             </div>
 
             <div className="flex-1">
-              <label className="form-label block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="form-label">
                 Upload JSON File
               </label>
               <FileUploader

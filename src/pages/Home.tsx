@@ -1,8 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import UtilityCard from '../components/UtilityCard';
-import { ArrowLeftRight, BrainCircuit, Code2, File, Image, Network } from 'lucide-react';
-
+import { ArrowLeftRight, BrainCircuit, Code2, File, GitCompareArrows, Image, Network } from 'lucide-react';
 const allUtilities = [
   {
     title: 'Encoding / Decoding',
@@ -35,10 +34,17 @@ const allUtilities = [
       { name: 'Unix ↔ UTC', path: '/unix_utc' },
       { name: 'px ↔ rem ↔ em', path: '/px_rem_em' },
       { name: 'Timezone', path: '/timezone' },
+    ],
+  },
+  {
+    title: 'General Converters',
+    icon: GitCompareArrows,
+    items: [
       { name: 'Time Unit', path: '/time' },
       { name: 'Bits/Bytes', path: '/bit_byte' },
-      'Temperature', 
-      'Distance',
+      { name: 'Temperature', path: '/temperature' },
+      { name: 'Length', path: '/length' },
+      { name: 'Area', path: '/area' },
       'Weight', 
     ],
   },

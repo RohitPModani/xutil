@@ -112,12 +112,12 @@ function JWTEncoderDecoder() {
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Encode or Decode JWT</h3>
-              <ClearButton onClick={handleClearAll} disabled = {payload === '' && headers === '' && secret === '' && expiryMinutes === '' && algorithm === 'HS256' && token === '' && verifyExpiry === true}/>
+            <h3 className="text-lg font-semibold">Encode or Decode JWT</h3>
+            <ClearButton onClick={handleClearAll} disabled={payload === '' && headers === '' && secret === '' && expiryMinutes === '' && algorithm === 'HS256' && token === '' && verifyExpiry === true} />
           </div>
           <div className="form-grid">
             <div>
-              <label className="form-label mb-2">Payload (JSON):</label>
+              <label className="form-label">Payload (JSON):</label>
               <AutoTextarea
                 value={payload}
                 onChange={(e) => setPayload(e.target.value)}
@@ -128,7 +128,7 @@ function JWTEncoderDecoder() {
             </div>
 
             <div>
-              <label className="form-label mb-2">Custom Headers (Optional):</label>
+              <label className="form-label">Custom Headers (Optional):</label>
               <AutoTextarea
                 value={headers}
                 onChange={(e) => setHeaders(e.target.value)}
@@ -139,7 +139,7 @@ function JWTEncoderDecoder() {
             </div>
 
             <div>
-              <label className="form-label mb-2">Secret Key:</label>
+              <label className="form-label">Secret Key:</label>
               <input
                 type="text"
                 value={secret}
@@ -151,7 +151,7 @@ function JWTEncoderDecoder() {
             </div>
 
             <div>
-              <label className="form-label mb-2">Algorithm:</label>
+              <label className="form-label">Algorithm:</label>
               <select
                 value={algorithm}
                 onChange={(e) => setAlgorithm(e.target.value)}
@@ -168,7 +168,7 @@ function JWTEncoderDecoder() {
             </div>
 
             <div>
-              <label className="form-label mb-2">Expiry (Minutes):</label>
+              <label className="form-label">Expiry (Minutes):</label>
               <input
                 type="number"
                 value={expiryMinutes}
@@ -181,7 +181,7 @@ function JWTEncoderDecoder() {
             </div>
 
             <div>
-              <label className="form-label block mb-2">Verify Expiry:</label>
+              <label className="form-label block">Verify Expiry:</label>
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -196,7 +196,7 @@ function JWTEncoderDecoder() {
           </div>
 
           <div className="mb-4">
-            <label className="form-label mb-2">JWT Token (for Decode):</label>
+            <label className="form-label">JWT Token (for Decode):</label>
             <input
               type="text"
               value={token}
@@ -214,9 +214,12 @@ function JWTEncoderDecoder() {
 
           {encodeResult && (
             <div className="result-box">
-              <div className="flex items-center justify-between">
-                <div className="w-full mono-output">{encodeResult.token}</div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="form-label">Encoded Result</label>
                 <CopyButton text={encodeResult.token} />
+              </div>
+              <div className="inner-result flex items-center">
+                <div className="w-full mono-output">{encodeResult.token}</div>
               </div>
               {encodeResult.expires_at && (
                 <p className="text-sm text-muted mt-2">
@@ -228,11 +231,14 @@ function JWTEncoderDecoder() {
 
           {decodeResult && (
             <div className="result-box">
-              <div className="flex items-center justify-between">
+              <div className="flex justify-between items-center mb-2">
+                <label className="form-label">Decoded Result</label>
+                <CopyButton text={JSON.stringify(decodeResult.payload)} />
+              </div>
+              <div className="inner-result flex items-center">
                 <div className="w-full mono-output">
                   <pre>{JSON.stringify(decodeResult.payload, null, 2)}</pre>
                 </div>
-                <CopyButton text={JSON.stringify(decodeResult.payload)} />
               </div>
               <p className="text-sm text-muted mt-2">
                 Headers: {JSON.stringify(decodeResult.headers)}

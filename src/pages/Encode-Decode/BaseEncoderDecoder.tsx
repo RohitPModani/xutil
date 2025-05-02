@@ -94,67 +94,79 @@ function BaseEncoderDecoder() {
           <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
           <SEODescription title={'a ' + seo.title}>{seo.body}</SEODescription>
 
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
+          <SectionCard>
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Encode or Decode Text</h3>
-              <ClearButton onClick={handleClearAll} disabled={inputText === ''}/>
-          </div>
-          <div className="form-grid">
-            <div>
-              <label className="form-label mb-2">Input Text:</label>
-              <AutoTextarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                className="input-field"
-                disabled={isLoading}
-                placeholder="Enter text to encode or decode"
-              />
+              <ClearButton onClick={handleClearAll} disabled={inputText === ''} />
             </div>
-            <div>
-              <label className="form-label mb-2">Base Type:</label>
-              <select
-                value={baseType}
-                onChange={(e) => setBaseType(e.target.value)}
-                className="input-field"
-                disabled={isLoading}
-              >
-                <option value="base32">Base32</option>
-                <option value="base58">Base58</option>
-                <option value="base64">Base64</option>
-              </select>
-            </div>
-          </div>
-          <div className="flex space-x-2 mb-4">
-            <LoadingButton onClick={encodeText} isLoading={isLoading}>Encode</LoadingButton>
-            <LoadingButton onClick={decodeText} isLoading={isLoading}>Decode</LoadingButton>
-          </div>
-
-          {encodeResult && (
-            <div className="result-box">
-              <div className="flex items-center justify-between">
-                <div className="w-full mono-output">{encodeResult.encoded_text}</div>
-                <CopyButton text={encodeResult.encoded_text} />
+            <div className="space-y-4 mb-4">
+              <div>
+                <label className="form-label">Input Text:</label>
+                <AutoTextarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  className="input-field"
+                  disabled={isLoading}
+                  placeholder="Enter text to encode or decode"
+                />
               </div>
-              <p className="text-sm mt-2">
-                Base Type: {encodeResult.base_type.toUpperCase()}
-              </p>
-            </div>
-          )}
-
-          {decodeResult && (
-            <div className="result-box">
-              <div className="flex items-center justify-between">
-                <div className="w-full mono-output">{decodeResult.decoded_text}</div>
-                <CopyButton text={decodeResult.decoded_text} />
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="w-full sm:w-1/2">
+                  <label className="form-label">Base Type:</label>
+                  <select
+                    value={baseType}
+                    onChange={(e) => setBaseType(e.target.value)}
+                    className="input-field w-full h-10"
+                    disabled={isLoading}
+                  >
+                    <option value="base32">Base32</option>
+                    <option value="base58">Base58</option>
+                    <option value="base64">Base64</option>
+                  </select>
+                </div>
+                <div className="w-full sm:w-1/2 flex sm:items-end gap-2">
+                  <LoadingButton onClick={encodeText} isLoading={isLoading} className="flex-1">
+                    Encode
+                  </LoadingButton>
+                  <LoadingButton onClick={decodeText} isLoading={isLoading} className="flex-1">
+                    Decode
+                  </LoadingButton>
+                </div>
               </div>
-              <p className="text-sm text-muted mt-2">
-                Base Type: {decodeResult.base_type.toUpperCase()}
-              </p>
             </div>
-          )}
 
-          <ErrorBox message={error} />
-        </SectionCard>
+            {(encodeResult || decodeResult) && (
+              <div className="result-box">
+                <label className="form-label">Result</label>
+                <div className="space-y-4">
+                  {encodeResult && (
+                    <div>
+                      <div className="inner-result">
+                        <div className="w-full mono-output">{encodeResult.encoded_text}</div>
+                        <CopyButton text={encodeResult.encoded_text} />
+                      </div>
+                      <p className="text-sm mt-2">
+                        Encoded Base Type: {encodeResult.base_type.toUpperCase()}
+                      </p>
+                    </div>
+                  )}
+                  {decodeResult && (
+                    <div>
+                      <div className="inner-result">
+                        <div className="w-full mono-output">{decodeResult.decoded_text}</div>
+                        <CopyButton text={decodeResult.decoded_text} />
+                      </div>
+                      <p className="text-sm mt-2">
+                        Decoded Base Type: {decodeResult.base_type.toUpperCase()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <ErrorBox message={error} />
+          </SectionCard>
       </div>
     </>
   );

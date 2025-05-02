@@ -132,9 +132,12 @@ function PasswordGenerator() {
 
           {password && (
             <div className="result-box">
-              <div className="flex items-center justify-between">
-                <div className="mono-output">{password}</div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="form-label">Generated Password</label>
                 <CopyButton text={password} />
+              </div>
+              <div className="inner-result">
+                <div className="mono-output">{password}</div>
               </div>
             </div>
           )}

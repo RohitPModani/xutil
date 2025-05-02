@@ -110,7 +110,7 @@ function PxRemEmConverter() {
 
           <div className="flex flex-col gap-6">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              <label className="form-label">
                 Value
               </label>
               <input
@@ -124,7 +124,7 @@ function PxRemEmConverter() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              <label className="form-label">
                 Conversion Type
               </label>
               <select
@@ -143,7 +143,7 @@ function PxRemEmConverter() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="form-label">
                   Root Font Size (px)
                 </label>
                 <input
@@ -157,7 +157,7 @@ function PxRemEmConverter() {
               </div>
 
               <div className="flex-1">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="form-label">
                   Parent Font Size (px)
                 </label>
                 <input
@@ -178,7 +178,7 @@ function PxRemEmConverter() {
             </div>
 
             <div className="result-box max-h-[400px] overflow-y-auto">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                <label className="form-label">
                 Conversion Result
                 </label>
                 {result && (
@@ -187,7 +187,7 @@ function PxRemEmConverter() {
                         {Object.entries(result).map(([key, val]) => (
                             <div
                                 key={key}
-                                className="bg-zinc-100 dark:bg-zinc-800 p-3 rounded flex justify-between items-center"
+                                className="inner-result"
                                 >
                                 <span className="font-mono text-zinc-800 dark:text-white">
                                     {key.toUpperCase()}: {val}

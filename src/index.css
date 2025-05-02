@@ -52,20 +52,23 @@
     @apply border rounded px-3 py-2 w-full dark:text-white bg-white text-sm sm:text-base rounded-md shadow-sm
     dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 disabled:opacity-50;
   }
-  
-  .input-field[type='number']::-webkit-inner-spin-button,
-  .input-field[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    appearance: none;
-    margin: 0;
-  } 
-  
+
+  .input-field[type="number"]::-webkit-inner-spin-button,
+  .input-field[type="number"]::-webkit-outer-spin-button {
+    @apply appearance-none; /* Hides the spinner controls */
+    background: transparent; /* Optional: Makes the background transparent */
+  }
+
   .form-label {
-    @apply block mb-1 text-zinc-700 dark:text-zinc-300 font-medium;
+    @apply block text-sm mb-2 text-zinc-700 dark:text-zinc-300 font-medium;
   }
 
   .result-box {
     @apply border rounded mt-4 p-3 bg-zinc-100 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 rounded dark:border-zinc-500;
+  }
+
+  .inner-result {
+    @apply bg-white dark:bg-zinc-800 p-3 rounded flex justify-between items-center;
   }
 
   .mono-output {
@@ -87,5 +90,4 @@
   .checkbox-primary {
     @apply h-3 w-3 sm:h-4 sm:w-4 rounded accent-zinc-600 dark:accent-zinc-300 mr-2;
   }
-  
 }

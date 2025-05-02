@@ -135,11 +135,14 @@ function JSONPydanticClassConverter() {
               />
 
               <div className="flex gap-2 my-4">
-                <input
-                  value={className}
-                  onChange={(e) => setClassName(e.target.value)}
-                  className="input-field rounded-md w-auto"
-                />
+                <div className="flex items-center justify-center">
+                  <label className="form-label text-base mr-2">Class Name:</label>
+                  <input
+                    value={className}
+                    onChange={(e) => setClassName(e.target.value)}
+                    className="input-field rounded-md w-auto"
+                  />
+                </div>
 
                 <LoadingButton onClick={handleTextConversion} isLoading={isTextConverting}>
                   Convert
@@ -149,16 +152,16 @@ function JSONPydanticClassConverter() {
 
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
-              <label className="form-label">Converted Result:</label>
-                  <div className="flex items-center gap-2">
-                    <CopyButton text={textResult} className="mr-2" />
-                    <DownloadButton
-                      content={textResult}
-                      fileName={`${className}.txt`}
-                      fileType="txt"
-                      disabled={!textResult}
-                    />
-                  </div>
+                <label className="form-label">Converted Result:</label>
+                <div className="flex items-center gap-2">
+                  <CopyButton text={textResult} className="mr-2" />
+                  <DownloadButton
+                    content={textResult}
+                    fileName={`${className}.txt`}
+                    fileType="txt"
+                    disabled={!textResult}
+                  />
+                </div>
               </div>
               <AutoTextarea
                 value={textResult || ''}
@@ -183,7 +186,7 @@ function JSONPydanticClassConverter() {
           </div>
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex-1">
-              <label className="form-label block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="form-label">
                 Upload JSON File
               </label>
               <FileUploader
@@ -194,11 +197,14 @@ function JSONPydanticClassConverter() {
                 resetSignal={fileReset.resetSignal}
               />
               <div className="flex gap-2 my-4">
-                <input
-                  value={fileClassName}
-                  onChange={(e) => setFileClassName(e.target.value)}
-                  className="input-field rounded-md w-auto"
-                />
+                <div className="flex items-center justify-center">
+                  <label className="form-label text-base mr-2">Class Name:</label>
+                  <input
+                    value={fileClassName}
+                    onChange={(e) => setFileClassName(e.target.value)}
+                    className="input-field rounded-md w-auto"
+                  />
+                </div>
 
                 <LoadingButton onClick={handleFileConversion} isLoading={isFileConverting}>
                   Convert

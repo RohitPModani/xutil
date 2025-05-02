@@ -10,6 +10,7 @@ import SEODescription from '../../components/SEODescription';
 import { PageSEO } from '../../components/PageSEO';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
+import AutoTextarea from '../../hooks/useAutoSizeTextArea';
 
 interface ConversionResponse {
   result: string;
@@ -119,7 +120,7 @@ function BaseNumberConverter() {
   return (
     <>
       <PageSEO title={seo.title} description={seo.body} />
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
         <div className="flex justify-between items-center mb-6">
           <BackToHome />
           <BuyMeCoffee variant="inline" />
@@ -137,11 +138,10 @@ function BaseNumberConverter() {
             {/* Input and Result Section */}
             <div className="flex flex-col gap-4">
               <div>
-                <label htmlFor="number" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                <label htmlFor="number" className="form-label">
                   Input Number
                 </label>
-                <input
-                  type="text"
+                <AutoTextarea
                   value={inputNumber}
                   onChange={(e) => setInputNumber(e.target.value)}
                   className="input-field"
@@ -153,7 +153,7 @@ function BaseNumberConverter() {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
-                  <label htmlFor="source_base" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label htmlFor="source_base" className="form-label">
                     Source Base
                   </label>
                   <select
@@ -183,7 +183,7 @@ function BaseNumberConverter() {
                   </button>
                 </div>
                 <div className="flex-1">
-                  <label htmlFor="target_base" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label htmlFor="target_base" className="form-label">
                     Target Base
                   </label>
                   <select
@@ -209,21 +209,17 @@ function BaseNumberConverter() {
                 </LoadingButton>
               </div>
 
-              <div className="mt-2">
-                <label htmlFor="result" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  Converted Number
-                </label>
-                <div className="flex items-center justify-between input-field">
-                  {convertedNumber ? (
-                    <>
-                      <span className="text-zinc-800 dark:text-white break-all">{convertedNumber}</span>
-                      <CopyButton text={convertedNumber} />
-                    </>
-                  ) : (
-                    <span className="text-zinc-400 dark:text-zinc-500">Result will appear here</span>
-                  )}
+              {convertedNumber && (
+                <div className="result-box">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="form-label">Converted Number</label>
+                    <CopyButton text={convertedNumber} />
+                  </div>
+                  <div className="inner-result">
+                    <div className="mono-output">{convertedNumber}</div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {error && (

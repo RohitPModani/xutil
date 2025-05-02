@@ -65,12 +65,12 @@ function HashGenerator() {
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Generate Cryptographic Hash</h3>
-              <ClearButton onClick={handleClearAll} disabled = {inputText === ''}/>
+            <h3 className="text-lg font-semibold">Generate Cryptographic Hash</h3>
+            <ClearButton onClick={handleClearAll} disabled={inputText === ''} />
           </div>
-          <div className="form-grid">
+          <div className="space-y-4 mb-4">
             <div>
-              <label className="form-label mb-2">Input Text:</label>
+              <label className="form-label">Input Text:</label>
               <AutoTextarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
@@ -79,31 +79,37 @@ function HashGenerator() {
                 placeholder="Enter text to hash"
               />
             </div>
-            <div>
-              <label className="form-label mb-2">Algorithm:</label>
-              <select
-                value={algorithm}
-                onChange={(e) => setAlgorithm(e.target.value)}
-                className="input-field"
-                disabled={isLoading}
-              >
-                <option value="md5">MD5</option>
-                <option value="sha1">SHA1</option>
-                <option value="sha256">SHA256</option>
-                <option value="sha512">SHA512</option>
-              </select>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-1/2">
+                <label className="form-label">Algorithm:</label>
+                <select
+                  value={algorithm}
+                  onChange={(e) => setAlgorithm(e.target.value)}
+                  className="input-field w-full h-10"
+                  disabled={isLoading}
+                >
+                  <option value="md5">MD5</option>
+                  <option value="sha1">SHA1</option>
+                  <option value="sha256">SHA256</option>
+                  <option value="sha512">SHA512</option>
+                </select>
+              </div>
+              <div className="w-full sm:w-1/2 flex sm:items-end">
+                <LoadingButton onClick={fetchHash} isLoading={isLoading} className="w-full">
+                  Generate
+                </LoadingButton>
+              </div>
             </div>
           </div>
 
-          <LoadingButton onClick={fetchHash} isLoading={isLoading}>Generate</LoadingButton>
-
           {hashResult && (
             <div className="result-box">
-              <div className="flex items-center justify-between">
+              <label className="form-label">Result</label>
+              <div className="inner-result">
                 <div className="w-full mono-output">{hashResult.hashed_text}</div>
                 <CopyButton text={hashResult.hashed_text} />
               </div>
-              <p className="text-sm text-muted mt-2">
+              <p className="text-sm mt-2">
                 Algorithm: {hashResult.algorithm.toUpperCase()}
               </p>
             </div>

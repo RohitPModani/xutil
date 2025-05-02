@@ -10,6 +10,7 @@ import { PageSEO } from '../../components/PageSEO';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
+import useResultText from '../../hooks/useResultsText';
 
 function BitByteConverter() {
   const seo = seoDescriptions.bitByte;
@@ -20,8 +21,8 @@ function BitByteConverter() {
   const [isLoading, setIsLoading] = useState(false);
 
   const units = [
-    { value: 'bit', label: 'Bits (bit)' },
-    { value: 'byte', label: 'Bytes (byte)' },
+    { value: 'Bit', label: 'Bits (bit)' },
+    { value: 'Byte', label: 'Bytes (byte)' },
     { value: 'Kb', label: 'Kilobits (Kb)' },
     { value: 'KB', label: 'Kilobytes (KB)' },
     { value: 'Mb', label: 'Megabits (Mb)' },
@@ -30,11 +31,13 @@ function BitByteConverter() {
     { value: 'GB', label: 'Gigabytes (GB)' },
     { value: 'Tb', label: 'Terabits (Tb)' },
     { value: 'TB', label: 'Terabytes (TB)' },
+    { value: 'Pb', label: 'Petabits (Pb)' },
+    { value: 'PB', label: 'Petabytes (PB)' },
   ];
 
   useEffect(() => {
     setValue('1');
-    setUnit('bit');
+    setUnit('Bit');
   }, []);
 
   const handleConvert = async () => {
@@ -84,6 +87,8 @@ function BitByteConverter() {
     setError(null);
   };
 
+  const getResultsText = useResultText(result, units);
+
   return (
     <>
       <PageSEO title={seo.title} description={seo.body} />
@@ -103,9 +108,9 @@ function BitByteConverter() {
           </div>
 
           <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2 md:flex-row md:items-end">
-              <div className="w-full md:w-1/2">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <label className="form-label">
                   Value
                 </label>
                 <input
@@ -120,14 +125,14 @@ function BitByteConverter() {
                 />
               </div>
 
-              <div className="w-full md:w-1/2">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <div className="flex-1">
+                <label className="form-label">
                   Unit
                 </label>
                 <select
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
-                  className="input-field w-full"
+                  className="input-field w-full h-10"
                   disabled={isLoading}
                 >
                   {units.map((unitOption) => (
@@ -145,25 +150,30 @@ function BitByteConverter() {
               </LoadingButton>
             </div>
 
-            <div className="result-box min-h-[100px]">
-              {result && (
-              <div className="max-h-[400px] overflow-y-auto">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+            <div className="result-box max-h-[500px] mt-1">
+              <div className="flex justify-between items-center">
+                <label className="form-label text-base">
                   Conversion Result
                 </label>
+                {result && (
+                  <CopyButton text={getResultsText} copyType="CopyAll" />
+                )}
+              </div>
+              {result && (
+              <div className="max-h-[500px] overflow-y-auto mt-2">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {Object.entries(result).map(([key, val]) => {
-                    const isBitBased = ['bit', 'Kb', 'Mb', 'Gb', 'Tb'].includes(key);
-                    const unitLabel = isBitBased ? 'bit(s)' : 'byte(s)';
+                    const unit = units.find(u => u.value === key);
+                    const displayLabel = unit ? unit.label : key.toUpperCase();
                     return (
                       <div
                         key={key}
-                        className="bg-zinc-100 dark:bg-zinc-800 p-3 rounded flex justify-between items-center"
+                        className="inner-result"
                       >
                         <span className="font-mono text-zinc-800 dark:text-white truncate">
-                          {key}: {val} {unitLabel}
+                          {displayLabel}: {val}
                         </span>
-                        <CopyButton text={`${key}: ${val} ${unitLabel}`} />
+                        <CopyButton text={`${displayLabel}: ${val}`} />
                       </div>
                     );
                   })}

@@ -16,7 +16,6 @@ function URLEncoderDecoder() {
   const seo = seoDescriptions.urlEncoder;
   const [text, setText] = useState('');
   const [encodedText, setEncodedText] = useState('');
-  const [safeChars, setSafeChars] = useState('/');
   const [encoded, setEncoded] = useState('');
   const [decoded, setDecoded] = useState('');
   const [errorEncode, setErrorEncode] = useState<string | null>(null);
@@ -37,7 +36,7 @@ function URLEncoderDecoder() {
     setErrorEncode(null);
     try {
       const { data } = await api.get('/url/encode', {
-        params: { text, safe: safeChars },
+        params: { text },
       });
       setEncoded(data.encoded_text);
     } catch (err) {
@@ -45,7 +44,7 @@ function URLEncoderDecoder() {
     } finally {
       setIsLoadingEncode(false);
     }
-  }, [text, safeChars, handleApiError]);
+  }, [text, handleApiError]);
 
   const decodeText = useCallback(async () => {
     if (!text.trim()) {
@@ -69,7 +68,6 @@ function URLEncoderDecoder() {
   const handleClearEncode = useCallback(() => {
     setText('');
     setEncoded('');
-    setSafeChars('/');
     setErrorEncode(null);
   }, []);
 
@@ -93,7 +91,7 @@ function URLEncoderDecoder() {
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Encode URL</h3>
-            <ClearButton onClick={handleClearEncode} disabled={isLoadingEncode || (text === '' && safeChars === '/')} />
+            <ClearButton onClick={handleClearEncode} disabled={isLoadingEncode || text === ''} />
           </div>
 
           <div className="space-y-4">
@@ -109,19 +107,6 @@ function URLEncoderDecoder() {
               />
             </div>
 
-            <div>
-              <label className="form-label">Safe Characters</label>
-              <input
-                type="text"
-                value={safeChars}
-                onChange={(e) => setSafeChars(e.target.value)}
-                className="input-field"
-                disabled={isLoadingEncode}
-                placeholder="e.g., /"
-                aria-label="Safe characters"
-              />
-            </div>
-
             <LoadingButton
               onClick={encodeText}
               isLoading={isLoadingEncode}
@@ -131,11 +116,14 @@ function URLEncoderDecoder() {
 
             {encoded && (
               <div className="result-box">
-                <div className="flex items-center gap-2">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="form-label">Encoded URL</label>
+                  <CopyButton text={encoded} />
+                </div>
+                <div className="inner-result">
                   <div className="flex-1 mono-output" aria-label="Encoded result">
                     {encoded}
                   </div>
-                  <CopyButton text={encoded}/>
                 </div>
               </div>
             )}
@@ -152,7 +140,7 @@ function URLEncoderDecoder() {
 
           <div className="space-y-4">
             <div>
-              <label className="form-label">Encoded Text</label>
+              <label className="form-label">Encoded URL</label>
               <AutoTextarea
                 value ={encodedText}
                 onChange={(e) => setEncodedText(e.target.value)}
@@ -172,11 +160,14 @@ function URLEncoderDecoder() {
 
             {decoded && (
               <div className="result-box">
-                <div className="flex items-center gap-2">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="form-label">Decoded URL</label>
+                  <CopyButton text={decoded} />
+                </div>
+                <div className="inner-result">
                   <div className="flex-1 mono-output" aria-label="Decoded result">
                     {decoded}
                   </div>
-                  <CopyButton text={decoded}/>
                 </div>
               </div>
             )}

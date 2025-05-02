@@ -115,7 +115,7 @@ function HtmlEntities() {
             {/* Input Pane */}
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
-                <label className="form-label mb-2">Input Text:</label>
+                <label className="form-label">Input Text:</label>
               </div>
               <AutoTextarea
                 value={inputText}
@@ -137,7 +137,7 @@ function HtmlEntities() {
             {/* Output Pane */}
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
-                <label className="form-label mb-2">Converted Result:</label>
+                <label className="form-label">Converted Result:</label>
                 {(encodeResult || decodeResult) && (
                   <CopyButton
                     text={encodeResult?.encoded_text || decodeResult?.decoded_text || ''}
@@ -152,7 +152,7 @@ function HtmlEntities() {
                     readOnly
                     className="input-field w-full"
                   />
-                  <p className="text-sm text-muted mt-1">Converted: HTML Encoded</p>
+                  <p className="text-sm text-muted">Converted: HTML Encoded</p>
                 </>
               )}
 

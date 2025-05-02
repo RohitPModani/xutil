@@ -139,11 +139,14 @@ function JSONTypescriptConverter() {
               />
 
               <div className="flex gap-2 my-4">
-                <input
-                  value={interfaceName}
-                  onChange={(e) => setInterfaceName(e.target.value)}
-                  className="input-field rounded-md w-auto"
-                />
+                <div className="flex items-center justify-center">
+                  <label className="form-label text-base mr-2">Interface Name:</label>
+                  <input
+                    value={interfaceName}
+                    onChange={(e) => setInterfaceName(e.target.value)}
+                    className="input-field rounded-md w-auto"
+                  />
+                </div>
 
                 <LoadingButton onClick={handleTextConversion} isLoading={isTextConverting}>
                   Convert
@@ -187,7 +190,7 @@ function JSONTypescriptConverter() {
           </div>
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex-1">
-              <label className="form-label block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="form-label">
                 Upload JSON File
               </label>
               <FileUploader
@@ -198,11 +201,14 @@ function JSONTypescriptConverter() {
                 resetSignal={fileReset.resetSignal}
               />
               <div className="flex gap-2 my-4">
-                <input
-                  value={fileInterfaceName}
-                  onChange={(e) => setFileInterfaceName(e.target.value)}
-                  className="input-field rounded-md w-auto"
-                />
+                <div className="flex items-center justify-center">
+                  <label className="form-label text-base mr-2">Interface Name:</label>
+                  <input
+                    value={fileInterfaceName}
+                    onChange={(e) => setFileInterfaceName(e.target.value)}
+                    className="input-field rounded-md w-auto"
+                  />
+                </div>
 
                 <LoadingButton onClick={handleFileConversion} isLoading={isFileConverting}>
                   Convert

@@ -219,26 +219,32 @@ function YAMLJSONConverter() {
                 </div>
 
                 <div className="flex-1 space-y-4">
-                <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between">
                     <label className="form-label">Converted Result:</label>
-                    {(yamlToJsonResult || jsonToYamlResult) && (
-                    <CopyButton text={yamlToJsonResult?.result || jsonToYamlResult?.result || ''} />
-                    )}
-                </div>
-                <AutoTextarea
-                    value={yamlToJsonResult?.result || jsonToYamlResult?.result || ''}
-                    readOnly
-                    disabled={!yamlToJsonResult && !jsonToYamlResult}
-                    placeholder="Converted result will appear here..."
-                    className={`input-field w-full ${
-                    !yamlToJsonResult && !jsonToYamlResult ? 'text-zinc-400 dark:text-zinc-500' : ''
-                    }`}
-                />
-                {(yamlToJsonResult || jsonToYamlResult) && (
-                    <p className="text-sm text-muted mt-1">
-                    Converted: {yamlToJsonResult ? 'YAML to JSON' : 'JSON to YAML'}
-                    </p>
-                )}
+                    <div className="flex items-center gap-2">
+                      <CopyButton text={yamlToJsonResult?.result || jsonToYamlResult?.result || ''} className="mr-3" />
+                      <DownloadButton 
+                        content={yamlToJsonResult?.result || jsonToYamlResult?.result || ''}
+                        fileName={`converted_result.${yamlToJsonResult ? 'json' : 'yaml'}`}
+                        fileType={yamlToJsonResult ? 'json' : 'yaml'}
+                        disabled={!yamlToJsonResult && !jsonToYamlResult}
+                      />
+                    </div>
+                  </div>
+                  <AutoTextarea
+                      value={yamlToJsonResult?.result || jsonToYamlResult?.result || ''}
+                      readOnly
+                      disabled={!yamlToJsonResult && !jsonToYamlResult}
+                      placeholder="Converted result will appear here..."
+                      className={`input-field w-full ${
+                      !yamlToJsonResult && !jsonToYamlResult ? 'text-zinc-400 dark:text-zinc-500' : ''
+                      }`}
+                  />
+                  {(yamlToJsonResult || jsonToYamlResult) && (
+                      <p className="text-sm text-muted mt-1">
+                      Converted: {yamlToJsonResult ? 'YAML to JSON' : 'JSON to YAML'}
+                      </p>
+                  )}
                 </div>
             </div>
           {error?.startsWith('Text conversion failed') && <ErrorBox message={error} />}
@@ -265,7 +271,7 @@ function YAMLJSONConverter() {
             )}
             <div className="flex flex-col md:flex-row gap-4 mb-4">
                 <div className="flex-1">
-                <label className="form-label block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="form-label">
                     Upload YAML File
                 </label>
                 <FileUploader
@@ -279,7 +285,7 @@ function YAMLJSONConverter() {
                 </div>
 
                 <div className="flex-1">
-                <label className="form-label block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="form-label">
                     Upload JSON File
                 </label>
                 <FileUploader

@@ -131,16 +131,19 @@ function CSVJSONConverter() {
           />
 
           <div className="flex gap-2 my-4">
-            <select
-              value={textSeparator}
-              onChange={(e) => setTextSeparator(e.target.value as '_' | '-' | ':' | '.')}
-              className="input-field w-24"
-            >
-              <option value="_">_</option>
-              <option value="-">-</option>
-              <option value=":">:</option>
-              <option value=".">.</option>
-            </select>
+            <div className="flex items-center justify-center">
+              <label className="form-label text-base mr-2">Separator:</label>
+              <select
+                value={fileSeparator}
+                onChange={(e) => setFileSeparator(e.target.value as '_' | '-' | ':' | '.')}
+                className="input-field w-24"
+              >
+                <option value="_">_</option>
+                <option value="-">-</option>
+                <option value=":">:</option>
+                <option value=".">.</option>
+              </select>
+            </div>
 
             <LoadingButton onClick={handleTextConversion} isLoading={isTextConverting}>
               Convert
@@ -191,16 +194,19 @@ function CSVJSONConverter() {
           />
 
           <div className="flex gap-2 my-4">
-            <select
-              value={fileSeparator}
-              onChange={(e) => setFileSeparator(e.target.value as '_' | '-' | ':' | '.')}
-              className="input-field rounded-md w-24"
-            >
-              <option value="_">_</option>
-              <option value="-">-</option>
-              <option value=":">:</option>
-              <option value=".">.</option>
-            </select>
+            <div className="flex items-center">
+              <label className="form-label text-base mr-2">Separator:</label>
+              <select
+                value={textSeparator}
+                onChange={(e) => setTextSeparator(e.target.value as '_' | '-' | ':' | '.')}
+                className="input-field w-24"
+              >
+                <option value="_">_</option>
+                <option value="-">-</option>
+                <option value=":">:</option>
+                <option value=".">.</option>
+              </select>
+            </div>
 
             <LoadingButton onClick={handleFileConversion} isLoading={isFileConverting}>
               Convert

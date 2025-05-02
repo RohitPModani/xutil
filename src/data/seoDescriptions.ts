@@ -176,6 +176,35 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly convert between bits and bytes in all their metric and binary glory — from b to TB, it's all covered.
   Perfect for developers, sysadmins, network nerds, and anyone who’s ever yelled at a download speed meter.`
   },    
+  temperature: {
+    title: "Temperature Converter",
+    body: `A Temperature Converter is like a digital weather wizard — effortlessly translating between Celsius, Fahrenheit, and Kelvin so you never have to say “what’s 451°F in real units?” again.
+  Whether you're cooking, coding, or casually wondering if -40 is really the same in both scales (it is!), this tool brings the heat and the chill.
+  Instantly switch between temperature units with precision — no mental math, no boiling confusion.
+  Perfect for students, devs, and anyone who’s ever Googled “convert 100 C to F” mid-conversation.`
+  },
+  area: {
+    title: "Area Converter",
+    body: `An Area Converter is like a land surveyor with superpowers — instantly flipping between square meters, acres, hectares, square miles, and more without breaking a ruler.
+  Whether you're designing a room, plotting a farm, or trying to figure out what 0.25 hectares actually means, this tool clears it up fast.
+  Convert any area unit quickly and confidently — from square inches to football fields.
+  Perfect for architects, real estate buffs, students, and anyone who’s ever thought, “Wait… how big is an acre again?”`
+  },
+  length: {
+    title: "Length Converter",
+    body: `A Length Converter is like a tape measure that speaks every language — translating kilometers to miles, inches to centimeters, and light-years to... well, more light-years.
+  Whether you're building furniture, coding units in CSS, or just curious how long a marathon really is in meters, this tool does the math for you.
+  Instantly convert between any length units with full accuracy — because size *does* matter (especially in code).
+  Perfect for engineers, designers, travelers, and anyone who’s tired of Googling “how many inches in a foot” for the 10th time.`
+  },
+  weight: {
+    title: "Weight Converter",
+    body: `A Weight Converter is like a digital dumbbell for your brain — effortlessly flipping between kilograms, pounds, grams, and tons with zero sweat involved.
+  Whether you're calculating cargo, measuring ingredients, or just curious how much your dog weighs in stone, this tool lifts the confusion.
+  Convert weight units instantly and accurately — from micrograms to megatons.
+  Perfect for cooks, lifters, logistics pros, and anyone who’s ever yelled “what’s 5 lbs in kg?!” while meal-prepping.`
+  },
+        
 };
 
 export default seoDescriptions;

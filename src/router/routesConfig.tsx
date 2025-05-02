@@ -25,8 +25,11 @@ const TextBaseConverter = lazy(() => import('../pages/Converters/TextBaseConvert
 const UnixUtcConverter = lazy(() => import('../pages/Converters/UnixUTCTimeConverter'));
 const TimezoneConverter = lazy(() => import('../pages/Converters/TimezoneConverter'));
 const PxRemEmConverter = lazy(() => import('../pages/Converters/PxRemEmConverter'));
-const TimeUnitConverter = lazy(() => import('../pages/Converters/TimeUnitConverter'));
-const BitByteConverter = lazy(() => import('../pages/Converters/BitByteConverter'));
+const TimeUnitConverter = lazy(() => import('../pages/GeneralConverters/TimeUnitConverter'));
+const BitByteConverter = lazy(() => import('../pages/GeneralConverters/BitByteConverter'));
+const TemperatureConverter = lazy(() => import('../pages/GeneralConverters/TemperatureConverter'));
+const LengthConverter = lazy(() => import('../pages/GeneralConverters/LengthConverter'));
+const AreaConverter = lazy(() => import('../pages/GeneralConverters/AreaConverter'));
 
 export const appRoutes = [
   {
@@ -57,6 +60,9 @@ export const appRoutes = [
       { path: 'px_rem_em', element: <PxRemEmConverter />, errorElement: <ErrorBoundary />},
       { path: 'time', element: <TimeUnitConverter />, errorElement: <ErrorBoundary />},
       { path: 'bit_byte', element: <BitByteConverter />, errorElement: <ErrorBoundary />},
+      { path: 'temperature', element: <TemperatureConverter />, errorElement: <ErrorBoundary />},
+      { path: 'length', element: <LengthConverter />, errorElement: <ErrorBoundary />},
+      { path: 'area', element: <AreaConverter />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

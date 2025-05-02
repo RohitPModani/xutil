@@ -10,37 +10,42 @@ import { PageSEO } from '../../components/PageSEO';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
+import useResultText from '../../hooks/useResultsText';
 
-function TimeConverter() {
-  const seo = seoDescriptions.timeUnit;
-
+function LengthConverter() {
+  const seo = seoDescriptions.length || { title: 'Length Converter', body: 'Convert lengths between millimeters, centimeters, meters, kilometers, inches, feet, yards, miles, and nautical miles.' };
   const [value, setValue] = useState('');
-  const [unit, setUnit] = useState('s');
+  const [unit, setUnit] = useState('m');
   const [result, setResult] = useState<{
-    ns?: number; μs?: number; ms?: number; s?: number; min?: number; hr?: number;
-    day?: number; week?: number; month?: number; year?: number; decade?: number; century?: number;
+    mm?: number;
+    cm?: number;
+    m?: number;
+    km?: number;
+    inch?: number;
+    ft?: number;
+    yd?: number;
+    mi?: number;
+    nm?: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const units = [
-    { value: 'ns', label: 'Nanoseconds (ns)' },
-    { value: 'μs', label: 'Microseconds (μs)' },
-    { value: 'ms', label: 'Milliseconds (ms)' },
-    { value: 's', label: 'Seconds (s)' },
-    { value: 'min', label: 'Minutes (min)' },
-    { value: 'hr', label: 'Hours (hr)' },
-    { value: 'day', label: 'Days (day)' },
-    { value: 'week', label: 'Weeks (week)' },
-    { value: 'month', label: 'Months (month)' },
-    { value: 'year', label: 'Years (year)' },
-    { value: 'decade', label: 'Decades (decade)' },
-    { value: 'century', label: 'Centuries (century)' },
+    { value: 'mm', label: 'Millimeters (mm)' },
+    { value: 'cm', label: 'Centimeters (cm)' },
+    { value: 'm', label: 'Meters (m)' },
+    { value: 'km', label: 'Kilometers (km)' },
+    { value: 'inch', label: 'Inches (in)' },
+    { value: 'ft', label: 'Feet (ft)' },
+    { value: 'yd', label: 'Yards (yd)' },
+    { value: 'mi', label: 'Miles (mi)' },
+    { value: 'nm', label: 'Nautical Miles (nm)' },
   ];
 
   useEffect(() => {
+    // Initialize default values
     setValue('1');
-    setUnit('s');
+    setUnit('m');
   }, []);
 
   const handleConvert = async () => {
@@ -50,13 +55,14 @@ function TimeConverter() {
     }
 
     const valueNum = parseFloat(value);
+
     if (isNaN(valueNum)) {
       setError('Please enter a valid number.');
       return;
     }
 
     if (valueNum <= 0) {
-      setError('Value must be greater than 0.');
+      setError('Length must be greater than zero.');
       return;
     }
 
@@ -65,9 +71,9 @@ function TimeConverter() {
     setResult(null);
 
     try {
-      const res = await api.post('/time/convert', {
+      const res = await api.post('/length/convert', {
         value: valueNum,
-        unit,
+        unit: unit,
       });
 
       if (res.data) {
@@ -85,10 +91,12 @@ function TimeConverter() {
 
   const handleClear = () => {
     setValue('1');
-    setUnit('s');
+    setUnit('m');
     setResult(null);
     setError(null);
   };
+
+  const getResultsText = useResultText(result, units);
 
   return (
     <>
@@ -98,47 +106,43 @@ function TimeConverter() {
           <BackToHome />
           <BuyMeCoffee variant="inline" />
         </div>
-
         <h2 className="text-3xl font-bold mb-6 text-zinc-900 dark:text-white">{seo.title}</h2>
         <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Time Unit Converter</h3>
+            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Length Converter</h3>
             <ClearButton onClick={handleClear} disabled={!value && !result && !error} />
           </div>
 
           <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2 md:flex-row md:items-end">
-              <div className="w-full md:w-1/2">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <label className="form-label">
                   Value
                 </label>
                 <input
-                  type="number"
-                  inputMode="decimal"
-                  step="any"
+                  type="text"
                   className="input-field w-full"
-                  placeholder="Enter numeric value"
+                  placeholder="Enter value (e.g., 1)"
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   disabled={isLoading}
                 />
               </div>
-
-              <div className="w-full md:w-1/2">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <div className="flex-1">
+                <label className="form-label">
                   Unit
                 </label>
                 <select
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
-                  className="input-field w-full"
+                  className="input-field w-full h-10"
                   disabled={isLoading}
                 >
-                  {units.map((unitOption) => (
-                    <option key={unitOption.value} value={unitOption.value}>
-                      {unitOption.label}
+                  {units.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
                     </option>
                   ))}
                 </select>
@@ -151,33 +155,42 @@ function TimeConverter() {
               </LoadingButton>
             </div>
 
-            <div className="result-box min-h-[100px]">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  Conversion Result
-              </label>
-              {result && (
-                <div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {Object.entries(result).map(([key, val]) => (
-                      <div
-                        key={key}
-                        className="bg-zinc-100 dark:bg-zinc-800 p-3 rounded flex justify-between items-center"
-                      >
-                        <span className="font-mono text-zinc-800 dark:text-white">
-                          {key}: {val}
-                        </span>
-                        <CopyButton text={`${key}: ${val}`} />
-                      </div>
-                    ))}
-                  </div>
+            <div className="result-box max-h-[500px] mt-1">
+                <div className="flex justify-between items-center">
+                    <label className="form-label text-base">
+                    Conversion Result
+                    </label>
+                    {result && (
+                    <CopyButton text={getResultsText} copyType="CopyAll" />
+                    )}
                 </div>
-              )}
+                {result && (
+                  <div className='mt-2'>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {Object.entries(result).map(([key, val]) => {
+                        const unit = units.find(u => u.value === key);
+                        const displayLabel = unit ? unit.label : key.toUpperCase();
+                        return (
+                            <div
+                            key={key}
+                            className="inner-result"
+                            >
+                            <span className="font-mono text-zinc-800 dark:text-white">
+                                {displayLabel}: {val}
+                            </span>
+                            <CopyButton text={`${displayLabel}: ${val}`} />
+                            </div>
+                        );
+                        })}
+                    </div>
+                    </div>
+                )}
             </div>
 
             {error && (
-              <div aria-live="polite">
-                <ErrorBox message={error} />
-              </div>
+                <div aria-live="polite">
+                    <ErrorBox message={error} />
+                </div>
             )}
           </div>
         </SectionCard>
@@ -186,4 +199,4 @@ function TimeConverter() {
   );
 }
 
-export default TimeConverter;
+export default LengthConverter;

@@ -101,60 +101,64 @@ function CipherEncoderDecoder() {
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Encode or Decode Text</h3>
-              <ClearButton onClick={handleClearAll} disabled = {inputText === ''}/>
+            <h3 className="text-lg font-semibold">Encode or Decode Text</h3>
+            <ClearButton onClick={handleClearAll} disabled={inputText === ''} />
           </div>
           <div className="space-y-4 mb-4">
             <div>
-              <label className="form-label mb-2">Input Text:</label>
+              <label className="form-label">Input Text:</label>
               <AutoTextarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                className="input-field"
+                className="input-field w-full"
                 disabled={isLoading}
                 placeholder="Enter text to encode/decode"
               />
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-              <div className="flex-1">
-                <label className="form-label mb-2 block">Cipher Type:</label>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-1/2">
+                <label className="form-label">Cipher Type:</label>
                 <select
                   value={cipherType}
                   onChange={(e) => setCipherType(e.target.value)}
-                  className="input-field w-full"
+                  className="input-field w-full h-10"
                   disabled={isLoading}
                 >
                   <option value="rot13">ROT13</option>
                   <option value="caesar">Caesar</option>
                 </select>
+                {cipherType === 'caesar' && (
+                  <div className="mt-4">
+                    <label className="form-label">Shift (-100 to 100):</label>
+                    <input
+                      type="text"
+                      value={shift}
+                      onChange={handleLengthChange}
+                      className="input-field w-full"
+                      disabled={isLoading}
+                      placeholder="Enter shift value (-100 to 100)"
+                    />
+                  </div>
+                )}
               </div>
-              {cipherType === 'caesar' && (
-                <div className="flex-1">
-                  <label className="form-label mb-2 block">Shift (-100 to 100):</label>
-                  <input
-                    type="text"
-                    value={shift}
-                    onChange={handleLengthChange}
-                    className="input-field w-full"
-                    disabled={isLoading}
-                    placeholder="Enter shift value (-100 to 100)"
-                  />
-                </div>
-              )}
+              <div className="w-full sm:w-1/2 flex sm:items-end">
+                <LoadingButton onClick={applyCipher} isLoading={isLoading} className="w-full">
+                  Apply Cipher
+                </LoadingButton>
+              </div>
             </div>
           </div>
 
-          <LoadingButton onClick={applyCipher} isLoading={isLoading}>
-            Apply Cipher
-          </LoadingButton>
-
           {result && (
             <div className="result-box">
-              <div className="flex items-center justify-between">
-                <div className="w-full mono-output">{result.output_text}</div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="form-label">Result</label>
                 <CopyButton text={result.output_text} />
               </div>
-              <p className="text-sm text-muted mt-2">
+              <div className="inner-result">
+                <div className="w-full mono-output">{result.output_text}</div>
+              </div>
+              <p className="text-sm mt-2">
                 Cipher: {cipherType === 'rot13' ? 'ROT13' : `Caesar (Shift: ${(result as CaesarResponse).shift})`}
               </p>
             </div>

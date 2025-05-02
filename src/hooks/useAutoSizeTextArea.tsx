@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 
 interface AutoTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value: string;
+  className?: string;
 }
 
 const AutoTextarea = ({ value, className = '', ...props }: AutoTextareaProps) => {
@@ -19,9 +20,9 @@ const AutoTextarea = ({ value, className = '', ...props }: AutoTextareaProps) =>
     <textarea
       ref={textAreaRef}
       value={value}
+      className={`resize-none scrollbox max-h-[30rem] ${className}`}
+      style={{ whiteSpace: 'pre-wrap' }}
       {...props}
-      className={`resize-none overflow-y-auto max-h-[30rem] ${className}`} // 🚀 Increased
-      style={{ whiteSpace: 'pre', overflowX: 'auto' }} // 🔥
     />
   );
 };

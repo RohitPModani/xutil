@@ -10,6 +10,7 @@ import { PageSEO } from '../../components/PageSEO';
 import SEODescription from '../../components/SEODescription';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
+import AutoTextarea from '../../hooks/useAutoSizeTextArea';
 
 const BASE_OPTIONS = [
   { value: 2, label: '2 (Binary)' },
@@ -117,16 +118,16 @@ function TextBaseConverter() {
             <div className="flex-1 space-y-4">
                 <label className="form-label">Input Text:</label>
                 <input
-                type="text"
-                maxLength={100}
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                className="input-field"
-                placeholder="Enter text (max 100 characters)"
+                  type="text"
+                  maxLength={100}
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  className="input-field"
+                  placeholder="Enter text (max 100 characters)"
                 />
             </div>
             <div className="flex gap-2 mt-4 items-center">
-                <label className="form-label w-24 whitespace-nowrap">Target Base:</label>
+                <label className="form-label mr-2 text-base">Target Base:</label>
                 <select
                     value={targetBase}
                     onChange={(e) => setTargetBase(e.target.value)}
@@ -143,9 +144,12 @@ function TextBaseConverter() {
 
             {convertedToBase && (
               <div className="result-box mt-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-full mono-output break-all">{convertedToBase}</div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="form-label">Text to Base Result</label>
                   <CopyButton text={convertedToBase} />
+                </div>
+                <div className="inner-result">
+                  <div className="w-full mono-output break-all">{convertedToBase}</div>
                 </div>
               </div>
             )}
@@ -159,13 +163,11 @@ function TextBaseConverter() {
             </div>
             <div className="flex-1 space-y-4">
                 <label className="form-label">Base Input:</label>
-                <input
-                type="text"
-                maxLength={100}
-                value={baseInput}
-                onChange={(e) => setBaseInput(e.target.value)}
-                className="input-field"
-                placeholder="Enter text (max 100 characters)"
+                <AutoTextarea
+                  value={baseInput}
+                  onChange={(e) => setBaseInput(e.target.value)}
+                  className="input-field"
+                  placeholder="Enter text (max 100 characters)"
                 />
             </div>
             <div className="flex gap-2 mt-4 items-center">
@@ -186,9 +188,12 @@ function TextBaseConverter() {
 
             {convertedToText && (
               <div className="result-box mt-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-full mono-output break-all">{convertedToText}</div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="form-label">Base to Text Result</label>
                   <CopyButton text={convertedToText} />
+                </div>
+                <div className="inner-result">
+                  <div className="w-full mono-output break-all">{convertedToText}</div>
                 </div>
               </div>
             )}

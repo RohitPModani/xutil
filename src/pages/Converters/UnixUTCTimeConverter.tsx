@@ -112,7 +112,7 @@ function UnixUtcConverter() {
                 <ClearButton onClick={clearUnixToUtc} disabled={unixInput.trim() === ''} />
             </div>
             <div className="flex-1 space-y-4 mb-4">
-                <label className="form-label">Unix Input:</label>
+                <label className="form-label mb-0">Unix Input:</label>
                 <input
                     type="text"
                     maxLength={100}
@@ -126,7 +126,7 @@ function UnixUtcConverter() {
 
             {unixToUtcResult && (
               <div className="result-box mt-4">
-                <div className="flex items-center justify-between">
+                <div className="inner-result">
                   <div className="w-full mono-output break-all">
                     <strong>UTC Datetime:</strong> {unixToUtcResult}
                   </div>
@@ -143,7 +143,7 @@ function UnixUtcConverter() {
                 <ClearButton onClick={clearUtcToUnix} disabled={utcInput.trim() === ''} />
             </div>
             <div className="flex-1 space-y-4 mb-4">
-                <label className="form-label">Input UTC:</label>
+                <label className="form-label mb-0">Input UTC:</label>
                 <input
                     type="text"
                     maxLength={100}
@@ -157,7 +157,7 @@ function UnixUtcConverter() {
 
             {utcToUnixResult && (
               <div className="result-box mt-4">
-                <div className="flex items-center justify-between">
+                <div className="inner-result flex items-center justify-between">
                   <div className="w-full mono-output break-all">
                     <strong>Unix Timestamp:</strong> {utcToUnixResult}
                   </div>

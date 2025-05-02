@@ -108,7 +108,7 @@ function TimezoneConverter() {
 
           <div className="flex flex-col gap-6">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              <label className="form-label">
                 Input Datetime (YYYY-MM-DD HH:mm:ss)
               </label>
               <input
@@ -123,7 +123,7 @@ function TimezoneConverter() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="form-label">
                   From Timezone
                 </label>
                 <select
@@ -154,7 +154,7 @@ function TimezoneConverter() {
               </div>
 
               <div className="flex-1">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="form-label">
                   To Timezone
                 </label>
                 <select
@@ -180,12 +180,12 @@ function TimezoneConverter() {
             </div>
 
             {result && (
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              <div className='result-box'>
+                <label className="form-label">
                   Converted Datetime
                 </label>
-                <div className="input-field flex justify-between items-center">
-                  <span className="text-zinc-800 dark:text-white break-all">{result}</span>
+                <div className="inner-result">
+                  <span className="text-zinc-900 dark:text-white break-all">{result}</span>
                   <CopyButton text={result} />
                 </div>
               </div>
