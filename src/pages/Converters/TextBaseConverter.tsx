@@ -127,7 +127,7 @@ function TextBaseConverter() {
                 />
             </div>
             <div className="flex gap-2 mt-4 items-center">
-                <label className="form-label mr-2 text-base">Target Base:</label>
+                <label className="form-label mr-2 text-sm sm:text-base">Target Base:</label>
                 <select
                     value={targetBase}
                     onChange={(e) => setTargetBase(e.target.value)}
@@ -173,7 +173,7 @@ function TextBaseConverter() {
                 />
             </div>
             <div className="flex gap-2 mt-4 items-center">
-                <label className="form-label w-24 whitespace-nowrap">Source Base:</label>
+                <label className="form-label mr-2 text-sm sm:text-base">Source Base:</label>
                 <select
                     value={sourceBase}
                     onChange={(e) => setSourceBase(e.target.value)}

@@ -134,20 +134,21 @@ function JSONPythonClassConverter() {
                 placeholder="Paste your JSON here..."
               />
 
-              <div className="flex gap-2 my-4">
-              <div className="flex items-center justify-center">
-                  <label className="form-label text-base mr-2">Class Name:</label>
-                  <input
-                    value={className}
-                    onChange={(e) => setClassName(e.target.value)}
-                    className="input-field rounded-md w-auto"
-                  />
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center">
+                    <label className="form-label text-sm sm:text-base mr-2">Class Name:</label>
+                    <input
+                      value={className}
+                      onChange={(e) => setClassName(e.target.value)}
+                      className="input-field rounded-md w-auto"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <LoadingButton onClick={handleTextConversion} isLoading={isTextConverting}>
+                      Convert
+                    </LoadingButton>
+                  </div>
                 </div>
-
-                <LoadingButton onClick={handleTextConversion} isLoading={isTextConverting}>
-                  Convert
-                </LoadingButton>
-              </div>
             </div>
 
             <div className="flex-1 space-y-4">
@@ -196,20 +197,21 @@ function JSONPythonClassConverter() {
                 onClear={clearFileConversion}
                 resetSignal={fileReset.resetSignal}
               />
-              <div className="flex gap-2 my-4">
-                <div className="flex items-center justify-center">
-                  <label className="form-label text-base mr-2">Class Name:</label>
-                  <input
-                    value={fileClassName}
-                    onChange={(e) => setFileClassName(e.target.value)}
-                    className="input-field rounded-md w-auto"
-                  />
+              <div className="flex items-center mt-4 justify-between flex-wrap gap-4">
+                  <div className="flex items-center">
+                    <label className="form-label text-sm sm:text-base mr-2">Class Name:</label>
+                    <input
+                      value={fileClassName}
+                      onChange={(e) => setFileClassName(e.target.value)}
+                      className="input-field rounded-md w-auto"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <LoadingButton onClick={handleFileConversion} isLoading={isFileConverting}>
+                      Convert
+                    </LoadingButton>
+                  </div>
                 </div>
-
-                <LoadingButton onClick={handleFileConversion} isLoading={isFileConverting}>
-                  Convert
-                </LoadingButton>
-              </div>
             </div>
           </div>
 

@@ -138,20 +138,21 @@ function JSONTypescriptConverter() {
                 placeholder="Paste your JSON here..."
               />
 
-              <div className="flex gap-2 my-4">
-                <div className="flex items-center justify-center">
-                  <label className="form-label text-base mr-2">Interface Name:</label>
-                  <input
-                    value={interfaceName}
-                    onChange={(e) => setInterfaceName(e.target.value)}
-                    className="input-field rounded-md w-auto"
-                  />
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
+                  <div className="flex items-center">
+                    <label className="form-label text-sm sm:text-base mr-2">Interface Name:</label>
+                    <input
+                      value={interfaceName}
+                      onChange={(e) => setInterfaceName(e.target.value)}
+                      className="input-field rounded-md w-auto"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <LoadingButton onClick={handleTextConversion} isLoading={isTextConverting}>
+                      Convert
+                    </LoadingButton>
+                  </div>
                 </div>
-
-                <LoadingButton onClick={handleTextConversion} isLoading={isTextConverting}>
-                  Convert
-                </LoadingButton>
-              </div>
             </div>
 
             <div className="flex-1 space-y-4">
@@ -200,20 +201,21 @@ function JSONTypescriptConverter() {
                 onClear={clearFileConversion}
                 resetSignal={fileReset.resetSignal}
               />
-              <div className="flex gap-2 my-4">
-                <div className="flex items-center justify-center">
-                  <label className="form-label text-base mr-2">Interface Name:</label>
-                  <input
-                    value={fileInterfaceName}
-                    onChange={(e) => setFileInterfaceName(e.target.value)}
-                    className="input-field rounded-md w-auto"
-                  />
+              <div className="flex items-center justify-between mt-4 flex-wrap gap-4">
+                  <div className="flex items-center">
+                    <label className="form-label text-sm sm:text-base mr-2">Interface Name:</label>
+                    <input
+                      value={fileInterfaceName}
+                      onChange={(e) => setInterfaceName(e.target.value)}
+                      className="input-field rounded-md w-auto"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <LoadingButton onClick={handleFileConversion} isLoading={isFileConverting}>
+                      Convert
+                    </LoadingButton>
+                  </div>
                 </div>
-
-                <LoadingButton onClick={handleFileConversion} isLoading={isFileConverting}>
-                  Convert
-                </LoadingButton>
-              </div>
             </div>
           </div>
 
