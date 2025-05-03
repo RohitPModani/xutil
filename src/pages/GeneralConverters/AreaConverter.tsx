@@ -18,7 +18,7 @@ function AreaConverter() {
       defaultValue="1"
       defaultUnit="m2"
       units={units}
-      apiEndpoint="/area/convert"
+      apiEndpoint="/unit-converter/area"
       converterName="Area Converter"
       validationMessage="Area must be greater than zero."
     />

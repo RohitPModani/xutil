@@ -25,7 +25,7 @@ function BitByteConverter() {
       defaultValue="1"
       defaultUnit="Gb"
       units={units}
-      apiEndpoint="/bit-byte/convert"
+      apiEndpoint="/unit-converter/bit-byte"
       converterName="Bit ↔ Byte Converter"
       validationMessage="Value must be greater than zero."
     />

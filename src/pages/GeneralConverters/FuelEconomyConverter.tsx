@@ -12,24 +12,28 @@ import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
 import useResultText from '../../hooks/useResultsText';
 
-function TemperatureConverter() {
-  const seo = seoDescriptions.temperature || { title: 'Temperature Converter', body: 'Convert temperatures between Celsius, Fahrenheit, and Kelvin.' };
-  const [value, setValue] = useState('');
-  const [unit, setUnit] = useState('celsius');
-  const [result, setResult] = useState<{ celsius?: number; fahrenheit?: number; kelvin?: number } | null>(null);
+function FuelEconomyConverter() {
+  const seo = seoDescriptions.fuelEconomy || { 
+    title: 'Fuel Economy Converter', 
+    body: 'Convert fuel efficiency between miles per gallon (US/UK), kilometers per liter, and liters per 100 kilometers.' 
+  };
+  const [value, setValue] = useState('1');
+  const [unit, setUnit] = useState('mpg_us');
+  const [result, setResult] = useState<{ mpg_us?: number; mpg_uk?: number; km_l?: number; l_100km?: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const units = [
-    { value: 'celsius', label: 'Celsius' },
-    { value: 'fahrenheit', label: 'Fahrenheit' },
-    { value: 'kelvin', label: 'Kelvin' },
+    { value: 'mpg_us', label: 'Miles per Gallon (US)' },
+    { value: 'mpg_uk', label: 'Miles per Gallon (UK)' },
+    { value: 'km_l', label: 'Kilometers per Liter' },
+    { value: 'l_100km', label: 'Liters per 100 Kilometers' },
   ];
 
   useEffect(() => {
     // Initialize default values
-    setValue('0');
-    setUnit('celsius');
+    setValue('1');
+    setUnit('mpg_us');
   }, []);
 
   const handleConvert = async () => {
@@ -50,7 +54,7 @@ function TemperatureConverter() {
     setResult(null);
 
     try {
-      const res = await api.post('/unit-converter/temperature', {
+      const res = await api.post('/unit-converter/fuel-economy', {
         value: valueNum,
         unit: unit,
       });
@@ -69,8 +73,8 @@ function TemperatureConverter() {
   };
 
   const handleClear = () => {
-    setValue('0');
-    setUnit('celsius');
+    setValue('1');
+    setUnit('mpg_us');
     setResult(null);
     setError(null);
   };
@@ -90,7 +94,7 @@ function TemperatureConverter() {
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Temperature Converter</h3>
+            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Fuel Economy Converter</h3>
             <ClearButton onClick={handleClear} disabled={!value && !result && !error} />
           </div>
 
@@ -178,4 +182,4 @@ function TemperatureConverter() {
   );
 }
 
-export default TemperatureConverter;
+export default FuelEconomyConverter;

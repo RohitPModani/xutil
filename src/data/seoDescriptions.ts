@@ -225,7 +225,42 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert speed units instantly with pinpoint accuracy.
   Perfect for athletes, engineers, physics nerds, and anyone who’s ever needed to turn “miles per hour” into “meters per second” without a calculator.`
   },
-          
+  power: {
+    title: "Power Converter",
+    body: `A Power Converter is like a wattage wizard — flipping between watts, horsepower, kilowatts, BTUs and more without burning out.
+  Whether you're sizing up appliances, configuring circuits, or just trying to figure out how strong one horsepower really is, this tool brings the juice.
+  Convert any power unit quickly and accurately — from mechanical to electrical and everything in between.
+  Perfect for engineers, electricians, physics students, and anyone who’s ever said, “Wait… how many watts is that?”`
+  },
+  pressure: {
+    title: "Pressure Converter",
+    body: `A Pressure Converter is like a stress reliever for unit confusion — smoothly translating between PSI, bar, Pascal, atm, and more.
+  Whether you're inflating tires, calibrating instruments, or just trying to make sense of barometric data, this tool keeps it from getting too intense.
+  Convert pressure values across metric and imperial systems with ease.
+  Perfect for engineers, mechanics, weather geeks, and anyone who’s ever asked, “Is that too much pressure… or not enough?”`
+  },
+  angle: {
+    title: "Angle Converter",
+    body: `An Angle Converter is like a math protractor in digital form — converting between degrees, radians, gradians, and more with pinpoint precision.
+  Whether you're working on geometry, animations, or just trying to understand how π fits into a circle, this tool keeps your angles in check.
+  Flip between angle units instantly — no trig needed.
+  Perfect for developers, students, game designers, and anyone who’s ever wondered, “How many radians is 90 degrees again?”`
+  },
+  frequency: {
+    title: "Frequency Converter",
+    body: `A Frequency Converter is like a DJ for data — smoothly spinning between Hertz, kilohertz, megahertz, and gigahertz without missing a beat.
+  Whether you're tuning signals, analyzing waves, or debugging system clocks, this tool keeps things on the right frequency.
+  Convert frequency values instantly across scales — from audio to RF and beyond.
+  Perfect for engineers, tech enthusiasts, musicians, and anyone who’s ever asked, “How many Hz is that exactly?”`
+  },
+  fuelEconomy: {
+    title: "Fuel Economy Converter",
+    body: `A Fuel Economy Converter is like your car’s translator — flipping between MPG, L/100km, km/L and other units so you know exactly how thirsty your ride is.
+  Whether you're buying a new car, tracking fuel usage, or comparing international efficiency ratings, this tool delivers fast, accurate results.
+  Switch between fuel economy units without manual math or mental gymnastics.
+  Perfect for drivers, travelers, mechanics, and anyone who’s ever asked, “Is 7 L/100km good?” (Spoiler: yes, kind of.)`
+  },
+                
 };
 
 export default seoDescriptions;

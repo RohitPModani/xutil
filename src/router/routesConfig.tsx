@@ -34,6 +34,11 @@ const WeightConverter = lazy(() => import('../pages/GeneralConverters/WeightConv
 const VolumeConverter = lazy(() => import('../pages/GeneralConverters/VolumeConverter'));
 const SpeedConverter = lazy(() => import('../pages/GeneralConverters/SpeedConverter'));
 const EnergyConverter = lazy(() => import('../pages/GeneralConverters/EnergyConverter'));
+const PowerConverter = lazy(() => import('../pages/GeneralConverters/PowerConverter'));
+const PressureConverter = lazy(() => import('../pages/GeneralConverters/PressureConverter'));
+const FrequencyConverter = lazy(() => import('../pages/GeneralConverters/FrequencyConverter'));
+const AngleConverter = lazy(() => import('../pages/GeneralConverters/AngleConverter'));
+const FuelEconomyConverter = lazy(() => import('../pages/GeneralConverters/FuelEconomyConverter'));
 
 export const appRoutes = [
   {
@@ -71,6 +76,11 @@ export const appRoutes = [
       { path: 'volume', element: <VolumeConverter />, errorElement: <ErrorBoundary />},
       { path: 'speed', element: <SpeedConverter />, errorElement: <ErrorBoundary />},
       { path: 'energy', element: <EnergyConverter />, errorElement: <ErrorBoundary />},
+      { path: 'power', element: <PowerConverter />, errorElement: <ErrorBoundary />},
+      { path: 'pressure', element: <PressureConverter />, errorElement: <ErrorBoundary />},
+      { path: 'frequency', element: <FrequencyConverter />, errorElement: <ErrorBoundary />},
+      { path: 'angle', element: <AngleConverter />, errorElement: <ErrorBoundary />},
+      { path: 'fuel_economy', element: <FuelEconomyConverter />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

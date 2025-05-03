@@ -20,8 +20,8 @@ function WeightConverter() {
       defaultValue="1"
       defaultUnit="kg"
       units={units}
-      apiEndpoint="/weight/convert"
-      converterName="weight Converter"
+      apiEndpoint="/unit-converter/weight"
+      converterName="Weight Converter"
       validationMessage="Weight must be greater than zero."
     />
   );

@@ -25,7 +25,7 @@ function TimeConverter() {
       defaultValue="1"
       defaultUnit="hr"
       units={units}
-      apiEndpoint="/time/convert"
+      apiEndpoint="/unit-converter/time"
       converterName="Time Unit Converter"
       validationMessage="Time must be greater than zero."
     />

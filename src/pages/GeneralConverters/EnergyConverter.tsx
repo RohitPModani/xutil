@@ -21,7 +21,7 @@ function EnergyConverter() {
         defaultValue="1"
         defaultUnit="j"
         units={units}
-        apiEndpoint="/energy/convert"
+        apiEndpoint="/unit-converter/energy"
         converterName="Energy Converter"
         validationMessage="Energy must be greater than zero."
         />
