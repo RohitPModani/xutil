@@ -30,6 +30,10 @@ const BitByteConverter = lazy(() => import('../pages/GeneralConverters/BitByteCo
 const TemperatureConverter = lazy(() => import('../pages/GeneralConverters/TemperatureConverter'));
 const LengthConverter = lazy(() => import('../pages/GeneralConverters/LengthConverter'));
 const AreaConverter = lazy(() => import('../pages/GeneralConverters/AreaConverter'));
+const WeightConverter = lazy(() => import('../pages/GeneralConverters/WeightConverter'));
+const VolumeConverter = lazy(() => import('../pages/GeneralConverters/VolumeConverter'));
+const SpeedConverter = lazy(() => import('../pages/GeneralConverters/SpeedConverter'));
+const EnergyConverter = lazy(() => import('../pages/GeneralConverters/EnergyConverter'));
 
 export const appRoutes = [
   {
@@ -63,6 +67,10 @@ export const appRoutes = [
       { path: 'temperature', element: <TemperatureConverter />, errorElement: <ErrorBoundary />},
       { path: 'length', element: <LengthConverter />, errorElement: <ErrorBoundary />},
       { path: 'area', element: <AreaConverter />, errorElement: <ErrorBoundary />},
+      { path: 'weight', element: <WeightConverter />, errorElement: <ErrorBoundary />},
+      { path: 'volume', element: <VolumeConverter />, errorElement: <ErrorBoundary />},
+      { path: 'speed', element: <SpeedConverter />, errorElement: <ErrorBoundary />},
+      { path: 'energy', element: <EnergyConverter />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

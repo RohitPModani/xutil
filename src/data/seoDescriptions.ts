@@ -204,7 +204,28 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert weight units instantly and accurately — from micrograms to megatons.
   Perfect for cooks, lifters, logistics pros, and anyone who’s ever yelled “what’s 5 lbs in kg?!” while meal-prepping.`
   },
-        
+  volume: {
+    title: "Volume Converter",
+    body: `A Volume Converter is like a digital measuring cup for everything — effortlessly translating between liters, gallons, cups, milliliters, and more.
+  Whether you're scaling recipes, tracking fuel, or just trying to figure out how much is “a pint” in real units, this tool makes volume conversion a breeze.
+  Convert between any volume unit quickly and accurately — from kitchen to chemistry lab.
+  Perfect for cooks, scientists, students, and anyone who's ever asked, "How many cups is that again?"`
+  },
+  energy: {
+    title: "Energy Converter",
+    body: `An Energy Converter is like a power adapter for units — switching between joules, calories, kilowatt-hours, BTUs, and more without blowing a fuse.
+  Whether you're tracking food energy, calculating physics problems, or just trying to understand what a kilojoule even means, this tool brings clarity.
+  Convert any energy unit instantly and precisely.
+  Perfect for scientists, fitness enthusiasts, students, and anyone who’s ever thought, "How many calories is that in real power?"`
+  },
+  speed: {
+    title: "Speed Converter",
+    body: `A Speed Converter is like cruise control for numbers — smoothly converting between km/h, mph, m/s, knots, and more in just a click.
+  Whether you're clocking race times, tracking data transfer, or just wondering how fast a cheetah really is, this tool moves fast.
+  Convert speed units instantly with pinpoint accuracy.
+  Perfect for athletes, engineers, physics nerds, and anyone who’s ever needed to turn “miles per hour” into “meters per second” without a calculator.`
+  },
+          
 };
 
 export default seoDescriptions;

@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import UtilityCard from '../components/UtilityCard';
 import { ArrowLeftRight, BrainCircuit, Code2, File, GitCompareArrows, Image, Network } from 'lucide-react';
+
 const allUtilities = [
   {
     title: 'Encoding / Decoding',
@@ -45,7 +46,10 @@ const allUtilities = [
       { name: 'Temperature', path: '/temperature' },
       { name: 'Length', path: '/length' },
       { name: 'Area', path: '/area' },
-      'Weight', 
+      { name: 'Weight', path: '/weight' },
+      { name: 'Volume', path: '/volume' },
+      { name: 'Speed', path: '/speed' },
+      { name: 'Energy', path: '/energy'},
     ],
   },
   {
