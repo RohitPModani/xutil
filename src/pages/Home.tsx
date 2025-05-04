@@ -61,7 +61,7 @@ const allUtilities = [
     title: 'Text & Code Utilities',
     icon: Code2,
     items: [
-      'Lorem Ipsum Generator',
+      { name: 'Lorem Ipsum Generator', path: '/lorem' },
       'SLUG Generator',
       'Text Diff / File Compare',
       'JSON Formatter & Validator',
