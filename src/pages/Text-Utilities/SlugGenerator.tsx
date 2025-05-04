@@ -149,9 +149,9 @@ function SlugGenerator() {
               </div>
               {result && (
                 <div className="scrollbox mt-2">
-                  <pre className="inner-result">
+                  <div className="inner-result">
                     {result}
-                  </pre>
+                  </div>
                 </div>
               )}
             </div>
