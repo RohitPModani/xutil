@@ -149,7 +149,7 @@ function SlugGenerator() {
               </div>
               {result && (
                 <div className="scrollbox mt-2">
-                  <div className="inner-result">
+                  <div className="font-mono inner-result whitespace-pre-wrap">
                     {result}
                   </div>
                 </div>
