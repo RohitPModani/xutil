@@ -173,9 +173,9 @@ function LoremIpsumGenerator() {
               </div>
               {result && (
                 <div className="scrollbox mt-2">
-                  <div className="inner-result font-mono text-zinc-800 dark:text-white whitespace-pre-wrap">
+                  <pre className="inner-result">
                     {result}
-                  </div>
+                  </pre>
                 </div>
               )}
             </div>

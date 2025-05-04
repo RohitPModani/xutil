@@ -260,7 +260,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Switch between fuel economy units without manual math or mental gymnastics.
   Perfect for drivers, travelers, mechanics, and anyone who’s ever asked, “Is 7 L/100km good?” (Spoiler: yes, kind of.)`
   },
-                
+  loremIpsum: {
+    title: "Lorem Ipsum Generator",
+    body: `A Lorem Ipsum Generator is like a caffeine-fueled copywriter who never sleeps — churning out placeholder text so you can focus on layout, design, and looking productive.
+  Whether you're mocking up websites, testing UI components, or just sick of typing “lorem lorem blah blah,” this tool gives you instant, customizable filler text.
+  Generate paragraphs, sentences, or word dumps faster than you can say “font pairing.”
+  Perfect for designers, developers, and anyone who’s ever needed to fake meaningful content with Latin gibberish that still feels classy.`
+  },
+               
 };
 
 export default seoDescriptions;

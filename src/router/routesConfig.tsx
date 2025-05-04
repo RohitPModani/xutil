@@ -40,6 +40,7 @@ const FrequencyConverter = lazy(() => import('../pages/GeneralConverters/Frequen
 const AngleConverter = lazy(() => import('../pages/GeneralConverters/AngleConverter'));
 const FuelEconomyConverter = lazy(() => import('../pages/GeneralConverters/FuelEconomyConverter'));
 const LoremIpsumGenerator = lazy(() => import('../pages/Text-Utilities/LoremIpsumGenerator'));
+const SlugGenerator = lazy(() => import('../pages/Text-Utilities/SlugGenerator'));
 
 export const appRoutes = [
   {
@@ -83,6 +84,7 @@ export const appRoutes = [
       { path: 'angle', element: <AngleConverter />, errorElement: <ErrorBoundary />},
       { path: 'fuel_economy', element: <FuelEconomyConverter />, errorElement: <ErrorBoundary />},
       { path: 'lorem', element: <LoremIpsumGenerator />, errorElement: <ErrorBoundary />},
+      { path: 'slug', element: <SlugGenerator />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }
