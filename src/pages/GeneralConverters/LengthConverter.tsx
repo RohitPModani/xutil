@@ -2,10 +2,7 @@ import UnitConverter from './UnitConverter';
 import seoDescriptions from '../../data/seoDescriptions';
 
 function LengthConverter() {
-  const seo = seoDescriptions.length || {
-    title: 'Length Converter',
-    body: 'Convert lengths between millimeters, centimeters, meters, kilometers, inches, feet, yards, miles, and nautical miles.',
-  };
+  const seo = seoDescriptions.length;
 
   const units = [
     { value: 'mm', label: 'Millimeters (mm)' },
@@ -25,7 +22,7 @@ function LengthConverter() {
       defaultValue="1"
       defaultUnit="m"
       units={units}
-      apiEndpoint="/unit-converter/length"
+      apiEndpoint="length"
       converterName="Length Converter"
       validationMessage="Length must be greater than zero."
     />

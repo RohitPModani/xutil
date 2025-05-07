@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ClearButton from '../../components/ClearButton';
 import CopyButton from '../../components/CopyButton';
@@ -9,6 +9,7 @@ import { PageSEO } from '../../components/PageSEO';
 import seoDescriptions from '../../data/seoDescriptions';
 import * as Diff from 'diff';
 import LoadingButton from '../../components/LoadingButton';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 interface DiffLine {
   type: 'added' | 'removed' | 'common';
@@ -24,6 +25,10 @@ const TextCompare: React.FC = () => {
   const [removals, setRemovals] = useState<number>(0);
   const [additions, setAdditions] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    updateToolUsage('text_compare');
+  }, []);
 
   const compareTexts = (): void => {
     if (!text1.trim() || !text2.trim()) {

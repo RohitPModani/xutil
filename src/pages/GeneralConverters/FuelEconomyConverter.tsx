@@ -11,12 +11,11 @@ import BuyMeCoffee from '../../components/BuyMeCoffee';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
 import useResultText from '../../hooks/useResultsText';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 function FuelEconomyConverter() {
-  const seo = seoDescriptions.fuelEconomy || { 
-    title: 'Fuel Economy Converter', 
-    body: 'Convert fuel efficiency between miles per gallon (US/UK), kilometers per liter, and liters per 100 kilometers.' 
-  };
+  const seo = seoDescriptions.fuelEconomy;
+  
   const [value, setValue] = useState('1');
   const [unit, setUnit] = useState('mpg_us');
   const [result, setResult] = useState<{ mpg_us?: number; mpg_uk?: number; km_l?: number; l_100km?: number } | null>(null);
@@ -29,6 +28,10 @@ function FuelEconomyConverter() {
     { value: 'km_l', label: 'Kilometers per Liter' },
     { value: 'l_100km', label: 'Liters per 100 Kilometers' },
   ];
+
+  useEffect(() => {
+    updateToolUsage('fuel_economy');
+  }, []);
 
   useEffect(() => {
     // Initialize default values

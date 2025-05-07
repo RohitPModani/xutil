@@ -11,6 +11,7 @@ import BuyMeCoffee from '../../components/BuyMeCoffee';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
 import useResultText from '../../hooks/useResultsText';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 function TemperatureConverter() {
   const seo = seoDescriptions.temperature || { title: 'Temperature Converter', body: 'Convert temperatures between Celsius, Fahrenheit, and Kelvin.' };
@@ -25,6 +26,10 @@ function TemperatureConverter() {
     { value: 'fahrenheit', label: 'Fahrenheit' },
     { value: 'kelvin', label: 'Kelvin' },
   ];
+
+  useEffect(() => {
+    updateToolUsage('temperature');
+  }, []);
 
   useEffect(() => {
     // Initialize default values

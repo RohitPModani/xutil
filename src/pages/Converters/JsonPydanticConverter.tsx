@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
@@ -14,6 +14,7 @@ import { PageSEO } from '../../components/PageSEO';
 import ClearButton from '../../components/ClearButton';
 import { useFileReset } from '../../hooks/useFileReset';
 import seoDescriptions from '../../data/seoDescriptions';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 function JSONPydanticClassConverter() {
   const seo = seoDescriptions.jsonToPydantic;
@@ -32,6 +33,10 @@ function JSONPydanticClassConverter() {
   const [jsonFileText, setJsonFileText] = useState('');
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    updateToolUsage('json_pydantic');
+  }, []);
 
   const handleTextConversion = async () => {
     if (!textInput.trim()) {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import SectionCard from '../../components/SectionCard';
 import ClearButton from '../../components/ClearButton';
@@ -10,12 +10,15 @@ import { PageSEO } from '../../components/PageSEO';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 function LoremIpsumGenerator() {
-  const seo = seoDescriptions.loremIpsum || { 
-    title: 'Lorem Ipsum Generator', 
-    body: 'Generate random Lorem Ipsum paragraphs, sentences, or words with customizable counts.'
-  };
+  const seo = seoDescriptions.loremIpsum;
+
+  useEffect(() => {
+    updateToolUsage('lorem');
+  }, []);
+
   const [type, setType] = useState('paragraph');
   const [count, setCount] = useState('5');
   const [format, setFormat] = useState('text');

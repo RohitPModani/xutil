@@ -2,10 +2,7 @@ import UnitConverter from './UnitConverter';
 import seoDescriptions from '../../data/seoDescriptions';
 
 function FrequencyConverter() {
-  const seo = seoDescriptions.frequency || {
-    title: 'Frequency Converter',
-    body: 'Convert frequency between hertz, kilohertz, megahertz, gigahertz, and revolutions per minute.',
-  };
+  const seo = seoDescriptions.frequency;
 
   const units = [
     { value: 'hz', label: 'Hertz (Hz)' },
@@ -21,7 +18,7 @@ function FrequencyConverter() {
       defaultValue="1"
       defaultUnit="hz"
       units={units}
-      apiEndpoint="/unit-converter/frequency"
+      apiEndpoint="frequency"
       converterName="Frequency Converter"
       validationMessage="Frequency must be greater than zero."
     />

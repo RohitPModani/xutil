@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
@@ -11,6 +11,7 @@ import SEODescription from '../../components/SEODescription';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 interface ROT13Response {
   input_text: string;
@@ -31,6 +32,10 @@ function CipherEncoderDecoder() {
   const [result, setResult] = useState<ROT13Response | CaesarResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    updateToolUsage('cipher');
+  }, []);
 
   const applyCipher = async () => {
     if (!inputText.trim()) {

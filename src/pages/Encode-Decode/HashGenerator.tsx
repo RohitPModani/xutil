@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
@@ -11,6 +11,7 @@ import SEODescription from '../../components/SEODescription';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 interface HashResponse {
   text: string;
@@ -25,6 +26,10 @@ function HashGenerator() {
   const [hashResult, setHashResult] = useState<HashResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    updateToolUsage('hash');
+  }, []);
 
   const fetchHash = async () => {
     if (!inputText.trim()) {

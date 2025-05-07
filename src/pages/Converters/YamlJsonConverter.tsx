@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
@@ -15,6 +15,7 @@ import { useFileReset } from '../../hooks/useFileReset';
 import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 interface YAMLToJSONResponse {
   result: string;
@@ -49,6 +50,10 @@ function YAMLJSONConverter() {
 
   const yamlReset = useFileReset();
   const jsonReset = useFileReset();
+
+  useEffect(() => {
+    updateToolUsage('yaml_json');
+  }, []);
 
   const scrollToTextResult = () => {
     setTimeout(() => {

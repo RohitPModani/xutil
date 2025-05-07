@@ -2,10 +2,7 @@ import UnitConverter from './UnitConverter';
 import seoDescriptions from '../../data/seoDescriptions';
 
 function PowerConverter() {
-  const seo = seoDescriptions.power || {
-    title: 'Power Converter',
-    body: 'Convert power between watts, kilowatts, horsepower (metric and imperial), megawatts, and foot-pounds per second.',
-  };
+  const seo = seoDescriptions.power;
 
   const units = [
     { value: 'w', label: 'Watts (W)' },
@@ -22,7 +19,7 @@ function PowerConverter() {
       defaultValue="1"
       defaultUnit="w"
       units={units}
-      apiEndpoint="/unit-converter/power"
+      apiEndpoint="power"
       converterName="Power Converter"
       validationMessage="Power must be greater than zero."
     />

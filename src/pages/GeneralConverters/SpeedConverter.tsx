@@ -18,7 +18,7 @@ function SpeedConverter() {
       defaultValue="1"
       defaultUnit="km_h"
       units={units}
-      apiEndpoint="/unit-converter/speed"
+      apiEndpoint="speed"
       converterName="Speed Converter"
       validationMessage="Speed must be greater than zero."
     />

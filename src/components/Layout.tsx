@@ -1,4 +1,3 @@
-// src/components/Layout.tsx
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AboutUsSection from './AboutUsSection';
 import aboutUsDescription from '../context/about';
@@ -71,15 +70,14 @@ function Layout() {
         </div>
       </header>
 
-      {/* Remove min-h allocation */}
-      <div className="px-4 max-w-7xl mx-auto sm:mb-4 mb-2">
-        {isHomePage && <AboutUsSection>{aboutUsDescription}</AboutUsSection>}
-      </div>
-
       <main className="px-3 pb-6 sm:px-4 sm:pb-8 max-w-7xl mx-auto">
         <ScrollToTop />
         <Outlet context={{ searchQuery, resetState }} />
       </main>
+
+      <footer className="px-4 max-w-7xl mx-auto sm:mb-4 mb-2">
+        {isHomePage && <AboutUsSection>{aboutUsDescription}</AboutUsSection>}
+      </footer>
 
       {/* Remove min-h allocation */}
       <div>

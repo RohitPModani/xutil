@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
@@ -10,6 +10,7 @@ import SEODescription from '../../components/SEODescription';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 interface ULIDResponse {
     ulid?: string;
@@ -32,6 +33,10 @@ function ULIDGenerator() {
   const [isLoadingSingle, setIsLoadingSingle] = useState(false);
   const [isLoadingBulk, setIsLoadingBulk] = useState(false);
   const [isLoadingTimestamp, setIsLoadingTimestamp] = useState(false);
+
+  useEffect(() => {
+    updateToolUsage('ulid');
+  }, []);
 
   const fetchSingleUlid = async () => {
     setIsLoadingSingle(true);

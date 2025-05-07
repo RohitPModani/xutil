@@ -10,6 +10,7 @@ import { PageSEO } from '../../components/PageSEO';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 function TimezoneConverter() {
   const seo = seoDescriptions.timezone;
@@ -30,6 +31,10 @@ function TimezoneConverter() {
         setDatetimeStr(getLocalDatetimeStr());
       })
       .catch(() => setError('Failed to fetch timezone list.'));
+  }, []);
+
+  useEffect(() => {
+    updateToolUsage('timezone');
   }, []);
 
   const getLocalDatetimeStr = () => {

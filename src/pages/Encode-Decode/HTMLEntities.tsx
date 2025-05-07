@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
@@ -12,6 +12,7 @@ import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 interface HtmlEncodeResponse {
   original_text: string;
@@ -32,6 +33,10 @@ function HtmlEntities() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const textResultRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    updateToolUsage('html');
+  }, []);
   
   const scrollToTextResult = () => {
     setTimeout(() => {

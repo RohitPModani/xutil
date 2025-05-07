@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
@@ -10,6 +10,7 @@ import SEODescription from '../../components/SEODescription';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 interface GuidResponse {
   guid?: string;
@@ -28,6 +29,10 @@ function GuidGenerator() {
   const [errorBulk, setErrorBulk] = useState<string | null>(null);
   const [isLoadingSingle, setIsLoadingSingle] = useState(false);
   const [isLoadingBulk, setIsLoadingBulk] = useState(false);
+
+  useEffect(() => {
+    updateToolUsage('guid');
+  }, []);
 
   const fetchSingleGuid = async () => {
     setIsLoadingSingle(true);

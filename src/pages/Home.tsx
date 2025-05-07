@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import UtilityCard from '../components/UtilityCard';
 import { ArrowLeftRight, BrainCircuit, Code2, File, GitCompareArrows, Image, Network } from 'lucide-react';
+import FrequentlyUsedTools from '../components/FrequentlyUsedTools';
 
 const allUtilities = [
   {
@@ -153,15 +154,18 @@ function Home() {
   }, [searchQuery]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {filteredUtilities.map((util, index) => (
-        <UtilityCard
-          key={index}
-          title={util.title}
-          icon={util.icon}
-          items={util.items}
-        />
-      ))}
+    <div className="space-y-8">
+      <FrequentlyUsedTools />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredUtilities.map((util, index) => (
+          <UtilityCard
+            key={index}
+            title={util.title}
+            icon={util.icon}
+            items={util.items}
+          />
+        ))}
+      </div>
     </div>
   );
 }

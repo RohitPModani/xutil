@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
@@ -11,6 +11,7 @@ import SEODescription from '../../components/SEODescription';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 function MorseCodeTranslator() {
   const seo = seoDescriptions.morseCode;
@@ -22,6 +23,10 @@ function MorseCodeTranslator() {
   const [errorMorse, setErrorMorse] = useState<string | null>(null);
   const [isLoadingText, setIsLoadingText] = useState(false);
   const [isLoadingMorse, setIsLoadingMorse] = useState(false);
+
+  useEffect(() => {
+    updateToolUsage('morse');
+  }, []);
 
   const handleTextToMorse = async () => {
     if (!textInput.trim()) {

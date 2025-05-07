@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import SectionCard from '../../components/SectionCard';
 import ErrorBox from '../../components/ErrorBox';
@@ -11,6 +11,7 @@ import SEODescription from '../../components/SEODescription';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
 import AutoTextarea from '../../hooks/useAutoSizeTextArea';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 const BASE_OPTIONS = [
   { value: 2, label: '2 (Binary)' },
@@ -31,6 +32,10 @@ function TextBaseConverter() {
   const [baseError, setBaseError] = useState<string | null>(null);
   const [isLoadingText, setIsLoadingText] = useState(false);
   const [isLoadingBase, setIsLoadingBase] = useState(false);
+
+  useEffect(() => {
+    updateToolUsage('text_base');
+  }, []);
 
   const isValidInput = (text: string) => /^[0-9a-zA-Z\s]*$/.test(text);
 

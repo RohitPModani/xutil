@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
@@ -11,6 +11,7 @@ import SEODescription from '../../components/SEODescription';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 function URLEncoderDecoder() {
   const seo = seoDescriptions.urlEncoder;
@@ -22,6 +23,10 @@ function URLEncoderDecoder() {
   const [errorDecode, setErrorDecode] = useState<string | null>(null);
   const [isLoadingEncode, setIsLoadingEncode] = useState(false);
   const [isLoadingDecode, setIsLoadingDecode] = useState(false);
+
+  useEffect(() => {
+    updateToolUsage('eurl');
+  }, []);
 
   const handleApiError = useCallback((err: any) => {
     return err.response?.data?.detail || err.message || 'An unexpected error occurred';

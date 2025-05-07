@@ -2,10 +2,7 @@ import UnitConverter from './UnitConverter';
 import seoDescriptions from '../../data/seoDescriptions';
 
 function PressureConverter() {
-  const seo = seoDescriptions.pressure || {
-    title: 'Pressure Converter',
-    body: 'Convert pressure between pascals, kilopascals, atmospheres, bars, millibars, pounds per square inch, millimeters of mercury, and torr.',
-  };
+  const seo = seoDescriptions.pressure;
 
   const units = [
     { value: 'pa', label: 'Pascals (Pa)' },
@@ -24,7 +21,7 @@ function PressureConverter() {
       defaultValue="1"
       defaultUnit="pa"
       units={units}
-      apiEndpoint="/unit-converter/pressure"
+      apiEndpoint="pressure"
       converterName="Pressure Converter"
       validationMessage="Pressure must be greater than zero."
     />

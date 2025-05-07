@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import SectionCard from '../../components/SectionCard';
 import ClearButton from '../../components/ClearButton';
@@ -10,12 +10,15 @@ import { PageSEO } from '../../components/PageSEO';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 function SlugGenerator() {
-  const seo = seoDescriptions.slug || { 
-    title: 'Slug Generator', 
-    body: 'Convert text into URL-friendly slugs with customizable separators and case.'
-  };
+  const seo = seoDescriptions.slug;
+
+  useEffect(() => {
+    updateToolUsage('slug');
+  }, []);
+
   const [text, setText] = useState('');
   const [separator, setSeparator] = useState('-');
   const [caseType, setCaseType] = useState('lowercase');

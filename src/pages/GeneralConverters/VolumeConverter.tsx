@@ -23,7 +23,7 @@ function VolumeConverter() {
       defaultValue="1"
       defaultUnit="l"
       units={units}
-      apiEndpoint="/unit-converter/volume"
+      apiEndpoint="volume"
       converterName="Volume Converter"
       validationMessage="Volume must be greater than zero."
     />

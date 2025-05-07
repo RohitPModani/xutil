@@ -10,6 +10,7 @@ import { PageSEO } from '../../components/PageSEO';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import api from '../../services/api';
 import useResultText from '../../hooks/useResultsText';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 interface Unit {
   value: string;
@@ -42,9 +43,15 @@ function UnitConverter({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    updateToolUsage(apiEndpoint);
+  }, []);
+
+  useEffect(() => {
     setValue(defaultValue);
     setUnit(defaultUnit);
   }, [defaultValue, defaultUnit]);
+
+  const finalEndPoint = '/unit-converter/' + apiEndpoint;
 
   const handleConvert = async () => {
     if (!value || !unit) {
@@ -68,7 +75,7 @@ function UnitConverter({
     setResult(null);
 
     try {
-      const res = await api.post(apiEndpoint, {
+      const res = await api.post(finalEndPoint, {
         value: valueNum,
         unit,
       });

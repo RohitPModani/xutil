@@ -10,6 +10,7 @@ import { PageSEO } from '../../components/PageSEO';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 function PxRemEmConverter() {
   const seo = seoDescriptions.pxRemEm;
@@ -20,6 +21,10 @@ function PxRemEmConverter() {
   const [result, setResult] = useState<{ px?: number; rem?: number; em?: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    updateToolUsage('px_rem_em');
+  }, []);
 
   const conversionTypes = [
     { value: 'px-to-rem-em', label: 'PX to REM/EM' },

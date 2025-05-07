@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
@@ -11,6 +11,7 @@ import { PageSEO } from '../../components/PageSEO';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import AutoTextarea from '../../hooks/useAutoSizeTextArea';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 interface ConversionResponse {
   result: string;
@@ -69,6 +70,10 @@ function BaseNumberConverter() {
     const validDigits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.slice(0, base).toLowerCase();
     return new RegExp(`^[${validDigits}]+$`, 'i').test(number);
   };
+
+  useEffect(() => {
+    updateToolUsage('base_number');
+  }, []);
 
   const handleConvert = async () => {
     if (!inputNumber.trim()) {

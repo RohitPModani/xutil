@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import SectionCard from '../../components/SectionCard';
 import ErrorBox from '../../components/ErrorBox';
@@ -10,6 +10,7 @@ import { PageSEO } from '../../components/PageSEO';
 import SEODescription from '../../components/SEODescription';
 import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
+import { updateToolUsage } from '../../utils/toolUsage';
 
 function UnixUtcConverter() {
     const seo = seoDescriptions.unixUtc;
@@ -21,6 +22,10 @@ function UnixUtcConverter() {
     const [errorUTC, setUtcError] = useState<string | null>(null);
     const [loadingUnixToUtc, setLoadingUnixToUtc] = useState(false);
     const [loadingUtcToUnix, setLoadingUtcToUnix] = useState(false);
+
+    useEffect(() => {
+      updateToolUsage('unix_utc');
+    }, []);
 
     // Validate unix timestamp input (digits only)
     const isValidUnix = (input_unix: string) => /^\d+$/.test(input_unix.trim());

@@ -2,10 +2,7 @@ import UnitConverter from './UnitConverter';
 import seoDescriptions from '../../data/seoDescriptions';
 
 function AngleConverter() {
-  const seo = seoDescriptions.angle || {
-    title: 'Angle Converter',
-    body: 'Convert angles between degrees, radians, gradians, minutes, seconds, and turns.',
-  };
+  const seo = seoDescriptions.angle;
 
   const units = [
     { value: 'deg', label: 'Degrees (°)' },
@@ -22,7 +19,7 @@ function AngleConverter() {
       defaultValue="1"
       defaultUnit="deg"
       units={units}
-      apiEndpoint="/unit-converter/angle"
+      apiEndpoint="angle"
       converterName="Angle Converter"
       validationMessage="Angle must be greater than zero."
     />
