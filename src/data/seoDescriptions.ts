@@ -267,7 +267,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Generate paragraphs, sentences, or word dumps faster than you can say “font pairing.”
   Perfect for designers, developers, and anyone who’s ever needed to fake meaningful content with Latin gibberish that still feels classy.`
   },
-               
+  textCompare: {
+    title: "Text Compare Tool",
+    body: `A Text Compare Tool is like a digital detective for your documents — highlighting every difference between two versions with laser-like precision.
+  Whether you're comparing code snippets, text files, or just checking who copy-pasted your content, this tool lays it all out in a side-by-side showdown.
+  Instantly spot changes, additions, and deletions without squinting at lines or second-guessing your memory.
+  Perfect for developers, writers, editors, and anyone who’s ever thought, “Wait… did I change that?” Spoiler: you’ll know for sure.`
+  },
+              
 };
 
 export default seoDescriptions;

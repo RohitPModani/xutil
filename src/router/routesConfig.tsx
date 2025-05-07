@@ -41,6 +41,7 @@ const AngleConverter = lazy(() => import('../pages/GeneralConverters/AngleConver
 const FuelEconomyConverter = lazy(() => import('../pages/GeneralConverters/FuelEconomyConverter'));
 const LoremIpsumGenerator = lazy(() => import('../pages/Text-Utilities/LoremIpsumGenerator'));
 const SlugGenerator = lazy(() => import('../pages/Text-Utilities/SlugGenerator'));
+const TextCompare = lazy(() => import('../pages/Text-Utilities/TextCompare'));
 
 export const appRoutes = [
   {
@@ -85,6 +86,7 @@ export const appRoutes = [
       { path: 'fuel_economy', element: <FuelEconomyConverter />, errorElement: <ErrorBoundary />},
       { path: 'lorem', element: <LoremIpsumGenerator />, errorElement: <ErrorBoundary />},
       { path: 'slug', element: <SlugGenerator />, errorElement: <ErrorBoundary />},
+      { path: 'text_compare', element: <TextCompare />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

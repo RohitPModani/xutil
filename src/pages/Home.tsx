@@ -63,7 +63,7 @@ const allUtilities = [
     items: [
       { name: 'Lorem Ipsum Generator', path: '/lorem' },
       { name: 'SLUG Generator', path: '/slug' },
-      'Text Diff / File Compare',
+      { name: 'Text Compare', path: '/text_compare'},
       'JSON Formatter & Validator',
       'Regex Tester',
       'Markdown Previewer',

@@ -12,8 +12,11 @@
   },
   "dependencies": {
     "axios": "^1.8.4",
+    "diff": "^7.0.0",
     "framer-motion": "^12.9.2",
+    "lucide": "^0.507.0",
     "lucide-react": "^0.503.0",
+    "mdast-util-to-hast": "^13.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet-async": "^2.0.5",
@@ -25,6 +28,7 @@
   "devDependencies": {
     "@eslint/js": "^9.22.0",
     "@tailwindcss/typography": "^0.5.16",
+    "@types/diff": "^7.0.2",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
