@@ -13,7 +13,7 @@ import { PageSEO } from '../../components/PageSEO';
 function PasswordGenerator() {
   const seo = seoDescriptions.passwordGenerator;
   const [password, setPassword] = useState('');
-  const [lengthInput, setLengthInput] = useState('12');
+  const [lengthInput, setLengthInput] = useState(12);
   const [includeNumbers, setIncludeNumbers] = useState(true);
   const [includeSpecial, setIncludeSpecial] = useState(true);
   const [includeUppercase, setIncludeUppercase] = useState(true);
@@ -22,8 +22,7 @@ function PasswordGenerator() {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchPassword = async () => {
-    const length = parseInt(lengthInput, 10);
-    if (isNaN(length) || length < 8 || length > 128) {
+    if(!Number.isInteger(lengthInput) || lengthInput < 8 || lengthInput > 128) {
       setError('Length must be a number between 8 and 128 characters');
       return;
     }
@@ -36,7 +35,7 @@ function PasswordGenerator() {
     try {
       const response = await api.get<string>('/password/generate', {
         params: {
-          length,
+          length: lengthInput,
           include_numbers: includeNumbers,
           include_special: includeSpecial,
           include_uppercase: includeUppercase,
@@ -54,7 +53,7 @@ function PasswordGenerator() {
   const handleLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^[0-9]+$/.test(value)) {
-      setLengthInput(value);
+      setLengthInput(Number(value));
     }
   };
 

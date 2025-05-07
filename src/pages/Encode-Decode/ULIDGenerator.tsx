@@ -49,6 +49,9 @@ function ULIDGenerator() {
   };
 
   const fetchBulkUlids = async () => {
+    if (bulkUlids.length > 0) {
+      setBulkUlids([]);
+    }
     if (!Number.isInteger(count) || count < 1 || count > 1000) {
       setErrorBulk('Count must be an integer between 1 and 1000');
       return;
@@ -82,6 +85,13 @@ function ULIDGenerator() {
     setBulkUlids([]);
     setCount(5);
   }
+
+  const handleLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || /^[0-9]+$/.test(value)) {
+      setCount(Number(value));
+    }
+  };
 
   return (
     <>
@@ -121,13 +131,12 @@ function ULIDGenerator() {
             <div className="flex items-center">
               <label className="form-label text-base mr-2">Count (1-1000):</label>
               <input
-                type="number"
-                min="1"
-                max="1000"
+                type="text"
                 value={count}
-                onChange={(e) => setCount(Math.max(1, Math.min(1000, Number(e.target.value))))}
+                onChange={handleLengthChange}
                 className="input-field w-20"
                 disabled={isLoadingBulk}
+                placeholder="Enter Count (1 - 1000)"
               />
             </div>
             <div className="flex items-center space-x-2">
