@@ -22,7 +22,7 @@ function FrequentlyUsedTools() {
   // Reset frequently used tools
   const handleReset = () => {
     resetToolUsage();
-    setMostUsed([]);
+    setMostUsed(getMostUsedTools());
   };
 
   return (
