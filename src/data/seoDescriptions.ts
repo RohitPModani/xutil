@@ -281,6 +281,13 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly detect syntax errors, validate JSON structure, and pretty-print your data with just one click.
   Perfect for developers, data wranglers, and anyone who’s ever wondered why their JSON suddenly decided to break the whole app.`
   },
+  textCase: {
+    title: "Text Case Converter",
+    body: `A Text Case Converter is like a wardrobe stylist for your words — effortlessly switching between uppercase, lowercase, title case, and more without breaking a sweat.
+  Whether you're formatting code, cleaning up text, or just trying to figure out how to make “hello world” look fancy, this tool has your back.
+  Instantly convert text to camelCase, snake_case, path-case, and other styles with zero fuss.
+  Perfect for developers, writers, and anyone who’s ever thought, “Why is my text so inconsistent?” Spoiler: it won’t be anymore.`
+  },
             
 };
 

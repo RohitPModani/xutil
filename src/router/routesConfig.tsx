@@ -43,6 +43,7 @@ const LoremIpsumGenerator = lazy(() => import('../pages/Text-Utilities/LoremIpsu
 const SlugGenerator = lazy(() => import('../pages/Text-Utilities/SlugGenerator'));
 const TextCompare = lazy(() => import('../pages/Text-Utilities/TextCompare'));
 const JSONValidator = lazy(() => import('../pages/Text-Utilities/JSONValidator'));
+const TextCaseConverter = lazy(() => import('../pages/Text-Utilities/TextCaseConverter'));
 
 export const appRoutes = [
   {
@@ -89,6 +90,7 @@ export const appRoutes = [
       { path: 'slug', element: <SlugGenerator />, errorElement: <ErrorBoundary />},
       { path: 'text_compare', element: <TextCompare />, errorElement: <ErrorBoundary />},
       { path: 'json_validator', element: <JSONValidator />, errorElement: <ErrorBoundary />},
+      { path: 'text_case', element: <TextCaseConverter />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

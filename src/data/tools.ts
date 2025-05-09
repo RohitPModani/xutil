@@ -162,5 +162,9 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
       name: 'JSON Validator & Formatter',
       path: '/json_validator',
     },
+    '/text_case': {
+      name: 'Text Case Converter',
+      path: '/text_case',
+    },
   };
   
