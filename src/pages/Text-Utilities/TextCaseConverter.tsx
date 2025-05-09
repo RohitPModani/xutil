@@ -103,47 +103,37 @@ function TextCaseConverter() {
             <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Text Case Converter</h3>
             <div className="flex items-center gap-2">
               {result && (
-                <CopyButton
-                  text={getResultsText(result)}
-                  copyType='CopyAll'
-                />
-                )}
-                <ClearButton onClick={handleClear} disabled={!text && !result} />
-              </div>
+                <CopyButton text={getResultsText(result)} copyType='CopyAll' />
+              )}
+              <ClearButton onClick={handleClear} disabled={!text && !result} />
+            </div>
           </div>
 
           <div className="flex flex-col gap-6">
-            <div className="flex-1">
-              <label className="form-label sm:text-base font-semibold">Input Text</label>
-              <AutoTextarea
-                className="input-field w-full"
-                placeholder="Enter your text here..."
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-              />
-            </div>
+            <AutoTextarea
+              className="input-field w-full"
+              placeholder="Enter your text here..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
 
-              {result && (
-                <>
-                    {Object.entries(result).map(([key, val]) => {
-                      const displayLabel = key
-                        .replace(/([A-Z])/g, ' $1')
-                        .replace(/^./, (str) => str.toUpperCase())
-                        .trim();
-                      return (
-                        <div className="result-box mt-0">
-                            <div className="flex justify-between items-center">
-                                <label className="form-label sm:text-base font-semibold">{displayLabel}</label>
-                                {val && <CopyButton text={val} />}
-                            </div>
-                            <div className='inner-result'>
-                                <span className='mono-output text-zinc-900 dark:text-white'>{val}</span>
-                            </div>
-                        </div>
-                      );
-                    })}
-                  </>
-              )}
+            {result && Object.entries(result).map(([key, val]) => {
+              const displayLabel = key
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, (str) => str.toUpperCase())
+                .trim();
+              return (
+                <div key={key} className="result-box mt-0">
+                    <div className="flex justify-between items-center mb-2">
+                        <label className="form-label sm:text-base font-semibold">{displayLabel}</label>
+                        <CopyButton text={val} />
+                    </div>
+                  <div className="inner-result">
+                    <span className='mono-output text-zinc-900 dark:text-white'>{val}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </SectionCard>
       </div>

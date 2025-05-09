@@ -166,5 +166,9 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
       name: 'Text Case Converter',
       path: '/text_case',
     },
+    '/regex': {
+      name: 'Regex Tester',
+      path: '/regex',
+    },
   };
   

@@ -288,7 +288,13 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly convert text to camelCase, snake_case, path-case, and other styles with zero fuss.
   Perfect for developers, writers, and anyone who’s ever thought, “Why is my text so inconsistent?” Spoiler: it won’t be anymore.`
   },
-            
+  regexTester: {
+    title: "Regex Tester",
+    body: `A Regex Tester is like a magic wand for your text — instantly validating, matching, and manipulating strings with the power of regular expressions.
+  Whether you're debugging patterns, extracting data, or just trying to figure out why your regex isn’t working (again), this tool makes it easy.
+  Test your regex against sample text, see matches in real-time, and even get explanations for complex patterns.
+  Perfect for developers, data wranglers, and anyone who’s ever yelled “why won’t this regex work?!” at their screen.`
+  },        
 };
 
 export default seoDescriptions;
