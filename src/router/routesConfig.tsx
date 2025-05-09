@@ -45,6 +45,7 @@ const TextCompare = lazy(() => import('../pages/Text-Utilities/TextCompare'));
 const JSONValidator = lazy(() => import('../pages/Text-Utilities/JSONValidator'));
 const TextCaseConverter = lazy(() => import('../pages/Text-Utilities/TextCaseConverter'));
 const RegexTester = lazy(() => import('../pages/Text-Utilities/RegexTester'));
+const MarkdownPreviewer = lazy(() => import('../pages/Text-Utilities/MarkdownPreviewer'));
 
 export const appRoutes = [
   {
@@ -93,6 +94,7 @@ export const appRoutes = [
       { path: 'json_validator', element: <JSONValidator />, errorElement: <ErrorBoundary />},
       { path: 'text_case', element: <TextCaseConverter />, errorElement: <ErrorBoundary />},
       { path: 'regex', element: <RegexTester />, errorElement: <ErrorBoundary />},
+      { path: 'markdown', element: <MarkdownPreviewer />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

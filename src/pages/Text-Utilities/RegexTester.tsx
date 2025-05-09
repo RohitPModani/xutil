@@ -72,7 +72,7 @@ function RegexTester() {
                         <ClearButton onClick={handleClear} disabled={!regexInput && !testString} />
                     </div>
                     <div className="flex flex-col gap-2 mb-4">
-                        <label className="form-label sm:text-base font-semibold mb-0">Regex:</label>
+                        <label className="form-label mb-0">Regex:</label>
                         <AutoTextarea
                         className="input-field w-full"
                         placeholder="e.g. [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
@@ -81,7 +81,7 @@ function RegexTester() {
                         />
                     </div>
                     <div className="flex flex-col gap-2 mb-4">
-                        <label className="form-label sm:text-base font-semibold mb-0">Test String:</label>
+                        <label className="form-label mb-0">Test String:</label>
                         <AutoTextarea
                         className="input-field w-full"
                         placeholder="e.g. user@example.com, test@domain.org"

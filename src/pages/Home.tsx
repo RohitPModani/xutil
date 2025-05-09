@@ -68,7 +68,7 @@ const allUtilities = [
       { name: 'Regex Tester', path: '/regex' },
       { name: 'JSON Formatter & Validator', path: '/json_validator' },
       { name: 'Text Case Converter', path: '/text_case' },
-      'Markdown Previewer',
+      { name: 'Markdown Previewer', path: '/markdown' },
       'String Reverser / Shuffler / Rotator',
       'Whitespace / Line Break Cleaner',
       'Duplicate Line Remover',

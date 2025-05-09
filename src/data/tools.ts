@@ -170,5 +170,9 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
       name: 'Regex Tester',
       path: '/regex',
     },
+    '/markdown': {
+      name: 'Markdown Previewer',
+      path: '/markdown',
+    },
   };
   

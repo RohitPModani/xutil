@@ -294,7 +294,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Whether you're debugging patterns, extracting data, or just trying to figure out why your regex isn’t working (again), this tool makes it easy.
   Test your regex against sample text, see matches in real-time, and even get explanations for complex patterns.
   Perfect for developers, data wranglers, and anyone who’s ever yelled “why won’t this regex work?!” at their screen.`
-  },        
+  },      
+  markdownPreviewer: {
+    title: "Markdown Previewer",
+    body: `A Markdown Previewer is like a crystal ball for your text — instantly transforming plain Markdown into beautifully formatted HTML without any guesswork.
+  Whether you're writing documentation, creating blog posts, or just trying to make your README look snazzy, this tool has you covered.
+  Type or paste your Markdown, and watch as it magically turns into headings, lists, links, and more in real-time.
+  Perfect for developers, writers, and anyone who’s ever thought, “How do I make this look good without using a WYSIWYG editor?” Spoiler: it’s easier than you think.`
+  },  
 };
 
 export default seoDescriptions;
