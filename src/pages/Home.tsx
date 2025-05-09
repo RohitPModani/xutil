@@ -65,7 +65,7 @@ const allUtilities = [
       { name: 'Lorem Ipsum Generator', path: '/lorem' },
       { name: 'SLUG Generator', path: '/slug' },
       { name: 'Text Compare', path: '/text_compare'},
-      'JSON Formatter & Validator',
+      { name: 'JSON Formatter & Validator', path: '/json_validator' },
       'Regex Tester',
       'Markdown Previewer',
       'Text Case Converter (camelCase, snake_case, etc.)',

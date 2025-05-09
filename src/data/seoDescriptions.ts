@@ -274,7 +274,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly spot changes, additions, and deletions without squinting at lines or second-guessing your memory.
   Perfect for developers, writers, editors, and anyone who’s ever thought, “Wait… did I change that?” Spoiler: you’ll know for sure.`
   },
-              
+  jsonValidator: {
+  title: "JSON Validator and Formatter",
+  body: `A JSON Validator and Formatter is like a code therapist — taking messy, tangled JSON and turning it into neat, well-structured, and error-free bliss.
+  Whether you’re debugging API responses, cleaning up data, or just tired of your JSON looking like a jumbled word salad, this tool brings order to chaos.
+  Instantly detect syntax errors, validate JSON structure, and pretty-print your data with just one click.
+  Perfect for developers, data wranglers, and anyone who’s ever wondered why their JSON suddenly decided to break the whole app.`
+  },
+            
 };
 
 export default seoDescriptions;

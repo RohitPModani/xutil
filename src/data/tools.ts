@@ -158,5 +158,9 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
       name: 'Text Compare',
       path: '/text_compare',
     },
+    '/json_validator': {
+      name: 'JSON Validator & Formatter',
+      path: '/json_validator',
+    },
   };
   

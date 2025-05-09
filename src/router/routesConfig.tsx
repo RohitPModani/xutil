@@ -42,6 +42,7 @@ const FuelEconomyConverter = lazy(() => import('../pages/GeneralConverters/FuelE
 const LoremIpsumGenerator = lazy(() => import('../pages/Text-Utilities/LoremIpsumGenerator'));
 const SlugGenerator = lazy(() => import('../pages/Text-Utilities/SlugGenerator'));
 const TextCompare = lazy(() => import('../pages/Text-Utilities/TextCompare'));
+const JSONValidator = lazy(() => import('../pages/Text-Utilities/JSONValidator'));
 
 export const appRoutes = [
   {
@@ -87,6 +88,7 @@ export const appRoutes = [
       { path: 'lorem', element: <LoremIpsumGenerator />, errorElement: <ErrorBoundary />},
       { path: 'slug', element: <SlugGenerator />, errorElement: <ErrorBoundary />},
       { path: 'text_compare', element: <TextCompare />, errorElement: <ErrorBoundary />},
+      { path: 'json_validator', element: <JSONValidator />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }
