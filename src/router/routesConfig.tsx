@@ -46,6 +46,9 @@ const JSONValidator = lazy(() => import('../pages/Text-Utilities/JSONValidator')
 const TextCaseConverter = lazy(() => import('../pages/Text-Utilities/TextCaseConverter'));
 const RegexTester = lazy(() => import('../pages/Text-Utilities/RegexTester'));
 const MarkdownPreviewer = lazy(() => import('../pages/Text-Utilities/MarkdownPreviewer'));
+const DuplicateLineRemover = lazy(() => import('../pages/Text-Utilities/DuplicateLineRemover'));
+const LineBreakWhiteSpaceRemover = lazy(() => import('../pages/Text-Utilities/LineBreakWhiteSpaceRemover'));
+const StringCounter = lazy(() => import('../pages/Text-Utilities/StringCounter'));
 
 export const appRoutes = [
   {
@@ -95,6 +98,9 @@ export const appRoutes = [
       { path: 'text_case', element: <TextCaseConverter />, errorElement: <ErrorBoundary />},
       { path: 'regex', element: <RegexTester />, errorElement: <ErrorBoundary />},
       { path: 'markdown', element: <MarkdownPreviewer />, errorElement: <ErrorBoundary />},
+      { path: 'duplicate_line_remover', element: <DuplicateLineRemover />, errorElement: <ErrorBoundary />},
+      { path: 'line_break_whitespace_remover', element: <LineBreakWhiteSpaceRemover />, errorElement: <ErrorBoundary />},
+      { path: 'string_counter', element: <StringCounter />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

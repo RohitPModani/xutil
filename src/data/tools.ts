@@ -174,5 +174,17 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
       name: 'Markdown Previewer',
       path: '/markdown',
     },
+    '/duplicate_line_remover': {
+      name: 'Duplicate Line Remover', 
+      path: '/duplicate_line_remover',
+    },
+    '/line_break_whitespace_remover': {
+      name: 'Whitespace & Line Break Remover',  
+      path: '/line_break_whitespace_remover',
+    },
+    '/string_counter': {
+      name: 'String Counter',
+      path: '/string_counter',
+    },
   };
   

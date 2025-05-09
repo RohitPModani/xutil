@@ -302,6 +302,27 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Type or paste your Markdown, and watch as it magically turns into headings, lists, links, and more in real-time.
   Perfect for developers, writers, and anyone who’s ever thought, “How do I make this look good without using a WYSIWYG editor?” Spoiler: it’s easier than you think.`
   },  
+  duplicateLineRemover: {
+    title: "Duplicate Line Remover",
+    body: `A Duplicate Line Remover is like a digital bouncer for your text — kicking out all the unwanted repeat guests and leaving you with a clean, unique list.
+  Whether you're cleaning up code, processing data, or just tired of seeing the same line over and over again, this tool does the job in seconds.
+  Paste your text, and watch as it instantly filters out duplicates, leaving only the original lines behind.
+  Perfect for developers, data wranglers, and anyone who’s ever thought, “Why is this so messy?” Spoiler: it won’t be anymore.`
+  },
+  lineBreakWhitespaceRemover: {
+    title: "Whitespace & Line Break Remover",
+    body: `A Whitespace & Line Break Remover is like a digital declutterer for your text — instantly zapping away unwanted spaces, tabs, and line breaks to give you a clean slate.
+  Whether you're prepping text for APIs, cleaning up user input, or just tired of seeing extra spaces everywhere, this tool has your back.
+  Paste your text, and watch as it instantly removes all the clutter, leaving you with a neat, readable result.
+  Perfect for developers, writers, and anyone who’s ever thought, “Why is my text so messy?” Spoiler: it won’t be anymore.`
+  },
+  stringCounter: {
+    title: "String, Word, Character, Line & Sentence Counter",
+    body: `A String Counter is like a digital tally counter for your text — instantly counting characters, words, lines, and sentences without breaking a sweat.
+  Whether you're writing essays, analyzing data, or just trying to figure out how many words you’ve typed, this tool does the math for you.
+  Paste your text, and watch as it instantly counts everything you need, giving you a clear breakdown of your input.
+  Perfect for writers, developers, and anyone who’s ever thought, “How long is this really?” Spoiler: it’s shorter than you think.`
+  },
 };
 
 export default seoDescriptions;
