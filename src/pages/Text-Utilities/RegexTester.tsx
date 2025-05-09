@@ -75,7 +75,7 @@ function RegexTester() {
                         <label className="form-label sm:text-base font-semibold mb-0">Regex:</label>
                         <AutoTextarea
                         className="input-field w-full"
-                        placeholder="Enter your regex here..."
+                        placeholder="e.g. [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
                         value={regexInput}
                         onChange={(e) => setRegexInput(e.target.value)}
                         />
@@ -84,7 +84,7 @@ function RegexTester() {
                         <label className="form-label sm:text-base font-semibold mb-0">Test String:</label>
                         <AutoTextarea
                         className="input-field w-full"
-                        placeholder="Enter your test string here..."
+                        placeholder="e.g. user@example.com, test@domain.org"
                         value={testString}
                         onChange={(e) => setTestString(e.target.value)}
                         />
