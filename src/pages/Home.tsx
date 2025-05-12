@@ -79,10 +79,10 @@ const allUtilities = [
     items: [
       { name: 'Palindrome Checker', path: '/palindrome' },
       { name: 'String Reverser / Rotator', path: '/string_reverser_rotator' },
-      'Roman Numeral Converter',
-      'NATO Phonetic Alphabet Converter',
-      'Pig Latin Converter',
-      'NumeroNym Generator',
+      { name: 'Roman Numeral Converter', path: '/roman_numeral' },
+      { name: 'NATO Phonetic Alphabet Converter', path: '/nato_phonetic' },
+      { name: 'Pig Latin Converter', path: '/pig_latin' },
+      { name: 'NumeroNym Generator', path: '/numeronym' },
     ]
   },
   {

@@ -50,6 +50,10 @@ const LineBreakWhiteSpaceRemover = lazy(() => import('../pages/Text-Utilities/Li
 const StringCounter = lazy(() => import('../pages/Text-Utilities/StringCounter'));
 const PalindromeChecker = lazy(() => import('../pages/Fun-Text-Utilities/PalindromeChecker'));
 const StringReverserRotator = lazy(() => import('../pages/Fun-Text-Utilities/StringReverserRotator'));
+const RomanNumeralConverter = lazy(() => import('../pages/Fun-Text-Utilities/RomanNumeralConverter'));
+const NATOPhoneticAlphabetConverter = lazy(() => import('../pages/Fun-Text-Utilities/NATOPhonetic'));
+const PigLatinConverter = lazy(() => import('../pages/Fun-Text-Utilities/PigLatinConverter'));
+const NumeronymGenerator = lazy(() => import('../pages/Fun-Text-Utilities/NumeroNymGenerator'));
 
 export const appRoutes = [
   {
@@ -103,6 +107,10 @@ export const appRoutes = [
       { path: 'string_counter', element: <StringCounter />, errorElement: <ErrorBoundary />},
       { path: 'palindrome', element: <PalindromeChecker />, errorElement: <ErrorBoundary />},
       { path: 'string_reverser_rotator', element: <StringReverserRotator />, errorElement: <ErrorBoundary />},
+      { path: 'roman_numeral', element: <RomanNumeralConverter />, errorElement: <ErrorBoundary />},
+      { path: 'nato_phonetic', element: <NATOPhoneticAlphabetConverter />, errorElement: <ErrorBoundary /> },
+      { path: 'pig_latin', element: <PigLatinConverter />, errorElement: <ErrorBoundary />},
+      { path: 'numeronym', element: <NumeronymGenerator />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

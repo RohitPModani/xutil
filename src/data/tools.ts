@@ -186,6 +186,7 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
       name: 'String Counter',
       path: '/string_counter',
     },
+
     //Fun Text Utilities
     '/string_reverser_rotator': {
       name: 'String Reverser / Rotator',
@@ -195,5 +196,21 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
       name: 'Palindrome Checker',
       path: '/palindrome',
     },
+    '/roman_numeral': {
+      name: 'Roman Numeral Converter',
+      path: 'roman_numeral'
+    },
+    '/nato_phonetic': {
+      name: 'NATO Phonetic Alphabet Converter',
+      path: 'nato_phonetic'
+    },
+    '/pig_latin': {
+      name: 'Pig Latin Converter',
+      path: 'pig_latin'
+    },
+    '/numeronym': {
+      name: 'Numeronym Generator',
+      path: 'numeronym'
+    }
   };
   

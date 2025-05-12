@@ -93,7 +93,7 @@ Ever seen %20 instead of a space or gotten yelled at by your browser because of 
 It converts your normal strings into safe, web-friendly formats, and can decode them right back when it’s time to chill. Whether you're building query strings,
 debugging URLs, or just tired of copy-pasting into Google, this tool has your back. It’s clean, fast, and won’t judge you for trying to encode emojis.`
   },
-  
+
   csvJson: {
     title: "CSV ↔ JSON Converter",
     body: `A CSV ↔ JSON Converter is like a backstage pass between two worlds — one’s a strict spreadsheet wizard, the other’s a chill API hipster.
@@ -380,6 +380,39 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Paste your text, and watch as it instantly checks for palindromes, giving you a clear “yes” or “no” answer.
   Perfect for developers, writers, and anyone who’s ever thought, “Is this a palindrome?” Spoiler: it either is or it isn’t.` 
   },
+
+  romanNumeral: {
+    title: "Roman Numeral Converter",
+    body: `A Roman Numeral Converter is like a time machine for your numbers — instantly translating between ancient Roman symbols and modern digits without needing a toga.
+  Whether you're decoding old documents, creating vintage-looking date stamps, or just showing off your numeric history knowledge, this tool handles the conversions with imperial precision.
+  Instantly switch between Roman numerals and integers — from I to M and beyond.
+  Perfect for history buffs, students, and anyone who’s ever wondered, “Is XL bigger than L?” (Hint: it’s not.)`
+  },
+
+  natoPhonetic: {
+    title: "NATO Phonetic Alphabet Converter",
+    body: `A NATO Phonetic Alphabet Converter is like a linguistic secret agent — transforming your plain text into cool, radio-ready code words like Alpha, Bravo, and Charlie.
+  Whether you're spelling out names over the phone, communicating clearly in noisy environments, or just pretending to be a pilot, this tool makes your text sound tactical.
+  Instantly convert any word or phrase into its NATO phonetic equivalent (and decode it back when needed).
+  Perfect for military buffs, aviation enthusiasts, and anyone who’s ever said, “Wait, B as in what?” (Hint: Bravo.)`
+  },
+
+  pigLatin: {
+    title: "Pig Latin Converter",
+    body: `A Pig Latin Converter is like a linguistic prankster — taking your normal words and flipping them into quirky, secret-sounding phrases that only the cool kids understand.
+  Whether you're writing coded messages, having fun with friends, or just adding a playful twist to your text, this tool makes it easy to speak like a Pig Latin pro.
+  Instantly convert English to Pig Latin (and back) without needing to remember the rules from grade school.
+  Perfect for word game enthusiasts, language lovers, and anyone who’s ever wanted to sound just a little bit mysterious.`
+  },
+
+  numeronym: {
+    title: "Numeronym Generator",
+    body: `A Numeronym Generator is like a shortcut wizard for long words — turning lengthy phrases into sleek, number-infused abbreviations like “i18n” or “l10n” without breaking a sweat.
+  Whether you're working with technical terms, creating catchy project names, or just love squishing words into clever codes, this tool makes it effortless.
+  Instantly generate numeronyms from any word or phrase, making them both compact and memorable.
+  Perfect for developers, linguists, branding experts, and anyone who’s ever thought, “Why type the whole word when I can just use numbers?”`
+  },
+
 };
 
 export default seoDescriptions;

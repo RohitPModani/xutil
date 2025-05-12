@@ -6,6 +6,7 @@ import ThemeToggle from './ThemeToggle';
 import ScrollToTop from './ScrollToTop';
 import { useState } from 'react';
 import { Search, X } from 'lucide-react';
+import { GitHub } from 'react-feather';
 
 function Layout() {
   const location = useLocation();
@@ -65,7 +66,17 @@ function Layout() {
           )}
         </div>
 
-        <div className="flex-shrink-0 flex items-center">
+        <div className="flex-shrink-0 flex items-center gap-4">
+          <a
+            href="https://github.com/RohitPModani/xutil.git"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-white hover:text-zinc-700 dark:hover:text-zinc-400 transition focus:outline-none"
+            title='Github'
+            aria-label='Github'
+          >
+            <GitHub className='w-5 h-5 sm:w-7 sm:h-7'/>
+          </a>
           <ThemeToggle />
         </div>
       </header>
