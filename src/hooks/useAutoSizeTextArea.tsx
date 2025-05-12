@@ -3,13 +3,15 @@ import { useLayoutEffect, useRef } from 'react';
 interface AutoTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value: string;
   className?: string;
+  ref?: React.Ref<HTMLTextAreaElement>;
 }
 
-const AutoTextarea = ({ value, className = '', ...props }: AutoTextareaProps) => {
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+const AutoTextarea = ({ value, className = '', ref, ...props }: AutoTextareaProps) => {
+  const innerRef = useRef<HTMLTextAreaElement>(null);
+  const textAreaRef = ref || innerRef;
 
   useLayoutEffect(() => {
-    const ta = textAreaRef.current;
+    const ta = (textAreaRef as React.RefObject<HTMLTextAreaElement>).current;
     if (ta) {
       ta.style.height = 'auto'; // Reset height
       ta.style.height = `${ta.scrollHeight}px`; // Grow dynamically

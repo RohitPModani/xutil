@@ -9,7 +9,7 @@ const PasswordGenerator = lazy(() => import('../pages/Encode-Decode/PasswordGene
 const HashGenerator = lazy(() => import('../pages/Encode-Decode/HashGenerator'));
 const BaseEncoderDecoder = lazy(() => import('../pages/Encode-Decode/BaseEncoderDecoder'));
 const CipherEncoderDecoder = lazy(() => import('../pages/Encode-Decode/CipherEncoderDecoder'));
-const JWTEncoderDecoder = lazy(() => import('../pages/Encode-Decode/JWTEncoderDecoder'));
+const JWTEncoderDecoder = lazy(() => import('../pages/Encode-Decode/JWTDecoder'));
 const HtmlEntities = lazy(() => import('../pages/Encode-Decode/HTMLEntities'));
 const ULIDGenerator = lazy(() => import('../pages/Encode-Decode/ULIDGenerator'));
 const MorseCodeTranslator = lazy(() => import('../pages/Encode-Decode/MorseCodeTranslator'));
@@ -24,7 +24,6 @@ const BaseNumberConverter = lazy(() => import('../pages/Converters/BaseNumberCon
 const TextBaseConverter = lazy(() => import('../pages/Converters/TextBaseConverter'));
 const UnixUtcConverter = lazy(() => import('../pages/Converters/UnixUTCTimeConverter'));
 const TimezoneConverter = lazy(() => import('../pages/Converters/TimezoneConverter'));
-const PxRemEmConverter = lazy(() => import('../pages/Converters/PxRemEmConverter'));
 const TimeUnitConverter = lazy(() => import('../pages/GeneralConverters/TimeUnitConverter'));
 const BitByteConverter = lazy(() => import('../pages/GeneralConverters/BitByteConverter'));
 const TemperatureConverter = lazy(() => import('../pages/GeneralConverters/TemperatureConverter'));
@@ -76,7 +75,6 @@ export const appRoutes = [
       { path: 'text_base', element: <TextBaseConverter />, errorElement: <ErrorBoundary />},
       { path: 'unix_utc', element: <UnixUtcConverter />, errorElement: <ErrorBoundary />},
       { path: 'timezone', element: <TimezoneConverter />, errorElement: <ErrorBoundary />},
-      { path: 'px_rem_em', element: <PxRemEmConverter />, errorElement: <ErrorBoundary />},
       { path: 'time', element: <TimeUnitConverter />, errorElement: <ErrorBoundary />},
       { path: 'bit_byte', element: <BitByteConverter />, errorElement: <ErrorBoundary />},
       { path: 'temperature', element: <TemperatureConverter />, errorElement: <ErrorBoundary />},

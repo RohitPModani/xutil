@@ -1,188 +1,91 @@
-import { useEffect, useState } from 'react';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ClearButton from '../../components/ClearButton';
-import LoadingButton from '../../components/LoadingButton';
-import ErrorBox from '../../components/ErrorBox';
-import CopyButton from '../../components/CopyButton';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import api from '../../services/api';
+import React from 'react';
+import UnitConverter from './UnitConverter';
 import seoDescriptions from '../../data/seoDescriptions';
-import useResultText from '../../hooks/useResultsText';
-import { updateToolUsage } from '../../utils/toolUsage';
+
+// Define types for better type safety
+type FuelEconomyUnit = 'mpg_us' | 'mpg_uk' | 'km_l' | 'l_100km';
+type FuelEconomyRates = Record<FuelEconomyUnit, number>;
+
+// Conversion constants for fuel economy
+const CONVERSION = {
+  MPG_US_TO_KM_L: 0.425143707,    // 1 MPG (US) = 0.425143707 km/L
+  MPG_UK_TO_KM_L: 0.35400619,     // 1 MPG (UK) = 0.35400619 km/L
+  KM_L_TO_MPG_US: 1 / 0.425143707,
+  KM_L_TO_MPG_UK: 1 / 0.35400619,
+  MAX_VALUE: 1e6,                 // Prevent extremely large values
+} as const;
+
+// Memoize constant data outside component
+const UNITS: { value: FuelEconomyUnit; label: string }[] = [
+  { value: 'mpg_us', label: 'Miles per Gallon (US)' },
+  { value: 'mpg_uk', label: 'Miles per Gallon (UK)' },
+  { value: 'km_l', label: 'Kilometers per Liter' },
+  { value: 'l_100km', label: 'Liters per 100 Kilometers' },
+];
+
+const VALIDATION_MESSAGE = "Value must be greater than zero for L/100km, non-negative for other units";
+const CONVERTER_NAME = "Fuel Economy Converter";
+const DEFAULT_VALUE = "20";
+const DEFAULT_UNIT: FuelEconomyUnit = "mpg_us";
 
 function FuelEconomyConverter() {
   const seo = seoDescriptions.fuelEconomy;
-  
-  const [value, setValue] = useState('1');
-  const [unit, setUnit] = useState('mpg_us');
-  const [result, setResult] = useState<{ mpg_us?: number; mpg_uk?: number; km_l?: number; l_100km?: number } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const units = [
-    { value: 'mpg_us', label: 'Miles per Gallon (US)' },
-    { value: 'mpg_uk', label: 'Miles per Gallon (UK)' },
-    { value: 'km_l', label: 'Kilometers per Liter' },
-    { value: 'l_100km', label: 'Liters per 100 Kilometers' },
-  ];
-
-  useEffect(() => {
-    updateToolUsage('fuel_economy');
-  }, []);
-
-  useEffect(() => {
-    // Initialize default values
-    setValue('1');
-    setUnit('mpg_us');
-  }, []);
-
-  const handleConvert = async () => {
-    if (!value || !unit) {
-      setError('Please fill in all fields.');
-      return;
+  const convertFuelEconomy = (value: number, unit: string): FuelEconomyRates => {
+    // Input validation
+    if (!Number.isFinite(value)) {
+      throw new Error('Value must be a finite number');
     }
 
-    const valueNum = parseFloat(value);
-
-    if (isNaN(valueNum)) {
-      setError('Please enter a valid number.');
-      return;
+    if (value > CONVERSION.MAX_VALUE) {
+      throw new Error(`Value must be less than ${CONVERSION.MAX_VALUE}`);
     }
 
-    setIsLoading(true);
-    setError(null);
-    setResult(null);
+    if (unit === 'l_100km') {
+      if (value <= 0) throw new Error(VALIDATION_MESSAGE);
+    } else if (value < 0) {
+      throw new Error(VALIDATION_MESSAGE);
+    }
 
-    try {
-      const res = await api.post('/unit-converter/fuel-economy', {
-        value: valueNum,
-        unit: unit,
-      });
+    // Convert to km/L (intermediate unit)
+    const fuelEconomyUnit = unit as FuelEconomyUnit;
+    const kmPerLiter = convertToKmPerLiter(value, fuelEconomyUnit);
 
-      if (res.data) {
-        setResult(res.data);
-      } else {
-        setError('No result returned from the server.');
-      }
-    } catch (err: any) {
-      const message = err.response?.data?.detail || 'Conversion failed.';
-      setError(message);
-    } finally {
-      setIsLoading(false);
+    // Convert to all target units
+    return {
+      mpg_us: round(kmPerLiter * CONVERSION.KM_L_TO_MPG_US),
+      mpg_uk: round(kmPerLiter * CONVERSION.KM_L_TO_MPG_UK),
+      km_l: round(kmPerLiter),
+      l_100km: kmPerLiter === 0 ? 0 : round(100 / kmPerLiter),
+    };
+  };
+
+  // Helper function for conversion to intermediate unit
+  const convertToKmPerLiter = (value: number, unit: FuelEconomyUnit): number => {
+    switch (unit) {
+      case 'mpg_us': return value * CONVERSION.MPG_US_TO_KM_L;
+      case 'mpg_uk': return value * CONVERSION.MPG_UK_TO_KM_L;
+      case 'km_l': return value;
+      case 'l_100km': return 100 / value;
+      default: throw new Error(`Invalid unit: ${unit}`);
     }
   };
 
-  const handleClear = () => {
-    setValue('1');
-    setUnit('mpg_us');
-    setResult(null);
-    setError(null);
-  };
-
-  const getResultsText = useResultText(result, units);
+  // Helper function for consistent rounding
+  const round = (num: number): number => Number(num.toFixed(8));
 
   return (
-    <>
-      <PageSEO title={seo.title} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex justify-between items-center mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-3xl font-bold mb-6 text-zinc-900 dark:text-white">{seo.title}</h2>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-
-        <SectionCard>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Fuel Economy Converter</h3>
-            <ClearButton onClick={handleClear} disabled={!value && !result && !error} />
-          </div>
-
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <label className="form-label">
-                  Value
-                </label>
-                <input
-                  type="text"
-                  className="input-field w-full"
-                  placeholder="Enter value (e.g., 0)"
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="flex-1">
-                <label className="form-label">
-                  Unit
-                </label>
-                <select
-                  value={unit}
-                  onChange={(e) => setUnit(e.target.value)}
-                  className="input-field w-full h-10"
-                  disabled={isLoading}
-                >
-                  {units.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex justify-center mt-2">
-              <LoadingButton onClick={handleConvert} isLoading={isLoading}>
-                Convert
-              </LoadingButton>
-            </div>
-
-            <div className="result-box mt-1">
-                <div className="flex justify-between items-center">
-                    <label className="form-label text-base">
-                        Conversion Result
-                    </label>
-                    {result && (
-                        <CopyButton text={getResultsText} copyType="CopyAll" />
-                    )}
-              </div>
-              {result && (
-                <div className='scrollbox mt-2'>
-                  <div className="flex flex-col gap-3">
-                    {Object.entries(result).map(([key, val]) => {
-                      const unit = units.find(u => u.value === key);
-                      const displayLabel = unit ? unit.label : key.toUpperCase();
-                      return (
-                        <div
-                          key={key}
-                          className="inner-result"
-                        >
-                          <span className="font-mono text-zinc-800 dark:text-white">
-                            {displayLabel}: {val}
-                          </span>
-                          <CopyButton text={`${displayLabel}: ${val}`} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {error && (
-              <div aria-live="polite">
-                <ErrorBox message={error} />
-              </div>
-            )}
-          </div>
-        </SectionCard>
-      </div>
-    </>
+    <UnitConverter
+      seo={seo}
+      defaultValue={DEFAULT_VALUE}
+      defaultUnit={DEFAULT_UNIT}
+      units={UNITS}
+      converterName={CONVERTER_NAME}
+      validationMessage={VALIDATION_MESSAGE}
+      convertFunction={convertFuelEconomy}
+      toolName='fuel_economy'
+    />
   );
 }
 
-export default FuelEconomyConverter;
+export default React.memo(FuelEconomyConverter);

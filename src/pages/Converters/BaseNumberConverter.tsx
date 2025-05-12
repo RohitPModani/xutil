@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
-import LoadingButton from '../../components/LoadingButton';
 import SectionCard from '../../components/SectionCard';
-import api from '../../services/api';
 import CopyButton from '../../components/CopyButton';
 import ClearButton from '../../components/ClearButton';
 import SEODescription from '../../components/SEODescription';
@@ -12,12 +10,9 @@ import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import AutoTextarea from '../../hooks/useAutoSizeTextArea';
 import { updateToolUsage } from '../../utils/toolUsage';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { ArrowLeftRight, ArrowUpDown } from 'lucide-react';
 
-interface ConversionResponse {
-  result: string;
-}
-
-// Hardcoded bases matching BaseEnum from schema.py
 const BASES = [
   { value: 2, name: 'Binary' },
   { value: 3, name: 'Ternary' },
@@ -63,7 +58,7 @@ function BaseNumberConverter() {
   const [targetBase, setTargetBase] = useState('2');
   const [convertedNumber, setConvertedNumber] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 640px)');
 
   const validateNumber = (number: string, base: number): boolean => {
     if (!number) return false;
@@ -71,47 +66,53 @@ function BaseNumberConverter() {
     return new RegExp(`^[${validDigits}]+$`, 'i').test(number);
   };
 
+  const convertBase = (numStr: string, fromBase: number, toBase: number): string => {
+    if (!numStr.trim()) return '';
+    
+    // First convert from source base to decimal
+    const decimal = parseInt(numStr, fromBase);
+    if (isNaN(decimal)) {
+      setError(`Invalid number for base ${fromBase}`);
+      return '';
+    }
+    
+    // Then convert from decimal to target base
+    return decimal.toString(toBase).toUpperCase();
+  };
+
   useEffect(() => {
     updateToolUsage('base_number');
   }, []);
 
-  const handleConvert = async () => {
+  useEffect(() => {
+    const sourceBaseNum = parseInt(sourceBase, 10);
+    const targetBaseNum = parseInt(targetBase, 10);
+    
     if (!inputNumber.trim()) {
-      setError('Please enter a number');
+      setError(null);
+      setConvertedNumber('');
       return;
     }
-    const sourceBaseNum = parseInt(sourceBase, 10);
+
     if (!validateNumber(inputNumber, sourceBaseNum)) {
       setError(`Number contains invalid digits for base ${sourceBaseNum}`);
+      setConvertedNumber('');
       return;
     }
-    setIsLoading(true);
+
     setError(null);
     try {
-      const response = await api.post<ConversionResponse>('/base-converter/base-convert', {
-        number: inputNumber,
-        source_base: sourceBaseNum,
-        target_base: parseInt(targetBase, 10),
-      });
-      setConvertedNumber(response.data.result);
-    } catch (err: any) {
-      let errorMessage = err.response?.data?.detail || err.message;
-      if (Array.isArray(errorMessage)) {
-        errorMessage = errorMessage.map((e: any) => e.msg).join(', ');
-      } else if (typeof errorMessage === 'object') {
-        errorMessage = JSON.stringify(errorMessage);
-      }
-      setError(errorMessage.replace(/value is not a valid enumeration member.*/, 'Invalid base selected'));
-    } finally {
-      setIsLoading(false);
+      const result = convertBase(inputNumber, sourceBaseNum, targetBaseNum);
+      setConvertedNumber(result);
+    } catch (err) {
+      setError('Conversion failed. Please check your input.');
+      setConvertedNumber('');
     }
-  };
+  }, [inputNumber, sourceBase, targetBase]);
 
   const handleSwap = () => {
     setSourceBase(targetBase);
     setTargetBase(sourceBase);
-    setConvertedNumber('');
-    setError(null);
   };
 
   const handleClear = () => {
@@ -150,7 +151,6 @@ function BaseNumberConverter() {
                   value={inputNumber}
                   onChange={(e) => setInputNumber(e.target.value)}
                   className="input-field"
-                  disabled={isLoading}
                   placeholder="Enter your number (e.g., 1010)"
                   aria-label="Input number for conversion"
                 />
@@ -166,7 +166,6 @@ function BaseNumberConverter() {
                     value={sourceBase}
                     onChange={(e) => setSourceBase(e.target.value)}
                     className="input-field"
-                    disabled={isLoading}
                     aria-label="Select source base"
                   >
                     {BASES.map((base) => (
@@ -180,11 +179,10 @@ function BaseNumberConverter() {
                   <button
                     onClick={handleSwap}
                     className="bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 px-2 py-1 rounded"
-                    disabled={isLoading}
                     title="Swap Source and Target Bases"
                     aria-label="Swap source and target bases"
                   >
-                    ⇄ 
+                   {isMobile ? <ArrowUpDown size={15}/> : <ArrowLeftRight size={20}/>}
                   </button>
                 </div>
                 <div className="flex-1">
@@ -196,7 +194,6 @@ function BaseNumberConverter() {
                     value={targetBase}
                     onChange={(e) => setTargetBase(e.target.value)}
                     className="input-field"
-                    disabled={isLoading}
                     aria-label="Select target base"
                   >
                     {BASES.map((base) => (
@@ -208,25 +205,19 @@ function BaseNumberConverter() {
                 </div>
               </div>
 
-              <div className="flex justify-center mt-2">
-                <LoadingButton onClick={handleConvert} isLoading={isLoading}>
-                  Convert
-                </LoadingButton>
-              </div>
-
               <div className="result-box">
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="form-label">Converted Number</label>
-                    <CopyButton text={convertedNumber} />
-                  </div>
-                  {convertedNumber && (
+                <div className="flex justify-between items-center mb-2">
+                  <label className="form-label">Converted Number</label>
+                  <CopyButton text={convertedNumber} />
+                </div>
+                {convertedNumber && (
                   <div className='scrollbox mt-2'>
                     <div className="inner-result">
                       <div className="mono-output">{convertedNumber}</div>
                     </div>
                   </div>
-                  )}
-                </div>
+                )}
+              </div>
             </div>
 
             {error && (

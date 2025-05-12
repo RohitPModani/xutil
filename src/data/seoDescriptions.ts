@@ -12,13 +12,6 @@ Instantly swap between YAML and JSON without losing your mind (or your metadata)
 It's perfect for developers, DevOps warriors, or anyone who's ever whispered to themselves, "Please... just work." — Good news: it does.`
   },
 
-  jwtEncoder: {
-    title: "JWT Encoder & Decoder",
-    body: `A JWT Encoder & Decoder is your secret agent for debugging tokens, decoding headers, and peeking into payloads — all without leaking your secrets to the world.
-Whether you're building auth flows or verifying token claims, this tool saves time and sanity.
-Decode. Debug. Done.`
-  },
-
   xmlJson: {
     title: "XML ↔ JSON Converter",
     body: `An XML ↔ JSON Converter is like a translator between two ancient tribes of data — one loves angle brackets, the other’s obsessed with curly braces.
@@ -323,6 +316,20 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Paste your text, and watch as it instantly counts everything you need, giving you a clear breakdown of your input.
   Perfect for writers, developers, and anyone who’s ever thought, “How long is this really?” Spoiler: it’s shorter than you think.`
   },
+  jwtDecoder: {
+    title: "JWT Decoder",
+    body: `A JWT Decoder is like a digital key master for your JSON Web Tokens — effortlessly breaking down those encoded strings into human-readable claims and headers.
+  Whether you're debugging authentication, analyzing tokens, or just trying to figure out what’s inside that JWT blob, this tool has you covered.
+  Paste your JWT, and watch as it instantly decodes the header, payload, and signature, giving you a clear view of the contents.
+  Perfect for developers, security pros, and anyone who’s ever thought, “What the heck is in this JWT?” Spoiler: it’s not as scary as it looks.`
+  },
+  slug: {
+    title: "Slug Generator",
+    body: `A Slug Generator is like a digital naming assistant for your URLs — effortlessly transforming your text into clean, SEO-friendly slugs that won’t break the internet.
+  Whether you're building websites, creating blog posts, or just trying to make your links look pretty, this tool has your back.
+  Paste your text, and watch as it instantly generates a slug that’s ready to roll — no spaces, no special characters, just pure URL goodness.
+  Perfect for developers, marketers, and anyone who’s ever thought, “How do I make this URL look better?” Spoiler: it’s easier than you think.`
+  }
 };
 
 export default seoDescriptions;

@@ -53,10 +53,8 @@
     dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 disabled:opacity-50;
   }
 
-  .input-field[type="number"]::-webkit-inner-spin-button,
-  .input-field[type="number"]::-webkit-outer-spin-button {
-    @apply appearance-none; /* Hides the spinner controls */
-    background: transparent; /* Optional: Makes the background transparent */
+  .toggle-count {
+    @apply px-2 py-0.5 bg-zinc-200 dark:bg-zinc-700 text-xs rounded-t hover:bg-zinc-300 dark:hover:bg-zinc-600 disabled:opacity-50;
   }
 
   .form-label {

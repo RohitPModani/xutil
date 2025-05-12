@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
+import { ulid, decodeTime } from 'ulid';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
 import SectionCard from '../../components/SectionCard';
-import api from '../../services/api';
 import CopyButton from '../../components/CopyButton';
 import ClearButton from '../../components/ClearButton';
 import SEODescription from '../../components/SEODescription';
@@ -12,14 +12,6 @@ import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
 import { updateToolUsage } from '../../utils/toolUsage';
 
-interface ULIDResponse {
-    ulid?: string;
-  }
-
-interface BulkUlidsResponse {
-   ulids: string[];
-}
-
 function ULIDGenerator() {
   const seo = seoDescriptions.ulidGenerator;
   const [singleUlid, setSingleUlid] = useState('');
@@ -27,33 +19,39 @@ function ULIDGenerator() {
   const [ulidInput, setUlidInput] = useState('');
   const [timestamp, setTimestamp] = useState<string | null>(null);
   const [count, setCount] = useState(5);
-  const [errorSingle, setErrorSingle] = useState<string | null>(null);
-  const [errorBulk, setErrorBulk] = useState<string | null>(null);
-  const [errorTimestamp, setErrorTimestamp] = useState<string | null>(null);
+  const [errorSingle, setErrorSingle] = useState('');
+  const [errorBulk, setErrorBulk] = useState('');
+  const [errorTimestamp, setErrorTimestamp] = useState('');
   const [isLoadingSingle, setIsLoadingSingle] = useState(false);
   const [isLoadingBulk, setIsLoadingBulk] = useState(false);
   const [isLoadingTimestamp, setIsLoadingTimestamp] = useState(false);
 
   useEffect(() => {
     updateToolUsage('ulid');
+    // Generate initial single ULID and bulk ULIDs on mount
+    fetchSingleUlid();
+    fetchBulkUlids();
   }, []);
 
-  const fetchSingleUlid = async () => {
+  // Auto-generate bulk ULIDs when count changes
+  useEffect(() => {
+    fetchBulkUlids();
+  }, [count]);
+
+  const fetchSingleUlid = () => {
     setIsLoadingSingle(true);
     try {
-      const response = await api.get<string | ULIDResponse>('/ulid/');
-      const ulid = typeof response.data === 'string' ? response.data : response.data.ulid;
-      if (!ulid) throw new Error('Invalid GUID response');
-      setSingleUlid(ulid);
-      setErrorSingle(null);
-    } catch (err: any) {
-      setErrorSingle(err.response?.data?.detail || err.message);
+      const ulidStr = ulid();
+      setSingleUlid(ulidStr);
+      setErrorSingle('');
+    } catch (err) {
+      setErrorSingle('Failed to generate ULID');
     } finally {
       setIsLoadingSingle(false);
     }
   };
 
-  const fetchBulkUlids = async () => {
+  const fetchBulkUlids = () => {
     if (bulkUlids.length > 0) {
       setBulkUlids([]);
     }
@@ -63,39 +61,53 @@ function ULIDGenerator() {
     }
     setIsLoadingBulk(true);
     try {
-      const response = await api.get<BulkUlidsResponse>(`/ulid/bulk?count=${count}`);
-      setBulkUlids(response.data.ulids);
-      setErrorBulk(null);
-    } catch (err: any) {
-      setErrorBulk(err.response?.data?.detail || err.message);
+      const ulids = Array.from({ length: count }, () => ulid());
+      setBulkUlids(ulids);
+      setErrorBulk('');
+    } catch (err) {
+      setErrorBulk('Failed to generate bulk ULIDs');
     } finally {
       setIsLoadingBulk(false);
     }
   };
 
-  const fetchTimestamp = async () => {
+  const fetchTimestamp = (input: string) => {
     setIsLoadingTimestamp(true);
     try {
-        const response = await api.get<{ Timestamp: string }>(`/ulid/timestamp?ULID_str=${ulidInput}`);
-        setTimestamp(response.data.Timestamp);        
-        setErrorTimestamp(null);
-    } catch (err: any) {
-      setErrorTimestamp(err.response?.data?.detail || err.message);
+      if (!input || input.length !== 26) {
+        throw new Error('Invalid ULID: Must be 26 characters long');
+      }
+      const timestampMs = decodeTime(input);
+      const date = new Date(timestampMs);
+      setTimestamp(date.toISOString());
+      setErrorTimestamp('');
+    } catch (err) {
+      setErrorTimestamp(err instanceof Error ? err.message : 'Failed to extract timestamp');
     } finally {
       setIsLoadingTimestamp(false);
     }
   };
 
-  const handleClearAll = () => {
-    setBulkUlids([]);
-    setCount(5);
-  }
+  const handleClearTimestamp = () => {
+    setUlidInput('');
+    setTimestamp(null);
+    setErrorTimestamp('');
+  };
 
-  const handleLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^[0-9]+$/.test(value)) {
-      setCount(Number(value));
+      const numValue = value === '' ? 0 : Number(value);
+      setCount(Math.max(0, Math.min(1000, numValue))); // Clamp between 0 and 1000
     }
+  };
+
+  const incrementCount = () => {
+    setCount((prev) => Math.min(prev + 1, 1000));
+  };
+
+  const decrementCount = () => {
+    setCount((prev) => Math.max(prev - 1, 1));
   };
 
   return (
@@ -123,32 +135,51 @@ function ULIDGenerator() {
               </div>
             </div>
           )}
-          <ErrorBox message={errorSingle} />
+          <ErrorBox message={errorSingle} id={errorSingle ? 'single-error' : undefined} />
         </SectionCard>
 
         {/* Bulk ULIDs */}
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Generate Bulk ULIDs</h3>
-            <ClearButton onClick={handleClearAll} disabled={bulkUlids.length === 0} />
           </div>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
             <div className="flex items-center">
-              <label className="form-label text-base mr-2">Count (1-1000):</label>
-              <input
-                type="text"
-                value={count}
-                onChange={handleLengthChange}
-                className="input-field w-20"
-                disabled={isLoadingBulk}
-                placeholder="Enter Count (1 - 1000)"
-              />
+              <label className="form-label text-base mr-2" htmlFor="bulk-count">
+                Count (1-1000):
+              </label>
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  value={count}
+                  onChange={handleCountChange}
+                  className="input-field w-20 text-right pr-2"
+                  disabled={isLoadingBulk}
+                  placeholder="1-1000"
+                  aria-describedby={errorBulk ? 'bulk-error' : undefined}
+                />
+                <div className="flex flex-col ml-1">
+                  <button
+                    onClick={incrementCount}
+                    disabled={isLoadingBulk || count >= 1000}
+                    className="toggle-count"
+                    aria-label="Increment count"
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={decrementCount}
+                    disabled={isLoadingBulk || count <= 1}
+                    className="toggle-count"
+                    aria-label="Decrement count"
+                  >
+                    −
+                  </button>
+                </div>
+              </div>
             </div>
             <div className="flex items-center space-x-2">
-              <LoadingButton onClick={fetchBulkUlids} isLoading={isLoadingBulk}>
-                Generate
-              </LoadingButton>
-              <CopyButton text={bulkUlids.join('\n')} copyType='CopyAll'  />
+              <CopyButton text={bulkUlids.join('\n')} copyType="CopyAll" />
             </div>
           </div>
 
@@ -158,10 +189,7 @@ function ULIDGenerator() {
             ) : bulkUlids.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {bulkUlids.map((ulid, index) => (
-                  <div
-                    key={index}
-                    className="inner-result"
-                  >
+                  <div key={index} className="inner-result">
                     <span className="font-mono text-zinc-800 dark:text-white truncate">
                       {ulid}
                     </span>
@@ -174,40 +202,45 @@ function ULIDGenerator() {
             )}
           </div>
 
-          <ErrorBox message={errorBulk} />
+          <ErrorBox message={errorBulk} id={errorBulk ? 'bulk-error' : undefined} />
         </SectionCard>
 
         {/* ULID Timestamp */}
-      <SectionCard className="mt-6">
-      <h3 className="text-lg font-semibold mb-4">Get Timestamp from ULID</h3>
-      <div className="flex gap-4 mb-4">
-          <input
-          type="text"
-          placeholder="Enter ULID"
-          value={ulidInput}
-          onChange={(e) => {
-              setUlidInput(e.target.value);
-              setTimestamp(null);          // clear result
-              setErrorTimestamp(null); 
-          }}
-          className="input-field w-full"
-          />
-          <LoadingButton onClick={fetchTimestamp} isLoading={isLoadingTimestamp}>
-          Fetch
-          </LoadingButton>
-      </div>
-
-      {timestamp && (
-          <div className="result-box mt-4">
-            <div className="inner-result">
-              <span className="truncate">DateTime: {timestamp}</span>
-              <CopyButton text={new Date(timestamp).toLocaleString()} />
-            </div>
+        <SectionCard className="mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Get Timestamp from ULID</h3>
+            <ClearButton onClick={handleClearTimestamp} disabled={!ulidInput} />
           </div>
-      )}
+          <div className="flex gap-4 mb-4">
+            <input
+              type="text"
+              id="ulid-input"
+              placeholder="Enter ULID"
+              value={ulidInput}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                setUlidInput(newValue);
+                setTimestamp(null); // Clear result
+                setErrorTimestamp('');
+                fetchTimestamp(newValue);
+              }}
+              className="input-field w-full"
+              disabled={isLoadingTimestamp}
+              aria-describedby={errorTimestamp ? 'timestamp-error' : undefined}
+            />
+          </div>
 
-      <ErrorBox message={errorTimestamp} />
-      </SectionCard>
+          {timestamp && (
+            <div className="result-box mt-4">
+              <div className="inner-result">
+                <span className="truncate">DateTime: {timestamp}</span>
+                <CopyButton text={new Date(timestamp).toLocaleString()} />
+              </div>
+            </div>
+          )}
+
+          <ErrorBox message={errorTimestamp} id={errorTimestamp ? 'timestamp-error' : undefined} />
+        </SectionCard>
       </div>
     </>
   );

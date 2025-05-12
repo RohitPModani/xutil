@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import UtilityCard from '../components/UtilityCard';
-import { ArrowLeftRight, BrainCircuit, Code2, File, GitCompareArrows, Image, Network } from 'lucide-react';
+import { ArrowLeftRight, BrainCircuit, Code2, File, GitCompareArrows, Image, Network, Zap } from 'lucide-react';
 import FrequentlyUsedTools from '../components/FrequentlyUsedTools';
 
 const allUtilities = [
@@ -13,8 +13,8 @@ const allUtilities = [
       { name: 'ULID Generator', path: '/ulid' },
       { name: 'Password Generator', path: '/password' },
       { name: 'Morse Code Parser', path: '/morse' },
-      { name: 'Hash Generator (MD5, SHA1, SHA256…)', path: '/hash' },
-      { name: 'Base Encoder/ Decoder (Base32/ Base58/ Base64)', path: '/base' },
+      { name: 'Hash Generator', path: '/hash' },
+      { name: 'Base Encoder/ Decoder', path: '/base' },
       { name: 'ROT13 / Caesar Cipher Encoder', path: '/cipher' },
       { name: 'JWT Encoder/ Decoder', path: '/jwt' },
       { name: 'URL Encoder/ Decoder', path: '/eurl' },
@@ -34,7 +34,6 @@ const allUtilities = [
       { name: 'Base Number', path: '/base_number' },
       { name: 'Text ↔ Binary / Hex / Octal / Decimal', path: '/text_base' },
       { name: 'Unix ↔ UTC', path: '/unix_utc' },
-      { name: 'px ↔ rem ↔ em', path: '/px_rem_em' },
       { name: 'Timezone', path: '/timezone' },
     ],
   },
@@ -72,9 +71,19 @@ const allUtilities = [
       { name: 'Whitespace / Line Break Remover', path: '/line_break_whitespace_remover' },
       { name: 'Duplicate Line Remover', path: '/duplicate_line_remover' },
       { name: 'String Counter', path: '/string_counter' },
-      'String Reverser / Shuffler / Rotator',
-      'Palindrome Checker / Anagram Generator',
     ],
+  },
+  {
+    title: 'Fun Text Utilities',
+    icon: Zap,
+    items: [
+      'Palindrome Checker',
+      'String Reverser / Rotator',
+      'Roman Numeral Converter',
+      'NATO Phonetic Alphabet Converter',
+      'Pig Latin Converter',
+      'NumeroNym Generator',
+    ]
   },
   {
     title: 'Web & Network Tools',

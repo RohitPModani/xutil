@@ -2,13 +2,11 @@ import { useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import SectionCard from '../../components/SectionCard';
 import ErrorBox from '../../components/ErrorBox';
-import LoadingButton from '../../components/LoadingButton';
 import ClearButton from '../../components/ClearButton';
 import CopyButton from '../../components/CopyButton';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import { PageSEO } from '../../components/PageSEO';
 import SEODescription from '../../components/SEODescription';
-import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
 import AutoTextarea from '../../hooks/useAutoSizeTextArea';
 import { updateToolUsage } from '../../utils/toolUsage';
@@ -30,8 +28,6 @@ function TextBaseConverter() {
   const [convertedToText, setConvertedToText] = useState<string>('');
   const [textError, setTextError] = useState<string | null>(null);
   const [baseError, setBaseError] = useState<string | null>(null);
-  const [isLoadingText, setIsLoadingText] = useState(false);
-  const [isLoadingBase, setIsLoadingBase] = useState(false);
 
   useEffect(() => {
     updateToolUsage('text_base');
@@ -39,58 +35,63 @@ function TextBaseConverter() {
 
   const isValidInput = (text: string) => /^[0-9a-zA-Z\s]*$/.test(text);
 
-  const handleTextToBase = async () => {
-    if (!inputText.trim()) return setTextError('Input text cannot be empty');
-    if (!isValidInput(inputText)) return setTextError('Only alphanumeric characters are allowed.');
-
-    setIsLoadingText(true);
+  const textToBase = (text: string, base: number) => {
+    if (!text.trim()) {
+      setTextError(null);
+      return '';
+    }
+    
+    if (!isValidInput(text)) {
+      setTextError('Only alphanumeric characters are allowed.');
+      return '';
+    }
+    
     setTextError(null);
     try {
-      const response = await api.post('/text-base/text-to-base', {
-        input_text: inputText,
-        target_base: parseInt(targetBase, 10),
-      });
-      setConvertedToBase(response.data.result);
-    } catch (err: any) {
-        let errorMessage = err.response?.data?.detail || err.message;
-        if (Array.isArray(errorMessage)) {
-          errorMessage = errorMessage.map((e: any) => e.msg).join(', ');
-        } else if (typeof errorMessage === 'object') {
-          errorMessage = JSON.stringify(errorMessage);
-        }
-        setConvertedToBase('');
-        setTextError(errorMessage);
-    } finally {
-      setIsLoadingText(false);
+      return text.split('').map(char => {
+        const code = char.charCodeAt(0);
+        return code.toString(base);
+      }).join(' ');
+    } catch (err) {
+      setTextError('Conversion failed');
+      return '';
     }
   };
 
-  const handleBaseToText = async () => {
-    if (!baseInput.trim()) return setBaseError('Base input cannot be empty');
-    if (!isValidInput(baseInput)) return setBaseError('Only alphanumeric characters and spaces are allowed.');
-
-    setIsLoadingBase(true);
+  const baseToText = (input: string, base: number) => {
+    if (!input.trim()) {
+      setBaseError(null);
+      return '';
+    }
+    
+    if (!isValidInput(input)) {
+      setBaseError('Only alphanumeric characters and spaces are allowed.');
+      return '';
+    }
+    
     setBaseError(null);
     try {
-      const response = await api.post('/text-base/base-to-text', {
-        base_text: baseInput,
-        source_base: parseInt(sourceBase, 10),
-      });
-      setConvertedToText(response.data.result);
-    } 
-    catch (err: any) {
-        let errorMessage = err.response?.data?.detail || err.message;
-        if (Array.isArray(errorMessage)) {
-          errorMessage = errorMessage.map((e: any) => e.msg).join(', ');
-        } else if (typeof errorMessage === 'object') {
-          errorMessage = JSON.stringify(errorMessage);
-        }
-        setConvertedToText('');
-        setBaseError(errorMessage);
-    } finally {
-      setIsLoadingBase(false);
+      const numbers = input.split(/\s+/).filter(Boolean);
+      return numbers.map(num => {
+        const code = parseInt(num, base);
+        if (isNaN(code)) throw new Error('Invalid number for base');
+        return String.fromCharCode(code);
+      }).join('');
+    } catch (err) {
+      setBaseError('Invalid input for the selected base');
+      return '';
     }
   };
+
+  useEffect(() => {
+    const result = textToBase(inputText, parseInt(targetBase, 10));
+    setConvertedToBase(result);
+  }, [inputText, targetBase]);
+
+  useEffect(() => {
+    const result = baseToText(baseInput, parseInt(sourceBase, 10));
+    setConvertedToText(result);
+  }, [baseInput, sourceBase]);
 
   const handleTextClear = () => {
     setInputText('');
@@ -144,7 +145,6 @@ function TextBaseConverter() {
                     </option>
                     ))}
                 </select>
-                <LoadingButton onClick={handleTextToBase} isLoading={isLoadingText}>Convert</LoadingButton>
             </div>
 
             <div className="result-box mt-4">
@@ -190,7 +190,6 @@ function TextBaseConverter() {
                     </option>
                     ))}
                 </select>
-                <LoadingButton onClick={handleBaseToText} isLoading={isLoadingBase}>Convert</LoadingButton>
             </div>
 
             <div className="result-box mt-4">

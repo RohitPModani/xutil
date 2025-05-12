@@ -3,266 +3,500 @@ import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
 import SectionCard from '../../components/SectionCard';
-import api from '../../services/api';
 import CopyButton from '../../components/CopyButton';
+import ClearButton from '../../components/ClearButton';
 import AutoTextarea from '../../hooks/useAutoSizeTextArea';
 import DownloadButton from '../../components/DownloadButton';
 import SEODescription from '../../components/SEODescription';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import FileUploader from '../../components/FileUploader';
-import { PageSEO } from '../../components/PageSEO';
-import ClearButton from '../../components/ClearButton';
 import { useFileReset } from '../../hooks/useFileReset';
 import seoDescriptions from '../../data/seoDescriptions';
+import { PageSEO } from '../../components/PageSEO';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { updateToolUsage } from '../../utils/toolUsage';
+import { validateClassName } from '../../utils/jsonPythonUtils';
 
-function JSONPydanticClassConverter() {
+interface ConversionResult {
+  result: string;
+  type: 'py';
+}
+
+enum ConversionType {
+  PY = 'py',
+}
+
+type AnyDict = { [key: string]: any };
+type AnyList = any[];
+
+function jsonToPydantic(jsonData: string, className: string): string {
+  try {
+    if (!jsonData.trim()) {
+      throw new Error('JSON data cannot be empty');
+    }
+
+    const data = JSON.parse(jsonData);
+    const classes: string[] = [];
+    const classMap = new Map<string, string>();
+
+    // Add imports only once at the beginning
+    const imports = [
+      'from datetime import date, datetime',
+      'from typing import List, Optional, Union',
+      'from pydantic import BaseModel',
+      'from pydantic import validator',
+      ''
+    ].join('\n');
+
+    function capitalize(str: string): string {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function getType(value: any, key: string, depth: number): string {
+      if (value === null) {
+        return 'Optional[Any]';
+      } else if (Array.isArray(value)) {
+        if (value.length === 0) {
+          return 'List[Any]';
+        }
+        
+        // Handle arrays with mixed types
+        const types = new Set<string>();
+        value.forEach(item => {
+          const itemType = getType(item, key, depth);
+          if (!types.has(itemType)) {
+            types.add(itemType);
+          }
+        });
+
+        // Simplify similar types
+        if (types.has('int') && types.has('float')) {
+          types.delete('int');
+        }
+
+        const baseType = types.size > 1 ? 
+          `Union[${Array.from(types).join(', ')}]` : 
+          Array.from(types)[0];
+        
+        return `List[${baseType}]`;
+      } else if (value && typeof value === 'object') {
+        const subClassName = `${className}${capitalize(key)}`;
+        if (!classMap.has(subClassName)) {
+          generateClass(value, subClassName, depth + 1);
+        }
+        return subClassName;
+      } else if (typeof value === 'string') {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          return 'date';
+        } else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/.test(value)) {
+          return 'datetime';
+        }
+        return 'str';
+      } else if (typeof value === 'number') {
+        return Number.isInteger(value) ? 'int' : 'float';
+      } else if (typeof value === 'boolean') {
+        return 'bool';
+      } else {
+        return 'Any';
+      }
+    }
+
+    function generateClass(obj: AnyDict | AnyList, name: string, depth: number): void {
+      if (classMap.has(name)) {
+        return;
+      }
+
+      const lines: string[] = [
+        `class ${name}(BaseModel):`
+      ];
+      const properties: AnyDict = Array.isArray(obj) ? (obj.length > 0 ? obj[0] : {}) : obj;
+
+      for (const [key, value] of Object.entries(properties)) {
+        const type = getType(value, key, depth);
+        lines.push(`    ${key}: ${type}`);
+      }
+
+      // Add datetime validators if needed
+      for (const [key, value] of Object.entries(properties)) {
+        const type = getType(value, key, depth);
+        if (type === 'date' || type === 'datetime') {
+          lines.push('');
+          lines.push(`    @validator('${key}', pre=True)`);
+          lines.push(`    def parse_${key}(cls, v):`);
+          lines.push(`        if isinstance(v, str):`);
+          lines.push(`            try:`);
+          if (type === 'date') {
+            lines.push(`                return datetime.strptime(v, "%Y-%m-%d").date()`);
+          } else {
+            lines.push(`                return datetime.fromisoformat(v.replace("Z", "+00:00"))`);
+          }
+          lines.push(`            except ValueError:`);
+          lines.push(`                raise ValueError(f"Invalid {type} format for {key}")`);
+          lines.push(`        return v`);
+        }
+      }
+
+      classMap.set(name, lines.join('\n'));
+      classes.push(lines.join('\n'));
+    }
+
+    generateClass(data, className, 0);
+    return [imports, ...classes].join('\n\n');
+  } catch (e: any) {
+    throw new Error(`JSON to Pydantic conversion failed: ${e.message || 'Invalid format'}`);
+  }
+}
+
+function JSONPydanticConverter() {
   const seo = seoDescriptions.jsonToPydantic;
-  const [textInput, setTextInput] = useState('');
-  const [className, setClassName] = useState('Root');
-  const [isTextConverting, setIsTextConverting] = useState(false);
-  const [textError, setTextError] = useState<string | null>(null);
-
-  const [fileUpload, setFileUpload] = useState<File | null>(null);
+  const [inputText, setInputText] = useState('');
+  const [textClassName, setTextClassName] = useState('Root');
   const [fileClassName, setFileClassName] = useState('Root');
-  const [isFileConverting, setIsFileConverting] = useState(false);
-  const [fileError, setFileError] = useState<string | null>(null);
+  const [conversionResult, setConversionResult] = useState<ConversionResult | null>(null);
   const [fileResult, setFileResult] = useState('');
-  const [textResult, setTextResult] = useState(''); 
+  const [textError, setTextError] = useState('');
+  const [fileError, setFileError] = useState('');
+  const [, setFileType] = useState<ConversionType | null>(null);
+  const [fileBaseName, setFileBaseName] = useState('');
+  const [fileInputText, setFileInputText] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isConverting, setIsConverting] = useState(false);
+  const textResultRef = useRef<HTMLDivElement | null>(null);
+  const fileResultRef = useRef<HTMLDivElement | null>(null);
+  const inputTextRef = useRef<HTMLTextAreaElement>(null);
+  const isMobile = useMediaQuery('(max-width: 640px)');
   const fileReset = useFileReset();
-  const [jsonFileText, setJsonFileText] = useState('');
-
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     updateToolUsage('json_pydantic');
   }, []);
 
-  const handleTextConversion = async () => {
-    if (!textInput.trim()) {
-      setTextError('Input text cannot be empty');
+  const scrollToResult = (ref: React.RefObject<HTMLDivElement | null>) => {
+    setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
+  const convertText = async () => {
+    if (!inputText.trim()) {
+      setTextError('Conversion failed: Input text cannot be empty');
+      setConversionResult(null);
       return;
     }
-    setIsTextConverting(true);
-    setTextError(null);
-    setTextResult(''); // Clear previous
+
+    const error = validateClassName(textClassName);
+    if (error) {
+      setTextError(error);
+      setConversionResult(null);
+      return;
+    }
+
+    setTextError('');
+    setIsConverting(true);
 
     try {
-      const endpoint = '/json-pydantic/json-to-pydantic'
-
-      const payload = { json_data: textInput, class_name: className }
-
-      const response = await api.post<{ result: string }>(endpoint, payload);
-
-      setTextResult(response.data.result || ''); // <-- Set into textResult now
+      const result = jsonToPydantic(inputText, textClassName);
+      setConversionResult({ result, type: 'py' });
+      scrollToResult(textResultRef);
     } catch (err: any) {
-      setTextError(err.response?.data?.detail || err.message);
+      console.error('Conversion error:', err);
+      setTextError(`Conversion failed: ${err.message || 'Invalid format'}`);
+      setConversionResult(null);
     } finally {
-      setIsTextConverting(false);
+      setIsConverting(false);
+    }
+  };
+
+  const handleFileSelection = async (file: File) => {
+    if (!file) {
+      setFileError('File upload failed: No file selected');
+      setFileInputText('');
+      setSelectedFile(null);
+      return;
+    }
+
+    try {
+      const fileText = await file.text();
+      setFileInputText(fileText);
+      setSelectedFile(file);
+      setFileBaseName(file.name.replace(/\.[^/.]+$/, ''));
+      setFileError('');
+    } catch (err: any) {
+      console.error('File read error:', err);
+      setFileError(`File read failed: ${err.message || 'Unable to read file'}`);
+      setFileInputText('');
+      setSelectedFile(null);
     }
   };
 
   const handleFileConversion = async () => {
-    if (!fileUpload) {
-      setFileError('Please upload a file first');
+    if (!selectedFile || !fileInputText.trim()) {
+      setFileError('Conversion failed: No file selected or file content is empty');
+      setFileResult('');
+      setFileType(null);
       return;
     }
-    setIsFileConverting(true);
-    setFileError(null);
+
+    const error = validateClassName(fileClassName);
+    if (error) {
+      setFileError(error);
+      setFileResult('');
+      setFileType(null);
+      return;
+    }
+
+    setFileError('');
+    setIsConverting(true);
 
     try {
-      const formData = new FormData();
-      formData.append('file', fileUpload);
-      formData.append('class_name', fileClassName);
-
-      const fileText = await fileUpload.text();
-      setJsonFileText(fileText)
-
-      const endpoint = '/json-pydantic/json-to-pydantic-file';
-
-      const response = await api.post<{ result: string }>(endpoint, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      setFileResult(response.data.result || '');
-      setFileUpload(null);
-      scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+      const result = jsonToPydantic(fileInputText, fileClassName);
+      setFileResult(result);
+      setFileType(ConversionType.PY);
+      scrollToResult(fileResultRef);
     } catch (err: any) {
-      setFileError(err.response?.data?.detail || err.message);
+      console.error('File conversion error:', err);
+      setFileError(`Conversion failed: ${err.message || 'Invalid format'}`);
+      setFileResult('');
+      setFileType(null);
     } finally {
-      setIsFileConverting(false);
+      setIsConverting(false);
     }
   };
 
   const clearTextConversion = () => {
-    setTextInput('');
+    setInputText('');
+    setTextClassName('Root');
+    setConversionResult(null);
     setTextError('');
-    setClassName('Root');
-    setTextResult('');
   };
 
   const clearFileConversion = () => {
-    setFileUpload(null);
     setFileResult('');
-    setFileError('');
+    setFileInputText('');
+    setSelectedFile(null);
+    setFileType(null);
+    setFileBaseName('');
     setFileClassName('Root');
-    setJsonFileText('');
+    setFileError('');
     fileReset.triggerReset();
+  };
+
+  const handleInputTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputText(e.target.value);
+    if (inputTextRef.current) {
+      inputTextRef.current.focus();
+    }
   };
 
   return (
     <>
-      <PageSEO title="JSON to Pydantic Class Converter" description="Convert JSON to Pydantic class." />
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
+      <PageSEO title={seo.title} description={seo.body} />
+      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
+        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
           <BackToHome />
           <BuyMeCoffee variant="inline" />
         </div>
-
         <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
         <SEODescription title={'a ' + seo.title}>{seo.body}</SEODescription>
 
         {/* Text Conversion Section */}
-        <SectionCard className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">JSON ➔ Pydantic Class (Text Conversion)</h3>
-            <ClearButton onClick={clearTextConversion} disabled={!textInput} />
-          </div>
-
+        <SectionCard>
+          {isMobile ? (
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Text Conversion</h3>
+              <ClearButton 
+                onClick={clearTextConversion} 
+                disabled={!inputText && !conversionResult && !textError} 
+              />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between mb-4" ref={textResultRef}>
+              <h3 className="text-lg font-semibold">Text Conversion</h3>
+              <ClearButton 
+                onClick={clearTextConversion} 
+                disabled={!inputText && !conversionResult && !textError} 
+              />
+            </div>
+          )}
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1 space-y-4">
-              <label className="form-label">Input Text:</label>
+              <label className="form-label" htmlFor="input-text">
+                Input JSON:
+              </label>
               <AutoTextarea
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                className="input-field w-full h-48"
-                placeholder="Paste your JSON here..."
+                id="input-text"
+                value={inputText}
+                onChange={handleInputTextChange}
+                className="input-field w-full"
+                placeholder="Enter JSON text to convert"
+                ref={inputTextRef}
+                aria-describedby={textError ? "json-pydantic-text-error" : undefined}
+                aria-label="JSON input text"
               />
-
-                <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex flex-wrap gap-2 items-center">
+                <div className="flex flex-col">
                   <div className="flex items-center">
-                    <label className="form-label text-sm sm:text-base mr-2">Class Name:</label>
+                    <label className="form-label text-base mr-2">Class Name:</label>
                     <input
-                      value={className}
-                      onChange={(e) => setClassName(e.target.value)}
-                      className="input-field rounded-md w-auto"
+                      value={textClassName}
+                      onChange={(e) => setTextClassName(e.target.value)}
+                      className="input-field rounded-md w-32 "
+                      placeholder="Root"
                     />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <LoadingButton onClick={handleTextConversion} isLoading={isTextConverting}>
-                      Convert
-                    </LoadingButton>
-                  </div>
                 </div>
+                <LoadingButton 
+                  onClick={convertText} 
+                  isLoading={isConverting}
+                  disabled={!inputText.trim()}
+                >
+                  Convert
+                </LoadingButton>
+              </div>
             </div>
 
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
-                <label className="form-label">Converted Result:</label>
+                <label className="form-label">Converted Pydantic Model:</label>
                 <div className="flex items-center gap-2">
-                  <CopyButton text={textResult} className="mr-2" />
+                  <CopyButton 
+                    text={conversionResult?.result || ''} 
+                  />
                   <DownloadButton
-                    content={textResult}
-                    fileName={`${className}.txt`}
-                    fileType="txt"
-                    disabled={!textResult}
+                    content={conversionResult?.result || ''}
+                    fileName={`${textClassName}.py`}
+                    fileType="py"
+                    disabled={!conversionResult}
                   />
                 </div>
               </div>
               <AutoTextarea
-                value={textResult || ''}
+                value={conversionResult?.result || ''}
                 readOnly
-                disabled={!textResult}
-                placeholder="Converted result will appear here..."
+                disabled={!conversionResult}
+                placeholder="Converted Pydantic model will appear here..."
                 className={`input-field w-full ${
-                  !textResult? 'text-zinc-400 dark:text-zinc-500' : ''
+                  !conversionResult ? 'text-zinc-400 dark:text-zinc-500' : ''
                 }`}
+                style={{ whiteSpace: 'pre' }}
+                aria-label="Converted Pydantic result"
               />
+              {conversionResult && (
+                <p className="text-sm text-muted mt-1">
+                  Converted: JSON to Pydantic
+                </p>
+              )}
             </div>
           </div>
-
-          {textError && <ErrorBox message={textError} />}
+          {textError && <ErrorBox message={textError} id="json-pydantic-text-error" />}
         </SectionCard>
 
         {/* File Conversion Section */}
         <SectionCard className="mt-6">
-          <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">JSON ➔ Pydantic Class (File Conversion)</h3>
-              <ClearButton onClick={clearFileConversion} disabled = {jsonFileText === '' && fileResult === ''}/>
-          </div>
+          {isMobile ? (
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">File Conversion</h3>
+              <ClearButton 
+                onClick={clearFileConversion} 
+                disabled={!fileInputText && !fileResult && !fileError} 
+              />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between mb-4" ref={fileResultRef}>
+              <h3 className="text-lg font-semibold">File Conversion</h3>
+              <ClearButton 
+                onClick={clearFileConversion} 
+                disabled={!fileInputText && !fileResult && !fileError} 
+              />
+            </div>
+          )}
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex-1">
-              <label className="form-label">
+              <label className="form-label" htmlFor="json-file-upload">
                 Upload JSON File
               </label>
               <FileUploader
                 accept=".json"
-                label="Choose JSON File"
-                onFileSelected={(file) => setFileUpload(file)}
+                label="Choose JSON"
+                onFileSelected={handleFileSelection}
                 onClear={clearFileConversion}
                 resetSignal={fileReset.resetSignal}
+                disabled={isConverting}
               />
-              <div className="flex items-center justify-between mt-4 flex-wrap gap-4">
-                  <div className="flex items-center">
-                    <label className="form-label text-sm sm:text-base mr-2">Class Name:</label>
-                    <input
-                      value={fileClassName}
-                      onChange={(e) => setFileClassName(e.target.value)}
-                      className="input-field rounded-md w-auto"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <LoadingButton onClick={handleFileConversion} isLoading={isFileConverting}>
-                      Convert
-                    </LoadingButton>
-                  </div>
+              <div className="flex flex-wrap gap-2 items-center mt-4">
+                <div className="flex items-center">
+                  <label className="form-label text-base mr-2">Class Name:</label>
+                  <input
+                    value={fileClassName}
+                    onChange={(e) => setFileClassName(e.target.value)}
+                    className="input-field rounded-md w-32"
+                    placeholder="Root"
+                  />
                 </div>
+                <LoadingButton 
+                  onClick={handleFileConversion} 
+                  isLoading={isConverting}
+                  disabled={!selectedFile || !fileInputText.trim()}
+                >
+                  Convert
+                </LoadingButton>
+              </div>
             </div>
           </div>
 
-          {/* Input Text Box (Always visible) */}
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1 space-y-4">
-              <label className="form-label">Input Text (from file):</label>
+              <label className="form-label mb-3">Input Text (from file):</label>
               <AutoTextarea
-                value={jsonFileText}
+                value={fileInputText}
                 readOnly
-                placeholder="Input text will appear here after uploading a file..."
+                disabled={!fileInputText}
+                placeholder="Input text from file..."
                 className={`input-field w-full h-64 ${
-                  !jsonFileText ? 'text-zinc-400 dark:text-zinc-500' : ''
+                  !fileInputText ? 'text-zinc-400 dark:text-zinc-500' : ''
                 }`}
+                style={{ whiteSpace: 'pre' }}
+                aria-label="Input text from uploaded file"
               />
             </div>
 
-            {/* Result Box (Always visible) */}
             <div className="flex-1 space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="form-label">Converted Result:</label>
-                  <div>
-                    <CopyButton text={fileResult} className="mr-3" />
-                    <DownloadButton
-                      content={fileResult}
-                      fileName={`${fileClassName}.txt`}
-                      fileType='txt'
-                      disabled={!fileResult}
-                    />
-                  </div>
+              <div className="flex items-center justify-between">
+                <label className="form-label">Converted Pydantic Model:</label>
+                <div>
+                  <CopyButton 
+                    text={fileResult} 
+                    className="mr-3" 
+                  />
+                  <DownloadButton
+                    content={fileResult}
+                    fileName={`${fileBaseName || fileClassName}_converted.py`}
+                    fileType="py"
+                    disabled={!fileResult}
+                  />
+                </div>
               </div>
               <AutoTextarea
                 value={fileResult}
                 readOnly
                 disabled={!fileResult}
-                placeholder="Converted result will appear here after upload..."
+                placeholder="Converted result will appear here..."
                 className={`input-field w-full h-64 ${!fileResult ? 'text-zinc-400 dark:text-zinc-500' : ''}`}
+                style={{ whiteSpace: 'pre' }}
+                aria-label="Converted result from uploaded file"
               />
+              {fileResult && (
+                <p className="text-sm text-muted mt-1">
+                  Converted: JSON to Pydantic
+                </p>
+              )}
             </div>
           </div>
-
-          {fileError?.startsWith('File upload failed') && <ErrorBox message={fileError} />}
+          {fileError && <ErrorBox message={fileError} id="json-pydantic-file-error" />}
         </SectionCard>
       </div>
     </>
   );
 }
 
-export default JSONPydanticClassConverter;
+export default JSONPydanticConverter;

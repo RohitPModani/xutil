@@ -1,25 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import BackToHome from '../../components/BackToHome';
 import SectionCard from '../../components/SectionCard';
 import ClearButton from '../../components/ClearButton';
-import LoadingButton from '../../components/LoadingButton';
 import ErrorBox from '../../components/ErrorBox';
 import CopyButton from '../../components/CopyButton';
 import SEODescription from '../../components/SEODescription';
 import { PageSEO } from '../../components/PageSEO';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
-import api from '../../services/api';
 import seoDescriptions from '../../data/seoDescriptions';
 import useResultText from '../../hooks/useResultsText';
 import { updateToolUsage } from '../../utils/toolUsage';
 
 function TemperatureConverter() {
   const seo = seoDescriptions.temperature || { title: 'Temperature Converter', body: 'Convert temperatures between Celsius, Fahrenheit, and Kelvin.' };
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState('0');
   const [unit, setUnit] = useState('celsius');
   const [result, setResult] = useState<{ celsius?: number; fahrenheit?: number; kelvin?: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const units = [
     { value: 'celsius', label: 'Celsius' },
@@ -29,56 +26,63 @@ function TemperatureConverter() {
 
   useEffect(() => {
     updateToolUsage('temperature');
+    setResult(convertTemperature(0, 'celsius'));
   }, []);
 
-  useEffect(() => {
-    // Initialize default values
-    setValue('0');
-    setUnit('celsius');
-  }, []);
-
-  const handleConvert = async () => {
-    if (!value || !unit) {
-      setError('Please fill in all fields.');
-      return;
+  const convertTemperature = (valueNum: number, unit: string) => {
+    let celsius, fahrenheit, kelvin;
+    if (unit === 'celsius') {
+      celsius = valueNum;
+      fahrenheit = (valueNum * 9) / 5 + 32;
+      kelvin = valueNum + 273.15;
+    } else if (unit === 'fahrenheit') {
+      celsius = (valueNum - 32) * 5 / 9;
+      fahrenheit = valueNum;
+      kelvin = celsius + 273.15;
+    } else {
+      celsius = valueNum - 273.15;
+      fahrenheit = (celsius * 9) / 5 + 32;
+      kelvin = valueNum;
     }
+    return { celsius, fahrenheit, kelvin };
+  };
 
-    const valueNum = parseFloat(value);
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    setValue(inputValue);
 
+    const valueNum = parseFloat(inputValue);
     if (isNaN(valueNum)) {
       setError('Please enter a valid number.');
+      setResult(null);
       return;
     }
-
-    setIsLoading(true);
     setError(null);
-    setResult(null);
+    const converted = convertTemperature(valueNum, unit);
+    setResult(converted);
+  };
 
-    try {
-      const res = await api.post('/unit-converter/temperature', {
-        value: valueNum,
-        unit: unit,
-      });
-
-      if (res.data) {
-        setResult(res.data);
-      } else {
-        setError('No result returned from the server.');
-      }
-    } catch (err: any) {
-      const message = err.response?.data?.detail || 'Conversion failed.';
-      setError(message);
-    } finally {
-      setIsLoading(false);
+  const handleUnitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setUnit(e.target.value);
+    const valueNum = parseFloat(value);
+    if (!isNaN(valueNum)) {
+      const converted = convertTemperature(valueNum, e.target.value);
+      setResult(converted);
     }
   };
 
   const handleClear = () => {
     setValue('0');
     setUnit('celsius');
-    setResult(null);
+    setResult({ celsius: 0, fahrenheit: 32, kelvin: 273.15 });
     setError(null);
   };
+
+  const formatNumber = useCallback((num: number): string => {
+      return new Intl.NumberFormat('en-US', {
+        maximumFractionDigits: 8
+      }).format(num);
+    }, []);
 
   const getResultsText = useResultText(result, units);
 
@@ -103,15 +107,15 @@ function TemperatureConverter() {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <label className="form-label">
-                  Value
+                  Value (Max Length: 8)
                 </label>
                 <input
                   type="text"
                   className="input-field w-full"
                   placeholder="Enter value (e.g., 0)"
                   value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  disabled={isLoading}
+                  maxLength={8}
+                  onChange={handleValueChange}
                 />
               </div>
               <div className="flex-1">
@@ -120,9 +124,8 @@ function TemperatureConverter() {
                 </label>
                 <select
                   value={unit}
-                  onChange={(e) => setUnit(e.target.value)}
+                  onChange={handleUnitChange}
                   className="input-field w-full h-10"
-                  disabled={isLoading}
                 >
                   {units.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -131,12 +134,6 @@ function TemperatureConverter() {
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div className="flex justify-center mt-2">
-              <LoadingButton onClick={handleConvert} isLoading={isLoading}>
-                Convert
-              </LoadingButton>
             </div>
 
             <div className="result-box mt-1">
@@ -154,15 +151,16 @@ function TemperatureConverter() {
                     {Object.entries(result).map(([key, val]) => {
                       const unit = units.find(u => u.value === key);
                       const displayLabel = unit ? unit.label : key.toUpperCase();
+                      const formattedVal = formatNumber(val);
                       return (
                         <div
                           key={key}
                           className="inner-result"
                         >
-                          <span className="font-mono text-zinc-800 dark:text-white">
-                            {displayLabel}: {val}
+                          <span className="whitespace-pre-wrap break-all">
+                            {displayLabel}: {formattedVal}
                           </span>
-                          <CopyButton text={`${displayLabel}: ${val}`} />
+                          <CopyButton text={`${displayLabel}: ${formattedVal}`} />
                         </div>
                       );
                     })}

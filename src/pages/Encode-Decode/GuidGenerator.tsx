@@ -1,55 +1,52 @@
 import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import LoadingButton from '../../components/LoadingButton';
 import SectionCard from '../../components/SectionCard';
-import api from '../../services/api';
 import CopyButton from '../../components/CopyButton';
-import ClearButton from '../../components/ClearButton';
 import SEODescription from '../../components/SEODescription';
 import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
 import { updateToolUsage } from '../../utils/toolUsage';
 
-interface GuidResponse {
-  guid?: string;
-}
-
-interface BulkGuidsResponse {
-  guids: string[];
-}
-
 function GuidGenerator() {
   const seo = seoDescriptions.guidGenerator;
   const [singleGuid, setSingleGuid] = useState('');
   const [bulkGuids, setBulkGuids] = useState<string[]>([]);
   const [count, setCount] = useState(5);
-  const [errorSingle, setErrorSingle] = useState<string | null>(null);
-  const [errorBulk, setErrorBulk] = useState<string | null>(null);
+  const [errorSingle, setErrorSingle] = useState('');
+  const [errorBulk, setErrorBulk] = useState('');
   const [isLoadingSingle, setIsLoadingSingle] = useState(false);
   const [isLoadingBulk, setIsLoadingBulk] = useState(false);
 
   useEffect(() => {
     updateToolUsage('guid');
+    // Generate initial single GUID and bulk GUIDs on mount
+    fetchSingleGuid();
+    fetchBulkGuids();
   }, []);
 
-  const fetchSingleGuid = async () => {
+  // Auto-generate bulk GUIDs when count changes
+  useEffect(() => {
+    fetchBulkGuids();
+  }, [count]);
+
+  const fetchSingleGuid = () => {
     setIsLoadingSingle(true);
     try {
-      const response = await api.get<string | GuidResponse>('/guid/');
-      const guid = typeof response.data === 'string' ? response.data : response.data.guid;
-      if (!guid) throw new Error('Invalid GUID response');
+      const guid = uuidv4();
       setSingleGuid(guid);
-      setErrorSingle(null);
-    } catch (err: any) {
-      setErrorSingle(err.response?.data?.detail || err.message);
+      setErrorSingle('');
+    } catch (err) {
+      setErrorSingle('Failed to generate GUID');
     } finally {
       setIsLoadingSingle(false);
     }
   };
 
-  const fetchBulkGuids = async () => {
+  const fetchBulkGuids = () => {
     if (bulkGuids.length > 0) {
       setBulkGuids([]);
     }
@@ -59,26 +56,30 @@ function GuidGenerator() {
     }
     setIsLoadingBulk(true);
     try {
-      const response = await api.get<BulkGuidsResponse>(`/guid/bulk?count=${count}`);
-      setBulkGuids(response.data.guids);
-      setErrorBulk(null);
-    } catch (err: any) {
-      setErrorBulk(err.response?.data?.detail || err.message);
+      const guids = Array.from({ length: count }, () => uuidv4());
+      setBulkGuids(guids);
+      setErrorBulk('');
+    } catch (err) {
+      setErrorBulk('Failed to generate bulk GUIDs');
     } finally {
       setIsLoadingBulk(false);
     }
   };
 
-  const handleClearAll = () => {
-    setBulkGuids([]);
-    setCount(5);
-  }
-
-  const handleLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^[0-9]+$/.test(value)) {
-      setCount(Number(value));
+      const numValue = value === '' ? 0 : Number(value);
+      setCount(Math.max(0, Math.min(1000, numValue))); // Clamp between 0 and 1000
     }
+  };
+
+  const incrementCount = () => {
+    setCount((prev) => Math.min(prev + 1, 1000));
+  };
+
+  const decrementCount = () => {
+    setCount((prev) => Math.max(prev - 1, 1));
   };
 
   return (
@@ -111,25 +112,40 @@ function GuidGenerator() {
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Generate Bulk GUIDs</h3>
-            <ClearButton onClick={handleClearAll} disabled = {bulkGuids.length === 0}/>
+              <CopyButton text={bulkGuids.join('\n')} copyType="CopyAll" />
           </div>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
             <div className="flex items-center">
               <label className="form-label text-base mr-2">Count (1-1000):</label>
-              <input
-                type="text"
-                value={count}
-                onChange={handleLengthChange}
-                className="input-field w-20"
-                disabled={isLoadingBulk}
-                placeholder="Enter Count (1 - 1000)"
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <LoadingButton onClick={fetchBulkGuids} isLoading={isLoadingBulk}>
-                Generate
-              </LoadingButton>
-              <CopyButton text={bulkGuids.join('\n')} copyType='CopyAll'  />
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  value={count}
+                  onChange={handleCountChange}
+                  className="input-field w-20 text-right pr-2"
+                  disabled={isLoadingBulk}
+                  placeholder="1-1000"
+                  aria-describedby={errorBulk ? 'bulk-error' : undefined}
+                />
+                <div className="flex flex-col ml-1">
+                  <button
+                    onClick={incrementCount}
+                    disabled={isLoadingBulk || count >= 1000}
+                    className="toggle-count"
+                    aria-label='Increment count'
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={decrementCount}
+                    disabled={isLoadingBulk || count <= 1}
+                    className="toggle-count"
+                    aria-label='Decrement count'
+                  >
+                    −
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -139,10 +155,7 @@ function GuidGenerator() {
             ) : bulkGuids.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {bulkGuids.map((guid, index) => (
-                  <div
-                    key={index}
-                    className="inner-result"
-                  >
+                  <div key={index} className="inner-result">
                     <span className="font-mono text-zinc-800 dark:text-white truncate">
                       {guid}
                     </span>
@@ -155,7 +168,7 @@ function GuidGenerator() {
             )}
           </div>
 
-          <ErrorBox message={errorBulk} />
+          <ErrorBox message={errorBulk} id={errorBulk ? 'bulk-error' : undefined} />
         </SectionCard>
       </div>
     </>
