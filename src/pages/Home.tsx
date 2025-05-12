@@ -77,8 +77,8 @@ const allUtilities = [
     title: 'Fun Text Utilities',
     icon: Zap,
     items: [
-      'Palindrome Checker',
-      'String Reverser / Rotator',
+      { name: 'Palindrome Checker', path: '/palindrome' },
+      { name: 'String Reverser / Rotator', path: '/string_reverser_rotator' },
       'Roman Numeral Converter',
       'NATO Phonetic Alphabet Converter',
       'Pig Latin Converter',

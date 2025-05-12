@@ -48,6 +48,8 @@ const MarkdownPreviewer = lazy(() => import('../pages/Text-Utilities/MarkdownPre
 const DuplicateLineRemover = lazy(() => import('../pages/Text-Utilities/DuplicateLineRemover'));
 const LineBreakWhiteSpaceRemover = lazy(() => import('../pages/Text-Utilities/LineBreakWhiteSpaceRemover'));
 const StringCounter = lazy(() => import('../pages/Text-Utilities/StringCounter'));
+const PalindromeChecker = lazy(() => import('../pages/Fun-Text-Utilities/PalindromeChecker'));
+const StringReverserRotator = lazy(() => import('../pages/Fun-Text-Utilities/StringReverserRotator'));
 
 export const appRoutes = [
   {
@@ -99,6 +101,8 @@ export const appRoutes = [
       { path: 'duplicate_line_remover', element: <DuplicateLineRemover />, errorElement: <ErrorBoundary />},
       { path: 'line_break_whitespace_remover', element: <LineBreakWhiteSpaceRemover />, errorElement: <ErrorBoundary />},
       { path: 'string_counter', element: <StringCounter />, errorElement: <ErrorBoundary />},
+      { path: 'palindrome', element: <PalindromeChecker />, errorElement: <ErrorBoundary />},
+      { path: 'string_reverser_rotator', element: <StringReverserRotator />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

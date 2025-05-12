@@ -186,5 +186,14 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
       name: 'String Counter',
       path: '/string_counter',
     },
+    //Fun Text Utilities
+    '/string_reverser_rotator': {
+      name: 'String Reverser / Rotator',
+      path: '/string_reverser_rotator',
+    },
+    '/palindrome': {
+      name: 'Palindrome Checker',
+      path: '/palindrome',
+    },
   };
   

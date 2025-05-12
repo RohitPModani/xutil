@@ -93,6 +93,7 @@ Ever seen %20 instead of a space or gotten yelled at by your browser because of 
 It converts your normal strings into safe, web-friendly formats, and can decode them right back when it’s time to chill. Whether you're building query strings,
 debugging URLs, or just tired of copy-pasting into Google, this tool has your back. It’s clean, fast, and won’t judge you for trying to encode emojis.`
   },
+  
   csvJson: {
     title: "CSV ↔ JSON Converter",
     body: `A CSV ↔ JSON Converter is like a backstage pass between two worlds — one’s a strict spreadsheet wizard, the other’s a chill API hipster.
@@ -100,6 +101,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly flip your tabular .csv files into neat JSON objects (or vice versa) without needing a computer science degree or sacrificing your sanity.
   Perfect for developers, data scientists, Excel escape artists, or anyone who's ever muttered, "There has to be an easier way to do this." Spoiler: there is, and it's right here.`
   },
+
   jsonToTs: {
     title: "JSON to TypeScript Interface Converter",
     body: `A JSON to TypeScript Interface Converter is like a magic wand for developers — wave it over your messy JSON and voilà: clean, typed, ready-to-code interfaces.
@@ -107,12 +109,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert JSON objects into strongly-typed TypeScript interfaces (and sometimes back) without lifting a finger or missing a key.
   Perfect for TypeScript fans, backend whisperers, and anyone who's ever thought, "There’s no way I’m writing this interface by hand." Good news: you don't have to.`
   },
+
   jsonToPython: {
     title: "JSON to Python Dataclass Converter",
     body: `A JSON to Python Dataclass Converter is like a personal assistant for your code — it turns messy, wild JSON blobs into clean, organized Python classes with zero drama.
   Whether you're building APIs, parsing configs, or just tired of writing init methods by hand, this tool instantly generates beautiful @dataclass models that are ready to roll.
   Perfect for Pythonistas, backend builders, and anyone who's whispered, "There has to be a lazier smarter way to do this." Spoiler: there is — and it even adds type hints for extra style points.`
   },
+
   jsonToPydantic: {
     title: "JSON to Pydantic Model Converter",
     body: `A JSON to Pydantic Model Converter is like giving your messy JSON a law degree — suddenly, it’s strict, structured, and knows exactly what types go where.
@@ -120,6 +124,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Perfect for Python devs building FastAPI apps, data validation wizards, or anyone who’s ever shouted, "Why isn’t this JSON behaving?!"
   With this tool, you get clean, predictable Pydantic classes — faster than you can say "BaseModel."`
   },  
+
   baseNumber: {
     title: "Base Number Converter",
     body: `A Base Number Converter is like a universal remote for numbers — flip effortlessly between binary, decimal, octal, and hexadecimal without needing a math degree.
@@ -127,6 +132,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly convert numbers across different bases and impress your friends (or at least confuse them a little).
   Perfect for developers, students, engineers, and anyone who thinks counting beyond 10 shouldn’t require a whiteboard.`
   },
+
   textBase: {
     title: "Text ↔ Base Converter",
     body: `A Text ↔ Base Converter is like a universal translator for humans and machines — it flips your readable text into Base64, Base32, or Base58, and then back like it never left.
@@ -134,6 +140,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   No more decoding headaches or guessing games — just clean, reversible conversions between text and base formats.
   Perfect for developers, tinkerers, and anyone who’s ever asked, “What even is this gibberish?” Spoiler: it’s Base64. And now you can read it.`
   },  
+
   unixUtc: {
     title: "UNIX ↔ UTC Timestamp Converter",
     body: `A UNIX ↔ UTC Timestamp Converter is like a time whisperer for developers — translating those cryptic seconds-since-1970 into human-readable dates (and back again) without breaking a sweat.
@@ -141,6 +148,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly flip between UNIX epoch timestamps and formatted UTC time with zero mental math involved.
   Perfect for backend engineers, log analysts, cron job wranglers, or anyone who's ever said, "Wait… what time is that really?"`
   },  
+
   timezone: {
     title: "Timezone Converter",
     body: `A Timezone Converter is like your personal time-travel assistant — turning “What time is it there?” into instant clarity across continents.
@@ -148,6 +156,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   No more Googling offsets or decoding GMT madness — just pick your zones and watch the magic happen.
   Perfect for remote teams, digital nomads, and anyone who's ever rage-quit over daylight saving time.`
   },  
+
   pxRemEm: {
     title: "PX ↔ REM ↔ EM Converter",
     body: `A PX ↔ REM ↔ EM Converter is like a style whisperer for front-end devs — translating between absolute and relative units without frying your brain over root font sizes.
@@ -155,6 +164,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert pixels to rem and em (and back) with full control over the root font size — because your design deserves precision, not approximation.
   Perfect for web developers, designers, and anyone who's ever muttered, “Why does 16px feel so different here?”`
   }, 
+
   timeUnit: {
     title: "Time Unit Converter",
     body: `A Time Unit Converter is like a digital timekeeper with a calculator — converting milliseconds to days, minutes to hours, or weeks to seconds without breaking a sweat.
@@ -162,13 +172,15 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert between any time units instantly and precisely — from nanoseconds to centuries, no time frame is too weird.
   Perfect for developers, data analysts, and anyone who’s ever Googled, “How many seconds in a month?”`
   },
+
   bitByte: {
     title: "Bit ↔ Byte Converter",
     body: `A Bit ↔ Byte Converter is like a Rosetta Stone for digital storage — translating between bits, bytes, kilobytes, megabytes, and beyond with pixel-perfect accuracy.
   Whether you're estimating file sizes, decoding bandwidth limits, or arguing about whether 1 MB is 1000 KB or 1024, this tool sets the record straight.
   Instantly convert between bits and bytes in all their metric and binary glory — from b to TB, it's all covered.
   Perfect for developers, sysadmins, network nerds, and anyone who’s ever yelled at a download speed meter.`
-  },    
+  },   
+
   temperature: {
     title: "Temperature Converter",
     body: `A Temperature Converter is like a digital weather wizard — effortlessly translating between Celsius, Fahrenheit, and Kelvin so you never have to say “what’s 451°F in real units?” again.
@@ -176,6 +188,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly switch between temperature units with precision — no mental math, no boiling confusion.
   Perfect for students, devs, and anyone who’s ever Googled “convert 100 C to F” mid-conversation.`
   },
+
   area: {
     title: "Area Converter",
     body: `An Area Converter is like a land surveyor with superpowers — instantly flipping between square meters, acres, hectares, square miles, and more without breaking a ruler.
@@ -183,6 +196,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert any area unit quickly and confidently — from square inches to football fields.
   Perfect for architects, real estate buffs, students, and anyone who’s ever thought, “Wait… how big is an acre again?”`
   },
+
   length: {
     title: "Length Converter",
     body: `A Length Converter is like a tape measure that speaks every language — translating kilometers to miles, inches to centimeters, and light-years to... well, more light-years.
@@ -190,6 +204,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly convert between any length units with full accuracy — because size *does* matter (especially in code).
   Perfect for engineers, designers, travelers, and anyone who’s tired of Googling “how many inches in a foot” for the 10th time.`
   },
+
   weight: {
     title: "Weight Converter",
     body: `A Weight Converter is like a digital dumbbell for your brain — effortlessly flipping between kilograms, pounds, grams, and tons with zero sweat involved.
@@ -197,6 +212,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert weight units instantly and accurately — from micrograms to megatons.
   Perfect for cooks, lifters, logistics pros, and anyone who’s ever yelled “what’s 5 lbs in kg?!” while meal-prepping.`
   },
+
   volume: {
     title: "Volume Converter",
     body: `A Volume Converter is like a digital measuring cup for everything — effortlessly translating between liters, gallons, cups, milliliters, and more.
@@ -204,6 +220,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert between any volume unit quickly and accurately — from kitchen to chemistry lab.
   Perfect for cooks, scientists, students, and anyone who's ever asked, "How many cups is that again?"`
   },
+
   energy: {
     title: "Energy Converter",
     body: `An Energy Converter is like a power adapter for units — switching between joules, calories, kilowatt-hours, BTUs, and more without blowing a fuse.
@@ -211,6 +228,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert any energy unit instantly and precisely.
   Perfect for scientists, fitness enthusiasts, students, and anyone who’s ever thought, "How many calories is that in real power?"`
   },
+
   speed: {
     title: "Speed Converter",
     body: `A Speed Converter is like cruise control for numbers — smoothly converting between km/h, mph, m/s, knots, and more in just a click.
@@ -218,6 +236,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert speed units instantly with pinpoint accuracy.
   Perfect for athletes, engineers, physics nerds, and anyone who’s ever needed to turn “miles per hour” into “meters per second” without a calculator.`
   },
+
   power: {
     title: "Power Converter",
     body: `A Power Converter is like a wattage wizard — flipping between watts, horsepower, kilowatts, BTUs and more without burning out.
@@ -225,6 +244,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert any power unit quickly and accurately — from mechanical to electrical and everything in between.
   Perfect for engineers, electricians, physics students, and anyone who’s ever said, “Wait… how many watts is that?”`
   },
+
   pressure: {
     title: "Pressure Converter",
     body: `A Pressure Converter is like a stress reliever for unit confusion — smoothly translating between PSI, bar, Pascal, atm, and more.
@@ -232,6 +252,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert pressure values across metric and imperial systems with ease.
   Perfect for engineers, mechanics, weather geeks, and anyone who’s ever asked, “Is that too much pressure… or not enough?”`
   },
+
   angle: {
     title: "Angle Converter",
     body: `An Angle Converter is like a math protractor in digital form — converting between degrees, radians, gradians, and more with pinpoint precision.
@@ -239,6 +260,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Flip between angle units instantly — no trig needed.
   Perfect for developers, students, game designers, and anyone who’s ever wondered, “How many radians is 90 degrees again?”`
   },
+
   frequency: {
     title: "Frequency Converter",
     body: `A Frequency Converter is like a DJ for data — smoothly spinning between Hertz, kilohertz, megahertz, and gigahertz without missing a beat.
@@ -246,6 +268,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Convert frequency values instantly across scales — from audio to RF and beyond.
   Perfect for engineers, tech enthusiasts, musicians, and anyone who’s ever asked, “How many Hz is that exactly?”`
   },
+
   fuelEconomy: {
     title: "Fuel Economy Converter",
     body: `A Fuel Economy Converter is like your car’s translator — flipping between MPG, L/100km, km/L and other units so you know exactly how thirsty your ride is.
@@ -253,6 +276,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Switch between fuel economy units without manual math or mental gymnastics.
   Perfect for drivers, travelers, mechanics, and anyone who’s ever asked, “Is 7 L/100km good?” (Spoiler: yes, kind of.)`
   },
+
   loremIpsum: {
     title: "Lorem Ipsum Generator",
     body: `A Lorem Ipsum Generator is like a caffeine-fueled copywriter who never sleeps — churning out placeholder text so you can focus on layout, design, and looking productive.
@@ -260,6 +284,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Generate paragraphs, sentences, or word dumps faster than you can say “font pairing.”
   Perfect for designers, developers, and anyone who’s ever needed to fake meaningful content with Latin gibberish that still feels classy.`
   },
+
   textCompare: {
     title: "Text Compare Tool",
     body: `A Text Compare Tool is like a digital detective for your documents — highlighting every difference between two versions with laser-like precision.
@@ -267,6 +292,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly spot changes, additions, and deletions without squinting at lines or second-guessing your memory.
   Perfect for developers, writers, editors, and anyone who’s ever thought, “Wait… did I change that?” Spoiler: you’ll know for sure.`
   },
+
   jsonValidator: {
   title: "JSON Validator and Formatter",
   body: `A JSON Validator and Formatter is like a code therapist — taking messy, tangled JSON and turning it into neat, well-structured, and error-free bliss.
@@ -274,6 +300,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly detect syntax errors, validate JSON structure, and pretty-print your data with just one click.
   Perfect for developers, data wranglers, and anyone who’s ever wondered why their JSON suddenly decided to break the whole app.`
   },
+
   textCase: {
     title: "Text Case Converter",
     body: `A Text Case Converter is like a wardrobe stylist for your words — effortlessly switching between uppercase, lowercase, title case, and more without breaking a sweat.
@@ -281,13 +308,15 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly convert text to camelCase, snake_case, path-case, and other styles with zero fuss.
   Perfect for developers, writers, and anyone who’s ever thought, “Why is my text so inconsistent?” Spoiler: it won’t be anymore.`
   },
+
   regexTester: {
     title: "Regex Tester",
     body: `A Regex Tester is like a magic wand for your text — instantly validating, matching, and manipulating strings with the power of regular expressions.
   Whether you're debugging patterns, extracting data, or just trying to figure out why your regex isn’t working (again), this tool makes it easy.
   Test your regex against sample text, see matches in real-time, and even get explanations for complex patterns.
   Perfect for developers, data wranglers, and anyone who’s ever yelled “why won’t this regex work?!” at their screen.`
-  },      
+  },    
+
   markdownPreviewer: {
     title: "Markdown Previewer",
     body: `A Markdown Previewer is like a crystal ball for your text — instantly transforming plain Markdown into beautifully formatted HTML without any guesswork.
@@ -295,6 +324,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Type or paste your Markdown, and watch as it magically turns into headings, lists, links, and more in real-time.
   Perfect for developers, writers, and anyone who’s ever thought, “How do I make this look good without using a WYSIWYG editor?” Spoiler: it’s easier than you think.`
   },  
+
   duplicateLineRemover: {
     title: "Duplicate Line Remover",
     body: `A Duplicate Line Remover is like a digital bouncer for your text — kicking out all the unwanted repeat guests and leaving you with a clean, unique list.
@@ -302,6 +332,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Paste your text, and watch as it instantly filters out duplicates, leaving only the original lines behind.
   Perfect for developers, data wranglers, and anyone who’s ever thought, “Why is this so messy?” Spoiler: it won’t be anymore.`
   },
+
   lineBreakWhitespaceRemover: {
     title: "Whitespace & Line Break Remover",
     body: `A Whitespace & Line Break Remover is like a digital declutterer for your text — instantly zapping away unwanted spaces, tabs, and line breaks to give you a clean slate.
@@ -309,6 +340,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Paste your text, and watch as it instantly removes all the clutter, leaving you with a neat, readable result.
   Perfect for developers, writers, and anyone who’s ever thought, “Why is my text so messy?” Spoiler: it won’t be anymore.`
   },
+
   stringCounter: {
     title: "String, Word, Character, Line & Sentence Counter",
     body: `A String Counter is like a digital tally counter for your text — instantly counting characters, words, lines, and sentences without breaking a sweat.
@@ -316,6 +348,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Paste your text, and watch as it instantly counts everything you need, giving you a clear breakdown of your input.
   Perfect for writers, developers, and anyone who’s ever thought, “How long is this really?” Spoiler: it’s shorter than you think.`
   },
+
   jwtDecoder: {
     title: "JWT Decoder",
     body: `A JWT Decoder is like a digital key master for your JSON Web Tokens — effortlessly breaking down those encoded strings into human-readable claims and headers.
@@ -323,13 +356,30 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Paste your JWT, and watch as it instantly decodes the header, payload, and signature, giving you a clear view of the contents.
   Perfect for developers, security pros, and anyone who’s ever thought, “What the heck is in this JWT?” Spoiler: it’s not as scary as it looks.`
   },
+
   slug: {
     title: "Slug Generator",
     body: `A Slug Generator is like a digital naming assistant for your URLs — effortlessly transforming your text into clean, SEO-friendly slugs that won’t break the internet.
   Whether you're building websites, creating blog posts, or just trying to make your links look pretty, this tool has your back.
   Paste your text, and watch as it instantly generates a slug that’s ready to roll — no spaces, no special characters, just pure URL goodness.
   Perfect for developers, marketers, and anyone who’s ever thought, “How do I make this URL look better?” Spoiler: it’s easier than you think.`
-  }
+  },
+
+  stringReverser: {
+    title: "String Reverser / Rotator",
+    body: `A String Reverser is like a magician for your text — flipping it backward or rotating it in ways that make you go “whoa!”
+  Whether you're playing with palindromes, creating secret codes, or just trying to see how “hello” looks when it’s upside down, this tool has you covered.
+  Paste your string, and watch as it instantly flips or rotates, giving you a new perspective on your text.
+  Perfect for developers, puzzle lovers, and anyone who’s ever thought, “What if I turned this inside out?” Spoiler: it’s cooler than you think.`
+  },
+
+  palindromeChecker: {
+    title: "Palindrome Checker",
+    body: `A Palindrome Checker is like a digital detective for your words — instantly spotting whether your string reads the same backward and forward.
+  Whether you're testing phrases, names, or just trying to impress your friends with your palindrome knowledge, this tool does the job in seconds.
+  Paste your text, and watch as it instantly checks for palindromes, giving you a clear “yes” or “no” answer.
+  Perfect for developers, writers, and anyone who’s ever thought, “Is this a palindrome?” Spoiler: it either is or it isn’t.` 
+  },
 };
 
 export default seoDescriptions;
