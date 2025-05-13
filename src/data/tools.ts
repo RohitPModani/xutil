@@ -212,9 +212,9 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
       name: 'Numeronym Generator',
       path: 'numeronym'
     },
-    '/ip_info': {
-      name: 'IP Info Finder',
-      path: 'ip_info'
-    }
+    '/url_parser': {
+      name: 'URL Parser',
+      path: 'url_parser'
+    },
   };
   

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import UtilityCard from '../components/UtilityCard';
-import { ArrowLeftRight, BrainCircuit, Code2, File, GitCompareArrows, Image, Network, Zap } from 'lucide-react';
+import { ArrowLeftRight, BrainCircuit, Code2, File, GitCompareArrows, Image, Zap } from 'lucide-react';
 import FrequentlyUsedTools from '../components/FrequentlyUsedTools';
 
 const allUtilities = [
@@ -71,6 +71,7 @@ const allUtilities = [
       { name: 'Whitespace / Line Break Remover', path: '/line_break_whitespace_remover' },
       { name: 'Duplicate Line Remover', path: '/duplicate_line_remover' },
       { name: 'String Counter', path: '/string_counter' },
+      { name: 'URL Parser', path: '/url_parser' },
     ],
   },
   {
@@ -84,20 +85,6 @@ const allUtilities = [
       { name: 'Pig Latin Converter', path: '/pig_latin' },
       { name: 'NumeroNym Generator', path: '/numeronym' },
     ]
-  },
-  {
-    title: 'Web & Network Tools',
-    icon: Network,
-    items: [
-      //{ name: 'IP Info Finder', path: '/ip_info' },
-      'IP Info Finder',
-      'DNS Lookup',
-      'Ping & HTTP Response Checker',
-      'HTTP Status Code Lookup',
-      'SSL Certificate Checker',
-      'URL Parser',
-      'Safe Port Scanner',
-    ],
   },
   {
     title: 'Barcode, QR & Image Tools',
