@@ -56,6 +56,7 @@ const PigLatinConverter = lazy(() => import('../pages/Fun-Text-Utilities/PigLati
 const NumeronymGenerator = lazy(() => import('../pages/Fun-Text-Utilities/NumeroNymGenerator'));
 const URLParser = lazy(() => import('../pages/Text-Utilities/URLParser'));
 const RegexCheatsheet = lazy(() => import('../pages/Text-Utilities/RegexCheatSheet'));
+const QRCodeGenerator = lazy(() => import('../pages/Image-Tools/QRCodeGenerator'));
 
 export const appRoutes = [
   {
@@ -115,6 +116,7 @@ export const appRoutes = [
       { path: 'numeronym', element: <NumeronymGenerator />, errorElement: <ErrorBoundary />},
       { path: 'url_parser', element: <URLParser />, errorElement: <ErrorBoundary />},
       { path: 'regex_cheatsheet', element: <RegexCheatsheet />, errorElement: <ErrorBoundary />},
+      { path: 'qr_code', element: <QRCodeGenerator />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

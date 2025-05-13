@@ -219,6 +219,10 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
     '/regex_cheatsheet': {
       name: 'Regex Cheatsheet',
       path: 'regex_cheatsheet'
+    },
+    '/qr_code': {
+      name: 'QR Code Generator',
+      path: 'qr_code'
     }
   };
   

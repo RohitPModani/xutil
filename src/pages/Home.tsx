@@ -91,7 +91,7 @@ const allUtilities = [
     title: 'Barcode, QR & Image Tools',
     icon: Image,
     items: [
-      'QR Code Generator',
+      { name: 'QR Code Generator', path: '/qr_code' },
       'Barcode Generator (With Format Selector)',
       'Barcode Reader (via image upload)',
       'Color Converter (HEX ↔ RGB ↔ HSL)',

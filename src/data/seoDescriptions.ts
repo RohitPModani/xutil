@@ -429,6 +429,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Perfect for developers, data wranglers, and anyone who’s ever muttered, “How do I escape that character again?”`
   },
   
+  qrCodeGenerator: {
+    title: "QR Code Generator",
+    body: `A QR Code Generator is like a high-tech graffiti artist — turning your text, URLs, and data into scannable, shareable squares that anyone with a smartphone can read.
+  Whether you’re creating links for business cards, event tickets, or just adding a futuristic touch to your project, this tool makes QR code creation effortless.
+  Generate custom QR codes with text, URLs, contact info, or anything else you want to encode — all in just a few clicks.
+  Perfect for marketers, developers, event planners, and anyone who’s ever thought, “How do I make this info instantly accessible?”`
+  },
+  
 };
 
 export default seoDescriptions;
