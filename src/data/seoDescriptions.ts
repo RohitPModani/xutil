@@ -421,6 +421,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Perfect for developers, web analysts, SEO experts, and anyone who’s ever thought, “What’s hidden in this URL?”`
   },  
 
+  regexCheatsheet: {
+    title: "Regex Cheatsheet",
+    body: `A Regex Cheatsheet is like a quick-reference spellbook for developers — packed with patterns, syntax, and examples to help you tame even the wildest text.
+  Whether you’re matching emails, validating URLs, or just trying to remember how that pesky backslash works, this tool keeps your regex skills sharp and on point.
+  Instantly access common expressions, syntax tips, and practical use cases without digging through documentation.
+  Perfect for developers, data wranglers, and anyone who’s ever muttered, “How do I escape that character again?”`
+  },
+  
 };
 
 export default seoDescriptions;

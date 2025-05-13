@@ -216,5 +216,9 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
       name: 'URL Parser',
       path: 'url_parser'
     },
+    '/regex_cheatsheet': {
+      name: 'Regex Cheatsheet',
+      path: 'regex_cheatsheet'
+    }
   };
   

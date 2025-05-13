@@ -54,7 +54,8 @@ const RomanNumeralConverter = lazy(() => import('../pages/Fun-Text-Utilities/Rom
 const NATOPhoneticAlphabetConverter = lazy(() => import('../pages/Fun-Text-Utilities/NATOPhonetic'));
 const PigLatinConverter = lazy(() => import('../pages/Fun-Text-Utilities/PigLatinConverter'));
 const NumeronymGenerator = lazy(() => import('../pages/Fun-Text-Utilities/NumeroNymGenerator'));
-const URLParser = lazy(() => import('../pages/Web-Utilities/URLParser'));
+const URLParser = lazy(() => import('../pages/Text-Utilities/URLParser'));
+const RegexCheatsheet = lazy(() => import('../pages/Text-Utilities/RegexCheatSheet'));
 
 export const appRoutes = [
   {
@@ -113,6 +114,7 @@ export const appRoutes = [
       { path: 'pig_latin', element: <PigLatinConverter />, errorElement: <ErrorBoundary />},
       { path: 'numeronym', element: <NumeronymGenerator />, errorElement: <ErrorBoundary />},
       { path: 'url_parser', element: <URLParser />, errorElement: <ErrorBoundary />},
+      { path: 'regex_cheatsheet', element: <RegexCheatsheet />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

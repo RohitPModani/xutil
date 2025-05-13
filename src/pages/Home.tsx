@@ -72,6 +72,7 @@ const allUtilities = [
       { name: 'Duplicate Line Remover', path: '/duplicate_line_remover' },
       { name: 'String Counter', path: '/string_counter' },
       { name: 'URL Parser', path: '/url_parser' },
+      { name: 'Regex Cheatsheet', path: '/regex_cheatsheet'},
     ],
   },
   {

@@ -54,7 +54,6 @@ function SlugGenerator() {
   const [caseType, setCaseType] = useState<typeof CASES[number]['value']>('lowercase');
   const [result, setResult] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     updateToolUsage('slug');
@@ -103,7 +102,6 @@ function SlugGenerator() {
     setCaseType('lowercase');
     setResult('');
     setError(null);
-    setCopied(false);
   };
 
   const applyPreset = (preset: typeof PRESETS[number]) => {
@@ -209,7 +207,6 @@ function SlugGenerator() {
             <div className="flex justify-between items-center mb-2">
               <label className="form-label">Generated Slug</label>
               <div className="flex items-center gap-2">
-                {copied && <span className="text-sm text-green-600">Copied!</span>}
                 <CopyButton 
                   text={result} 
                   aria-label="Copy generated slug" 
