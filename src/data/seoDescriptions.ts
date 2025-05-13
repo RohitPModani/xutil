@@ -412,6 +412,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly generate numeronyms from any word or phrase, making them both compact and memorable.
   Perfect for developers, linguists, branding experts, and anyone who’s ever thought, “Why type the whole word when I can just use numbers?”`
   },
+  
+  ipInfo: {
+    title: "IP Information Finder",
+    body: `An IP Information Finder is like a digital detective for network geeks — instantly revealing the location, ISP, and other juicy details behind any IP address.
+  Whether you're troubleshooting network issues, analyzing visitor data, or just satisfying your curiosity about a suspicious IP, this tool gives you the facts fast.
+  Instantly look up IP details like city, region, country, and more — no complex network commands needed.
+  Perfect for developers, sysadmins, security analysts, and anyone who’s ever wondered, “Where on earth is that IP from?”`
+  },
 
 };
 

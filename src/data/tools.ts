@@ -211,6 +211,10 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
     '/numeronym': {
       name: 'Numeronym Generator',
       path: 'numeronym'
+    },
+    '/ip_info': {
+      name: 'IP Info Finder',
+      path: 'ip_info'
     }
   };
   

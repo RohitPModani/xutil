@@ -89,7 +89,7 @@ const allUtilities = [
     title: 'Web & Network Tools',
     icon: Network,
     items: [
-      'IP Info Finder',
+      { name: 'IP Info Finder', path: '/ip_info' },
       'DNS Lookup',
       'Ping & HTTP Response Checker',
       'HTTP Status Code Lookup',
