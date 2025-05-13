@@ -223,6 +223,14 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
     '/qr_code': {
       name: 'QR Code Generator',
       path: 'qr_code'
+    },
+    '/barcode_generator': {
+      name: 'Barcode Generator',
+      path: 'barcode_generator'
+    },
+    '/barcode_reader': {
+      name: 'Barcode Reader',
+      path: 'barcode_reader'
     }
   };
   

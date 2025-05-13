@@ -437,6 +437,22 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Perfect for marketers, developers, event planners, and anyone who’s ever thought, “How do I make this info instantly accessible?”`
   },
   
+  barcodeGenerator: {
+    title: "Barcode Generator",
+    body: `A Barcode Generator is like a digital label maker for the modern age — turning your numbers, codes, and product info into scannable bar patterns that any reader can understand.
+  Whether you're managing inventory, creating product labels, or just organizing your stuff with some high-tech flair, this tool generates barcodes instantly.
+  Create barcodes in popular formats like Code 128, UPC, EAN, and more — all without needing specialized software.
+  Perfect for store owners, developers, logistics pros, and anyone who’s ever thought, “I wish I could just scan this.”`
+  },
+
+  barcodeReader: {
+    title: "Barcode Reader",
+    body: `A Barcode Reader is like a digital detective — scanning bar patterns and instantly revealing the data they hold without needing a fancy scanner gun.
+  Whether you're decoding product labels, checking inventory, or just curious about what’s hidden behind those black lines, this tool makes it effortless.
+  Simply upload or scan a barcode, and get the decoded information in a flash — from UPC and EAN to Code 128 and more.
+  Perfect for store owners, developers, logistics managers, and anyone who’s ever wondered, “What does this barcode actually mean?”`
+  },  
+  
 };
 
 export default seoDescriptions;

@@ -12,10 +12,12 @@
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
+    "@zxing/browser": "^0.1.5",
     "axios": "^1.8.4",
     "diff": "^7.0.0",
     "framer-motion": "^12.9.2",
     "js-yaml": "^4.1.0",
+    "jsbarcode": "^3.11.6",
     "jwt-decode": "^4.0.0",
     "lucide": "^0.507.0",
     "lucide-react": "^0.503.0",
