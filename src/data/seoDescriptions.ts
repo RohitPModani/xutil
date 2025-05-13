@@ -412,7 +412,7 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Instantly generate numeronyms from any word or phrase, making them both compact and memorable.
   Perfect for developers, linguists, branding experts, and anyone who’s ever thought, “Why type the whole word when I can just use numbers?”`
   },
-  
+
   urlParser: {
     title: "URL Parser",
     body: `A URL Parser is like a digital scalpel for web addresses — slicing through complex URLs to reveal their individual components without breaking a sweat.
@@ -453,6 +453,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Perfect for store owners, developers, logistics managers, and anyone who’s ever wondered, “What does this barcode actually mean?”`
   },  
   
+  colorPicker: {
+    title: "Color Picker",
+    body: `A Color Picker is like a digital paint palette for designers and developers — helping you find, mix, and choose the perfect shade without guessing HEX codes.
+  Whether you're crafting a stunning UI, selecting a theme color, or just hunting for that elusive perfect blue, this tool makes color selection a breeze.
+  Instantly get HEX, RGB, HSL, and more from any color, and tweak shades with precision.
+  Perfect for designers, developers, artists, and anyone who’s ever thought, “Wait… is this the right shade of green?”`
+  },
+
 };
 
 export default seoDescriptions;

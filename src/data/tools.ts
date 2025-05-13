@@ -231,6 +231,10 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
     '/barcode_reader': {
       name: 'Barcode Reader',
       path: 'barcode_reader'
+    },
+    '/color_picker': {
+      name: 'Color Picker',
+      path: 'color_picker'
     }
   };
   

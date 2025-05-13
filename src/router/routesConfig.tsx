@@ -59,6 +59,7 @@ const RegexCheatsheet = lazy(() => import('../pages/Text-Utilities/RegexCheatShe
 const QRCodeGenerator = lazy(() => import('../pages/Image-Tools/QRCodeGenerator'));
 const BarcodeGenerator = lazy(() => import('../pages/Image-Tools/BarCodeGenerator'));
 const BarcodeReader = lazy(() => import('../pages/Image-Tools/BarcodeReader'));
+const ColorPicker = lazy(() => import('../pages/Image-Tools/ColorPicker'));
 
 export const appRoutes = [
   {
@@ -121,6 +122,7 @@ export const appRoutes = [
       { path: 'qr_code', element: <QRCodeGenerator />, errorElement: <ErrorBoundary />},
       { path: 'barcode_generator', element: <BarcodeGenerator />, errorElement: <ErrorBoundary/>},
       { path: 'barcode_reader', element: <BarcodeReader />, errorElement: <ErrorBoundary />},
+      { path: 'color_picker', element: <ColorPicker />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

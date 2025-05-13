@@ -33,10 +33,7 @@ type BarcodeResult = {
 };
 
 function BarcodeReader() {
-  const seo = seoDescriptions.barcodeReader || {
-    title: 'Barcode Reader',
-    body: 'Scan and decode barcodes from images with this online barcode reader tool.'
-  };
+  const seo = seoDescriptions.barcodeReader;
   
   const [, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
