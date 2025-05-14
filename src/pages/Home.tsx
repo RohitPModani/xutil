@@ -86,6 +86,7 @@ const allUtilities = [
       { name: 'Pig Latin Converter', path: '/pig_latin' },
       { name: 'NumeroNym Generator', path: '/numeronym' },
       { name: 'Leetspeak Translator', path: '/leetspeak' },
+      { name: 'Word Frequency Counter', path: '/word_frequency_counter' },
     ]
   },
   {

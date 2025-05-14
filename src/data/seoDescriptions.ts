@@ -501,6 +501,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Perfect for gamers, coders, meme creators, and anyone who’s ever thought, “How do I make this text look epic and cryptic?”`
   },  
 
+  wordFrequencyCounter: {
+    title: "Word Frequency Counter",
+    body: `A Word Frequency Counter is like a text detective — analyzing your content to reveal which words pop up the most without the need for manual counting.
+  Whether you're studying word patterns, analyzing text data, or just curious about your writing habits, this tool gives you an instant breakdown of word usage.
+  Simply paste your text, and get a sorted list of words with their frequency counts.
+  Perfect for writers, data analysts, content creators, and anyone who’s ever wondered, “Do I really say ‘basically’ that often?”`
+  },
+  
 };
 
 export default seoDescriptions;

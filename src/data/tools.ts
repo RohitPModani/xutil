@@ -255,6 +255,10 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
     '/leetspeak': {
       name: 'Leetspeak Translator',
       path: 'leetspeak'
+    },
+    '/word_frequency_counter': {
+      name: 'Word Frequency Counter',
+      path: 'word_frequency_counter'
     }
   };
   

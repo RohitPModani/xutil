@@ -65,6 +65,7 @@ const ImageCompressor = lazy(() => import('../pages/Image-Tools/ImageCompressor'
 const GradientGenerator = lazy(() => import('../pages/Image-Tools/GradientGenerator'));
 const BoxShadowGenerator = lazy(() => import('../pages/Image-Tools/BoxShadowGenerator'));
 const LeetSpeakTranslator = lazy(() => import('../pages/Fun-Text-Utilities/LeetSpeakTranslator'));
+const WordFrequencyCounter = lazy(() => import('../pages/Fun-Text-Utilities/WordFrequencyCounter'));
 
 export const appRoutes = [
   {
@@ -133,6 +134,7 @@ export const appRoutes = [
       { path: 'gradient_generator', element: <GradientGenerator />, errorElement: <ErrorBoundary />},
       { path: 'box_shadow_generator', element: <BoxShadowGenerator />, errorElement: <ErrorBoundary />},
       { path: 'leetspeak', element: <LeetSpeakTranslator />, errorElement: <ErrorBoundary /> },
+      { path: 'word_frequency_counter', element: <WordFrequencyCounter />, errorElement: <ErrorBoundary /> },
       { path: '*', element: <NotFound /> },
     ],
   }
