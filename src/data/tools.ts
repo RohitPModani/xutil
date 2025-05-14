@@ -251,6 +251,10 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
     '/box_shadow_generator': {
       name: 'Box Shadow Generator',
       path: 'box_shadow_generator'
+    },
+    '/leetspeak': {
+      name: 'Leetspeak Translator',
+      path: 'leetspeak'
     }
   };
   

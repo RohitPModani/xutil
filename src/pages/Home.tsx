@@ -85,6 +85,7 @@ const allUtilities = [
       { name: 'NATO Phonetic Alphabet Converter', path: '/nato_phonetic' },
       { name: 'Pig Latin Converter', path: '/pig_latin' },
       { name: 'NumeroNym Generator', path: '/numeronym' },
+      { name: 'Leetspeak Translator', path: '/leetspeak' },
     ]
   },
   {

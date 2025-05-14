@@ -493,6 +493,14 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Perfect for web developers, UI/UX designers, and anyone who’s ever thought, “How do I make this element pop?”`
   },
 
+  leetspeak: {
+    title: "Leetspeak Translator",
+    body: `A Leetspeak Translator is like a hacker’s keyboard on steroids — flipping your plain text into elite, coded lingo that makes you look like a digital mastermind.
+  Whether you're crafting a cool username, encoding secret messages, or just unleashing your inner cyberpunk, this tool transforms your text into leet (1337) speak instantly.
+  Convert normal words into their leet counterparts with numbers, symbols, and that unmistakable hacker flair.
+  Perfect for gamers, coders, meme creators, and anyone who’s ever thought, “How do I make this text look epic and cryptic?”`
+  },  
+
 };
 
 export default seoDescriptions;
