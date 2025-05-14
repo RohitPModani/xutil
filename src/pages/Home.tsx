@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import UtilityCard from '../components/UtilityCard';
-import { ArrowLeftRight, BrainCircuit, Code2, File, GitCompareArrows, Image, Zap } from 'lucide-react';
+import { ArrowLeftRight, BrainCircuit, Code2, GitCompareArrows, Image, Zap } from 'lucide-react';
 import FrequentlyUsedTools from '../components/FrequentlyUsedTools';
 
 const allUtilities = [
@@ -103,7 +103,7 @@ const allUtilities = [
       { name: 'Box Shadow Generator (CSS)', path: '/box_shadow_generator' },
     ],
   },
-  {
+  /* {
     title: 'File & Misc Utilities',
     icon: File,
     items: [
@@ -113,7 +113,7 @@ const allUtilities = [
       'Fake Data Generator (Names, Emails, etc.)',
       'UUID Validator',
     ],
-  },
+  }, */
 ];
 
 function Home() {
