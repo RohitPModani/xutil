@@ -54,7 +54,7 @@ const allUtilities = [
       { name: 'Temperature', path: '/temperature' },
       { name: 'Time Unit', path: '/time' },
       { name: 'Volume', path: '/volume' },
-      { name: 'Weight', path: '/weight' }
+      { name: 'Weight', path: '/weight' },
     ],
   },
   {
@@ -63,7 +63,7 @@ const allUtilities = [
     items: [
       { name: 'Lorem Ipsum Generator', path: '/lorem' },
       { name: 'SLUG Generator', path: '/slug' },
-      { name: 'Text Compare', path: '/text_compare'},
+      { name: 'Text Compare', path: '/text_compare' },
       { name: 'URL Parser', path: '/url_parser' },
       { name: 'JSON Formatter & Validator', path: '/json_validator' },
       { name: 'Text Case Converter', path: '/text_case' },
@@ -72,7 +72,7 @@ const allUtilities = [
       { name: 'Duplicate Line Remover', path: '/duplicate_line_remover' },
       { name: 'String Counter', path: '/string_counter' },
       { name: 'Regex Tester', path: '/regex' },
-      { name: 'Regex Cheatsheet', path: '/regex_cheatsheet'},
+      { name: 'Regex Cheatsheet', path: '/regex_cheatsheet' },
     ],
   },
   {
@@ -87,14 +87,14 @@ const allUtilities = [
       { name: 'NumeroNym Generator', path: '/numeronym' },
       { name: 'Leetspeak Translator', path: '/leetspeak' },
       { name: 'Word Frequency Counter', path: '/word_frequency_counter' },
-    ]
+    ],
   },
   {
     title: 'Barcode, QR & Image Tools',
     icon: Image,
     items: [
       { name: 'QR Code Generator', path: '/qr_code' },
-      { name: 'Barcode Generator', path: 'barcode_generator' },
+      { name: 'Barcode Generator', path: '/barcode_generator' },
       { name: 'Barcode Reader', path: '/barcode_reader' },
       { name: 'Color Picker', path: '/color_picker' },
       { name: 'Favicon Generator', path: '/favicon' },
@@ -103,17 +103,6 @@ const allUtilities = [
       { name: 'Box Shadow Generator (CSS)', path: '/box_shadow_generator' },
     ],
   },
-  /* {
-    title: 'File & Misc Utilities',
-    icon: File,
-    items: [
-      'CSV Column Extractor',
-      'HTML/CSS/JS Minifier',
-      'JSON/JS/CSS Prettifier',
-      'Fake Data Generator (Names, Emails, etc.)',
-      'UUID Validator',
-    ],
-  }, */
 ];
 
 function Home() {
@@ -153,7 +142,8 @@ function Home() {
 
   return (
     <div className="space-y-8">
-      <FrequentlyUsedTools />
+      {/* Conditionally render FrequentlyUsedTools when searchQuery is empty */}
+      {searchQuery === '' && <FrequentlyUsedTools />}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredUtilities.map((util, index) => (
           <UtilityCard
@@ -167,5 +157,5 @@ function Home() {
     </div>
   );
 }
-//
+
 export default Home;

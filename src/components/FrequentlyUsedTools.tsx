@@ -26,7 +26,7 @@ function FrequentlyUsedTools() {
   };
 
   return (
-    <div className="card shadow-md rounded-lg p-4 sm:p-6 hover:shadow-lg transition border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white my-8">
+    <div className="card shadow-md rounded-lg p-4 sm:p-6 hover:shadow-lg transition border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white my-1 sm:my-2">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-md sm:text-xl font-semibold">Frequently Used Tools</h2>
