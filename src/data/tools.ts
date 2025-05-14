@@ -235,6 +235,22 @@ export const toolsMeta: Record<string, { name: string, path: string }> = {
     '/color_picker': {
       name: 'Color Picker',
       path: 'color_picker'
+    },
+    '/favicon': {
+      name: 'Favicon Generator',
+      path: 'favicon'
+    },
+    '/image_compressor': {
+      name: 'Image Compressor',
+      path: 'image_compressor'
+    },
+    '/gradient_generator': {
+      name: 'Gradient Generator',
+      path: 'gradient_generator'
+    },
+    '/box_shadow_generator': {
+      name: 'Box Shadow Generator',
+      path: 'box_shadow_generator'
     }
   };
   

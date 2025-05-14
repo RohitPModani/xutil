@@ -60,6 +60,10 @@ const QRCodeGenerator = lazy(() => import('../pages/Image-Tools/QRCodeGenerator'
 const BarcodeGenerator = lazy(() => import('../pages/Image-Tools/BarCodeGenerator'));
 const BarcodeReader = lazy(() => import('../pages/Image-Tools/BarcodeReader'));
 const ColorPicker = lazy(() => import('../pages/Image-Tools/ColorPicker'));
+const FaviconGenerator = lazy(() => import('../pages/Image-Tools/FaviconGenerator'));
+const ImageCompressor = lazy(() => import('../pages/Image-Tools/ImageCompressor'));
+const GradientGenerator = lazy(() => import('../pages/Image-Tools/GradientGenerator'));
+const BoxShadowGenerator = lazy(() => import('../pages/Image-Tools/BoxShadowGenerator'));
 
 export const appRoutes = [
   {
@@ -123,6 +127,10 @@ export const appRoutes = [
       { path: 'barcode_generator', element: <BarcodeGenerator />, errorElement: <ErrorBoundary/>},
       { path: 'barcode_reader', element: <BarcodeReader />, errorElement: <ErrorBoundary />},
       { path: 'color_picker', element: <ColorPicker />, errorElement: <ErrorBoundary />},
+      { path: 'favicon', element: <FaviconGenerator />, errorElement: <ErrorBoundary />},
+      { path: 'image_compressor', element: <ImageCompressor />, errorElement: <ErrorBoundary />},
+      { path: 'gradient_generator', element: <GradientGenerator />, errorElement: <ErrorBoundary />},
+      { path: 'box_shadow_generator', element: <BoxShadowGenerator />, errorElement: <ErrorBoundary />},
       { path: '*', element: <NotFound /> },
     ],
   }

@@ -461,6 +461,38 @@ debugging URLs, or just tired of copy-pasting into Google, this tool has your ba
   Perfect for designers, developers, artists, and anyone who’s ever thought, “Wait… is this the right shade of green?”`
   },
 
+  faviconGenerator: {
+    title: "Favicon Generator",
+    body: `A Favicon Generator is like your website’s personal stylist — creating that tiny, memorable icon that appears in browser tabs and bookmarks without the usual hassle.
+  Whether you're designing a brand logo, launching a personal blog, or just tired of seeing the default icon, this tool crafts a perfect favicon in seconds.
+  Upload your image, customize the size, and get a ready-to-use favicon for any platform.
+  Perfect for web developers, designers, bloggers, and anyone who’s ever thought, “Why does my site still have that boring default icon?”`
+  },
+
+  imageCompressor: {
+    title: "Image Compressor",
+    body: `An Image Compressor is like a digital fitness coach for your pictures — slimming down file sizes without sacrificing quality, so your website loads faster and looks sharp.
+  Whether you're optimizing images for the web, sending files by email, or just freeing up some storage, this tool makes compression effortless.
+  Upload your image, choose the compression level, and get a lighter, faster version instantly.
+  Perfect for web developers, photographers, social media managers, and anyone who’s ever thought, “Why is this image so huge?”`
+  },
+
+  gradientGenerator: {
+    title: "Gradient Generator",
+    body: `A Gradient Generator is like a digital artist’s palette — blending colors seamlessly to create eye-catching, stylish gradients without the guesswork.
+  Whether you're designing a website background, crafting a logo, or just adding a splash of color to your project, this tool helps you mix hues with precision.
+  Choose your colors, tweak the direction, and get CSS code for linear or radial gradients instantly.
+  Perfect for web designers, UI/UX developers, and anyone who’s ever thought, “How do I make this look a little more epic?”`
+  },
+
+  boxShadowGenerator: {
+    title: "Box Shadow Generator",
+    body: `A Box Shadow Generator is like a digital lighting designer — casting subtle, stylish, or dramatic shadows behind your elements without the trial and error.
+  Whether you're adding depth to buttons, creating floating card effects, or just giving your design a modern touch, this tool helps you craft the perfect shadow.
+  Adjust blur, spread, color, and offset to create custom CSS box shadows — and get the code instantly.
+  Perfect for web developers, UI/UX designers, and anyone who’s ever thought, “How do I make this element pop?”`
+  },
+
 };
 
 export default seoDescriptions;
