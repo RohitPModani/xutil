@@ -1,8 +1,10 @@
 import { useEffect, useMemo } from 'react';
+import Fuse from 'fuse.js';
 import { useOutletContext } from 'react-router-dom';
 import UtilityCard from '../components/UtilityCard';
 import { ArrowLeftRight, BrainCircuit, Code2, GitCompareArrows, Image, Zap } from 'lucide-react';
 import FrequentlyUsedTools from '../components/FrequentlyUsedTools';
+import { GitHub } from 'react-feather';
 
 const allUtilities = [
   {
@@ -123,37 +125,87 @@ function Home() {
     }
   }, []);
 
-  const filteredUtilities = useMemo(() => {
-    if (!searchQuery.trim()) return allUtilities;
+  const fuseOptions = {
+    keys: ['name'],
+    threshold: 0.4, 
+    includeScore: true,
+    minMatchCharLength: 1, 
+    ignoreLocation: true, 
+    shouldSort: true, 
+  };
 
-    const query = searchQuery.toLowerCase();
-    return allUtilities
-      .map(group => {
-        const filteredItems = group.items.filter(item => {
-          const name = typeof item === 'string' ? item : item.name;
-          return name.toLowerCase().includes(query);
+    const { filteredUtilities, isEmpty } = useMemo(() => {
+    if (!searchQuery.trim()) return { filteredUtilities: allUtilities, isEmpty: false };
+
+    // Create a flattened array of all items with their group information
+    const allItemsWithGroup = allUtilities.flatMap(group => 
+      group.items.map(item => ({ ...item, groupTitle: group.title, groupIcon: group.icon }))
+    );
+
+    const fuse = new Fuse(allItemsWithGroup, fuseOptions);
+    const results = fuse.search(searchQuery);
+
+    // Reconstruct the original grouped structure
+    const groupedResults = new Map();
+    
+    results.forEach(({ item }) => {
+      if (!groupedResults.has(item.groupTitle)) {
+        groupedResults.set(item.groupTitle, {
+          title: item.groupTitle,
+          icon: item.groupIcon,
+          items: []
         });
-        return filteredItems.length
-          ? { ...group, items: filteredItems }
-          : null;
-      })
-      .filter((group): group is typeof allUtilities[number] => group !== null);
+      }
+      groupedResults.get(item.groupTitle).items.push({
+        name: item.name,
+        path: item.path
+      });
+    });
+
+    const filtered = Array.from(groupedResults.values());
+    return {
+      filteredUtilities: filtered,
+      isEmpty: filtered.length === 0 && searchQuery.trim() !== ''
+    };
   }, [searchQuery]);
 
   return (
     <div className="space-y-8">
-      {/* Conditionally render FrequentlyUsedTools when searchQuery is empty */}
       {searchQuery === '' && <FrequentlyUsedTools />}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredUtilities.map((util, index) => (
-          <UtilityCard
-            key={index}
-            title={util.title}
-            icon={util.icon}
-            items={util.items}
-          />
-        ))}
-      </div>
+      
+      {isEmpty ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="max-w-md space-y-4">
+            <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300">
+              No results found for "{searchQuery}"
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              We couldn't find any tools matching your search. If you're looking for a 
+              specific tool that's not available, you can request it on our GitHub Issues section.
+            </p>
+            <a
+              href="https://github.com/RohitPModani/xutil/issues/new"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 sm:mt-8 inline-flex items-center justify-center button-primary"
+            >
+              <GitHub className="w-5 h-5 mr-2" />
+              Request on GitHub
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredUtilities.map((util, index) => (
+            <UtilityCard
+              key={index}
+              title={util.title}
+              icon={util.icon}
+              items={util.items}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
