@@ -84,14 +84,13 @@ function GuidGenerator() {
 
   return (
     <>
-      <PageSEO title={seo.title} description={seo.body} />
+      <PageSEO title={seo.seo} description={seo.body} />
       <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
         <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
           <BackToHome />
           <BuyMeCoffee variant="inline" />
         </div>
         <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
-        <SEODescription title={'a GUID'}>{seo.body}</SEODescription>
 
         <SectionCard className="mb-6">
           <h3 className="text-lg font-semibold mb-4">Generate Single GUID</h3>
@@ -170,6 +169,7 @@ function GuidGenerator() {
 
           <ErrorBox message={errorBulk} id={errorBulk ? 'bulk-error' : undefined} />
         </SectionCard>
+        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>
     </>
   );

@@ -60,14 +60,13 @@ function DuplicateLineRemover() {
 
   return (
     <>
-      <PageSEO title={seo.title} description={seo.body} />
+      <PageSEO title={seo.seo} description={seo.body} />
       <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
         <div className="flex justify-between items-center mb-4">
           <BackToHome />
           <BuyMeCoffee variant="inline" />
         </div>
         <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
@@ -113,6 +112,7 @@ function DuplicateLineRemover() {
             </div>
           )}
         </SectionCard>
+        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>
     </>
   );

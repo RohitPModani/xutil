@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AboutUsSection from './AboutUsSection';
-import aboutUsDescription from '../context/about';
+import aboutUsDescription from '../data/about';
 import BuyMeCoffee from './BuyMeCoffee';
 import ThemeToggle from './ThemeToggle';
 import ScrollToTop from './ScrollToTop';
@@ -12,6 +12,7 @@ function Layout() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const [searchQuery, setSearchQuery] = useState('');
+  const [hasSearchResults, setHasSearchResults] = useState(true);
   const navigate = useNavigate();
 
   const handleLogoClick = () => {
@@ -26,6 +27,10 @@ function Layout() {
     if (!isMobile) {
       sessionStorage.removeItem('lastClickedTool');
     }
+  };
+
+  const updateSearchResults = (hasResults: boolean) => {
+    setHasSearchResults(hasResults);
   };
 
   return (
@@ -83,11 +88,11 @@ function Layout() {
 
       <main className="px-3 pb-6 sm:px-4 sm:pb-8 max-w-7xl mx-auto">
         <ScrollToTop />
-        <Outlet context={{ searchQuery, resetState }} />
+        <Outlet context={{ searchQuery, resetState, updateSearchResults }} />
       </main>
 
       <footer className="px-4 max-w-7xl mx-auto sm:mb-4 mb-2">
-        {isHomePage && <AboutUsSection>{aboutUsDescription}</AboutUsSection>}
+        {isHomePage && hasSearchResults && <AboutUsSection>{aboutUsDescription}</AboutUsSection>}
       </footer>
 
       {/* Remove min-h allocation */}

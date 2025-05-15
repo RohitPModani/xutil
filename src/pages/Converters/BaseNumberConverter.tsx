@@ -125,14 +125,13 @@ function BaseNumberConverter() {
 
   return (
     <>
-      <PageSEO title={seo.title} description={seo.body} />
+      <PageSEO title={seo.seo} description={seo.body} />
       <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
         <div className="flex justify-between items-center mb-6">
           <BackToHome />
           <BuyMeCoffee variant="inline" />
         </div>
-        <h2 className="text-3xl font-bold mb-6 text-zinc-900 dark:text-white">{seo.title}</h2>
-        <SEODescription title={'a ' + seo.title}>{seo.body}</SEODescription>
+        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
 
         <SectionCard>
           <div className="flex items-center justify-between mb-6">
@@ -227,6 +226,8 @@ function BaseNumberConverter() {
             )}
           </div>
         </SectionCard>
+
+        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>
     </>
   );

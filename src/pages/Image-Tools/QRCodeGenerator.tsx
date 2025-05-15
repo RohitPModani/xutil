@@ -421,14 +421,13 @@ function QRCodeGenerator() {
 
   return (
     <>
-      <PageSEO title={seo.title} description={seo.body} />
+      <PageSEO title={seo.seo} description={seo.body} />
       <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
         <div className="flex items-center justify-between mb-4">
           <BackToHome />
           <BuyMeCoffee variant="inline" />
         </div>
         <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
-        <SEODescription title={seo.title}>{seo.body}</SEODescription>
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
@@ -582,6 +581,7 @@ function QRCodeGenerator() {
 
           <ErrorBox message={error} aria-live="polite" />
         </SectionCard>
+        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>
     </>
   );

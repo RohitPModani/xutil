@@ -18,7 +18,7 @@ const allUtilities = [
       { name: 'Hash Generator', path: '/hash' },
       { name: 'Base Encoder/ Decoder', path: '/base' },
       { name: 'ROT13 / Caesar Cipher Encoder', path: '/cipher' },
-      { name: 'JWT Encoder/ Decoder', path: '/jwt' },
+      { name: 'JWT Decoder', path: '/jwt' },
       { name: 'URL Encoder/ Decoder', path: '/eurl' },
       { name: 'HTML Entities Encoder/ Decoder', path: '/html' },
     ],
@@ -34,7 +34,7 @@ const allUtilities = [
       { name: 'JSON to Python Dataclass', path: '/json_python' },
       { name: 'JSON to Pydantic Model', path: '/json_pydantic' },
       { name: 'Base Number', path: '/base_number' },
-      { name: 'Text ↔ Binary / Hex / Octal / Decimal', path: '/text_base' },
+      { name: 'Text ↔ Base Number', path: '/text_base' },
       { name: 'Unix ↔ UTC', path: '/unix_utc' },
       { name: 'Timezone', path: '/timezone' },
     ],
@@ -108,7 +108,10 @@ const allUtilities = [
 ];
 
 function Home() {
-  const { searchQuery } = useOutletContext<{ searchQuery: string }>();
+  const { searchQuery, updateSearchResults } = useOutletContext<{ 
+    searchQuery: string;
+    updateSearchResults: (hasResults: boolean) => void;
+  }>();
 
   useEffect(() => {
     document.title = 'XUtil | Developer Tools';
@@ -135,7 +138,10 @@ function Home() {
   };
 
     const { filteredUtilities, isEmpty } = useMemo(() => {
-    if (!searchQuery.trim()) return { filteredUtilities: allUtilities, isEmpty: false };
+    if (!searchQuery.trim()) {
+      updateSearchResults(true);
+      return { filteredUtilities: allUtilities, isEmpty: false };
+    }
 
     // Create a flattened array of all items with their group information
     const allItemsWithGroup = allUtilities.flatMap(group => 
@@ -163,6 +169,7 @@ function Home() {
     });
 
     const filtered = Array.from(groupedResults.values());
+    updateSearchResults(filtered.length > 0);
     return {
       filteredUtilities: filtered,
       isEmpty: filtered.length === 0 && searchQuery.trim() !== ''

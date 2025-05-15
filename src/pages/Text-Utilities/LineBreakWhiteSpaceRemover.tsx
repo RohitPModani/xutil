@@ -13,7 +13,7 @@ import seoDescriptions from '../../data/seoDescriptions';
 import { updateToolUsage } from '../../utils/toolUsage';
 
 function LineBreakWhiteSpaceRemover() {
-  const seo = seoDescriptions.lineBreakWhiteSpaceRemover || { title: 'Line Break & Whitespace Remover', body: 'Remove line breaks and extra whitespace from your text in real-time.' };
+  const seo = seoDescriptions.lineBreakWhitespaceRemover;
   const [textInput, setTextInput] = useState<string>('');
   const [resultOutput, setResultOutput] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -62,14 +62,13 @@ function LineBreakWhiteSpaceRemover() {
 
   return (
     <>
-      <PageSEO title={seo.title} description={seo.body} />
+      <PageSEO title={seo.seo} description={seo.body} />
       <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
         <div className="flex justify-between items-center mb-4">
           <BackToHome />
           <BuyMeCoffee variant="inline" />
         </div>
         <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
@@ -115,6 +114,7 @@ function LineBreakWhiteSpaceRemover() {
             </div>
           )}
         </SectionCard>
+        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>
     </>
   );

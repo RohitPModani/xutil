@@ -158,14 +158,13 @@ function BoxShadowGenerator() {
 
   return (
     <>
-      <PageSEO title={seo.title} description={seo.body} />
+      <PageSEO title={seo.seo} description={seo.body} />
       <div className="max-w-3xl mx-auto px-2 py-4 section">
         <div className="flex items-center justify-between mb-4">
           <BackToHome />
           <BuyMeCoffee variant="inline" />
         </div>
-        <h2 className="text-xl font-bold mb-2 text-zinc-900 dark:text-zinc-100">{seo.title}</h2>
-        <SEODescription title={seo.title}>{seo.body}</SEODescription>
+        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
 
         <SectionCard className="mb-4 section">
           <div className="flex items-center justify-between mb-3">
@@ -371,6 +370,7 @@ function BoxShadowGenerator() {
             <ErrorBox message={error} aria-live="polite" />
           </div>
         </SectionCard>
+        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>
     </>
   );

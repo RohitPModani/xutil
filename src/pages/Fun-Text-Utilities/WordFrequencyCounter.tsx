@@ -17,17 +17,8 @@ interface WordFrequency {
   count: number;
 }
 
-// Define interface for SEO data
-interface SEOData {
-  title: string;
-  body: string;
-}
-
 const WordFrequencyCounter: React.FC = () => {
-  const seo: SEOData = seoDescriptions.wordFrequencyCounter || {
-    title: 'Word Frequency Counter',
-    body: 'Analyze text to count the frequency of each word, sorted by frequency and alphabetically.'
-  };
+  const seo = seoDescriptions.wordFrequencyCounter;
 
   const [input, setInput] = useState<string>('');
   const [output, setOutput] = useState<WordFrequency[]>([]);
@@ -98,14 +89,13 @@ const WordFrequencyCounter: React.FC = () => {
 
   return (
     <>
-      <PageSEO title={seo.title} description={seo.body} />
+      <PageSEO title={seo.seo} description={seo.body} />
       <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
         <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
           <BackToHome />
           <BuyMeCoffee variant="inline" />
         </div>
         <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
@@ -176,6 +166,7 @@ const WordFrequencyCounter: React.FC = () => {
             </ul>
           </div>
         </SectionCard>
+        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>
     </>
   );

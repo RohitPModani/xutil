@@ -1,5 +1,6 @@
 import { ReactNode, useRef, useState, useEffect } from 'react';
 import { ChevronUp } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface SEODescriptionProps {
   title: string;
@@ -37,7 +38,7 @@ export default function SEODescription({
   }, [isOpen]);
 
   return (
-    <div className={`mb-6 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white shadow-lg rounded-lg sm:p-6 p-4 ${className}`}>
+    <div className={`mt-6 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white shadow-lg rounded-lg sm:p-6 p-4 ${className}`}>
       <div
         ref={headerRef}
         onClick={() => setIsOpen(!isOpen)}
@@ -71,7 +72,9 @@ export default function SEODescription({
           opacity: isOpen ? 1 : 0
         }}
       >
-        <div className="input-field">{children}</div>
+        <div className="prose prose-md dark:prose-invert max-w-none input-field pt-2">
+          <ReactMarkdown>{children as string}</ReactMarkdown>
+        </div>
       </div>
     </div>
   );
