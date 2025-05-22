@@ -34,6 +34,8 @@ type QRCodeOptions = {
   wifiSsid?: string;
   wifiPassword?: string;
   wifiEncryption?: 'WPA' | 'WEP' | 'nopass';
+  // WhatsApp specific fields
+  whatsappMessage?: string;
 };
 
 const DEFAULT_OPTIONS: QRCodeOptions = {
@@ -53,6 +55,7 @@ const ACTION_TYPES = [
   { value: 'sms', label: 'Send SMS' },
   { value: 'wifi', label: 'Connect to WiFi' },
   { value: 'phone', label: 'Phone Number' },
+  { value: 'whatsapp', label: 'WhatsApp Message' },
 ];
 
 function QRCodeGenerator() {
@@ -119,6 +122,13 @@ function QRCodeGenerator() {
         case 'phone':
           if (!options.phone) throw new Error('Phone number is required');
           qrContent = `tel:${options.phone}`;
+          break;
+        case 'whatsapp':
+          if (!options.phone) throw new Error('Phone number is required');
+          qrContent = `https://wa.me/${options.phone}`;
+          if (options.whatsappMessage) {
+            qrContent += `?text=${encodeURIComponent(options.whatsappMessage)}`;
+          }
           break;
         default:
           qrContent = options.text;
@@ -383,6 +393,38 @@ function QRCodeGenerator() {
                 value={options.phone || ''}
                 onChange={handleInputChange}
                 required
+              />
+            </div>
+          </div>
+        );
+      case 'whatsapp':
+        return (
+          <div className="space-y-3">
+            <div>
+              <label htmlFor="phone" className="form-label">
+                Phone Number:
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                className="input-field"
+                value={options.phone || ''}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="whatsappMessage" className="form-label">
+                Message:
+              </label>
+              <textarea
+                id="whatsappMessage"
+                name="whatsappMessage"
+                className="input-field scrollbar"
+                rows={3}
+                value={options.whatsappMessage || ''}
+                onChange={handleInputChange}
               />
             </div>
           </div>
