@@ -36,6 +36,12 @@ type QRCodeOptions = {
   wifiEncryption?: 'WPA' | 'WEP' | 'nopass';
   // WhatsApp specific fields
   whatsappMessage?: string;
+  // Calendar event specific fields
+  eventTitle?: string;
+  eventStart?: Date | string;
+  eventEnd?: Date | string;
+  eventLocation?: string;
+  eventDescription?: string;
 };
 
 const DEFAULT_OPTIONS: QRCodeOptions = {
@@ -44,7 +50,9 @@ const DEFAULT_OPTIONS: QRCodeOptions = {
   size: 200,
   colorDark: '#000000',
   colorLight: '#ffffff',
-  errorCorrectionLevel: 'M'
+  errorCorrectionLevel: 'M',
+  eventStart: new Date(),
+  eventEnd: new Date(Date.now() + 60 * 60 * 1000), // Default to 1 hour later
 };
 
 const ACTION_TYPES = [
@@ -56,6 +64,7 @@ const ACTION_TYPES = [
   { value: 'wifi', label: 'Connect to WiFi' },
   { value: 'phone', label: 'Phone Number' },
   { value: 'whatsapp', label: 'WhatsApp Message' },
+  { value: 'event', label: 'Calendar Event' },
 ];
 
 function QRCodeGenerator() {
@@ -129,6 +138,21 @@ function QRCodeGenerator() {
           if (options.whatsappMessage) {
             qrContent += `?text=${encodeURIComponent(options.whatsappMessage)}`;
           }
+          break;
+        case 'event':
+          if (!options.eventTitle) throw new Error('Event title is required');
+          qrContent = `BEGIN:VEVENT\nSUMMARY:${options.eventTitle}\n`;
+          if (options.eventStart) {
+            const start = new Date(options.eventStart);
+            qrContent += `DTSTART:${start.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\n`;
+          }
+          if (options.eventEnd) {
+            const end = new Date(options.eventEnd);
+            qrContent += `DTEND:${end.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\n`;
+          }
+          if (options.eventLocation) qrContent += `LOCATION:${options.eventLocation}\n`;
+          if (options.eventDescription) qrContent += `DESCRIPTION:${options.eventDescription}\n`;
+          qrContent += `END:VEVENT`;
           break;
         default:
           qrContent = options.text;
@@ -424,6 +448,77 @@ function QRCodeGenerator() {
                 className="input-field scrollbar"
                 rows={3}
                 value={options.whatsappMessage || ''}
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+        );
+      case 'event':
+        return (
+          <div className="space-y-3">
+            <div>
+              <label htmlFor="eventTitle" className="form-label">
+                Event Title:
+              </label>
+              <input
+                id="eventTitle"
+                name="eventTitle"
+                type="text"
+                className="input-field"
+                value={options.eventTitle || ''}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="eventStart" className="form-label">
+                Start Date & Time:
+              </label>
+              <input
+                id="eventStart"
+                name="eventStart"
+                type="datetime-local"
+                className="input-field"
+                value={options.eventStart ? new Date(options.eventStart).toISOString().slice(0, 16) : ''}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="eventEnd" className="form-label">
+                End Date & Time:
+              </label>
+              <input
+                id="eventEnd"
+                name="eventEnd"
+                type="datetime-local"
+                className="input-field"
+                value={options.eventEnd ? new Date(options.eventEnd).toISOString().slice(0, 16) : ''}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="eventLocation" className="form-label">
+                Location:
+              </label>
+              <input
+                id="eventLocation"
+                name="eventLocation"
+                type="text"
+                className="input-field"
+                value={options.eventLocation || ''}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="eventDescription" className="form-label">
+                Description:
+              </label>
+              <textarea
+                id="eventDescription"
+                name="eventDescription"
+                className="input-field scrollbar"
+                rows={3}
+                value={options.eventDescription || ''}
                 onChange={handleInputChange}
               />
             </div>
