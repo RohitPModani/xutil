@@ -163,60 +163,64 @@ function GuidGenerator() {
             <CopyButton text={bulkGuids.join('\n')} copyType="CopyAll" />
           </div>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
-            <div className="flex items-center">
-              <label htmlFor="bulk-guid-format" className="sr-only">
-                GUID Format
-              </label>
-              <select
-                id="bulk-guid-format"
-                className="input-field w-auto form-select mr-4"
-                value={bulkGuidFormat}
-                onChange={(e) => {
-                  const format = e.target.value as GuidVersion;
-                  setBulkGuidFormat(format);
-                }}
-              >
-                {GUID_FORMATS.map((format) => (
-                  <option key={format.value} value={format.value}>
-                    {format.label}
-                  </option>
-                ))}
-              </select>
-              <label htmlFor="guid-count" className="form-label text-base mr-2">
-                Count (1-1000):
-              </label>
+            <div className="flex items-center justify-start sm:flex-row gap-4 flex-col">
               <div className="flex items-center">
-                <input
-                  id="guid-count"
-                  type="text"
-                  value={count}
-                  onChange={handleCountChange}
-                  className="input-field w-20 text-right pr-2"
-                  disabled={isLoadingBulk}
-                  placeholder='1-1000'
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={4}
-                  aria-label="Number of GUIDs to generate"
-                  aria-describedby={errorBulk ? 'bulk-error' : undefined}
-                />
-                <div className="flex flex-col ml-1">
-                  <button
-                    onClick={incrementCount}
-                    disabled={isLoadingBulk || count >= 1000}
-                    className="toggle-count"
-                    aria-label="Increment count"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={decrementCount}
-                    disabled={isLoadingBulk || count <= 1}
-                    className="toggle-count"
-                    aria-label="Decrement count"
-                  >
-                    −
-                  </button>
+                <label htmlFor="bulk-guid-format" className="sr-only">
+                  GUID Format
+                </label>
+                <select
+                  id="bulk-guid-format"
+                  className="input-field w-auto form-select sm:mr-4 mr-10"
+                  value={bulkGuidFormat}
+                  onChange={(e) => {
+                    const format = e.target.value as GuidVersion;
+                    setBulkGuidFormat(format);
+                  }}
+                >
+                  {GUID_FORMATS.map((format) => (
+                    <option key={format.value} value={format.value}>
+                      {format.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center">
+                <label htmlFor="guid-count" className="form-label text-base mr-2">
+                  Count (1-1000):
+                </label>
+                <div className="flex items-center">
+                  <input
+                    id="guid-count"
+                    type="text"
+                    value={count}
+                    onChange={handleCountChange}
+                    className="input-field w-20 text-right pr-2"
+                    disabled={isLoadingBulk}
+                    placeholder='1-1000'
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={4}
+                    aria-label="Number of GUIDs to generate"
+                    aria-describedby={errorBulk ? 'bulk-error' : undefined}
+                  />
+                  <div className="flex flex-col ml-1">
+                    <button
+                      onClick={incrementCount}
+                      disabled={isLoadingBulk || count >= 1000}
+                      className="toggle-count"
+                      aria-label="Increment count"
+                    >
+                      +
+                    </button>
+                    <button
+                      onClick={decrementCount}
+                      disabled={isLoadingBulk || count <= 1}
+                      className="toggle-count"
+                      aria-label="Decrement count"
+                    >
+                      −
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
