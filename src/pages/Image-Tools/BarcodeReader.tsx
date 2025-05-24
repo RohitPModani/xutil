@@ -24,6 +24,7 @@ const BARCODE_FORMATS = [
   { value: 'CODE39', label: 'CODE39' },
   { value: 'ITF14', label: 'ITF-14' },
   { value: 'codabar', label: 'Codabar' },
+  { value: 'QR_CODE', label: 'QR Code' },
 ];
 
 type BarcodeResult = {
@@ -96,6 +97,7 @@ function BarcodeReader() {
       [BarcodeFormat.CODE_39]: 'CODE39',
       [BarcodeFormat.ITF]: 'ITF14',
       [BarcodeFormat.CODABAR]: 'codabar',
+      [BarcodeFormat.QR_CODE]: 'QR_CODE',
     };
 
     const format = formatMap[result.getBarcodeFormat()] || result.getBarcodeFormat().toString();

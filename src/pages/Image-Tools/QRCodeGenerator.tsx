@@ -47,7 +47,7 @@ type QRCodeOptions = {
 const DEFAULT_OPTIONS: QRCodeOptions = {
   actionType: 'url',
   text: '',
-  size: 200,
+  size: 500,
   colorDark: '#000000',
   colorLight: '#ffffff',
   errorCorrectionLevel: 'M',
