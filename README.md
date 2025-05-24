@@ -1,54 +1,97 @@
-# React + TypeScript + Vite
+# ⚙️ XUtil
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**XUtil** is your no-nonsense, privacy-first toolbox for developers, built to eliminate the clutter and bloat from typical online utilities. No ads, no trackers, no signups—just fast, reliable tools that work.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 💡 Why XUtil?
 
-## Expanding the ESLint configuration
+Most "free" online tools come at a hidden cost:
+- Intrusive ads and popups  
+- Data tracking and analytics  
+- Account walls just to get results  
+- Sluggish performance and bloated interfaces  
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+**XUtil fixes all that.**  
+Whether you're debugging JSON at 2AM or whipping up a UUID between meetings, XUtil is your always-ready, always-private companion.
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Features
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Privacy-First:** No cookies, no analytics, no data retention—your inputs stay on your device  
+- **Fast as Lightning:** Built with performance in mind. Tools load instantly  
+- **Ad-Free & Account-Free:** No signups. No ads. No BS  
+- **Dev-First UX:** Tailored for developers who just want tools that work  
+- **Fun Included:** From Morse code to Pig Latin, utility meets personality  
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+---
+
+## 🧰 Tech Stack
+
+- **Frontend:** React + TypeScript  
+- **Styling:** Tailwind CSS  
+- **Hosting:** Cloudflare pages
+- **Deployment tool:** Railway
+
+---
+
+## 🛠️ Available Tools
+
+### 🔐 Encoding / Decoding
+- GUID & ULID Generators  
+- Password & Hash Generator  
+- JWT Decoder  
+- Base64, URL, and HTML Encode/Decode  
+- ROT13 / Caesar Cipher  
+- Morse Code Parser  
+
+### 🔄 Data Converters
+- JSON ↔ XML, YAML, CSV  
+- JSON → TypeScript, Python Dataclass, Pydantic Model  
+- Unix ↔ UTC Timestamp  
+- Timezone Converter  
+- Text ↔ Binary / Hex / Decimal  
+- Base Number Converter  
+
+### 📐 Unit Conversions
+- Angle, Area, Length, Volume, Weight  
+- Speed, Temperature, Time Units  
+- Bits & Bytes, Power, Pressure, Energy, Frequency, Fuel Economy  
+
+### ✍️ Text & Code Utilities
+- Lorem Ipsum & Slug Generators  
+- Text Compare & Case Converter  
+- Whitespace, Line Break & Duplicate Remover  
+- JSON Validator & Formatter  
+- Regex Tester + Cheatsheet  
+- URL Parser, String Counter, Markdown Preview  
+
+### 🤪 Fun Text Tools
+- Palindrome Checker  
+- Roman Numeral Converter  
+- Leetspeak & Pig Latin Translator  
+- NATO Phonetic Converter  
+- String Reverser / Rotator  
+- Numeronym Generator  
+- Word Frequency Counter  
+
+### 🖼️ Visual & Image Tools
+- QR Code & Barcode Generator  
+- Barcode Reader  
+- Image Compressor  
+- Color Picker  
+- CSS Gradient & Box Shadow Generators  
+- Favicon Generator  
+
+---
+
+## 🧪 Run Locally
+
+Clone the repository and start the development server:
+
+```bash
+git clone https://github.com/RohitPModani/xutil.git
+cd xutil
+npm install
+npm run dev
