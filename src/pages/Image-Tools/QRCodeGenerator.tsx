@@ -168,7 +168,9 @@ function QRCodeGenerator() {
           dark: options.colorDark,
           light: options.colorLight
         },
-        errorCorrectionLevel: options.errorCorrectionLevel
+        errorCorrectionLevel: options.errorCorrectionLevel,
+        type: 'image/png',
+        margin: 1,
       });
       
       setQrCodeDataUrl(dataUrl);
