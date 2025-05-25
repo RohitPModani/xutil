@@ -213,7 +213,7 @@ function PasswordGenerator() {
     const value = e.target.value;
     if (value === '' || /^[0-9]+$/.test(value)) {
       const numValue = Number(value);
-      if (numValue === 0 || numValue > 128) return;
+      if (numValue < 0 || numValue > 128) return;
       setLengthInput(numValue);
     }
   };

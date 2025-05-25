@@ -34,16 +34,16 @@ const DEBOUNCE_DELAY = 300;
 function rot13(text: string): string {
   return text.replace(/[A-Za-z]/g, (char) => {
     const code = char.charCodeAt(0);
-    const base = code >= 97 ? 97 : 65; // Lowercase or uppercase
+    const base = code >= 97 ? 97 : 65;
     return String.fromCharCode(((code - base + 13) % 26) + base);
   });
 }
 
 function caesar(text: string, shift: number): string {
-  const normalizedShift = ((shift % 26) + 26) % 26; // Normalize to 0-25
+  const normalizedShift = ((shift % 26) + 26) % 26;
   return text.replace(/[A-Za-z]/g, (char) => {
     const code = char.charCodeAt(0);
-    const base = code >= 97 ? 97 : 65; // Lowercase or uppercase
+    const base = code >= 97 ? 97 : 65;
     return String.fromCharCode(((code - base + normalizedShift) % 26) + base);
   });
 }
@@ -53,13 +53,13 @@ function CipherEncoderDecoder() {
   const [inputText, setInputText] = useState('');
   const [cipherType, setCipherType] = useState<CipherType>('rot13');
   const [shift, setShift] = useState(3);
+  const [shiftInput, setShiftInput] = useState('3'); // New state for input field
   const [result, setResult] = useState<CipherResponse | null>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [characterCount, setCharacterCount] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Debounce the cipher application
   const debouncedInputText = useDebounce(inputText, DEBOUNCE_DELAY);
   const debouncedShift = useDebounce(shift, DEBOUNCE_DELAY);
 
@@ -111,28 +111,56 @@ function CipherEncoderDecoder() {
     }
   }, [debouncedInputText, cipherType, debouncedShift]);
 
-  // Apply cipher when debounced values change
   useEffect(() => {
     applyCipher();
   }, [debouncedInputText, cipherType, debouncedShift, applyCipher]);
 
   const handleShiftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const numValue = e.target.value === '' ? 0 : Number(e.target.value);
-    setShift(Math.max(MIN_SHIFT, Math.min(MAX_SHIFT, numValue)));
+    const value = e.target.value;
+
+    // Allow: '', '-', '+', or valid numbers (e.g., '-123', '123')
+    if (/^[-+]?\d*$/.test(value)) {
+      setShiftInput(value); // Update the input field value
+
+      // Only update shift if the input is a valid number
+      if (value !== '' && value !== '-' && value !== '+') {
+        const num = Number(value);
+        if (num >= MIN_SHIFT && num <= MAX_SHIFT) {
+          setShift(num);
+          setError('');
+        } else {
+          setError(`Shift must be between ${MIN_SHIFT} and ${MAX_SHIFT}`);
+          setShift(num); // Still update shift for debouncing, but show error
+        }
+      } else {
+        setError(''); // Clear error for incomplete inputs
+      }
+    }
   };
 
   const incrementShift = () => {
-    setShift((prev) => Math.min(prev + 1, MAX_SHIFT));
+    const newShift = Math.min(shift + 1, MAX_SHIFT);
+    setShift(newShift);
+    setShiftInput(newShift.toString()); // Sync input field
+    if (newShift >= MIN_SHIFT && newShift <= MAX_SHIFT) {
+      setError('');
+    }
   };
 
   const decrementShift = () => {
-    setShift((prev) => Math.max(prev - 1, MIN_SHIFT));
+    const newShift = Math.max(shift - 1, MIN_SHIFT);
+    setShift(newShift);
+    setShiftInput(newShift.toString()); // Sync input field
+    if (newShift >= MIN_SHIFT && newShift <= MAX_SHIFT) {
+      setError('');
+    }
   };
 
   const handleClearAll = () => {
     setInputText('');
     setCipherType('rot13');
     setShift(3);
+    setShiftInput('3'); // Reset input field
     setResult(null);
     setError('');
     setCharacterCount(0);
@@ -208,15 +236,12 @@ function CipherEncoderDecoder() {
                     </label>
                     <div className="flex items-center">
                       <input
-                        type="number"
+                        type="text"
                         id="shift-input"
-                        min={MIN_SHIFT}
-                        max={MAX_SHIFT}
-                        value={shift}
+                        value={shiftInput} // Bind to shiftInput
                         onChange={handleShiftChange}
                         className="input-field w-20 text-right pr-2"
                         disabled={isLoading}
-                        placeholder={`${MIN_SHIFT} to ${MAX_SHIFT}`}
                         aria-describedby={error ? 'cipher-error' : undefined}
                       />
                       <div className="flex flex-col ml-1">
