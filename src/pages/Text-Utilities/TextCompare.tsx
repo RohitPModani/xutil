@@ -10,11 +10,12 @@ import seoDescriptions from '../../data/seoDescriptions';
 import * as Diff from 'diff';
 import LoadingButton from '../../components/LoadingButton';
 import { updateToolUsage } from '../../utils/toolUsage';
+import DOMPurify from 'dompurify';
 
 interface DiffLine {
   type: 'added' | 'removed' | 'common';
-  text: string; // Raw text for common lines or fallback
-  html?: string; // HTML for lines with word-level highlighting
+  text: string;
+  html?: string;
   lineNumber: number;
 }
 
@@ -26,13 +27,13 @@ const TextCompare: React.FC = () => {
   const [removals, setRemovals] = useState<number>(0);
   const [additions, setAdditions] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [ignoreWhitespace, setIgnoreWhitespace] = useState(false);
 
   useEffect(() => {
     updateToolUsage('text_compare');
   }, []);
 
   const compareTexts = (): void => {
-  
     if (!text1.trim() || !text2.trim()) {
       setDiffLines([
         {
@@ -44,79 +45,84 @@ const TextCompare: React.FC = () => {
       setAdditions(0);
       return;
     }
-  
+
     setIsLoading(true);
-  
+
     try {
-      // Split texts into lines while preserving all whitespace and empty lines
-      const lines1 = text1.split('\n');
-      const lines2 = text2.split('\n');
-      
-      // Remove the last empty line if it exists (artifact of split)
-      if (lines1[lines1.length - 1] === '') lines1.pop();
-      if (lines2[lines2.length - 1] === '') lines2.pop();
-  
+      const lines1 = text1.split('\n').filter((line, i, arr) => line || i < arr.length - 1);
+      const lines2 = text2.split('\n').filter((line, i, arr) => line || i < arr.length - 1);
+
       const maxLines = Math.max(lines1.length, lines2.length);
       const lines: { left: DiffLine; right: DiffLine }[] = [];
       let removalCount = 0;
       let additionCount = 0;
-  
+
       for (let i = 0; i < maxLines; i++) {
         const line1 = lines1[i] ?? '';
         const line2 = lines2[i] ?? '';
-  
-        if (line1 === line2) {
-          // Lines are identical
+
+        const trimmedLine1 = ignoreWhitespace ? line1.replace(/\s+/g, '').trim() : line1;
+        const trimmedLine2 = ignoreWhitespace ? line2.replace(/\s+/g, '').trim() : line2;
+
+        if (trimmedLine1 === trimmedLine2) {
           lines.push({
             left: { type: 'common', text: line1, html: line1, lineNumber: i + 1 },
             right: { type: 'common', text: line2, html: line2, lineNumber: i + 1 },
           });
         } else {
-          // Lines are different - do word-level comparison
-          const wordDiff = Diff.diffWordsWithSpace(line1, line2);
+          const wordDiff: Diff.Change[] = ignoreWhitespace
+            ? Diff.diffWords(
+                line1.replace(/\s+/g, ' ').trim(), 
+                line2.replace(/\s+/g, ' ').trim()
+              )
+            : Diff.diffWordsWithSpace(line1, line2);
 
-          const leftHtml = wordDiff
-            .map((part) => {
-              if (part.removed) {
-                return `<span class="bg-red-300 dark:bg-red-400 dark:text-zinc-900 whitespace-pre-wrap">${part.value}</span>`;
-              }
-              return part.added ? '' : part.value;
-            })
-            .join('');
+          const leftHtml = DOMPurify.sanitize(
+            wordDiff
+              .map((part) => {
+                if (part.removed) {
+                  return `<span class="bg-red-300 dark:bg-red-400 dark:text-zinc-900 whitespace-pre-wrap">${part.value}</span>`;
+                }
+                return part.added ? '' : part.value;
+              })
+              .join('')
+          );
 
-          const rightHtml = wordDiff
-            .map((part) => {
-              if (part.added) {
-                return `<span class="bg-green-300 dark:bg-green-400 dark:text-zinc-900 whitespace-pre-wrap">${part.value}</span>`;
-              }
-              return part.removed ? '' : part.value;
-            })
-            .join('');
-  
+          const rightHtml = DOMPurify.sanitize(
+            wordDiff
+              .map((part) => {
+                if (part.added) {
+                  return `<span class="bg-green-300 dark:bg-green-400 dark:text-zinc-900 whitespace-pre-wrap">${part.value}</span>`;
+                }
+                return part.removed ? '' : part.value;
+              })
+              .join('')
+          );
+
           lines.push({
-            left: { 
-              type: line1 ? 'removed' : 'common', 
-              text: line1, 
-              html: leftHtml, 
-              lineNumber: i + 1 
+            left: {
+              type: line1 ? 'removed' : 'common',
+              text: line1,
+              html: leftHtml,
+              lineNumber: i + 1,
             },
-            right: { 
-              type: line2 ? 'added' : 'common', 
-              text: line2, 
-              html: rightHtml, 
-              lineNumber: i + 1 
+            right: {
+              type: line2 ? 'added' : 'common',
+              text: line2,
+              html: rightHtml,
+              lineNumber: i + 1,
             },
           });
-  
+
           if (line1 && !line2) removalCount++;
           if (line2 && !line1) additionCount++;
           if (line1 && line2) {
-            removalCount += wordDiff.filter(part => part.removed).length;
-            additionCount += wordDiff.filter(part => part.added).length;
+            removalCount += wordDiff.filter((part) => part.removed).length;
+            additionCount += wordDiff.filter((part) => part.added).length;
           }
         }
       }
-  
+
       setDiffLines(lines);
       setRemovals(removalCount);
       setAdditions(additionCount);
@@ -139,10 +145,11 @@ const TextCompare: React.FC = () => {
     setRemovals(0);
     setAdditions(0);
     setIsLoading(false);
+    setIgnoreWhitespace(false);
   };
 
-  const lineCount1 = text1.split('\n').length - (text1.endsWith('\n') ? 0 : 1);
-  const lineCount2 = text2.split('\n').length - (text2.endsWith('\n') ? 0 : 1);
+  const lineCount1 = text1 ? text1.split('\n').length : 0;
+  const lineCount2 = text2 ? text2.split('\n').length : 0;
 
   return (
     <>
@@ -157,6 +164,16 @@ const TextCompare: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Text Compare</h3>
             <div className="flex gap-2">
+              <label className="flex items-center gap-2 mr-2">
+                <input
+                  type="checkbox"
+                  checked={ignoreWhitespace}
+                  onChange={(e) => setIgnoreWhitespace(e.target.checked)}
+                  className="checkbox-primary mr-1"
+                  aria-label="Ignore whitespace in comparison"
+                />
+                Ignore Whitespace
+              </label>
               <LoadingButton onClick={compareTexts} isLoading={isLoading} disabled={!text1 || !text2}>
                 Compare
               </LoadingButton>
@@ -177,6 +194,7 @@ const TextCompare: React.FC = () => {
                 onChange={(e) => setText1(e.target.value)}
                 className="input-field"
                 placeholder="Enter first text to compare"
+                aria-label="First text input for comparison"
               />
             </div>
             <div className="flex-1 space-y-4">
@@ -192,6 +210,7 @@ const TextCompare: React.FC = () => {
                 onChange={(e) => setText2(e.target.value)}
                 className="input-field"
                 placeholder="Enter second text to compare"
+                aria-label="Second text input for comparison"
               />
             </div>
           </div>
@@ -200,30 +219,33 @@ const TextCompare: React.FC = () => {
               <label className="form-label mb-0">Differences:</label>
               <div className="flex items-center justify-between text-sm text-zinc-700 dark:text-zinc-300 mb-2">
                 <div className="flex gap-4">
-                  <span className="flex items-center">
+                  <span className="flex items-center" aria-label={`${removals} removals`}>
                     <span className="w-4 h-4 bg-red-500 rounded-full mr-1"></span>
                     {removals} removal{removals !== 1 ? 's' : ''}
                   </span>
-                  <span className="flex items-center">
+                  <span aria-label={`${lineCount1} lines in first text`}>
                     {lineCount1} line{lineCount1 !== 1 ? 's' : ''}
                   </span>
                 </div>
                 <div className="flex gap-4">
-                  <span className="flex items-center">
+                  <span aria-label={`${lineCount2} lines in second text`}>
                     {lineCount2} line{lineCount2 !== 1 ? 's' : ''}
                   </span>
-                  <span className="flex items-center">
+                  <span className="flex items-center" aria-label={`${additions} additions`}>
                     <span className="w-4 h-4 bg-green-500 rounded-full mr-1"></span>
                     {additions} addition{additions !== 1 ? 's' : ''}
                   </span>
                 </div>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-sm font-mono">
+                <table
+                  className="w-full border-collapse text-sm font-mono"
+                  aria-label="Text comparison differences"
+                >
                   <tbody>
                     {diffLines.map((line, index) => (
                       <tr key={index} className="dark:bg-zinc-800">
-                        <td className="w-12 text-right pr-2 border р border-gray-300 dark:border-gray-700">
+                        <td className="w-12 text-right pr-2 border border-gray-300 dark:border-gray-700">
                           {line.left.lineNumber}
                         </td>
                         <td
@@ -235,6 +257,13 @@ const TextCompare: React.FC = () => {
                               : ''
                           }`}
                           dangerouslySetInnerHTML={{ __html: line.left.html || line.left.text }}
+                          aria-label={
+                            line.left.type === 'removed'
+                              ? 'Removed text'
+                              : line.left.type === 'added'
+                              ? 'Added text'
+                              : 'Common text'
+                          }
                         />
                         <td className="w-12 text-right pr-2 border-r border-gray-300 dark:border-gray-700">
                           {line.right.lineNumber}
@@ -248,6 +277,13 @@ const TextCompare: React.FC = () => {
                               : ''
                           }`}
                           dangerouslySetInnerHTML={{ __html: line.right.html || line.right.text }}
+                          aria-label={
+                            line.right.type === 'added'
+                              ? 'Added text'
+                              : line.right.type === 'removed'
+                              ? 'Removed text'
+                              : 'Common text'
+                          }
                         />
                       </tr>
                     ))}
