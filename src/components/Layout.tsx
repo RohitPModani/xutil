@@ -4,7 +4,7 @@ import aboutUsDescription from '../data/about';
 import BuyMeCoffee from './BuyMeCoffee';
 import ThemeToggle from './ThemeToggle';
 import ScrollToTop from './ScrollToTop';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { GitHub } from 'react-feather';
 
@@ -14,6 +14,35 @@ function Layout() {
   const [searchQuery, setSearchQuery] = useState('');
   const [hasSearchResults, setHasSearchResults] = useState(true);
   const navigate = useNavigate();
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Determine shortcut hint based on platform
+  const getIsMac = () => {
+    // Prefer userAgentData if available
+    if ((navigator as any).userAgentData?.platform) {
+      return (navigator as any).userAgentData.platform.toUpperCase().includes('MAC');
+    }
+    // Fallback to userAgent
+    return navigator.userAgent.toUpperCase().includes('MAC');
+  };
+  const isMac = getIsMac();
+  const shortcutHint = isMac ? '⌘ + K' : 'Ctrl + K';
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((isMac && e.metaKey && e.key === 'k') || (!isMac && e.ctrlKey && e.key === 'k')) {
+        e.preventDefault();
+        if (isHomePage && searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isHomePage, isMac]);
+
 
   const handleLogoClick = () => {
     resetState();
@@ -50,8 +79,9 @@ function Layout() {
             <div className="relative w-full">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
               <input
+                ref={searchInputRef}
                 type="text"
-                placeholder="Search tools..."
+                placeholder={`Search tools... (${shortcutHint})`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-8 pr-8 py-1.5 sm:py-2 text-sm rounded-full border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500"
