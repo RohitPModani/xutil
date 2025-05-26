@@ -86,6 +86,10 @@ Whether you're debugging JSON at 2AM or whipping up a UUID between meetings, XUt
 
 ---
 
+<a href="https://www.producthunt.com/posts/xutil?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-xutil" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=969882&theme=light&t=1748242685186" alt="XUtil - A&#0032;minimalist&#0032;one&#0032;stop&#0032;destination&#0032;for&#0032;all&#0032;Dev&#0032;tools | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
+---
+
 ## 🧪 Run Locally
 
 Clone the repository and start the development server:
