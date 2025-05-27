@@ -18,10 +18,12 @@ import { ArrowLeftRight, ArrowUpDown, Clock } from 'lucide-react';
 function TimezoneConverter() {
   const seo = seoDescriptions.timezone;
   const [datetimeStr, setDatetimeStr] = useState('');
-  const [fromZone, setFromZone] = useState('');
-  const [toZone, setToZone] = useState('');
+  const [fromZone, setFromZone] = useState<TimezoneOption | null>(null);
+  const [toZone, setToZone] = useState<TimezoneOption | null>(null);
   const [convertedDatetime, setConvertedDatetime] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [isFromZoneDST, setIsFromZoneDST] = useState(false);
+  const [isToZoneDST, setIsToZoneDST] = useState(false);
   const isMobile = useMediaQuery('(max-width: 640px)');
   const [isDark, setIsDark] = useState(() =>
     typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
@@ -47,9 +49,9 @@ function TimezoneConverter() {
   useEffect(() => {
     let localZone = moment.tz.guess() || 'UTC';
     localZone = localZone === 'Asia/Calcutta' ? 'Asia/Kolkata' : localZone;
-    const defaultFromZone = allTimezones.some((tz) => tz.value === localZone) ? localZone : 'UTC';
-    setFromZone(defaultFromZone);
-    setToZone('UTC');
+    const defaultFromZone = allTimezones.find((tz) => tz.value === localZone) || allTimezones.find((tz) => tz.value === 'UTC');
+    setFromZone(defaultFromZone || null);
+    setToZone(allTimezones.find((tz) => tz.value === 'UTC') || null);
     setDatetimeStr(moment().format('YYYY-MM-DD HH:mm:ss'));
   }, []);
 
@@ -61,8 +63,18 @@ function TimezoneConverter() {
     return /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(datetime);
   };
 
-  const convertDatetime = (datetime: string, fromZone: string, toZone: string): string => {
-    if (!datetime || !fromZone || !toZone) {
+  const checkDST = (zone: string, datetime: string): boolean => {
+    if (!zone || !datetime || !isValidDatetime(datetime)) return false;
+    try {
+      const dt = moment.tz(datetime, 'YYYY-MM-DD HH:mm:ss', zone);
+      return dt.isValid() && dt.isDST();
+    } catch {
+      return false;
+    }
+  };
+
+  const convertDatetime = (datetime: string, fromZoneVal: string, toZoneVal: string): string => {
+    if (!datetime || !fromZoneVal || !toZoneVal) {
       setError('Please fill in all fields.');
       return '';
     }
@@ -73,12 +85,12 @@ function TimezoneConverter() {
     }
 
     try {
-      const dt = moment.tz(datetime, 'YYYY-MM-DD HH:mm:ss', fromZone);
+      const dt = moment.tz(datetime, 'YYYY-MM-DD HH:mm:ss', fromZoneVal);
       if (!dt.isValid()) {
         setError('Invalid datetime or timezone.');
         return '';
       }
-      const converted = dt.tz(toZone).format('YYYY-MM-DD HH:mm:ss z');
+      const converted = dt.tz(toZoneVal).format('YYYY-MM-DD HH:mm:ss');
       setError(null);
       return converted;
     } catch (err) {
@@ -88,8 +100,10 @@ function TimezoneConverter() {
   };
 
   useEffect(() => {
-    const result = convertDatetime(datetimeStr, fromZone, toZone);
+    const result = convertDatetime(datetimeStr, fromZone?.value || '', toZone?.value || '');
     setConvertedDatetime(result);
+    setIsFromZoneDST(checkDST(fromZone?.value || '', datetimeStr));
+    setIsToZoneDST(checkDST(toZone?.value || '', datetimeStr));
   }, [datetimeStr, fromZone, toZone]);
 
   const handleSwap = () => {
@@ -103,11 +117,13 @@ function TimezoneConverter() {
   const handleClear = () => {
     setDatetimeStr(moment().format('YYYY-MM-DD HH:mm:ss'));
     const localZone = moment.tz.guess() || 'UTC';
-    const defaultFromZone = allTimezones.some((tz) => tz.value === localZone) ? localZone : 'UTC';
-    setFromZone(defaultFromZone);
-    setToZone('UTC');
+    const defaultFromZone = allTimezones.find((tz) => tz.value === localZone) || allTimezones.find((tz) => tz.value === 'UTC');
+    setFromZone(defaultFromZone || null);
+    setToZone(allTimezones.find((tz) => tz.value === 'UTC') || null);
     setConvertedDatetime('');
     setError(null);
+    setIsFromZoneDST(false);
+    setIsToZoneDST(false);
   };
 
   const handleDatetimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,15 +136,20 @@ function TimezoneConverter() {
     }
   };
 
+  // Custom filter for react-select to search only on label
+  const filterOption = ({ label }: TimezoneOption, input: string): boolean => {
+    return input ? label.toLowerCase().includes(input.toLowerCase()) : true;
+  };
+
   // Custom styles for react-select
   const customSelectStyles = {
     control: (provided: any, state: any) => ({
       ...provided,
-      backgroundColor: isDark ? '#27272a' : '#ffffff', // dark:bg-zinc-800 or bg-white
+      backgroundColor: isDark ? '#27272a' : '#ffffff',
       borderColor: state.isFocused
-        ? isDark ? '#52525b' : '#d4d4d8'                 // dark:border-zinc-600 or zinc-300
-        : isDark ? '#3f3f46' : '#e5e7eb',                // dark:border-zinc-700 or zinc-200
-      color: isDark ? '#ffffff' : '#1f2937',             // dark:text-white or zinc-800
+        ? isDark ? '#52525b' : '#d4d4d8'
+        : isDark ? '#3f3f46' : '#e5e7eb',
+      color: isDark ? '#ffffff' : '#1f2937',
       padding: '0.25rem 0.5rem',
       borderRadius: '0.375rem',
       fontSize: '0.875rem',
@@ -146,7 +167,7 @@ function TimezoneConverter() {
     }),
     placeholder: (provided: any) => ({
       ...provided,
-      color: isDark ? '#a1a1aa' : '#9ca3af', // dark:zinc-400 or zinc-400
+      color: isDark ? '#a1a1aa' : '#9ca3af',
     }),
     menu: (provided: any) => ({
       ...provided,
@@ -155,7 +176,7 @@ function TimezoneConverter() {
       zIndex: 20,
       marginTop: '0.25rem',
       border: '1px solid',
-      borderColor: isDark ? '#3f3f46' : '#e5e7eb', // dark:border-zinc-700 or border-zinc-200
+      borderColor: isDark ? '#3f3f46' : '#e5e7eb',
       boxShadow: isDark
         ? '0 1px 3px rgba(0,0,0,0.5)'
         : '0 1px 2px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1)',
@@ -180,10 +201,6 @@ function TimezoneConverter() {
       textTransform: 'uppercase',
     }),
   };
-
-  // Find timezone option, return undefined if not found
-  const findTimezoneOption = (value: string): TimezoneOption | undefined =>
-    allTimezones.find((tz) => tz.value === value);
 
   return (
     <>
@@ -232,10 +249,11 @@ function TimezoneConverter() {
               <Select<TimezoneOption, false, GroupBase<TimezoneOption>>
                 id="from_zone"
                 options={CITY_TIMEZONES}
-                value={findTimezoneOption(fromZone)}
-                onChange={(option) => setFromZone(option?.value || '')}
+                value={fromZone}
+                onChange={(option) => setFromZone(option || null)}
                 placeholder="Select source timezone"
                 isSearchable
+                filterOption={filterOption}
                 styles={customSelectStyles}
                 aria-label="Select source timezone"
               />
@@ -257,10 +275,11 @@ function TimezoneConverter() {
               <Select<TimezoneOption, false, GroupBase<TimezoneOption>>
                 id="to_zone"
                 options={CITY_TIMEZONES}
-                value={findTimezoneOption(toZone)}
-                onChange={(option) => setToZone(option?.value || '')}
+                value={toZone}
+                onChange={(option) => setToZone(option || null)}
                 placeholder="Select target timezone"
                 isSearchable
+                filterOption={filterOption}
                 styles={customSelectStyles}
                 aria-label="Select target timezone"
               />
@@ -273,10 +292,19 @@ function TimezoneConverter() {
               <CopyButton text={convertedDatetime} aria-label="Copy converted datetime" />
             </div>
             {convertedDatetime && (
-              <div className="scrollbox mt-2 ">
+              <div className="scrollbox mt-2">
                 <div className="inner-result">
                   <div className="w-full mono-output break-all text-sm">{convertedDatetime}</div>
                 </div>
+              </div>
+            )}
+            {(isFromZoneDST || isToZoneDST) && convertedDatetime && (
+              <div className="mt-2 text-yellow-600 dark:text-yellow-400 text-sm">
+                <strong>Warning:</strong> {isFromZoneDST && isToZoneDST
+                  ? `Both ${fromZone?.label} and ${toZone?.label} are currently observing Daylight Saving Time (DST).`
+                  : isFromZoneDST
+                  ? `${fromZone?.label} is currently observing Daylight Saving Time (DST).`
+                  : `${toZone?.label} is currently observing Daylight Saving Time (DST).`}
               </div>
             )}
           </div>
