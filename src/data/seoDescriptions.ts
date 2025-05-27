@@ -346,7 +346,7 @@ Fun fact: The UNIX epoch (Jan 1 1970) is called "the birthday of modern computin
     body: `Schedule meetings across timezones without the headache. We handle the math so you don't have to.
 
   **Why Timezone Diplomat is your best pick:**
-  - Supports 500+ cities and global timezones
+  - Supports 300+ cities and global timezones
   - Convert single times or full time ranges
   - Multi-timezone comparison with live preview
   - DST alerts so you don’t get caught off-guard

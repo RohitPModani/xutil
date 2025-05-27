@@ -7,6 +7,8 @@ import ScrollToTop from './ScrollToTop';
 import { useEffect, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { GitHub } from 'react-feather';
+import { useMediaQuery } from '../hooks/useMediaQuery';
+import { showError, showSuccess } from '../utils/toast';
 
 function Layout() {
   const location = useLocation();
@@ -14,6 +16,41 @@ function Layout() {
   const [searchQuery, setSearchQuery] = useState('');
   const [hasSearchResults, setHasSearchResults] = useState(true);
   const navigate = useNavigate();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: '', tool: '', desc: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    const formDataEncoded = new URLSearchParams();
+    formDataEncoded.append('entry.112796009', formData.name);
+    formDataEncoded.append('entry.1057890448', formData.tool);
+    formDataEncoded.append('entry.1291570962', formData.desc);
+  
+    try {
+      setIsSubmitting(true);
+  
+      await fetch('https://docs.google.com/forms/d/e/1FAIpQLScJwt5CkRpu-w77-B6EVhwWV5iTJqH08ysxcROyTZ6eWu9KHg/formResponse', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formDataEncoded.toString(),
+      });
+  
+      showSuccess('Request has been submitted.');
+      setFormData({ name: '', tool: '', desc: '' });
+      setIsFormOpen(false);
+    } catch (error) {
+      showError('Something went wrong.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+    
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,13 +101,20 @@ function Layout() {
 
   return (
     <div className="section min-h-screen transition-colors duration-300">
-      <header className="w-full flex items-center justify-between px-4 py-4 sm:py-6 max-w-7xl mx-auto gap-4">
-        <div className="flex-shrink-0 flex items-center">
+      <header className="w-full flex items-center justify-between px-4 py-4 sm:py-6 max-w-7xl mx-auto gap-2 sm:gap-4">
+        <div className="flex-shrink-0 flex items-center gap-2">
           <button
             onClick={handleLogoClick}
             className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-white hover:text-zinc-700 dark:hover:text-zinc-400 transition focus:outline-none"
           >
             XUtil
+          </button>
+          <button
+            onClick={() => setIsFormOpen(true)}
+            disabled={isSubmitting}
+            className="text-xs sm:text-sm px-2 py-1 rounded-md border border-zinc-400 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+          >
+            { isMobile ? 'Request' : 'Request a Tool' }
           </button>
         </div>
 
@@ -101,7 +145,7 @@ function Layout() {
           )}
         </div>
 
-        <div className="flex-shrink-0 flex items-center gap-4">
+        <div className="flex-shrink-0 flex items-center gap-2 sm:gap-4">
           <a
             href="https://github.com/RohitPModani/xutil.git"
             target="_blank"
@@ -133,6 +177,54 @@ function Layout() {
           </div>
         )}
       </div>
+      {isFormOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center px-4">
+          <div className="border border-zinc-300 dark:border-zinc-600  bg-zinc-100 text-zinc-800 dark:bg-zinc-900 dark:text-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h2 className="text-lg font-semibold mb-4">Request a New Tool</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input
+                type="text"
+                placeholder="Your Name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="input-field"
+              />
+              <input
+                type="text"
+                placeholder="Tool Name"
+                required
+                value={formData.tool}
+                onChange={(e) => setFormData({ ...formData, tool: e.target.value })}
+                className="input-field"
+              />
+              <textarea
+                placeholder="Brief Description"
+                required
+                value={formData.desc}
+                onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
+                className="input-field"
+                rows={4}
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsFormOpen(false)}
+                  className="px-4 py-2 bg-zinc-300 hover:bg-zinc-400 dark:bg-zinc-700 dark:hover:bg-zinc-600 font-semibold rounded-full"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 dark:bg-white dark:hover:bg-zinc-300 text-white dark:text-zinc-900 font-semibold rounded-full"
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -498,7 +498,6 @@ function TimezoneConverter() {
               value={datetimeStr}
               onChange={handleDatetimeChange}
               aria-label="Select datetime for timezone conversion"
-              autoFocus
             />
           </div>
 
