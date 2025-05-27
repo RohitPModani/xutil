@@ -13,11 +13,55 @@ import seoDescriptions from '../../data/seoDescriptions';
 import { updateToolUsage } from '../../utils/toolUsage';
 import { CITY_TIMEZONES, TimezoneOption } from '../../data/cityTimezones';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { ArrowLeftRight, ArrowUpDown, Clock, RefreshCcw, Trash2 } from 'lucide-react';
+import { ArrowLeftRight, ArrowUpDown, Clock, Info, RefreshCcw, Trash2, X } from 'lucide-react';
+
+// InfoDialog component for displaying section information
+interface InfoDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  content: string;
+}
+
+const InfoDialog: React.FC<InfoDialogProps> = ({ isOpen, onClose, title, content }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      role="dialog"
+      aria-labelledby="dialog-title"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white dark:bg-zinc-800 rounded-lg p-4 max-w-md w-full mx-4 shadow-lg relative flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Title and Close Button Row */}
+        <div className="flex items-center justify-between mb-2">
+          <h3 id="dialog-title" className="text-lg font-semibold">
+            {title}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white focus:outline-none transition-colors"
+            aria-label="Close dialog"
+          >
+            <X className="w-5 h-5" aria-hidden="true" />
+          </button>
+        </div>
+  
+        {/* Dialog Content */}
+        <p className="text-sm text-zinc-800 dark:text-zinc-200">{content}</p>
+      </div>
+    </div>
+  );
+  
+};
 
 function TimezoneConverter() {
   const seo = seoDescriptions.timezone;
-  // Update state to use datetime-local format (YYYY-MM-DDTHH:mm)
   const [datetimeStr, setDatetimeStr] = useState(moment().format('YYYY-MM-DDTHH:mm'));
   const [fromZone, setFromZone] = useState<TimezoneOption | null>(null);
   const [toZone, setToZone] = useState<TimezoneOption | null>(null);
@@ -28,7 +72,7 @@ function TimezoneConverter() {
   const [isFromZoneDST, setIsFromZoneDST] = useState(false);
   const [isToZoneDST, setIsToZoneDST] = useState(false);
   const [savedTimezones, setSavedTimezones] = useState<TimezoneOption[]>([]);
-  const [currentTime, setCurrentTime] = useState(moment().format('YYYY-MM-DD HH:mm:ss')); // Keep for saved timezones
+  const [currentTime, setCurrentTime] = useState(moment().format('YYYY-MM-DD HH:mm:ss'));
   const [multiZoneDatetime, setMultiZoneDatetime] = useState(moment().format('YYYY-MM-DDTHH:mm'));
   const [selectedMultiZones, setSelectedMultiZones] = useState<TimezoneOption[]>([]);
   const [rangeStartDatetime, setRangeStartDatetime] = useState(moment().format('YYYY-MM-DDTHH:mm'));
@@ -36,12 +80,39 @@ function TimezoneConverter() {
   const [selectedRangeZones, setSelectedRangeZones] = useState<TimezoneOption[]>([]);
   const [multiZoneFromZone, setMultiZoneFromZone] = useState<TimezoneOption | null>(null);
   const [rangeZoneFromZone, setRangeZoneFromZone] = useState<TimezoneOption | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState('');
+  const [dialogContent, setDialogContent] = useState('');
   const isMobile = useMediaQuery('(max-width: 640px)');
   const [isDark, setIsDark] = useState(() =>
     typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
   );
 
   const allTimezones = CITY_TIMEZONES.flatMap((group) => group.options);
+
+  // Info dialog content for each section
+  const sectionInfo = {
+    savedTimezones: {
+      title: 'Saved Timezones',
+      content:
+        'Keep track of up to three important timezones—like your remote team, travel destinations, or family abroad. Just pick a city from the dropdown to add it to your saved list. You’ll instantly see the live local time for each one. Need a reset? You can remove individual timezones using the trash icon or clear all with the "Reset" button. These timezones are saved in your browser so they’re always ready when you come back.',
+    },
+    timezoneConverter: {
+      title: 'Timezone Converter',
+      content:
+        'Quickly convert any date and time from one timezone to another. Just enter the date and time, pick a "From" timezone and a "To" timezone, and get the accurate result—DST (Daylight Saving Time) handled automatically. You can even swap the timezones with a click to reverse the conversion. It’s perfect for scheduling meetings across countries or checking what time it’ll be somewhere else.',
+    },
+    multipleTimezoneConverter: {
+      title: 'Multiple Timezone Converter',
+      content:
+        'Convert a single date and time across up to ten timezones at once. Select your base timezone, pick multiple others to compare, and get all their local times in one place. This is super handy for global teams, international events, or simply syncing across time zones. You can copy all results in one click or reset to start over.',
+    },
+    multipleTimezoneRangeConverter: {
+      title: 'Multiple Timezone Range Converter',
+      content:
+        'Plan a time range (like a meeting or event window) across multiple timezones. Set a start and end time, choose your base timezone, and add up to ten others to see how the full time range translates. It’s ideal for scheduling events that span time, like webinars or project sprints, and ensures everyone knows their local time slot. You can copy the results or clear everything with ease.',
+    },
+  };  
 
   // Load saved timezones 
   useEffect(() => {
@@ -341,12 +412,18 @@ function TimezoneConverter() {
     return acc;
   }, {} as Record<string, { start: string; end: string }>);
 
+  // Handle info icon click
+  const handleInfoClick = (section: keyof typeof sectionInfo) => {
+      setDialogTitle(sectionInfo[section].title);
+      setDialogContent(sectionInfo[section].content);
+      setIsDialogOpen(true);
+  };
+
   // Custom filter and styles for react-select 
   const filterOption = ({ label }: TimezoneOption, input: string): boolean => {
     return input ? label.toLowerCase().includes(input.toLowerCase()) : true;
   };
 
-  // Custom styles for react-select
   const customSelectStyles = {
     control: (provided: any, state: any) => ({
       ...provided,
@@ -419,10 +496,27 @@ function TimezoneConverter() {
           <Clock className="mr-2" size={24} /> {seo.title}
         </h2>
 
-        {/* Saved Timezones Section  */}
+        {/* Info Dialog */}
+        <InfoDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          title={dialogTitle}
+          content={dialogContent}
+        />
+
+        {/* Saved Timezones Section */}
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Saved Timezones</h3>
+            <div className='flex items-center gap-2'>
+              <h3 className="text-lg font-semibold">Saved Timezones</h3>
+              <button
+                onClick={() => handleInfoClick('savedTimezones')}
+                aria-label="Information about Saved Timezones section"
+                title="Learn more about Saved Timezones"
+              >
+                <Info className='w-5 h-5' />
+              </button>
+            </div>
             <button
               onClick={handleClearSavedTimezones}
               disabled={savedTimezones.length === 0}
@@ -479,7 +573,16 @@ function TimezoneConverter() {
         {/* Timezone Converter Section */}
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Timezone Converter</h3>
+            <div className='flex items-center gap-2'>
+              <h3 className="text-lg font-semibold">Timezone Converter</h3>
+              <button
+                onClick={() => handleInfoClick('timezoneConverter')}
+                aria-label="Information about Timezone Converter section"
+                title="Learn more about Timezone Converter"
+              >
+                <Info className='w-5 h-5' />
+              </button>
+            </div>
             <ClearButton
               onClick={handleClear}
               disabled={!datetimeStr && !convertedDatetime && !error}
@@ -575,7 +678,16 @@ function TimezoneConverter() {
         {/* Multiple Timezone Converter Section */}
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Multiple Timezone Converter</h3>
+            <div className='flex items-center gap-2'>
+              <h3 className="text-lg font-semibold">Multiple Timezone Converter</h3>
+              <button
+                onClick={() => handleInfoClick('multipleTimezoneConverter')}
+                aria-label="Information about Multiple Timezone Converter section"
+                title="Learn more about Multiple Timezone Converter"
+              >
+                <Info className='w-5 h-5' />
+              </button>
+            </div>
             <ClearButton
               onClick={handleClearMultiZones}
               disabled={selectedMultiZones.length === 0}
@@ -674,7 +786,16 @@ function TimezoneConverter() {
         {/* Multiple Timezone Range Converter Section */}
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Multiple Timezone Range Converter</h3>
+            <div className='flex items-center gap-2'>
+              <h3 className="text-lg font-semibold">Multiple Timezone Range Converter</h3>
+              <button
+                onClick={() => handleInfoClick('multipleTimezoneRangeConverter')}
+                aria-label="Information about Multiple Timezone Range Converter section"
+                title="Learn more about Multiple Timezone Range Converter"
+              >
+                <Info className='w-5 h-5' />
+              </button>
+            </div>
             <ClearButton
               onClick={handleClearRangeZones}
               disabled={selectedRangeZones.length === 0}
