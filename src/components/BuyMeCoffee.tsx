@@ -12,7 +12,7 @@ const BuyMeCoffee = ({ variant = 'bottom' }: BuyMeCoffeeProps) => {
   if (variant === 'inline') {
     return (
       <a
-        href="https://buymeacoffee.com/xutil"
+        href="https://ko-fi.com/rohitmodani"
         target="_blank"
         rel="noopener noreferrer"
         className={`${baseStyle} ml-2`} 
@@ -29,7 +29,7 @@ const BuyMeCoffee = ({ variant = 'bottom' }: BuyMeCoffeeProps) => {
   return (
     <div className="w-full text-center sm:py-6 py-4">
       <a
-        href="https://buymeacoffee.com/xutil"
+        href="https://ko-fi.com/rohitmodani"
         target="_blank"
         rel="noopener noreferrer"
         className={baseStyle}
