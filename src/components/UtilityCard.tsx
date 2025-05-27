@@ -87,25 +87,12 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
             const path = typeof item === 'string' ? undefined : item.path;
             const elementId = toolName.replace(/\s+/g, '-').toLowerCase();
 
-            if (!path) {
-              return (
-                <div
-                  key={index}
-                  id={elementId}
-                  className="bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 sm:p-3 p-2 rounded cursor-not-allowed select-none"
-                  title="Coming soon"
-                >
-                  {toolName}
-                </div>
-              );
-            }
-
             return (
               <div
                 key={index}
                 id={elementId}
                 className="bg-zinc-100 dark:bg-zinc-600 border border-transparent hover:border-zinc-800 dark:hover:border-white transition-all duration-300 text-zinc-800 dark:text-white sm:p-3 p-2 rounded cursor-pointer"
-                onClick={() => handleImplementedClick(path, toolName)}
+                onClick={() => path && handleImplementedClick(path, toolName)}
               >
                 {toolName}
               </div>

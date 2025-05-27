@@ -342,20 +342,24 @@ Fun fact: The UNIX epoch (Jan 1 1970) is called "the birthday of modern computin
 
   timezone: {
     title: "Timezone Diplomat",
-    seo: "Timezone Converter Online | Free Meeting Planner",
+    seo: "Timezone Converter Online | Multi-Timezone Meeting Planner | Time Range Tool",
     body: `Schedule meetings across timezones without the headache. We handle the math so you don't have to.
 
-**Why our converter rocks:**
-- 500+ cities and timezones
-- Side-by-side comparison
-- Future date calculations
+  **Why Timezone Diplomat is your best pick:**
+  - Supports 500+ cities and global timezones
+  - Convert single times or full time ranges
+  - Multi-timezone comparison with live preview
+  - DST alerts so you don’t get caught off-guard
+  - Auto-detects your local timezone
+  - Save and manage frequently used zones
+  - Accurate math using moment-timezone
 
-Perfect for:
-- Remote teams spread across the globe
-- Client calls with international partners
-- That webinar where you can't afford mistakes
+  Ideal for:
+  - Remote teams scheduling across continents
+  - Freelancers juggling international clients
+  - Event planners and webinar hosts
 
-Pro tip: Always specify timezone in meeting invites. "3 PM" means nothing without context.`
+  **Pro Tip:** Use the multi-timezone or range converters for effortless global scheduling. "9 AM PST" might mean very different things elsewhere—make sure your invite doesn’t need a detective to decode it.`
   },
 
   loremIpsum: {

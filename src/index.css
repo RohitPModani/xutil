@@ -36,12 +36,12 @@
 
   .button-primary {
     @apply text-sm px-3 py-1.5
-            sm:text-base sm:px-4 sm:py-2 
-            text-white bg-zinc-800 hover:bg-zinc-700 
-            dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300 
-            rounded-full font-medium 
-            transition-colors duration-100 
-            disabled:bg-zinc-300 dark:disabled:bg-zinc-400 disabled:cursor-not-allowed;
+           sm:text-base sm:px-4 sm:py-2 
+           text-white bg-zinc-800 hover:bg-zinc-700 
+           dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300 
+           rounded-full font-medium 
+           transition-colors duration-100 
+           disabled:bg-zinc-300 dark:disabled:bg-zinc-400 disabled:cursor-not-allowed;
   }  
 
   .hover-surface {
@@ -50,7 +50,28 @@
 
   .input-field {
     @apply border rounded px-3 py-2 w-full dark:text-white bg-white text-sm sm:text-base rounded-md shadow-sm
-    dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 disabled:opacity-50;
+           dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 disabled:opacity-50;
+  }
+
+  /* Style the calendar icon for datetime-local inputs in WebKit browsers */
+  .input-field[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    @apply cursor-pointer;
+    width: 20px; 
+    height: 20px; 
+  }
+
+  /* Hover effect for calendar icon */
+  .input-field[type="datetime-local"]:hover::-webkit-calendar-picker-indicator {
+    filter: invert(35%) sepia(85%) saturate(2000%) hue-rotate(90deg) brightness(95%) contrast(110%); /* Slightly different green */
+  }
+
+  /* Dark mode styles for calendar icon */
+  .dark .input-field[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%); /* White icon for dark mode */
+  }
+
+  .dark .input-field[type="datetime-local"]:hover::-webkit-calendar-picker-indicator {
+    filter: invert(90%) sepia(10%) saturate(500%) hue-rotate(0deg) brightness(110%) contrast(100%); /* Slightly dimmed white on hover */
   }
 
   .toggle-count {
