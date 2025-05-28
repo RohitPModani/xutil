@@ -7,9 +7,9 @@ export interface Tool {
 const DEFAULT_TOOLS: Tool[] = [
   { key: "/guid", usage: 0 },
   { key: "/password", usage: 0 },
-  { key: "/xml_json", usage: 0 },
-  { key: "/lorem", usage: 0 },
+  { key: "/timezone", usage: 0 },
   { key: "/text_compare", usage: 0 },
+  { key: "/qr_code", usage: 0 },
 ];
 
 export const updateToolUsage = (toolKey: string) => {
