@@ -1,28 +1,28 @@
-import { useEffect, useState } from 'react';
-import { DateTime } from 'luxon';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ErrorBox from '../../components/ErrorBox';
-import ClearButton from '../../components/ClearButton';
-import CopyButton from '../../components/CopyButton';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import { PageSEO } from '../../components/PageSEO';
-import SEODescription from '../../components/SEODescription';
-import seoDescriptions from '../../data/seoDescriptions';
-import { updateToolUsage } from '../../utils/toolUsage';
+import { useEffect, useState } from "react";
+import { DateTime } from "luxon";
+import BackToHome from "../../components/BackToHome";
+import SectionCard from "../../components/SectionCard";
+import ErrorBox from "../../components/ErrorBox";
+import ClearButton from "../../components/ClearButton";
+import CopyButton from "../../components/CopyButton";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import { PageSEO } from "../../components/PageSEO";
+import SEODescription from "../../components/SEODescription";
+import seoDescriptions from "../../data/seoDescriptions";
+import { updateToolUsage } from "../../utils/toolUsage";
 
 function UnixUtcConverter() {
   const seo = seoDescriptions.unixUtc;
-  const [unixInput, setUnixInput] = useState('');
-  const [utcInput, setUtcInput] = useState('');
-  const [unixToUtcResult, setUnixToUtcResult] = useState<string>('');
-  const [utcToUnixResult, setUtcToUnixResult] = useState<string>('');
+  const [unixInput, setUnixInput] = useState("");
+  const [utcInput, setUtcInput] = useState("");
+  const [unixToUtcResult, setUnixToUtcResult] = useState<string>("");
+  const [utcToUnixResult, setUtcToUnixResult] = useState<string>("");
   const [errorUnix, setUnixError] = useState<string | null>(null);
   const [errorUTC, setUtcError] = useState<string | null>(null);
 
   const getDefaultValues = () => {
     const now = DateTime.utc();
-    const utcStr = now.toFormat('yyyy-MM-dd HH:mm:ss');
+    const utcStr = now.toFormat("yyyy-MM-dd HH:mm:ss");
     const unixStr = now.toUnixInteger().toString();
     return { utcStr, unixStr };
   };
@@ -36,7 +36,7 @@ function UnixUtcConverter() {
   }, []);
 
   useEffect(() => {
-    updateToolUsage('unix_utc');
+    updateToolUsage("unix_utc");
   }, []);
 
   const isValidUnix = (input_unix: string) => /^\d+$/.test(input_unix.trim());
@@ -46,48 +46,50 @@ function UnixUtcConverter() {
 
   const convertUnixToUtc = (input: string): string => {
     if (!input.trim()) {
-      setUnixError('Please enter a Unix timestamp.');
-      return '';
+      setUnixError("Please enter a Unix timestamp.");
+      return "";
     }
     if (!isValidUnix(input)) {
-      setUnixError('Invalid Unix timestamp. Must be a positive integer.');
-      return '';
+      setUnixError("Invalid Unix timestamp. Must be a positive integer.");
+      return "";
     }
     try {
       const timestamp = parseInt(input, 10);
-      const dt = DateTime.fromSeconds(timestamp, { zone: 'utc' });
+      const dt = DateTime.fromSeconds(timestamp, { zone: "utc" });
       if (!dt.isValid) {
-        setUnixError('Invalid Unix timestamp.');
-        return '';
+        setUnixError("Invalid Unix timestamp.");
+        return "";
       }
       setUnixError(null);
-      return dt.toFormat('yyyy-MM-dd HH:mm:ss');
+      return dt.toFormat("yyyy-MM-dd HH:mm:ss");
     } catch (err) {
-      setUnixError('Conversion failed.');
-      return '';
+      setUnixError("Conversion failed.");
+      return "";
     }
   };
 
   const convertUtcToUnix = (input: string): string => {
     if (!input.trim()) {
-      setUtcError('Please enter a UTC datetime.');
-      return '';
+      setUtcError("Please enter a UTC datetime.");
+      return "";
     }
     if (!isValidUtc(input)) {
-      setUtcError('Invalid UTC datetime. Use format YYYY-MM-DD HH:mm:ss');
-      return '';
+      setUtcError("Invalid UTC datetime. Use format YYYY-MM-DD HH:mm:ss");
+      return "";
     }
     try {
-      const dt = DateTime.fromFormat(input, 'yyyy-MM-dd HH:mm:ss', { zone: 'utc' });
+      const dt = DateTime.fromFormat(input, "yyyy-MM-dd HH:mm:ss", {
+        zone: "utc",
+      });
       if (!dt.isValid) {
-        setUtcError('Invalid UTC datetime.');
-        return '';
+        setUtcError("Invalid UTC datetime.");
+        return "";
       }
       setUtcError(null);
       return dt.toUnixInteger().toString();
     } catch (err) {
-      setUtcError('Conversion failed.');
-      return '';
+      setUtcError("Conversion failed.");
+      return "";
     }
   };
 
@@ -134,6 +136,7 @@ function UnixUtcConverter() {
               aria-label="Clear Unix to UTC input and result"
             />
           </div>
+          <hr className="line-break" />
           <div className="flex-1 space-y-4">
             <label htmlFor="unix_input" className="form-label">
               Unix Timestamp:
@@ -152,12 +155,17 @@ function UnixUtcConverter() {
           <div className="result-box mt-4">
             <div className="flex justify-between items-center mb-2">
               <label className="form-label">UTC Datetime</label>
-              <CopyButton text={unixToUtcResult} aria-label="Copy UTC datetime result" />
+              <CopyButton
+                text={unixToUtcResult}
+                aria-label="Copy UTC datetime result"
+              />
             </div>
             {unixToUtcResult && (
               <div className="scrollbox mt-2">
                 <div className="inner-result">
-                  <div className="w-full mono-output break-all">{unixToUtcResult}</div>
+                  <div className="w-full mono-output break-all">
+                    {unixToUtcResult}
+                  </div>
                 </div>
               </div>
             )}
@@ -174,6 +182,7 @@ function UnixUtcConverter() {
               aria-label="Clear UTC to Unix input and result"
             />
           </div>
+          <hr className="line-break" />
           <div className="flex-1 space-y-4">
             <label htmlFor="utc_input" className="form-label">
               UTC Datetime:
@@ -192,12 +201,17 @@ function UnixUtcConverter() {
           <div className="result-box mt-4">
             <div className="flex justify-between items-center mb-2">
               <label className="form-label">Unix Timestamp</label>
-              <CopyButton text={utcToUnixResult} aria-label="Copy Unix timestamp result" />
+              <CopyButton
+                text={utcToUnixResult}
+                aria-label="Copy Unix timestamp result"
+              />
             </div>
             {utcToUnixResult && (
               <div className="scrollbox mt-2">
                 <div className="inner-result">
-                  <div className="w-full mono-output break-all">{utcToUnixResult}</div>
+                  <div className="w-full mono-output break-all">
+                    {utcToUnixResult}
+                  </div>
                 </div>
               </div>
             )}

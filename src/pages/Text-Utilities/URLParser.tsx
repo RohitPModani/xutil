@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ClearButton from '../../components/ClearButton';
-import ErrorBox from '../../components/ErrorBox';
-import CopyButton from '../../components/CopyButton';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { updateToolUsage } from '../../utils/toolUsage';
-import AutoTextarea from '../../hooks/useAutoSizeTextArea';
+import { useEffect, useState } from "react";
+import BackToHome from "../../components/BackToHome";
+import SectionCard from "../../components/SectionCard";
+import ClearButton from "../../components/ClearButton";
+import ErrorBox from "../../components/ErrorBox";
+import CopyButton from "../../components/CopyButton";
+import SEODescription from "../../components/SEODescription";
+import { PageSEO } from "../../components/PageSEO";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { updateToolUsage } from "../../utils/toolUsage";
+import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 
 function URLParser() {
   const seo = seoDescriptions.urlParser;
-  const [urlInput, setUrlInput] = useState<string>('');
+  const [urlInput, setUrlInput] = useState<string>("");
   const [result, setResult] = useState<{
     href: string;
     origin: string;
@@ -29,10 +29,10 @@ function URLParser() {
     hash: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [jsonOutput, setJsonOutput] = useState<string>('');
+  const [jsonOutput, setJsonOutput] = useState<string>("");
 
   useEffect(() => {
-    updateToolUsage('url_parser');
+    updateToolUsage("url_parser");
   }, []);
 
   useEffect(() => {
@@ -56,28 +56,30 @@ function URLParser() {
           pathname: url.pathname,
           search: url.search,
           searchParams,
-          hash: url.hash
+          hash: url.hash,
         };
 
         setResult(parsedResult);
         setJsonOutput(JSON.stringify(parsedResult, null, 2));
         setError(null);
       } catch (err) {
-        setError('Invalid URL. Please enter a valid URL including protocol (http/https).');
+        setError(
+          "Invalid URL. Please enter a valid URL including protocol (http/https)."
+        );
         setResult(null);
-        setJsonOutput('');
+        setJsonOutput("");
       }
     } else {
       setResult(null);
-      setJsonOutput('');
+      setJsonOutput("");
       setError(null);
     }
   }, [urlInput]);
 
   const handleClear = () => {
-    setUrlInput('');
+    setUrlInput("");
     setResult(null);
-    setJsonOutput('');
+    setJsonOutput("");
     setError(null);
   };
 
@@ -93,10 +95,15 @@ function URLParser() {
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">URL Parser</h3>
-            <ClearButton onClick={handleClear} disabled={!urlInput && !result && !error} />
+            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+              URL Parser
+            </h3>
+            <ClearButton
+              onClick={handleClear}
+              disabled={!urlInput && !result && !error}
+            />
           </div>
-
+          <hr className="line-break" />
           <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
@@ -113,14 +120,14 @@ function URLParser() {
 
             <div className="result-box mt-1">
               <div className="flex justify-between items-center">
-                <label className="form-label text-base">Parsed URL (JSON)</label>
-                {result && <CopyButton text={jsonOutput}/>}
+                <label className="form-label text-base">
+                  Parsed URL (JSON)
+                </label>
+                {result && <CopyButton text={jsonOutput} />}
               </div>
               {result && (
                 <div className="scrollbox inner-result mt-2">
-                  <pre>
-                    {jsonOutput}
-                  </pre>
+                  <pre>{jsonOutput}</pre>
                 </div>
               )}
             </div>

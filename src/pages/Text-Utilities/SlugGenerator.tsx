@@ -1,94 +1,101 @@
-import { useEffect, useState, useCallback } from 'react';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ClearButton from '../../components/ClearButton';
-import ErrorBox from '../../components/ErrorBox';
-import CopyButton from '../../components/CopyButton';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { updateToolUsage } from '../../utils/toolUsage';
-import AutoTextarea from '../../hooks/useAutoSizeTextArea';
+import { useEffect, useState, useCallback } from "react";
+import BackToHome from "../../components/BackToHome";
+import SectionCard from "../../components/SectionCard";
+import ClearButton from "../../components/ClearButton";
+import ErrorBox from "../../components/ErrorBox";
+import CopyButton from "../../components/CopyButton";
+import SEODescription from "../../components/SEODescription";
+import { PageSEO } from "../../components/PageSEO";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { updateToolUsage } from "../../utils/toolUsage";
+import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 
 // Constants
 const MAX_INPUT_LENGTH = 1000;
 const PRESETS = [
-  { 
-    name: 'URL Slug',
-    separator: '-',
-    caseType: 'lowercase',
-    description: 'Standard URL format (hyphen-separated, lowercase)'
+  {
+    name: "URL Slug",
+    separator: "-",
+    caseType: "lowercase",
+    description: "Standard URL format (hyphen-separated, lowercase)",
   },
   {
-    name: 'Filename',
-    separator: '_',
-    caseType: 'lowercase',
-    description: 'Filesystem-friendly format (underscore-separated)'
+    name: "Filename",
+    separator: "_",
+    caseType: "lowercase",
+    description: "Filesystem-friendly format (underscore-separated)",
   },
   {
-    name: 'Constant Case',
-    separator: '_',
-    caseType: 'uppercase',
-    description: 'CONSTANT_CASE format (uppercase with underscores)'
-  }
+    name: "Constant Case",
+    separator: "_",
+    caseType: "uppercase",
+    description: "CONSTANT_CASE format (uppercase with underscores)",
+  },
 ] as const;
 
 const SEPARATORS = [
-  { value: '-', label: 'Hyphen (-)' },
-  { value: '_', label: 'Underscore (_)' },
-  { value: '.', label: 'Dot (.)' },
-  { value: '', label: 'None (concatenated)' },
+  { value: "-", label: "Hyphen (-)" },
+  { value: "_", label: "Underscore (_)" },
+  { value: ".", label: "Dot (.)" },
+  { value: "", label: "None (concatenated)" },
 ] as const;
 
 const CASES = [
-  { value: 'lowercase', label: 'Lowercase' },
-  { value: 'uppercase', label: 'Uppercase' },
-  { value: 'preserve', label: 'Preserve Original' },
+  { value: "lowercase", label: "Lowercase" },
+  { value: "uppercase", label: "Uppercase" },
+  { value: "preserve", label: "Preserve Original" },
 ] as const;
 
 function SlugGenerator() {
   const seo = seoDescriptions.slug;
-  const [text, setText] = useState('');
-  const [separator, setSeparator] = useState<typeof SEPARATORS[number]['value']>('-');
-  const [caseType, setCaseType] = useState<typeof CASES[number]['value']>('lowercase');
-  const [result, setResult] = useState('');
+  const [text, setText] = useState("");
+  const [separator, setSeparator] =
+    useState<(typeof SEPARATORS)[number]["value"]>("-");
+  const [caseType, setCaseType] =
+    useState<(typeof CASES)[number]["value"]>("lowercase");
+  const [result, setResult] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    updateToolUsage('slug');
+    updateToolUsage("slug");
   }, []);
 
-  const generateSlug = useCallback((text: string, separator: string, caseType: string): string => {
-    if (!text.trim()) return '';
+  const generateSlug = useCallback(
+    (text: string, separator: string, caseType: string): string => {
+      if (!text.trim()) return "";
 
-    try {
-      let slug = text
-        .normalize('NFKD') // Normalize Unicode
-        .replace(/[^\w\s~-]/g, '') // Remove non-alphanumeric (except spaces, ~, -)
-        .trim()
-        .replace(/[-\s]+/g, separator) // Replace spaces and hyphens with separator
-        .replace(new RegExp(`\\${separator}{2,}`, 'g'), separator) // Replace multiple separators
-        .replace(new RegExp(`^\\${separator}|\\${separator}$`, 'g'), ''); // Trim separators
+      try {
+        let slug = text
+          .normalize("NFKD") // Normalize Unicode
+          .replace(/[^\w\s~-]/g, "") // Remove non-alphanumeric (except spaces, ~, -)
+          .trim()
+          .replace(/[-\s]+/g, separator) // Replace spaces and hyphens with separator
+          .replace(new RegExp(`\\${separator}{2,}`, "g"), separator) // Replace multiple separators
+          .replace(new RegExp(`^\\${separator}|\\${separator}$`, "g"), ""); // Trim separators
 
-      if (!slug) {
-        setError('Input text produced an empty slug. Please use alphanumeric characters.');
-        return '';
+        if (!slug) {
+          setError(
+            "Input text produced an empty slug. Please use alphanumeric characters."
+          );
+          return "";
+        }
+
+        switch (caseType) {
+          case "uppercase":
+            return slug.toUpperCase();
+          case "lowercase":
+            return slug.toLowerCase();
+          default:
+            return slug;
+        }
+      } catch (err) {
+        setError("Slug generation failed. Please check your inputs.");
+        return "";
       }
-
-      switch (caseType) {
-        case 'uppercase':
-          return slug.toUpperCase();
-        case 'lowercase':
-          return slug.toLowerCase();
-        default:
-          return slug;
-      }
-    } catch (err) {
-      setError('Slug generation failed. Please check your inputs.');
-      return '';
-    }
-  }, []);
+    },
+    []
+  );
 
   useEffect(() => {
     setError(null);
@@ -97,14 +104,14 @@ function SlugGenerator() {
   }, [text, separator, caseType, generateSlug]);
 
   const handleClear = () => {
-    setText('');
-    setSeparator('-');
-    setCaseType('lowercase');
-    setResult('');
+    setText("");
+    setSeparator("-");
+    setCaseType("lowercase");
+    setResult("");
     setError(null);
   };
 
-  const applyPreset = (preset: typeof PRESETS[number]) => {
+  const applyPreset = (preset: (typeof PRESETS)[number]) => {
     setSeparator(preset.separator);
     setCaseType(preset.caseType);
   };
@@ -128,7 +135,7 @@ function SlugGenerator() {
               aria-label="Clear all inputs and results"
             />
           </div>
-
+          <hr className="line-break" />
           <div className="mb-4">
             <label htmlFor="text" className="form-label">
               Text ({text.length}/{MAX_INPUT_LENGTH} characters):
@@ -152,7 +159,11 @@ function SlugGenerator() {
               <select
                 id="separator"
                 value={separator}
-                onChange={(e) => setSeparator(e.target.value as typeof SEPARATORS[number]['value'])}
+                onChange={(e) =>
+                  setSeparator(
+                    e.target.value as (typeof SEPARATORS)[number]["value"]
+                  )
+                }
                 className="input-field"
                 aria-label="Select separator"
               >
@@ -170,7 +181,9 @@ function SlugGenerator() {
               <select
                 id="case"
                 value={caseType}
-                onChange={(e) => setCaseType(e.target.value as typeof CASES[number]['value'])}
+                onChange={(e) =>
+                  setCaseType(e.target.value as (typeof CASES)[number]["value"])
+                }
                 className="input-field"
                 aria-label="Select case type"
               >
@@ -185,14 +198,16 @@ function SlugGenerator() {
               <label className="form-label">Quick Presets:</label>
               <select
                 onChange={(e) => {
-                  const preset = PRESETS.find(p => p.name === e.target.value);
+                  const preset = PRESETS.find((p) => p.name === e.target.value);
                   if (preset) applyPreset(preset);
                 }}
                 className="input-field"
                 aria-label="Select preset"
                 defaultValue=""
               >
-                <option value="" disabled>Select a preset...</option>
+                <option value="" disabled>
+                  Select a preset...
+                </option>
                 {PRESETS.map((p) => (
                   <option key={p.name} value={p.name}>
                     {p.name} - {p.description}
@@ -206,10 +221,7 @@ function SlugGenerator() {
             <div className="flex justify-between items-center mb-2">
               <label className="form-label">Generated Slug</label>
               <div className="flex items-center gap-2">
-                <CopyButton 
-                  text={result} 
-                  aria-label="Copy generated slug" 
-                />
+                <CopyButton text={result} aria-label="Copy generated slug" />
               </div>
             </div>
             {result && (

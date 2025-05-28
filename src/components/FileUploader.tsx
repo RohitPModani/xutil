@@ -1,6 +1,6 @@
 // src/components/FileUploader.tsx
-import { useRef, useState, useEffect } from 'react';
-import { File, X } from 'lucide-react';
+import { useRef, useState, useEffect } from "react";
+import { File, X } from "lucide-react";
 
 interface FileUploaderProps {
   onFileSelected: (file: File) => void;
@@ -20,7 +20,7 @@ const FileUploader = ({
   resetSignal,
 }: FileUploaderProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [fileName, setFileName] = useState<string>('');
+  const [fileName, setFileName] = useState<string>("");
 
   const handleClick = () => {
     if (!disabled) inputRef.current?.click();
@@ -35,15 +35,15 @@ const FileUploader = ({
   };
 
   const handleClear = () => {
-    setFileName('');
-    if (inputRef.current) inputRef.current.value = '';
+    setFileName("");
+    if (inputRef.current) inputRef.current.value = "";
     if (onClear) onClear();
   };
 
   useEffect(() => {
     // Triggered when resetSignal changes from parent
-    setFileName('');
-    if (inputRef.current) inputRef.current.value = '';
+    setFileName("");
+    if (inputRef.current) inputRef.current.value = "";
   }, [resetSignal]);
 
   return (
@@ -55,7 +55,7 @@ const FileUploader = ({
         bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white text-sm sm:text-base font-medium 
         shadow-sm hover:shadow-md hover:bg-zinc-100 dark:hover:bg-zinc-700 
         cursor-pointer transition-all duration-200 ${
-          disabled ? 'opacity-50 cursor-not-allowed' : ''
+          disabled ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
         <File className="w-4 h-4 sm:w-5 sm:h-5" />

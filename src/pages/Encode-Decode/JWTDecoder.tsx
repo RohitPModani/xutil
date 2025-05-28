@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import BackToHome from '../../components/BackToHome';
-import ErrorBox from '../../components/ErrorBox';
-import LoadingButton from '../../components/LoadingButton';
-import SectionCard from '../../components/SectionCard';
-import CopyButton from '../../components/CopyButton';
-import ClearButton from '../../components/ClearButton';
-import SEODescription from '../../components/SEODescription';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { PageSEO } from '../../components/PageSEO';
-import { updateToolUsage } from '../../utils/toolUsage';
-import AutoTextarea from '../../hooks/useAutoSizeTextArea';
+import { useState } from "react";
+import BackToHome from "../../components/BackToHome";
+import ErrorBox from "../../components/ErrorBox";
+import LoadingButton from "../../components/LoadingButton";
+import SectionCard from "../../components/SectionCard";
+import CopyButton from "../../components/CopyButton";
+import ClearButton from "../../components/ClearButton";
+import SEODescription from "../../components/SEODescription";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { PageSEO } from "../../components/PageSEO";
+import { updateToolUsage } from "../../utils/toolUsage";
+import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 
 interface JWTDecodedData {
   headers: { [key: string]: any };
@@ -19,15 +19,21 @@ interface JWTDecodedData {
 }
 
 function base64UrlDecode(str: string): string {
-  let output = str.replace(/-/g, '+').replace(/_/g, '/');
-  
+  let output = str.replace(/-/g, "+").replace(/_/g, "/");
+
   switch (output.length % 4) {
-    case 0: break;
-    case 2: output += '=='; break;
-    case 3: output += '='; break;
-    default: throw new Error('Illegal base64url string');
+    case 0:
+      break;
+    case 2:
+      output += "==";
+      break;
+    case 3:
+      output += "=";
+      break;
+    default:
+      throw new Error("Illegal base64url string");
   }
-  
+
   try {
     return decodeURIComponent(escape(atob(output)));
   } catch (e) {
@@ -37,50 +43,52 @@ function base64UrlDecode(str: string): string {
 
 function JWTDecoder() {
   const seo = seoDescriptions.jwtDecoder;
-  const [decodeToken, setDecodeToken] = useState<string>('');
+  const [decodeToken, setDecodeToken] = useState<string>("");
   const [decodedData, setDecodedData] = useState<JWTDecodedData | null>(null);
-  const [decodeError, setDecodeError] = useState<string>('');
+  const [decodeError, setDecodeError] = useState<string>("");
   const [isDecodeLoading, setIsDecodeLoading] = useState<boolean>(false);
 
   const decodeJWT = () => {
     setIsDecodeLoading(true);
-    setDecodeError('');
+    setDecodeError("");
     try {
-      if (!decodeToken.trim()) throw new Error('Token cannot be empty');
-      
-      const parts = decodeToken.split('.');
+      if (!decodeToken.trim()) throw new Error("Token cannot be empty");
+
+      const parts = decodeToken.split(".");
       if (parts.length !== 3) {
-        throw new Error('Invalid JWT format. A valid JWT should contain three parts separated by dots.');
+        throw new Error(
+          "Invalid JWT format. A valid JWT should contain three parts separated by dots."
+        );
       }
 
       try {
         const headers = JSON.parse(base64UrlDecode(parts[0]));
         const payload = JSON.parse(base64UrlDecode(parts[1]));
         const signature = parts[2];
-        
+
         setDecodedData({
           headers,
           payload,
-          signature
+          signature,
         });
       } catch (e) {
-        throw new Error('Invalid JWT - failed to decode parts');
+        throw new Error("Invalid JWT - failed to decode parts");
       }
     } catch (err: any) {
-      setDecodeError(err?.message || 'Failed to decode JWT');
+      setDecodeError(err?.message || "Failed to decode JWT");
       setDecodedData(null);
     } finally {
       setIsDecodeLoading(false);
       if (!decodeError) {
-        updateToolUsage('jwt-decoder');
+        updateToolUsage("jwt-decoder");
       }
     }
   };
 
   const handleClearDecode = () => {
-    setDecodeToken('');
+    setDecodeToken("");
     setDecodedData(null);
-    setDecodeError('');
+    setDecodeError("");
   };
 
   return (
@@ -99,7 +107,7 @@ function JWTDecoder() {
             <h3 className="text-lg font-semibold">Decode JWT</h3>
             <ClearButton onClick={handleClearDecode} disabled={!decodeToken} />
           </div>
-
+          <hr className="line-break" />
           <div className="flex-1 space-y-4">
             <div className="flex items-center justify-between">
               <label className="form-label" htmlFor="jwt-input">
@@ -113,7 +121,7 @@ function JWTDecoder() {
               className="input-field w-full"
               disabled={isDecodeLoading}
               placeholder="Enter JWT token (e.g., eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c)"
-              aria-describedby={decodeError ? 'jwt-decode-error' : undefined}
+              aria-describedby={decodeError ? "jwt-decode-error" : undefined}
             />
             <div className="flex space-x-2">
               <LoadingButton onClick={decodeJWT} isLoading={isDecodeLoading}>

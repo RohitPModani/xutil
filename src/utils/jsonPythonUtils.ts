@@ -1,4 +1,3 @@
-// src/utils/jsonPythonUtils.ts
 export const validateClassName = (name: string): string => {
   if (!name) return 'Class name cannot be empty';
   if (!/^[a-zA-Z_]/.test(name)) return 'Class name must start with a letter or underscore';

@@ -1,56 +1,58 @@
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import AboutUsSection from './AboutUsSection';
-import aboutUsDescription from '../data/about';
-import BuyMeCoffee from './BuyMeCoffee';
-import ThemeToggle from './ThemeToggle';
-import ScrollToTop from './ScrollToTop';
-import { useEffect, useRef, useState } from 'react';
-import { Search, X } from 'lucide-react';
-import { GitHub } from 'react-feather';
-import { useMediaQuery } from '../hooks/useMediaQuery';
-import { showError, showSuccess } from '../utils/toast';
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import AboutUsSection from "./AboutUsSection";
+import aboutUsDescription from "../data/about";
+import BuyMeCoffee from "./BuyMeCoffee";
+import ThemeToggle from "./ThemeToggle";
+import ScrollToTop from "./ScrollToTop";
+import { useEffect, useRef, useState } from "react";
+import { Search, X } from "lucide-react";
+import { GitHub } from "react-feather";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import { showError, showSuccess } from "../utils/toast";
 
 function Layout() {
   const location = useLocation();
-  const isHomePage = location.pathname === '/';
-  const [searchQuery, setSearchQuery] = useState('');
+  const isHomePage = location.pathname === "/";
+  const [searchQuery, setSearchQuery] = useState("");
   const [hasSearchResults, setHasSearchResults] = useState(true);
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', tool: '', desc: '' });
+  const [formData, setFormData] = useState({ name: "", tool: "", desc: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     const formDataEncoded = new URLSearchParams();
-    formDataEncoded.append('entry.112796009', formData.name);
-    formDataEncoded.append('entry.1057890448', formData.tool);
-    formDataEncoded.append('entry.1291570962', formData.desc);
-  
+    formDataEncoded.append("entry.112796009", formData.name);
+    formDataEncoded.append("entry.1057890448", formData.tool);
+    formDataEncoded.append("entry.1291570962", formData.desc);
+
     try {
       setIsSubmitting(true);
-  
-      await fetch('https://docs.google.com/forms/d/e/1FAIpQLScJwt5CkRpu-w77-B6EVhwWV5iTJqH08ysxcROyTZ6eWu9KHg/formResponse', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formDataEncoded.toString(),
-      });
-  
-      showSuccess('Request has been submitted.');
-      setFormData({ name: '', tool: '', desc: '' });
+
+      await fetch(
+        "https://docs.google.com/forms/d/e/1FAIpQLScJwt5CkRpu-w77-B6EVhwWV5iTJqH08ysxcROyTZ6eWu9KHg/formResponse",
+        {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: formDataEncoded.toString(),
+        }
+      );
+
+      showSuccess("Request has been submitted.");
+      setFormData({ name: "", tool: "", desc: "" });
       setIsFormOpen(false);
     } catch (error) {
-      showError('Something went wrong.');
+      showError("Something went wrong.");
     } finally {
       setIsSubmitting(false);
     }
   };
-    
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,17 +60,22 @@ function Layout() {
   const getIsMac = () => {
     // Prefer userAgentData if available
     if ((navigator as any).userAgentData?.platform) {
-      return (navigator as any).userAgentData.platform.toUpperCase().includes('MAC');
+      return (navigator as any).userAgentData.platform
+        .toUpperCase()
+        .includes("MAC");
     }
     // Fallback to userAgent
-    return navigator.userAgent.toUpperCase().includes('MAC');
+    return navigator.userAgent.toUpperCase().includes("MAC");
   };
   const isMac = getIsMac();
-  const shortcutHint = isMac ? '⌘ + K' : 'Ctrl + K';
+  const shortcutHint = isMac ? "⌘ + K" : "Ctrl + K";
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((isMac && e.metaKey && e.key === 'k') || (!isMac && e.ctrlKey && e.key === 'k')) {
+      if (
+        (isMac && e.metaKey && e.key === "k") ||
+        (!isMac && e.ctrlKey && e.key === "k")
+      ) {
         e.preventDefault();
         if (isHomePage && searchInputRef.current) {
           searchInputRef.current.focus();
@@ -76,22 +83,21 @@ function Layout() {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isHomePage, isMac]);
-
 
   const handleLogoClick = () => {
     resetState();
-    navigate('/');
+    navigate("/");
   };
 
   const resetState = () => {
-    setSearchQuery('');
+    setSearchQuery("");
     // Check if in mobile view (width < 768px, matching the condition in Home.tsx)
     const isMobile = window.innerWidth < 768;
     if (!isMobile) {
-      sessionStorage.removeItem('lastClickedTool');
+      sessionStorage.removeItem("lastClickedTool");
     }
   };
 
@@ -114,7 +120,7 @@ function Layout() {
             disabled={isSubmitting}
             className="text-xs sm:text-sm px-2 py-1 rounded-md border border-zinc-400 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
           >
-            { isMobile ? 'Request' : 'Request a Tool' }
+            {isMobile ? "Request" : "Request a Tool"}
           </button>
         </div>
 
@@ -132,7 +138,7 @@ function Layout() {
               />
               {searchQuery && (
                 <button
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => setSearchQuery("")}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white"
                   aria-label="Clear search"
                 >
@@ -151,10 +157,10 @@ function Layout() {
             target="_blank"
             rel="noopener noreferrer"
             className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-white hover:text-zinc-700 dark:hover:text-zinc-400 transition focus:outline-none"
-            title='Github'
-            aria-label='Github'
+            title="Github"
+            aria-label="Github"
           >
-            <GitHub className='w-5 h-5 sm:w-7 sm:h-7'/>
+            <GitHub className="w-5 h-5 sm:w-7 sm:h-7" />
           </a>
           <ThemeToggle />
         </div>
@@ -166,7 +172,9 @@ function Layout() {
       </main>
 
       <footer className="px-4 max-w-7xl mx-auto sm:mb-4 mb-2">
-        {isHomePage && hasSearchResults && <AboutUsSection>{aboutUsDescription}</AboutUsSection>}
+        {isHomePage && hasSearchResults && (
+          <AboutUsSection>{aboutUsDescription}</AboutUsSection>
+        )}
       </footer>
 
       {/* Remove min-h allocation */}
@@ -187,7 +195,9 @@ function Layout() {
                 placeholder="Your Name"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="input-field"
               />
               <input
@@ -195,14 +205,18 @@ function Layout() {
                 placeholder="Tool Name"
                 required
                 value={formData.tool}
-                onChange={(e) => setFormData({ ...formData, tool: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, tool: e.target.value })
+                }
                 className="input-field"
               />
               <textarea
                 placeholder="Brief Description"
                 required
                 value={formData.desc}
-                onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, desc: e.target.value })
+                }
                 className="input-field"
                 rows={4}
               />

@@ -1,12 +1,15 @@
-import { useState } from 'react';
-import { showSuccess, showError } from '../utils/toast';
+import { useState } from "react";
+import { showSuccess, showError } from "../utils/toast";
 
 export function useClipboard(timeout: number = 1500) {
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [copiedAll, setCopiedAll] = useState<boolean>(false); // ✅ NEW
 
-  const copy = async (text: string, options?: { index?: number; all?: boolean }) => {
+  const copy = async (
+    text: string,
+    options?: { index?: number; all?: boolean }
+  ) => {
     try {
       await navigator.clipboard.writeText(text);
 
@@ -24,8 +27,8 @@ export function useClipboard(timeout: number = 1500) {
         showSuccess("Copied to clipboard!");
       }
     } catch (err) {
-      console.error('Copy failed:', err);
-      showError('Failed to copy');
+      console.error("Copy failed:", err);
+      showError("Failed to copy");
     }
   };
 
@@ -33,6 +36,6 @@ export function useClipboard(timeout: number = 1500) {
     copy,
     copied,
     copiedIndex,
-    copiedAll, // ✅ RETURN IT
+    copiedAll, 
   };
 }

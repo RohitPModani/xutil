@@ -1,15 +1,18 @@
 // src/components/BackToHome.tsx
-import { useNavigate, useOutletContext } from 'react-router-dom';
-import { Home } from 'lucide-react';
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { Home } from "lucide-react";
 
 function BackToHome() {
   const navigate = useNavigate();
   // Access the resetState function from Outlet context
-  const { resetState } = useOutletContext<{ searchQuery: string; resetState: () => void }>();
+  const { resetState } = useOutletContext<{
+    searchQuery: string;
+    resetState: () => void;
+  }>();
 
   const handleBackToHome = () => {
     resetState(); // Clear searchQuery and lastClickedTool
-    navigate('/'); // Navigate to Home
+    navigate("/"); // Navigate to Home
   };
 
   return (

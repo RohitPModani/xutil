@@ -14,20 +14,20 @@ function DownloadButton({
   fileName,
   fileType,
   disabled = false,
-  className = '',
+  className = "",
 }: DownloadButtonProps) {
   const [isPromptOpen, setIsPromptOpen] = useState(false);
-  const [userFileName, setUserFileName] = useState('');
+  const [userFileName, setUserFileName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isDisabled =
     disabled ||
-    (typeof content === 'string' && content.trim() === '') ||
+    (typeof content === "string" && content.trim() === "") ||
     (content instanceof Blob && content.size === 0);
 
   const getExtension = (fullName: string) => {
-    const parts = fullName.split('.');
-    return parts.length > 1 ? `.${parts.pop()}` : '';
+    const parts = fullName.split(".");
+    return parts.length > 1 ? `.${parts.pop()}` : "";
   };
 
   const getFileNameWithoutExtension = (fullName: string) => {
@@ -36,11 +36,14 @@ function DownloadButton({
   };
 
   const handleActualDownload = (finalNameWithoutExtension: string) => {
-    const originalExtension = getExtension(fileName) || '.txt';
+    const originalExtension = getExtension(fileName) || ".txt";
     const finalFileName = `${finalNameWithoutExtension}${originalExtension}`;
-    const blob = content instanceof Blob ? content : new Blob([content], { type: fileType });
+    const blob =
+      content instanceof Blob
+        ? content
+        : new Blob([content], { type: fileType });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = finalFileName;
     link.click();
@@ -62,7 +65,7 @@ function DownloadButton({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handlePromptConfirm();
     }
@@ -89,7 +92,9 @@ function DownloadButton({
       {isPromptOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow-lg w-80">
-            <h2 className="text-lg font-bold mb-4 text-zinc-800 dark:text-zinc-200">Save As</h2>
+            <h2 className="text-lg font-bold mb-4 text-zinc-800 dark:text-zinc-200">
+              Save As
+            </h2>
             <div className="flex items-center">
               <input
                 ref={inputRef}
@@ -100,7 +105,9 @@ function DownloadButton({
                 className="input-field flex-1 mr-2"
                 placeholder="File name"
               />
-              <span className="text-zinc-600 dark:text-zinc-300">{getExtension(fileName)}</span>
+              <span className="text-zinc-600 dark:text-zinc-300">
+                {getExtension(fileName)}
+              </span>
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <button

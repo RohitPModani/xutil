@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
-import BackToHome from '../../components/BackToHome';
-import ClearButton from '../../components/ClearButton';
-import CopyButton from '../../components/CopyButton';
-import SectionCard from '../../components/SectionCard';
-import AutoTextarea from '../../hooks/useAutoSizeTextArea';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import seoDescriptions from '../../data/seoDescriptions';
-import * as Diff from 'diff';
-import LoadingButton from '../../components/LoadingButton';
-import { updateToolUsage } from '../../utils/toolUsage';
-import DOMPurify from 'dompurify';
+import { useEffect, useState } from "react";
+import BackToHome from "../../components/BackToHome";
+import ClearButton from "../../components/ClearButton";
+import CopyButton from "../../components/CopyButton";
+import SectionCard from "../../components/SectionCard";
+import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import SEODescription from "../../components/SEODescription";
+import { PageSEO } from "../../components/PageSEO";
+import seoDescriptions from "../../data/seoDescriptions";
+import * as Diff from "diff";
+import LoadingButton from "../../components/LoadingButton";
+import { updateToolUsage } from "../../utils/toolUsage";
+import DOMPurify from "dompurify";
 
 interface DiffLine {
-  type: 'added' | 'removed' | 'common';
+  type: "added" | "removed" | "common";
   text: string;
   html?: string;
   lineNumber: number;
@@ -21,24 +21,34 @@ interface DiffLine {
 
 const TextCompare: React.FC = () => {
   const seo = seoDescriptions.textCompare;
-  const [text1, setText1] = useState<string>('');
-  const [text2, setText2] = useState<string>('');
-  const [diffLines, setDiffLines] = useState<{ left: DiffLine; right: DiffLine }[]>([]);
+  const [text1, setText1] = useState<string>("");
+  const [text2, setText2] = useState<string>("");
+  const [diffLines, setDiffLines] = useState<
+    { left: DiffLine; right: DiffLine }[]
+  >([]);
   const [removals, setRemovals] = useState<number>(0);
   const [additions, setAdditions] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [ignoreWhitespace, setIgnoreWhitespace] = useState(false);
 
   useEffect(() => {
-    updateToolUsage('text_compare');
+    updateToolUsage("text_compare");
   }, []);
 
   const compareTexts = (): void => {
     if (!text1.trim() || !text2.trim()) {
       setDiffLines([
         {
-          left: { type: 'common', text: 'Please enter text in both fields.', lineNumber: 1 },
-          right: { type: 'common', text: 'Please enter text in both fields.', lineNumber: 1 },
+          left: {
+            type: "common",
+            text: "Please enter text in both fields.",
+            lineNumber: 1,
+          },
+          right: {
+            type: "common",
+            text: "Please enter text in both fields.",
+            lineNumber: 1,
+          },
         },
       ]);
       setRemovals(0);
@@ -49,8 +59,12 @@ const TextCompare: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const lines1 = text1.split('\n').filter((line, i, arr) => line || i < arr.length - 1);
-      const lines2 = text2.split('\n').filter((line, i, arr) => line || i < arr.length - 1);
+      const lines1 = text1
+        .split("\n")
+        .filter((line, i, arr) => line || i < arr.length - 1);
+      const lines2 = text2
+        .split("\n")
+        .filter((line, i, arr) => line || i < arr.length - 1);
 
       const maxLines = Math.max(lines1.length, lines2.length);
       const lines: { left: DiffLine; right: DiffLine }[] = [];
@@ -58,22 +72,36 @@ const TextCompare: React.FC = () => {
       let additionCount = 0;
 
       for (let i = 0; i < maxLines; i++) {
-        const line1 = lines1[i] ?? '';
-        const line2 = lines2[i] ?? '';
+        const line1 = lines1[i] ?? "";
+        const line2 = lines2[i] ?? "";
 
-        const trimmedLine1 = ignoreWhitespace ? line1.replace(/\s+/g, '').trim() : line1;
-        const trimmedLine2 = ignoreWhitespace ? line2.replace(/\s+/g, '').trim() : line2;
+        const trimmedLine1 = ignoreWhitespace
+          ? line1.replace(/\s+/g, "").trim()
+          : line1;
+        const trimmedLine2 = ignoreWhitespace
+          ? line2.replace(/\s+/g, "").trim()
+          : line2;
 
         if (trimmedLine1 === trimmedLine2) {
           lines.push({
-            left: { type: 'common', text: line1, html: line1, lineNumber: i + 1 },
-            right: { type: 'common', text: line2, html: line2, lineNumber: i + 1 },
+            left: {
+              type: "common",
+              text: line1,
+              html: line1,
+              lineNumber: i + 1,
+            },
+            right: {
+              type: "common",
+              text: line2,
+              html: line2,
+              lineNumber: i + 1,
+            },
           });
         } else {
           const wordDiff: Diff.Change[] = ignoreWhitespace
             ? Diff.diffWords(
-                line1.replace(/\s+/g, ' ').trim(), 
-                line2.replace(/\s+/g, ' ').trim()
+                line1.replace(/\s+/g, " ").trim(),
+                line2.replace(/\s+/g, " ").trim()
               )
             : Diff.diffWordsWithSpace(line1, line2);
 
@@ -83,9 +111,9 @@ const TextCompare: React.FC = () => {
                 if (part.removed) {
                   return `<span class="bg-red-300 dark:bg-red-400 dark:text-zinc-900 whitespace-pre-wrap">${part.value}</span>`;
                 }
-                return part.added ? '' : part.value;
+                return part.added ? "" : part.value;
               })
-              .join('')
+              .join("")
           );
 
           const rightHtml = DOMPurify.sanitize(
@@ -94,20 +122,20 @@ const TextCompare: React.FC = () => {
                 if (part.added) {
                   return `<span class="bg-green-300 dark:bg-green-400 dark:text-zinc-900 whitespace-pre-wrap">${part.value}</span>`;
                 }
-                return part.removed ? '' : part.value;
+                return part.removed ? "" : part.value;
               })
-              .join('')
+              .join("")
           );
 
           lines.push({
             left: {
-              type: line1 ? 'removed' : 'common',
+              type: line1 ? "removed" : "common",
               text: line1,
               html: leftHtml,
               lineNumber: i + 1,
             },
             right: {
-              type: line2 ? 'added' : 'common',
+              type: line2 ? "added" : "common",
               text: line2,
               html: rightHtml,
               lineNumber: i + 1,
@@ -129,8 +157,16 @@ const TextCompare: React.FC = () => {
     } catch (error) {
       setDiffLines([
         {
-          left: { type: 'common', text: 'Error during comparison', lineNumber: 1 },
-          right: { type: 'common', text: 'Error during comparison', lineNumber: 1 },
+          left: {
+            type: "common",
+            text: "Error during comparison",
+            lineNumber: 1,
+          },
+          right: {
+            type: "common",
+            text: "Error during comparison",
+            lineNumber: 1,
+          },
         },
       ]);
     } finally {
@@ -139,8 +175,8 @@ const TextCompare: React.FC = () => {
   };
 
   const clearTexts = (): void => {
-    setText1('');
-    setText2('');
+    setText1("");
+    setText2("");
     setDiffLines([]);
     setRemovals(0);
     setAdditions(0);
@@ -148,8 +184,8 @@ const TextCompare: React.FC = () => {
     setIgnoreWhitespace(false);
   };
 
-  const lineCount1 = text1 ? text1.split('\n').length : 0;
-  const lineCount2 = text2 ? text2.split('\n').length : 0;
+  const lineCount1 = text1 ? text1.split("\n").length : 0;
+  const lineCount2 = text2 ? text2.split("\n").length : 0;
 
   return (
     <>
@@ -163,6 +199,7 @@ const TextCompare: React.FC = () => {
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Text Compare</h3>
+            <hr className="line-break" />
             <div className="flex gap-2">
               <label className="flex items-center gap-2 mr-2">
                 <input
@@ -174,7 +211,11 @@ const TextCompare: React.FC = () => {
                 />
                 Ignore Whitespace
               </label>
-              <LoadingButton onClick={compareTexts} isLoading={isLoading} disabled={!text1 || !text2}>
+              <LoadingButton
+                onClick={compareTexts}
+                isLoading={isLoading}
+                disabled={!text1 || !text2}
+              >
                 Compare
               </LoadingButton>
               <ClearButton onClick={clearTexts} disabled={!text1 && !text2} />
@@ -219,21 +260,27 @@ const TextCompare: React.FC = () => {
               <label className="form-label mb-0">Differences:</label>
               <div className="flex items-center justify-between text-sm text-zinc-700 dark:text-zinc-300 mb-2">
                 <div className="flex gap-4">
-                  <span className="flex items-center" aria-label={`${removals} removals`}>
+                  <span
+                    className="flex items-center"
+                    aria-label={`${removals} removals`}
+                  >
                     <span className="w-4 h-4 bg-red-500 rounded-full mr-1"></span>
-                    {removals} removal{removals !== 1 ? 's' : ''}
+                    {removals} removal{removals !== 1 ? "s" : ""}
                   </span>
                   <span aria-label={`${lineCount1} lines in first text`}>
-                    {lineCount1} line{lineCount1 !== 1 ? 's' : ''}
+                    {lineCount1} line{lineCount1 !== 1 ? "s" : ""}
                   </span>
                 </div>
                 <div className="flex gap-4">
                   <span aria-label={`${lineCount2} lines in second text`}>
-                    {lineCount2} line{lineCount2 !== 1 ? 's' : ''}
+                    {lineCount2} line{lineCount2 !== 1 ? "s" : ""}
                   </span>
-                  <span className="flex items-center" aria-label={`${additions} additions`}>
+                  <span
+                    className="flex items-center"
+                    aria-label={`${additions} additions`}
+                  >
                     <span className="w-4 h-4 bg-green-500 rounded-full mr-1"></span>
-                    {additions} addition{additions !== 1 ? 's' : ''}
+                    {additions} addition{additions !== 1 ? "s" : ""}
                   </span>
                 </div>
               </div>
@@ -250,19 +297,21 @@ const TextCompare: React.FC = () => {
                         </td>
                         <td
                           className={`w-1/2 p-1 text-sm sm:text-base ${
-                            line.left.type === 'removed'
-                              ? 'bg-red-100 dark:bg-red-200 dark:text-zinc-900'
-                              : line.left.type === 'added'
-                              ? 'bg-green-100 dark:bg-green-200 dark:text-zinc-900'
-                              : ''
+                            line.left.type === "removed"
+                              ? "bg-red-100 dark:bg-red-200 dark:text-zinc-900"
+                              : line.left.type === "added"
+                              ? "bg-green-100 dark:bg-green-200 dark:text-zinc-900"
+                              : ""
                           }`}
-                          dangerouslySetInnerHTML={{ __html: line.left.html || line.left.text }}
+                          dangerouslySetInnerHTML={{
+                            __html: line.left.html || line.left.text,
+                          }}
                           aria-label={
-                            line.left.type === 'removed'
-                              ? 'Removed text'
-                              : line.left.type === 'added'
-                              ? 'Added text'
-                              : 'Common text'
+                            line.left.type === "removed"
+                              ? "Removed text"
+                              : line.left.type === "added"
+                              ? "Added text"
+                              : "Common text"
                           }
                         />
                         <td className="w-12 text-right pr-2 border-r border-gray-300 dark:border-gray-700">
@@ -270,19 +319,21 @@ const TextCompare: React.FC = () => {
                         </td>
                         <td
                           className={`w-1/2 p-1 text-sm sm:text-base ${
-                            line.right.type === 'added'
-                              ? 'bg-green-100 dark:bg-green-200 dark:text-zinc-900'
-                              : line.right.type === 'removed'
-                              ? 'bg-red-100 dark:bg-red-200 dark:text-zinc-900'
-                              : ''
+                            line.right.type === "added"
+                              ? "bg-green-100 dark:bg-green-200 dark:text-zinc-900"
+                              : line.right.type === "removed"
+                              ? "bg-red-100 dark:bg-red-200 dark:text-zinc-900"
+                              : ""
                           }`}
-                          dangerouslySetInnerHTML={{ __html: line.right.html || line.right.text }}
+                          dangerouslySetInnerHTML={{
+                            __html: line.right.html || line.right.text,
+                          }}
                           aria-label={
-                            line.right.type === 'added'
-                              ? 'Added text'
-                              : line.right.type === 'removed'
-                              ? 'Removed text'
-                              : 'Common text'
+                            line.right.type === "added"
+                              ? "Added text"
+                              : line.right.type === "removed"
+                              ? "Removed text"
+                              : "Common text"
                           }
                         />
                       </tr>

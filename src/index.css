@@ -4,7 +4,7 @@
 
 @layer utilities {
   .animate-spin-slow {
-    animation: spin 3s linear infinite; 
+    animation: spin 3s linear infinite;
   }
 }
 
@@ -42,7 +42,7 @@
            rounded-full font-medium 
            transition-colors duration-100 
            disabled:bg-zinc-300 dark:disabled:bg-zinc-400 disabled:cursor-not-allowed;
-  }  
+  }
 
   .hover-surface {
     @apply hover:bg-zinc-200 dark:hover:bg-zinc-700;
@@ -56,22 +56,26 @@
   /* Style the calendar icon for datetime-local inputs in WebKit browsers */
   .input-field[type="datetime-local"]::-webkit-calendar-picker-indicator {
     @apply cursor-pointer;
-    width: 20px; 
-    height: 20px; 
+    width: 20px;
+    height: 20px;
   }
 
   /* Hover effect for calendar icon */
   .input-field[type="datetime-local"]:hover::-webkit-calendar-picker-indicator {
-    filter: invert(35%) sepia(85%) saturate(2000%) hue-rotate(90deg) brightness(95%) contrast(110%); /* Slightly different green */
+    filter: invert(35%) sepia(85%) saturate(2000%) hue-rotate(90deg)
+      brightness(95%) contrast(110%); /* Slightly different green */
   }
 
   /* Dark mode styles for calendar icon */
   .dark .input-field[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%); /* White icon for dark mode */
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg)
+      brightness(100%) contrast(100%); /* White icon for dark mode */
   }
 
-  .dark .input-field[type="datetime-local"]:hover::-webkit-calendar-picker-indicator {
-    filter: invert(90%) sepia(10%) saturate(500%) hue-rotate(0deg) brightness(110%) contrast(100%); /* Slightly dimmed white on hover */
+  .dark
+    .input-field[type="datetime-local"]:hover::-webkit-calendar-picker-indicator {
+    filter: invert(90%) sepia(10%) saturate(500%) hue-rotate(0deg)
+      brightness(110%) contrast(100%); /* Slightly dimmed white on hover */
   }
 
   .toggle-count {

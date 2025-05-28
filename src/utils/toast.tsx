@@ -1,5 +1,5 @@
-import { toast } from 'react-toastify';
-import CustomToast from '../components/CustomToast';
+import { toast } from "react-toastify";
+import CustomToast from "../components/CustomToast";
 
 export const showSuccess = (msg: string) =>
   toast(<CustomToast type="success" message={msg} />);

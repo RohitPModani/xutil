@@ -1,17 +1,17 @@
-import { useEffect, useState, useCallback } from 'react';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ClearButton from '../../components/ClearButton';
-import ErrorBox from '../../components/ErrorBox';
-import CopyButton from '../../components/CopyButton';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { updateToolUsage } from '../../utils/toolUsage';
-import QRCode from 'qrcode';
-import LoadingButton from '../../components/LoadingButton';
-import { Download } from 'lucide-react';
+import { useEffect, useState, useCallback } from "react";
+import BackToHome from "../../components/BackToHome";
+import SectionCard from "../../components/SectionCard";
+import ClearButton from "../../components/ClearButton";
+import ErrorBox from "../../components/ErrorBox";
+import CopyButton from "../../components/CopyButton";
+import SEODescription from "../../components/SEODescription";
+import { PageSEO } from "../../components/PageSEO";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { updateToolUsage } from "../../utils/toolUsage";
+import QRCode from "qrcode";
+import LoadingButton from "../../components/LoadingButton";
+import { Download } from "lucide-react";
 
 type QRCodeOptions = {
   actionType: string;
@@ -19,7 +19,7 @@ type QRCodeOptions = {
   size?: number;
   colorDark?: string;
   colorLight?: string;
-  errorCorrectionLevel?: 'L' | 'M' | 'Q' | 'H';
+  errorCorrectionLevel?: "L" | "M" | "Q" | "H";
   // Contact specific fields
   firstName?: string;
   lastName?: string;
@@ -33,7 +33,7 @@ type QRCodeOptions = {
   // WiFi specific fields
   wifiSsid?: string;
   wifiPassword?: string;
-  wifiEncryption?: 'WPA' | 'WEP' | 'nopass';
+  wifiEncryption?: "WPA" | "WEP" | "nopass";
   // WhatsApp specific fields
   whatsappMessage?: string;
   // Calendar event specific fields
@@ -45,38 +45,38 @@ type QRCodeOptions = {
 };
 
 const DEFAULT_OPTIONS: QRCodeOptions = {
-  actionType: 'url',
-  text: '',
+  actionType: "url",
+  text: "",
   size: 300,
-  colorDark: '#000000',
-  colorLight: '#ffffff',
-  errorCorrectionLevel: 'M',
+  colorDark: "#000000",
+  colorLight: "#ffffff",
+  errorCorrectionLevel: "M",
   eventStart: new Date(),
   eventEnd: new Date(Date.now() + 60 * 60 * 1000), // Default to 1 hour later
 };
 
 const ACTION_TYPES = [
-  { value: 'url', label: 'Website URL' },
-  { value: 'text', label: 'Plain Text' },
-  { value: 'contact', label: 'Add to Contacts' },
-  { value: 'email', label: 'Send Email' },
-  { value: 'sms', label: 'Send SMS' },
-  { value: 'wifi', label: 'Connect to WiFi' },
-  { value: 'phone', label: 'Phone Number' },
-  { value: 'whatsapp', label: 'WhatsApp Message' },
-  { value: 'event', label: 'Calendar Event' },
+  { value: "url", label: "Website URL" },
+  { value: "text", label: "Plain Text" },
+  { value: "contact", label: "Add to Contacts" },
+  { value: "email", label: "Send Email" },
+  { value: "sms", label: "Send SMS" },
+  { value: "wifi", label: "Connect to WiFi" },
+  { value: "phone", label: "Phone Number" },
+  { value: "whatsapp", label: "WhatsApp Message" },
+  { value: "event", label: "Calendar Event" },
 ];
 
 function QRCodeGenerator() {
   const seo = seoDescriptions.qrCodeGenerator;
-  
+
   const [options, setOptions] = useState<QRCodeOptions>(DEFAULT_OPTIONS);
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    updateToolUsage('qr_code');
+    updateToolUsage("qr_code");
   }, []);
 
   const generateQRCode = useCallback(async () => {
@@ -84,74 +84,95 @@ function QRCodeGenerator() {
       setIsGenerating(true);
       setError(null);
 
-      let qrContent = '';
-      
+      let qrContent = "";
+
       switch (options.actionType) {
-        case 'url':
-        case 'text':
+        case "url":
+        case "text":
           qrContent = options.text;
           break;
-        case 'contact':
-          if (!options.firstName && !options.lastName && !options.phone && !options.email) {
-            throw new Error('Please fill at least one contact field');
+        case "contact":
+          if (
+            !options.firstName &&
+            !options.lastName &&
+            !options.phone &&
+            !options.email
+          ) {
+            throw new Error("Please fill at least one contact field");
           }
           qrContent = `BEGIN:VCARD\nVERSION:3.0\n`;
           if (options.firstName || options.lastName) {
-            qrContent += `N:${options.lastName || ''};${options.firstName || ''}\n`;
-            qrContent += `FN:${options.firstName || ''} ${options.lastName || ''}\n`;
+            qrContent += `N:${options.lastName || ""};${
+              options.firstName || ""
+            }\n`;
+            qrContent += `FN:${options.firstName || ""} ${
+              options.lastName || ""
+            }\n`;
           }
           if (options.phone) qrContent += `TEL:${options.phone}\n`;
           if (options.email) qrContent += `EMAIL:${options.email}\n`;
           qrContent += `END:VCARD`;
           break;
-        case 'email':
-          if (!options.email) throw new Error('Email address is required');
+        case "email":
+          if (!options.email) throw new Error("Email address is required");
           qrContent = `mailto:${options.email}`;
           if (options.emailSubject || options.emailBody) {
-            qrContent += '?';
+            qrContent += "?";
             const params = [];
-            if (options.emailSubject) params.push(`subject=${encodeURIComponent(options.emailSubject)}`);
-            if (options.emailBody) params.push(`body=${encodeURIComponent(options.emailBody)}`);
-            qrContent += params.join('&');
+            if (options.emailSubject)
+              params.push(
+                `subject=${encodeURIComponent(options.emailSubject)}`
+              );
+            if (options.emailBody)
+              params.push(`body=${encodeURIComponent(options.emailBody)}`);
+            qrContent += params.join("&");
           }
           break;
-        case 'sms':
-          if (!options.phone) throw new Error('Phone number is required');
+        case "sms":
+          if (!options.phone) throw new Error("Phone number is required");
           qrContent = `smsto:${options.phone}`;
           if (options.smsBody) {
             qrContent += `:${encodeURIComponent(options.smsBody)}`;
           }
           break;
-        case 'wifi':
-          if (!options.wifiSsid) throw new Error('WiFi SSID is required');
-          qrContent = `WIFI:T:${options.wifiEncryption || 'WPA'};S:${options.wifiSsid};`;
+        case "wifi":
+          if (!options.wifiSsid) throw new Error("WiFi SSID is required");
+          qrContent = `WIFI:T:${options.wifiEncryption || "WPA"};S:${
+            options.wifiSsid
+          };`;
           if (options.wifiPassword) qrContent += `P:${options.wifiPassword};`;
-          qrContent += ';';
+          qrContent += ";";
           break;
-        case 'phone':
-          if (!options.phone) throw new Error('Phone number is required');
+        case "phone":
+          if (!options.phone) throw new Error("Phone number is required");
           qrContent = `tel:${options.phone}`;
           break;
-        case 'whatsapp':
-          if (!options.phone) throw new Error('Phone number is required');
+        case "whatsapp":
+          if (!options.phone) throw new Error("Phone number is required");
           qrContent = `https://wa.me/${options.phone}`;
           if (options.whatsappMessage) {
             qrContent += `?text=${encodeURIComponent(options.whatsappMessage)}`;
           }
           break;
-        case 'event':
-          if (!options.eventTitle) throw new Error('Event title is required');
+        case "event":
+          if (!options.eventTitle) throw new Error("Event title is required");
           qrContent = `BEGIN:VEVENT\nSUMMARY:${options.eventTitle}\n`;
           if (options.eventStart) {
             const start = new Date(options.eventStart);
-            qrContent += `DTSTART:${start.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\n`;
+            qrContent += `DTSTART:${
+              start.toISOString().replace(/[-:]/g, "").split(".")[0]
+            }Z\n`;
           }
           if (options.eventEnd) {
             const end = new Date(options.eventEnd);
-            qrContent += `DTEND:${end.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\n`;
+            qrContent += `DTEND:${
+              end.toISOString().replace(/[-:]/g, "").split(".")[0]
+            }Z\n`;
           }
-          if (options.eventLocation) qrContent += `LOCATION:${options.eventLocation}\n`;
-          if (options.eventDescription) qrContent += `DESCRIPTION:${options.eventDescription}\n`;
+          if (options.eventLocation)
+            qrContent += `LOCATION:${options.eventLocation}\n`;
+          if (options.eventDescription)
+            qrContent += `DESCRIPTION:${options.eventDescription}\n`;
           qrContent += `END:VEVENT`;
           break;
         default:
@@ -159,60 +180,74 @@ function QRCodeGenerator() {
       }
 
       if (!qrContent) {
-        throw new Error('Please enter content to generate QR code');
+        throw new Error("Please enter content to generate QR code");
       }
 
       const dataUrl = await QRCode.toDataURL(qrContent, {
         width: options.size,
         color: {
           dark: options.colorDark,
-          light: options.colorLight
+          light: options.colorLight,
         },
         errorCorrectionLevel: options.errorCorrectionLevel,
-        type: 'image/png',
+        type: "image/png",
         margin: 1,
       });
-      
+
       setQrCodeDataUrl(dataUrl);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate QR code');
-      console.error('QR code generation error:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to generate QR code"
+      );
+      console.error("QR code generation error:", err);
     } finally {
       setIsGenerating(false);
     }
   }, [options]);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setOptions(prev => ({ ...prev, [name]: value }));
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setOptions((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
-  const handleColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setOptions(prev => ({ ...prev, [name]: value }));
-  }, []);
+  const handleColorChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setOptions((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
-  const handleSelectChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setOptions(prev => ({ ...prev, [name]: value }));
-  }, []);
+  const handleSelectChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setOptions((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
-  const handleActionTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value } = e.target;
-    setOptions(_prev => ({ ...DEFAULT_OPTIONS, actionType: value }));
-    setQrCodeDataUrl('');
-  }, []);
+  const handleActionTypeChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const { value } = e.target;
+      setOptions((_prev) => ({ ...DEFAULT_OPTIONS, actionType: value }));
+      setQrCodeDataUrl("");
+    },
+    []
+  );
 
   const handleClear = useCallback(() => {
     setOptions(DEFAULT_OPTIONS);
-    setQrCodeDataUrl('');
+    setQrCodeDataUrl("");
     setError(null);
   }, []);
 
   const downloadQRCode = useCallback(() => {
     if (!qrCodeDataUrl) return;
-    
-    const link = document.createElement('a');
+
+    const link = document.createElement("a");
     link.href = qrCodeDataUrl;
     link.download = `qr-code-${options.actionType}-${Date.now()}.png`;
     document.body.appendChild(link);
@@ -222,7 +257,7 @@ function QRCodeGenerator() {
 
   const renderActionFields = () => {
     switch (options.actionType) {
-      case 'contact':
+      case "contact":
         return (
           <div className="space-y-3">
             <div>
@@ -234,7 +269,7 @@ function QRCodeGenerator() {
                 name="firstName"
                 type="text"
                 className="input-field"
-                value={options.firstName || ''}
+                value={options.firstName || ""}
                 onChange={handleInputChange}
               />
             </div>
@@ -247,7 +282,7 @@ function QRCodeGenerator() {
                 name="lastName"
                 type="text"
                 className="input-field"
-                value={options.lastName || ''}
+                value={options.lastName || ""}
                 onChange={handleInputChange}
               />
             </div>
@@ -260,7 +295,7 @@ function QRCodeGenerator() {
                 name="phone"
                 type="tel"
                 className="input-field"
-                value={options.phone || ''}
+                value={options.phone || ""}
                 onChange={handleInputChange}
               />
             </div>
@@ -273,13 +308,13 @@ function QRCodeGenerator() {
                 name="email"
                 type="email"
                 className="input-field"
-                value={options.email || ''}
+                value={options.email || ""}
                 onChange={handleInputChange}
               />
             </div>
           </div>
         );
-      case 'email':
+      case "email":
         return (
           <div className="space-y-3">
             <div>
@@ -291,7 +326,7 @@ function QRCodeGenerator() {
                 name="email"
                 type="email"
                 className="input-field"
-                value={options.email || ''}
+                value={options.email || ""}
                 onChange={handleInputChange}
                 required
               />
@@ -305,7 +340,7 @@ function QRCodeGenerator() {
                 name="emailSubject"
                 type="text"
                 className="input-field"
-                value={options.emailSubject || ''}
+                value={options.emailSubject || ""}
                 onChange={handleInputChange}
               />
             </div>
@@ -318,13 +353,13 @@ function QRCodeGenerator() {
                 name="emailBody"
                 className="input-field scrollbar"
                 rows={3}
-                value={options.emailBody || ''}
+                value={options.emailBody || ""}
                 onChange={handleInputChange}
               />
             </div>
           </div>
         );
-      case 'sms':
+      case "sms":
         return (
           <div className="space-y-3">
             <div>
@@ -336,7 +371,7 @@ function QRCodeGenerator() {
                 name="phone"
                 type="tel"
                 className="input-field"
-                value={options.phone || ''}
+                value={options.phone || ""}
                 onChange={handleInputChange}
                 required
               />
@@ -350,13 +385,13 @@ function QRCodeGenerator() {
                 name="smsBody"
                 className="input-field scrollbar"
                 rows={3}
-                value={options.smsBody || ''}
+                value={options.smsBody || ""}
                 onChange={handleInputChange}
               />
             </div>
           </div>
         );
-      case 'wifi':
+      case "wifi":
         return (
           <div className="space-y-3">
             <div>
@@ -368,7 +403,7 @@ function QRCodeGenerator() {
                 name="wifiSsid"
                 type="text"
                 className="input-field"
-                value={options.wifiSsid || ''}
+                value={options.wifiSsid || ""}
                 onChange={handleInputChange}
                 required
               />
@@ -382,7 +417,7 @@ function QRCodeGenerator() {
                 name="wifiPassword"
                 type="password"
                 className="input-field"
-                value={options.wifiPassword || ''}
+                value={options.wifiPassword || ""}
                 onChange={handleInputChange}
               />
             </div>
@@ -394,7 +429,7 @@ function QRCodeGenerator() {
                 id="wifiEncryption"
                 name="wifiEncryption"
                 className="input-field"
-                value={options.wifiEncryption || 'WPA'}
+                value={options.wifiEncryption || "WPA"}
                 onChange={handleSelectChange}
               >
                 <option value="WPA">WPA/WPA2</option>
@@ -404,7 +439,7 @@ function QRCodeGenerator() {
             </div>
           </div>
         );
-      case 'phone':
+      case "phone":
         return (
           <div className="space-y-3">
             <div>
@@ -416,14 +451,14 @@ function QRCodeGenerator() {
                 name="phone"
                 type="tel"
                 className="input-field"
-                value={options.phone || ''}
+                value={options.phone || ""}
                 onChange={handleInputChange}
                 required
               />
             </div>
           </div>
         );
-      case 'whatsapp':
+      case "whatsapp":
         return (
           <div className="space-y-3">
             <div>
@@ -435,7 +470,7 @@ function QRCodeGenerator() {
                 name="phone"
                 type="tel"
                 className="input-field"
-                value={options.phone || ''}
+                value={options.phone || ""}
                 onChange={handleInputChange}
                 required
               />
@@ -449,13 +484,13 @@ function QRCodeGenerator() {
                 name="whatsappMessage"
                 className="input-field scrollbar"
                 rows={3}
-                value={options.whatsappMessage || ''}
+                value={options.whatsappMessage || ""}
                 onChange={handleInputChange}
               />
             </div>
           </div>
         );
-      case 'event':
+      case "event":
         return (
           <div className="space-y-3">
             <div>
@@ -467,7 +502,7 @@ function QRCodeGenerator() {
                 name="eventTitle"
                 type="text"
                 className="input-field"
-                value={options.eventTitle || ''}
+                value={options.eventTitle || ""}
                 onChange={handleInputChange}
                 required
               />
@@ -481,7 +516,11 @@ function QRCodeGenerator() {
                 name="eventStart"
                 type="datetime-local"
                 className="input-field"
-                value={options.eventStart ? new Date(options.eventStart).toISOString().slice(0, 16) : ''}
+                value={
+                  options.eventStart
+                    ? new Date(options.eventStart).toISOString().slice(0, 16)
+                    : ""
+                }
                 onChange={handleInputChange}
               />
             </div>
@@ -494,7 +533,11 @@ function QRCodeGenerator() {
                 name="eventEnd"
                 type="datetime-local"
                 className="input-field"
-                value={options.eventEnd ? new Date(options.eventEnd).toISOString().slice(0, 16) : ''}
+                value={
+                  options.eventEnd
+                    ? new Date(options.eventEnd).toISOString().slice(0, 16)
+                    : ""
+                }
                 onChange={handleInputChange}
               />
             </div>
@@ -507,7 +550,7 @@ function QRCodeGenerator() {
                 name="eventLocation"
                 type="text"
                 className="input-field"
-                value={options.eventLocation || ''}
+                value={options.eventLocation || ""}
                 onChange={handleInputChange}
               />
             </div>
@@ -520,7 +563,7 @@ function QRCodeGenerator() {
                 name="eventDescription"
                 className="input-field scrollbar"
                 rows={3}
-                value={options.eventDescription || ''}
+                value={options.eventDescription || ""}
                 onChange={handleInputChange}
               />
             </div>
@@ -530,9 +573,9 @@ function QRCodeGenerator() {
         return (
           <div>
             <label htmlFor="text" className="form-label">
-              {options.actionType === 'url' ? 'Website URL:' : 'Text Content:'}
+              {options.actionType === "url" ? "Website URL:" : "Text Content:"}
             </label>
-            {options.actionType === 'text' ? (
+            {options.actionType === "text" ? (
               <textarea
                 id="text"
                 name="text"
@@ -573,11 +616,18 @@ function QRCodeGenerator() {
             <h3 className="text-lg font-semibold">QR Code Generator</h3>
             <ClearButton
               onClick={handleClear}
-              disabled={!options.text && !qrCodeDataUrl && !options.firstName && !options.phone && !options.email && !options.wifiSsid}
+              disabled={
+                !options.text &&
+                !qrCodeDataUrl &&
+                !options.firstName &&
+                !options.phone &&
+                !options.email &&
+                !options.wifiSsid
+              }
               aria-label="Clear inputs"
             />
           </div>
-
+          <hr className="line-break" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
@@ -591,8 +641,10 @@ function QRCodeGenerator() {
                   value={options.actionType}
                   onChange={handleActionTypeChange}
                 >
-                  {ACTION_TYPES.map(type => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
+                  {ACTION_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -683,29 +735,28 @@ function QRCodeGenerator() {
                 </div>
               </div>
 
-            <div className='flex justify-center item-center'>
-            <LoadingButton onClick={generateQRCode} disabled={isGenerating} isLoading={isGenerating}>
-                Generate QR Code
-            </LoadingButton>
-            </div>
+              <div className="flex justify-center item-center">
+                <LoadingButton
+                  onClick={generateQRCode}
+                  disabled={isGenerating}
+                  isLoading={isGenerating}
+                >
+                  Generate QR Code
+                </LoadingButton>
+              </div>
             </div>
 
             <div className="flex flex-col items-center justify-center">
               {qrCodeDataUrl ? (
                 <>
-                  <img 
-                    src={qrCodeDataUrl} 
-                    alt="Generated QR Code" 
+                  <img
+                    src={qrCodeDataUrl}
+                    alt="Generated QR Code"
                     className="mb-4 border rounded p-2 bg-white"
                   />
                   <div className="flex justify-center item center gap-4">
-                    <CopyButton 
-                      text={qrCodeDataUrl} 
-                    />
-                    <button
-                      onClick={downloadQRCode}
-                      className="btn-secondary"
-                    >
+                    <CopyButton text={qrCodeDataUrl} />
+                    <button onClick={downloadQRCode} className="btn-secondary">
                       <Download className="sm:w-6 sm:h-6 w-5 h-5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-100" />
                     </button>
                   </div>

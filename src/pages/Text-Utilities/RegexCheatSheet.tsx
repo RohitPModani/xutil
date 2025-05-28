@@ -1,15 +1,15 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ClearButton from '../../components/ClearButton';
-import ErrorBox from '../../components/ErrorBox';
-import CopyButton from '../../components/CopyButton';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { updateToolUsage } from '../../utils/toolUsage';
-import { REGEX_CATEGORIES } from '../../data/regexConstants'; // Suggested to move constants to separate file
+import { useEffect, useState, useMemo, useCallback } from "react";
+import BackToHome from "../../components/BackToHome";
+import SectionCard from "../../components/SectionCard";
+import ClearButton from "../../components/ClearButton";
+import ErrorBox from "../../components/ErrorBox";
+import CopyButton from "../../components/CopyButton";
+import SEODescription from "../../components/SEODescription";
+import { PageSEO } from "../../components/PageSEO";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { updateToolUsage } from "../../utils/toolUsage";
+import { REGEX_CATEGORIES } from "../../data/regexConstants"; // Suggested to move constants to separate file
 
 type RegexItem = {
   pattern: string;
@@ -45,13 +45,13 @@ const CategorySection = ({ category }: { category: RegexCategory }) => (
 
 function RegexCheatsheet() {
   const seo = seoDescriptions.regexCheatsheet;
-  
-  const [filter, setFilter] = useState('');
-  const [debouncedFilter, setDebouncedFilter] = useState('');
+
+  const [filter, setFilter] = useState("");
+  const [debouncedFilter, setDebouncedFilter] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    updateToolUsage('regex_cheatsheet');
+    updateToolUsage("regex_cheatsheet");
   }, []);
 
   useEffect(() => {
@@ -81,15 +81,18 @@ function RegexCheatsheet() {
   }, [debouncedFilter, filterItems]);
 
   const handleClear = useCallback(() => {
-    setFilter('');
+    setFilter("");
     setError(null);
   }, []);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      handleClear();
-    }
-  }, [handleClear]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClear();
+      }
+    },
+    [handleClear]
+  );
 
   return (
     <>
@@ -110,7 +113,7 @@ function RegexCheatsheet() {
               aria-label="Clear filter"
             />
           </div>
-
+          <hr className="line-break" />
           <div className="mb-4">
             <label htmlFor="filter" className="form-label">
               Filter Patterns:

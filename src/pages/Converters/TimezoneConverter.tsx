@@ -1,97 +1,128 @@
-import { useEffect, useState } from 'react';
-import moment from 'moment-timezone';
-import Select, { GroupBase } from 'react-select';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ClearButton from '../../components/ClearButton';
-import ErrorBox from '../../components/ErrorBox';
-import CopyButton from '../../components/CopyButton';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import SectionHeader from '../../components/SectionHeader'; // Import SectionHeader
-import seoDescriptions from '../../data/seoDescriptions';
-import { updateToolUsage } from '../../utils/toolUsage';
-import { CITY_TIMEZONES, TimezoneOption } from '../../data/cityTimezones';
-import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { ArrowLeftRight, ArrowUpDown, Clock, RefreshCcw, Trash2 } from 'lucide-react';
+import { useEffect, useState } from "react";
+import moment from "moment-timezone";
+import Select, { GroupBase } from "react-select";
+import BackToHome from "../../components/BackToHome";
+import SectionCard from "../../components/SectionCard";
+import ClearButton from "../../components/ClearButton";
+import ErrorBox from "../../components/ErrorBox";
+import CopyButton from "../../components/CopyButton";
+import SEODescription from "../../components/SEODescription";
+import { PageSEO } from "../../components/PageSEO";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import SectionHeader from "../../components/SectionHeader"; // Import SectionHeader
+import seoDescriptions from "../../data/seoDescriptions";
+import { updateToolUsage } from "../../utils/toolUsage";
+import { CITY_TIMEZONES, TimezoneOption } from "../../data/cityTimezones";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
+import {
+  ArrowLeftRight,
+  ArrowUpDown,
+  Clock,
+  RefreshCcw,
+  Trash2,
+} from "lucide-react";
 
 function TimezoneConverter() {
   const seo = seoDescriptions.timezone;
-  const [datetimeStr, setDatetimeStr] = useState(moment().format('YYYY-MM-DDTHH:mm'));
+  const [datetimeStr, setDatetimeStr] = useState(
+    moment().format("YYYY-MM-DDTHH:mm")
+  );
   const [fromZone, setFromZone] = useState<TimezoneOption | null>(null);
   const [toZone, setToZone] = useState<TimezoneOption | null>(null);
-  const [convertedDatetime, setConvertedDatetime] = useState<string>('');
+  const [convertedDatetime, setConvertedDatetime] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [multiZoneError, setMultiZoneError] = useState<string | null>(null);
   const [rangeZoneError, setRangeZoneError] = useState<string | null>(null);
   const [isFromZoneDST, setIsFromZoneDST] = useState(false);
   const [isToZoneDST, setIsToZoneDST] = useState(false);
   const [savedTimezones, setSavedTimezones] = useState<TimezoneOption[]>([]);
-  const [currentTime, setCurrentTime] = useState(moment().format('YYYY-MM-DD HH:mm:ss'));
-  const [multiZoneDatetime, setMultiZoneDatetime] = useState(moment().format('YYYY-MM-DDTHH:mm'));
-  const [selectedMultiZones, setSelectedMultiZones] = useState<TimezoneOption[]>([]);
-  const [rangeStartDatetime, setRangeStartDatetime] = useState(moment().format('YYYY-MM-DDTHH:mm'));
-  const [rangeEndDatetime, setRangeEndDatetime] = useState(moment().add(1, 'hour').format('YYYY-MM-DDTHH:mm'));
-  const [selectedRangeZones, setSelectedRangeZones] = useState<TimezoneOption[]>([]);
-  const [multiZoneFromZone, setMultiZoneFromZone] = useState<TimezoneOption | null>(null);
-  const [rangeZoneFromZone, setRangeZoneFromZone] = useState<TimezoneOption | null>(null);
-  const isMobile = useMediaQuery('(max-width: 640px)');
+  const [currentTime, setCurrentTime] = useState(
+    moment().format("YYYY-MM-DD HH:mm:ss")
+  );
+  const [multiZoneDatetime, setMultiZoneDatetime] = useState(
+    moment().format("YYYY-MM-DDTHH:mm")
+  );
+  const [selectedMultiZones, setSelectedMultiZones] = useState<
+    TimezoneOption[]
+  >([]);
+  const [rangeStartDatetime, setRangeStartDatetime] = useState(
+    moment().format("YYYY-MM-DDTHH:mm")
+  );
+  const [rangeEndDatetime, setRangeEndDatetime] = useState(
+    moment().add(1, "hour").format("YYYY-MM-DDTHH:mm")
+  );
+  const [selectedRangeZones, setSelectedRangeZones] = useState<
+    TimezoneOption[]
+  >([]);
+  const [multiZoneFromZone, setMultiZoneFromZone] =
+    useState<TimezoneOption | null>(null);
+  const [rangeZoneFromZone, setRangeZoneFromZone] =
+    useState<TimezoneOption | null>(null);
+  const isMobile = useMediaQuery("(max-width: 640px)");
   const [isDark, setIsDark] = useState(() =>
-    typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
+    typeof document !== "undefined"
+      ? document.documentElement.classList.contains("dark")
+      : false
   );
 
   const allTimezones = CITY_TIMEZONES.flatMap((group) => group.options);
 
-  // Load saved timezones 
+  // Load saved timezones
   useEffect(() => {
-    const saved = localStorage.getItem('savedTimezones');
+    const saved = localStorage.getItem("savedTimezones");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         const validTimezones = parsed
           .map((tzLabel: string) => {
             for (const group of CITY_TIMEZONES) {
-              const found = group.options.find(option => option.label === tzLabel);
+              const found = group.options.find(
+                (option) => option.label === tzLabel
+              );
               if (found) return found;
             }
             return null;
           })
-          .filter((tz: TimezoneOption | null) => tz !== null) as TimezoneOption[];
+          .filter(
+            (tz: TimezoneOption | null) => tz !== null
+          ) as TimezoneOption[];
         setSavedTimezones(validTimezones);
       } catch (e) {
-        console.error('Error parsing saved timezones', e);
+        console.error("Error parsing saved timezones", e);
       }
     }
   }, []);
 
-  // Save timezones to localStorage 
+  // Save timezones to localStorage
   useEffect(() => {
     if (savedTimezones.length > 0) {
-      localStorage.setItem('savedTimezones', JSON.stringify(savedTimezones.map(tz => tz.label)));
+      localStorage.setItem(
+        "savedTimezones",
+        JSON.stringify(savedTimezones.map((tz) => tz.label))
+      );
     } else {
-      localStorage.removeItem('savedTimezones');
+      localStorage.removeItem("savedTimezones");
     }
   }, [savedTimezones]);
 
-  // Update current time every second 
+  // Update current time every second
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTime(moment().format('YYYY-MM-DD HH:mm:ss'));
+      setCurrentTime(moment().format("YYYY-MM-DD HH:mm:ss"));
     }, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Dark mode observer 
+  // Dark mode observer
   useEffect(() => {
     const observer = new MutationObserver(() => {
-      const dark = document.documentElement.classList.contains('dark');
+      const dark = document.documentElement.classList.contains("dark");
       setIsDark(dark);
     });
 
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['class'],
+      attributeFilter: ["class"],
     });
 
     return () => observer.disconnect();
@@ -99,18 +130,20 @@ function TimezoneConverter() {
 
   // Set default timezones
   useEffect(() => {
-    let localZone = moment.tz.guess() || 'UTC';
-    localZone = localZone === 'Asia/Calcutta' ? 'Asia/Kolkata' : localZone;
-    const defaultFromZone = allTimezones.find((tz) => tz.value === localZone) || allTimezones.find((tz) => tz.value === 'UTC');
+    let localZone = moment.tz.guess() || "UTC";
+    localZone = localZone === "Asia/Calcutta" ? "Asia/Kolkata" : localZone;
+    const defaultFromZone =
+      allTimezones.find((tz) => tz.value === localZone) ||
+      allTimezones.find((tz) => tz.value === "UTC");
     setFromZone(defaultFromZone || null);
-    setToZone(allTimezones.find((tz) => tz.value === 'UTC') || null);
-    setDatetimeStr(moment().format('YYYY-MM-DDTHH:mm'));
-    setMultiZoneFromZone(defaultFromZone || null); 
+    setToZone(allTimezones.find((tz) => tz.value === "UTC") || null);
+    setDatetimeStr(moment().format("YYYY-MM-DDTHH:mm"));
+    setMultiZoneFromZone(defaultFromZone || null);
     setRangeZoneFromZone(defaultFromZone || null);
   }, []);
 
   useEffect(() => {
-    updateToolUsage('timezone');
+    updateToolUsage("timezone");
   }, []);
 
   // Update datetime validation for datetime-local format
@@ -122,7 +155,7 @@ function TimezoneConverter() {
   const checkDST = (zone: string, datetime: string): boolean => {
     if (!zone || !datetime || !isValidDatetime(datetime)) return false;
     try {
-      const dt = moment.tz(datetime, 'YYYY-MM-DDTHH:mm', zone);
+      const dt = moment.tz(datetime, "YYYY-MM-DDTHH:mm", zone);
       return dt.isValid() && dt.isDST();
     } catch {
       return false;
@@ -130,63 +163,83 @@ function TimezoneConverter() {
   };
 
   // Update conversion to handle datetime-local format
-  const convertDatetime = (datetime: string, fromZoneVal: string, toZoneVal: string): string => {
+  const convertDatetime = (
+    datetime: string,
+    fromZoneVal: string,
+    toZoneVal: string
+  ): string => {
     if (!datetime || !fromZoneVal || !toZoneVal) {
-      setError('Please fill in all fields.');
-      return '';
+      setError("Please fill in all fields.");
+      return "";
     }
 
     if (!isValidDatetime(datetime)) {
-      setError('Invalid datetime format. Use YYYY-MM-DD HH:mm');
-      return '';
+      setError("Invalid datetime format. Use YYYY-MM-DD HH:mm");
+      return "";
     }
 
     try {
-      const dt = moment.tz(datetime, 'YYYY-MM-DDTHH:mm', fromZoneVal);
+      const dt = moment.tz(datetime, "YYYY-MM-DDTHH:mm", fromZoneVal);
       if (!dt.isValid()) {
-        setError('Invalid datetime or timezone.');
-        return '';
+        setError("Invalid datetime or timezone.");
+        return "";
       }
-      const converted = dt.tz(toZoneVal).format('YYYY-MM-DD HH:mm:ss');
+      const converted = dt.tz(toZoneVal).format("YYYY-MM-DD HH:mm:ss");
       setError(null);
       return converted;
     } catch (err) {
-      setError('Conversion failed.');
-      return '';
+      setError("Conversion failed.");
+      return "";
     }
   };
 
   // Update to handle datetime-local format for saved timezones
-  const getCurrentTimeInTimezone = (timezone: string, datetime: string = currentTime): string => {
+  const getCurrentTimeInTimezone = (
+    timezone: string,
+    datetime: string = currentTime
+  ): string => {
     try {
-      return moment.tz(datetime, 'YYYY-MM-DD HH:mm:ss', 'UTC').tz(timezone).format('YYYY-MM-DD HH:mm:ss');
+      return moment
+        .tz(datetime, "YYYY-MM-DD HH:mm:ss", "UTC")
+        .tz(timezone)
+        .format("YYYY-MM-DD HH:mm:ss");
     } catch {
-      return 'Invalid timezone';
+      return "Invalid timezone";
     }
   };
 
   useEffect(() => {
-    const result = convertDatetime(datetimeStr, fromZone?.value || '', toZone?.value || '');
+    const result = convertDatetime(
+      datetimeStr,
+      fromZone?.value || "",
+      toZone?.value || ""
+    );
     setConvertedDatetime(result);
-    setIsFromZoneDST(checkDST(fromZone?.value || '', datetimeStr));
-    setIsToZoneDST(checkDST(toZone?.value || '', datetimeStr));
+    setIsFromZoneDST(checkDST(fromZone?.value || "", datetimeStr));
+    setIsToZoneDST(checkDST(toZone?.value || "", datetimeStr));
   }, [datetimeStr, fromZone, toZone]);
 
   const handleSwap = () => {
     setFromZone(toZone);
     setToZone(fromZone);
-    setDatetimeStr(convertedDatetime.split(' ')[0] + 'T' + convertedDatetime.split(' ')[1].slice(0, 5));
-    setConvertedDatetime('');
+    setDatetimeStr(
+      convertedDatetime.split(" ")[0] +
+        "T" +
+        convertedDatetime.split(" ")[1].slice(0, 5)
+    );
+    setConvertedDatetime("");
     setError(null);
   };
 
   const handleClear = () => {
-    setDatetimeStr(moment().format('YYYY-MM-DDTHH:mm'));
-    const localZone = moment.tz.guess() || 'UTC';
-    const defaultFromZone = allTimezones.find((tz) => tz.value === localZone) || allTimezones.find((tz) => tz.value === 'UTC');
+    setDatetimeStr(moment().format("YYYY-MM-DDTHH:mm"));
+    const localZone = moment.tz.guess() || "UTC";
+    const defaultFromZone =
+      allTimezones.find((tz) => tz.value === localZone) ||
+      allTimezones.find((tz) => tz.value === "UTC");
     setFromZone(defaultFromZone || null);
-    setToZone(allTimezones.find((tz) => tz.value === 'UTC') || null);
-    setConvertedDatetime('');
+    setToZone(allTimezones.find((tz) => tz.value === "UTC") || null);
+    setConvertedDatetime("");
     setError(null);
     setIsFromZoneDST(false);
     setIsToZoneDST(false);
@@ -196,21 +249,21 @@ function TimezoneConverter() {
     const value = e.target.value;
     setDatetimeStr(value);
     if (value && !isValidDatetime(value)) {
-      setError('Invalid datetime format. Use YYYY-MM-DD HH:mm');
+      setError("Invalid datetime format. Use YYYY-MM-DD HH:mm");
     } else if (fromZone && toZone) {
       setError(null);
     }
   };
 
-  // Handlers for saved timezones 
+  // Handlers for saved timezones
   const handleAddTimezone = (option: TimezoneOption | null) => {
     if (!option) return;
-    if (savedTimezones.some(tz => tz.label === option.label)) {
-      setError('This city is already saved.');
+    if (savedTimezones.some((tz) => tz.label === option.label)) {
+      setError("This city is already saved.");
       return;
     }
     if (savedTimezones.length >= 3) {
-      setError('Maximum 3 timezones can be saved.');
+      setError("Maximum 3 timezones can be saved.");
       return;
     }
     setSavedTimezones([...savedTimezones, option]);
@@ -218,21 +271,25 @@ function TimezoneConverter() {
   };
 
   const handleRemoveTimezone = (timezone: TimezoneOption) => {
-    setSavedTimezones(savedTimezones.filter(tz => tz.label !== timezone.label));
+    setSavedTimezones(
+      savedTimezones.filter((tz) => tz.label !== timezone.label)
+    );
   };
 
   const handleClearSavedTimezones = () => {
     setSavedTimezones([]);
-    localStorage.removeItem('savedTimezones');
+    localStorage.removeItem("savedTimezones");
     setError(null);
   };
 
   // Handlers for multi-timezone section
-  const handleMultiZoneDatetimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMultiZoneDatetimeChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const value = e.target.value;
     setMultiZoneDatetime(value);
     if (value && !isValidDatetime(value)) {
-      setMultiZoneError('Invalid datetime format. Use YYYY-MM-DD HH:mm');
+      setMultiZoneError("Invalid datetime format. Use YYYY-MM-DD HH:mm");
     } else {
       setMultiZoneError(null);
     }
@@ -240,12 +297,12 @@ function TimezoneConverter() {
 
   const handleAddMultiZone = (option: TimezoneOption | null) => {
     if (!option) return;
-    if (selectedMultiZones.some(tz => tz.label === option.label)) {
-      setMultiZoneError('This city is already selected.');
+    if (selectedMultiZones.some((tz) => tz.label === option.label)) {
+      setMultiZoneError("This city is already selected.");
       return;
     }
     if (selectedMultiZones.length >= 10) {
-      setMultiZoneError('Maximum 10 timezones can be selected.');
+      setMultiZoneError("Maximum 10 timezones can be selected.");
       return;
     }
     setSelectedMultiZones([...selectedMultiZones, option]);
@@ -254,34 +311,44 @@ function TimezoneConverter() {
 
   const handleClearMultiZones = () => {
     setSelectedMultiZones([]);
-    setMultiZoneDatetime(moment().format('YYYY-MM-DDTHH:mm'));
+    setMultiZoneDatetime(moment().format("YYYY-MM-DDTHH:mm"));
     setMultiZoneError(null);
   };
 
   // Handlers for range timezone section
-  const handleRangeStartDatetimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRangeStartDatetimeChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const value = e.target.value;
     setRangeStartDatetime(value);
     if (value && !isValidDatetime(value)) {
-      setRangeZoneError('Invalid start datetime format. Use YYYY-MM-DD HH:mm');
+      setRangeZoneError("Invalid start datetime format. Use YYYY-MM-DD HH:mm");
     } else if (rangeEndDatetime && !isValidDatetime(rangeEndDatetime)) {
-      setRangeZoneError('Invalid end datetime format. Use YYYY-MM-DD HH:mm');
-    } else if (rangeEndDatetime && moment(value).isAfter(moment(rangeEndDatetime))) {
-      setRangeZoneError('Start datetime cannot be after end datetime.');
+      setRangeZoneError("Invalid end datetime format. Use YYYY-MM-DD HH:mm");
+    } else if (
+      rangeEndDatetime &&
+      moment(value).isAfter(moment(rangeEndDatetime))
+    ) {
+      setRangeZoneError("Start datetime cannot be after end datetime.");
     } else {
       setRangeZoneError(null);
     }
   };
 
-  const handleRangeEndDatetimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRangeEndDatetimeChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const value = e.target.value;
     setRangeEndDatetime(value);
     if (value && !isValidDatetime(value)) {
-      setRangeZoneError('Invalid end datetime format. Use YYYY-MM-DD HH:mm');
+      setRangeZoneError("Invalid end datetime format. Use YYYY-MM-DD HH:mm");
     } else if (rangeStartDatetime && !isValidDatetime(rangeStartDatetime)) {
-      setRangeZoneError('Invalid start datetime format. Use YYYY-MM-DD HH:mm');
-    } else if (rangeStartDatetime && moment(rangeStartDatetime).isAfter(moment(value))) {
-      setRangeZoneError('End datetime cannot be before start datetime.');
+      setRangeZoneError("Invalid start datetime format. Use YYYY-MM-DD HH:mm");
+    } else if (
+      rangeStartDatetime &&
+      moment(rangeStartDatetime).isAfter(moment(value))
+    ) {
+      setRangeZoneError("End datetime cannot be before start datetime.");
     } else {
       setRangeZoneError(null);
     }
@@ -289,12 +356,12 @@ function TimezoneConverter() {
 
   const handleAddRangeZone = (option: TimezoneOption | null) => {
     if (!option) return;
-    if (selectedRangeZones.some(tz => tz.label === option.label)) {
-      setRangeZoneError('This city is already selected.');
+    if (selectedRangeZones.some((tz) => tz.label === option.label)) {
+      setRangeZoneError("This city is already selected.");
       return;
     }
     if (selectedRangeZones.length >= 10) {
-      setRangeZoneError('Maximum 10 timezones can be selected.');
+      setRangeZoneError("Maximum 10 timezones can be selected.");
       return;
     }
     setSelectedRangeZones([...selectedRangeZones, option]);
@@ -303,45 +370,60 @@ function TimezoneConverter() {
 
   const handleClearRangeZones = () => {
     setSelectedRangeZones([]);
-    setRangeStartDatetime(moment().format('YYYY-MM-DDTHH:mm'));
-    setRangeEndDatetime(moment().add(1, 'hour').format('YYYY-MM-DDTHH:mm'));
+    setRangeStartDatetime(moment().format("YYYY-MM-DDTHH:mm"));
+    setRangeEndDatetime(moment().add(1, "hour").format("YYYY-MM-DDTHH:mm"));
     setRangeZoneError(null);
   };
 
   // Function to convert range datetime to selected timezone
-  const convertRangeDatetime = (start: string, end: string, timezone: string): { start: string; end: string } => {
+  const convertRangeDatetime = (
+    start: string,
+    end: string,
+    timezone: string
+  ): { start: string; end: string } => {
     try {
-      const startDt = moment.tz(start, 'YYYY-MM-DDTHH:mm', rangeZoneFromZone?.value || 'UTC')
+      const startDt = moment
+        .tz(start, "YYYY-MM-DDTHH:mm", rangeZoneFromZone?.value || "UTC")
         .tz(timezone)
-        .format('YYYY-MM-DD HH:mm:ss');
-      const endDt = moment.tz(end, 'YYYY-MM-DDTHH:mm', rangeZoneFromZone?.value || 'UTC')
+        .format("YYYY-MM-DD HH:mm:ss");
+      const endDt = moment
+        .tz(end, "YYYY-MM-DDTHH:mm", rangeZoneFromZone?.value || "UTC")
         .tz(timezone)
-        .format('YYYY-MM-DD HH:mm:ss');
+        .format("YYYY-MM-DD HH:mm:ss");
       return { start: startDt, end: endDt };
     } catch {
-      return { start: 'Invalid timezone', end: 'Invalid timezone' };
+      return { start: "Invalid timezone", end: "Invalid timezone" };
     }
   };
 
   // Convert selected multi-zones
   const multiZoneResults = selectedMultiZones.reduce((acc, tz) => {
     try {
-      const dt = moment.tz(multiZoneDatetime, 'YYYY-MM-DDTHH:mm', multiZoneFromZone?.value || 'UTC')
+      const dt = moment
+        .tz(
+          multiZoneDatetime,
+          "YYYY-MM-DDTHH:mm",
+          multiZoneFromZone?.value || "UTC"
+        )
         .tz(tz.value)
-        .format('YYYY-MM-DD HH:mm:ss');
+        .format("YYYY-MM-DD HH:mm:ss");
       acc[tz.label] = dt;
     } catch {
-      acc[tz.label] = 'Invalid timezone';
+      acc[tz.label] = "Invalid timezone";
     }
     return acc;
   }, {} as Record<string, string>);
 
   const rangeZoneResults = selectedRangeZones.reduce((acc, tz) => {
-    acc[tz.label] = convertRangeDatetime(rangeStartDatetime, rangeEndDatetime, tz.value);
+    acc[tz.label] = convertRangeDatetime(
+      rangeStartDatetime,
+      rangeEndDatetime,
+      tz.value
+    );
     return acc;
   }, {} as Record<string, { start: string; end: string }>);
 
-  // Custom filter and styles for react-select 
+  // Custom filter and styles for react-select
   const filterOption = ({ label }: TimezoneOption, input: string): boolean => {
     return input ? label.toLowerCase().includes(input.toLowerCase()) : true;
   };
@@ -349,60 +431,67 @@ function TimezoneConverter() {
   const customSelectStyles = {
     control: (provided: any, state: any) => ({
       ...provided,
-      backgroundColor: isDark ? '#27272a' : '#ffffff',
+      backgroundColor: isDark ? "#27272a" : "#ffffff",
       borderColor: state.isFocused
-        ? isDark ? '#52525b' : '#d4d4d8'
-        : isDark ? '#3f3f46' : '#e5e7eb',
-      color: isDark ? '#ffffff' : '#1f2937',
-      padding: '0.25rem 0.5rem',
-      borderRadius: '0.375rem',
-      fontSize: '0.875rem',
-      minHeight: '2.5rem',
-      transition: 'all 0.2s ease',
-      boxShadow: state.isFocused ? '0 0 0 1px rgba(156,163,175,0.5)' : 'none',
+        ? isDark
+          ? "#52525b"
+          : "#d4d4d8"
+        : isDark
+        ? "#3f3f46"
+        : "#e5e7eb",
+      color: isDark ? "#ffffff" : "#1f2937",
+      padding: "0.25rem 0.5rem",
+      borderRadius: "0.375rem",
+      fontSize: "0.875rem",
+      minHeight: "2.5rem",
+      transition: "all 0.2s ease",
+      boxShadow: state.isFocused ? "0 0 0 1px rgba(156,163,175,0.5)" : "none",
     }),
     singleValue: (provided: any) => ({
       ...provided,
-      color: isDark ? '#ffffff' : '#1f2937',
+      color: isDark ? "#ffffff" : "#1f2937",
     }),
     input: (provided: any) => ({
       ...provided,
-      color: isDark ? '#ffffff' : '#1f2937',
+      color: isDark ? "#ffffff" : "#1f2937",
     }),
     placeholder: (provided: any) => ({
       ...provided,
-      color: isDark ? '#a1a1aa' : '#9ca3af',
+      color: isDark ? "#a1a1aa" : "#9ca3af",
     }),
     menu: (provided: any) => ({
       ...provided,
-      backgroundColor: isDark ? '#27272a' : '#ffffff',
-      borderRadius: '0.375rem',
+      backgroundColor: isDark ? "#27272a" : "#ffffff",
+      borderRadius: "0.375rem",
       zIndex: 20,
-      marginTop: '0.25rem',
-      border: '1px solid',
-      borderColor: isDark ? '#3f3f46' : '#e5e7eb',
+      marginTop: "0.25rem",
+      border: "1px solid",
+      borderColor: isDark ? "#3f3f46" : "#e5e7eb",
       boxShadow: isDark
-        ? '0 1px 3px rgba(0,0,0,0.5)'
-        : '0 1px 2px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1)',
+        ? "0 1px 3px rgba(0,0,0,0.5)"
+        : "0 1px 2px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1)",
     }),
     option: (provided: any, state: any) => ({
       ...provided,
-      backgroundColor: 
-        state.isFocused
-        ? isDark ? '#3f3f46' : '#f3f4f6'
-        : isDark ? '#27272a' : '#ffffff',
-      color: state.isSelected ? '#ffffff' : isDark ? '#f4f4f5' : '#1f2937',
-      padding: '0.5rem 0.75rem',
-      cursor: 'pointer',
+      backgroundColor: state.isFocused
+        ? isDark
+          ? "#3f3f46"
+          : "#f3f4f6"
+        : isDark
+        ? "#27272a"
+        : "#ffffff",
+      color: state.isSelected ? "#ffffff" : isDark ? "#f4f4f5" : "#1f2937",
+      padding: "0.5rem 0.75rem",
+      cursor: "pointer",
     }),
     groupHeading: (provided: any) => ({
       ...provided,
       fontWeight: 600,
-      color: isDark ? '#a1a1aa' : '#4b5563',
-      padding: '0.5rem 0.75rem',
-      backgroundColor: isDark ? '#1e1e1e' : '#f9fafb',
-      fontSize: '0.75rem',
-      textTransform: 'uppercase',
+      color: isDark ? "#a1a1aa" : "#4b5563",
+      padding: "0.5rem 0.75rem",
+      backgroundColor: isDark ? "#1e1e1e" : "#f9fafb",
+      fontSize: "0.75rem",
+      textTransform: "uppercase",
     }),
   };
 
@@ -433,6 +522,7 @@ function TimezoneConverter() {
               Reset
             </button>
           </div>
+          <hr className="line-break" />
           <div className="sm:mb-4 mb-2">
             <label htmlFor="saved_timezone" className="form-label">
               Add Timezone (Max 3):
@@ -467,7 +557,10 @@ function TimezoneConverter() {
                     <div className="w-full mono-output break-all text-sm">
                       {getCurrentTimeInTimezone(tz.value)}
                     </div>
-                    <CopyButton text={getCurrentTimeInTimezone(tz.value)} aria-label={`Copy current time in ${tz.label}`} />
+                    <CopyButton
+                      text={getCurrentTimeInTimezone(tz.value)}
+                      aria-label={`Copy current time in ${tz.label}`}
+                    />
                   </div>
                 </div>
               ))}
@@ -485,15 +578,20 @@ function TimezoneConverter() {
               aria-label="Clear all inputs and results"
             />
           </div>
-
+          <hr className="line-break" />
           <div className="flex-1 space-y-4">
-            <label htmlFor="datetime" className="form-label mb-0 flex items-center">
+            <label
+              htmlFor="datetime"
+              className="form-label mb-0 flex items-center"
+            >
               <Clock size={16} className="mr-1" /> Input Datetime:
             </label>
             <input
               id="datetime"
               type="datetime-local"
-              className={`input-field ${error && datetimeStr ? 'border-red-500' : ''}`}
+              className={`input-field ${
+                error && datetimeStr ? "border-red-500" : ""
+              }`}
               value={datetimeStr}
               onChange={handleDatetimeChange}
               aria-label="Select datetime for timezone conversion"
@@ -524,7 +622,11 @@ function TimezoneConverter() {
                 title="Swap source and target timezones"
                 aria-label="Swap source and target timezones"
               >
-                {isMobile ? <ArrowUpDown size={15} /> : <ArrowLeftRight size={20} />}
+                {isMobile ? (
+                  <ArrowUpDown size={15} />
+                ) : (
+                  <ArrowLeftRight size={20} />
+                )}
               </button>
             </div>
             <div className="flex-1">
@@ -548,18 +650,24 @@ function TimezoneConverter() {
           <div className="result-box mt-4">
             <div className="flex justify-between items-center mb-2">
               <label className="form-label">Converted Datetime</label>
-              <CopyButton text={convertedDatetime} aria-label="Copy converted datetime" />
+              <CopyButton
+                text={convertedDatetime}
+                aria-label="Copy converted datetime"
+              />
             </div>
             {convertedDatetime && (
               <div className="scrollbox mt-2">
                 <div className="inner-result">
-                  <div className="w-full mono-output break-all text-sm">{convertedDatetime}</div>
+                  <div className="w-full mono-output break-all text-sm">
+                    {convertedDatetime}
+                  </div>
                 </div>
               </div>
             )}
             {(isFromZoneDST || isToZoneDST) && convertedDatetime && (
               <div className="mt-2 text-yellow-600 dark:text-yellow-400 text-sm">
-                <strong>Warning:</strong> {isFromZoneDST && isToZoneDST
+                <strong>Warning:</strong>{" "}
+                {isFromZoneDST && isToZoneDST
                   ? `Both ${fromZone?.label} and ${toZone?.label} are currently observing Daylight Saving Time (DST).`
                   : isFromZoneDST
                   ? `${fromZone?.label} is currently observing Daylight Saving Time (DST).`
@@ -581,15 +689,20 @@ function TimezoneConverter() {
               aria-label="Clear all selected timezones and reset datetime"
             />
           </div>
-
+          <hr className="line-break" />
           <div className="flex-1 space-y-4">
-            <label htmlFor="multi_datetime" className="form-label mb-0 flex items-center">
+            <label
+              htmlFor="multi_datetime"
+              className="form-label mb-0 flex items-center"
+            >
               <Clock size={16} className="mr-1" /> Input Datetime:
             </label>
             <input
               id="multi_datetime"
               type="datetime-local"
-              className={`input-field ${multiZoneError && multiZoneDatetime ? 'border-red-500' : ''}`}
+              className={`input-field ${
+                multiZoneError && multiZoneDatetime ? "border-red-500" : ""
+              }`}
               value={multiZoneDatetime}
               onChange={handleMultiZoneDatetimeChange}
               aria-label="Select datetime for multiple timezone conversion"
@@ -631,10 +744,12 @@ function TimezoneConverter() {
               <label className="form-label text-base">Conversion Result</label>
               {Object.keys(multiZoneResults).length > 0 && (
                 <div className="flex items-center gap-2">
-                  <CopyButton 
-                    text={Object.entries(multiZoneResults).map(([k, v]) => `${k}: ${v}`).join('\n')} 
-                    copyType='CopyAll'
-                    className='mb-2'
+                  <CopyButton
+                    text={Object.entries(multiZoneResults)
+                      .map(([k, v]) => `${k}: ${v}`)
+                      .join("\n")}
+                    copyType="CopyAll"
+                    className="mb-2"
                     aria-label="Copy all conversion results"
                   />
                 </div>
@@ -646,7 +761,10 @@ function TimezoneConverter() {
                   {Object.entries(multiZoneResults).map(([key, val]) => {
                     const displayLabel = key;
                     return (
-                      <div key={key} className="inner-result flex justify-between items-center">
+                      <div
+                        key={key}
+                        className="inner-result flex justify-between items-center"
+                      >
                         <span className="font-mono text-zinc-800 dark:text-white whitespace-pre-wrap break-all">
                           {displayLabel}: {val}
                         </span>
@@ -680,29 +798,39 @@ function TimezoneConverter() {
               aria-label="Clear all selected timezones and reset datetime range"
             />
           </div>
-
+          <hr className="line-break" />
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 space-y-4">
-              <label htmlFor="range_start_datetime" className="form-label mb-0 flex items-center">
+              <label
+                htmlFor="range_start_datetime"
+                className="form-label mb-0 flex items-center"
+              >
                 <Clock size={16} className="mr-1" /> Start Datetime:
               </label>
               <input
                 id="range_start_datetime"
                 type="datetime-local"
-                className={`input-field ${rangeZoneError && rangeStartDatetime ? 'border-red-500' : ''}`}
+                className={`input-field ${
+                  rangeZoneError && rangeStartDatetime ? "border-red-500" : ""
+                }`}
                 value={rangeStartDatetime}
                 onChange={handleRangeStartDatetimeChange}
                 aria-label="Select start datetime for range conversion"
               />
             </div>
             <div className="flex-1 space-y-4">
-              <label htmlFor="range_end_datetime" className="form-label mb-0 flex items-center">
+              <label
+                htmlFor="range_end_datetime"
+                className="form-label mb-0 flex items-center"
+              >
                 <Clock size={16} className="mr-1" /> End Datetime:
               </label>
               <input
                 id="range_end_datetime"
                 type="datetime-local"
-                className={`input-field ${rangeZoneError && rangeEndDatetime ? 'border-red-500' : ''}`}
+                className={`input-field ${
+                  rangeZoneError && rangeEndDatetime ? "border-red-500" : ""
+                }`}
                 value={rangeEndDatetime}
                 onChange={handleRangeEndDatetimeChange}
                 aria-label="Select end datetime for range conversion"
@@ -745,13 +873,17 @@ function TimezoneConverter() {
 
           <div className="result-box mt-4">
             <div className="flex justify-between items-center">
-              <label className="form-label text-base">Conversion Range Results</label>
+              <label className="form-label text-base">
+                Conversion Range Results
+              </label>
               {Object.keys(rangeZoneResults).length > 0 && (
                 <div className="flex items-center gap-2">
-                  <CopyButton 
-                    text={Object.entries(rangeZoneResults).map(([k, v]) => `${k}: ${v.start} to ${v.end}`).join('\n')} 
-                    copyType='CopyAll'
-                    className='mb-2'
+                  <CopyButton
+                    text={Object.entries(rangeZoneResults)
+                      .map(([k, v]) => `${k}: ${v.start} to ${v.end}`)
+                      .join("\n")}
+                    copyType="CopyAll"
+                    className="mb-2"
                     aria-label="Copy all range conversion results"
                   />
                 </div>
@@ -763,7 +895,10 @@ function TimezoneConverter() {
                   {Object.entries(rangeZoneResults).map(([key, val]) => {
                     const displayLabel = key;
                     return (
-                      <div key={key} className="inner-result flex justify-between items-center">
+                      <div
+                        key={key}
+                        className="inner-result flex justify-between items-center"
+                      >
                         <span className="font-mono text-zinc-800 dark:text-white whitespace-pre-wrap break-all">
                           {displayLabel}: {val.start} to {val.end}
                         </span>

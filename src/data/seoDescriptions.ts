@@ -21,7 +21,7 @@ Perfect for:
 - API developers switching between formats
 - Anyone who's ever screamed "Why won't these brackets work?!"
 
-Pro tip: Bookmark this for when your YAML suddenly needs to be JSON (or vice versa) at 2 AM. No judgment here.`
+Pro tip: Bookmark this for when your YAML suddenly needs to be JSON (or vice versa) at 2 AM. No judgment here.`,
   },
 
   xmlJson: {
@@ -40,7 +40,7 @@ Real-world uses:
 - Making SOAP APIs play nice with REST clients
 - When your boss says "Make it work" and you just need it done
 
-Fun fact: This tool has prevented approximately 1.2 million developer meltdowns (estimate may be low).`
+Fun fact: This tool has prevented approximately 1.2 million developer meltdowns (estimate may be low).`,
   },
 
   baseEncoder: {
@@ -59,7 +59,7 @@ When to use:
 - Debugging JWT tokens without going cross-eyed
 - That moment when you need to email binary data safely
 
-PS: We don't track your data. At all. Pinky promise.`
+PS: We don't track your data. At all. Pinky promise.`,
   },
 
   cipherEncoder: {
@@ -78,7 +78,7 @@ Perfect for:
 - Creating escape room puzzles
 - Sending messages only your nerd friends will get
 
-Did you know? Caesar used a shift of 3 - which is why it's called the Caesar cipher. Ancient Rome's version of "password123".`
+Did you know? Caesar used a shift of 3 - which is why it's called the Caesar cipher. Ancient Rome's version of "password123".`,
   },
 
   guidGenerator: {
@@ -97,7 +97,7 @@ Critical uses:
 - Distributed systems that need to play nice
 - That moment when you realize your IDs aren't actually unique
 
-Fun fact: There are 2^128 possible UUIDs - that's 340 undecillion. You're statistically safe.`
+Fun fact: There are 2^128 possible UUIDs - that's 340 undecillion. You're statistically safe.`,
   },
 
   hashGenerator: {
@@ -116,7 +116,7 @@ When to hash:
 - Password storage (properly salted, of course)
 - Creating unique identifiers from similar inputs
 
-Warning: Hashes are like tattoos - permanent but not secret. Use proper encryption for sensitive data.`
+Warning: Hashes are like tattoos - permanent but not secret. Use proper encryption for sensitive data.`,
   },
 
   htmlEntities: {
@@ -134,7 +134,7 @@ Essential for:
 - Displaying code snippets on your blog
 - When you need to show <div> without creating one
 
-Pro tip: Always encode untrusted input. Your future self will thank you.`
+Pro tip: Always encode untrusted input. Your future self will thank you.`,
   },
 
   morseCode: {
@@ -151,7 +151,7 @@ Perfect for:
 - Actual emergency communication practice
 - Adding retro flair to your maker project
 
-Did you know? SOS isn't an acronym - it was chosen because ··· --- ··· is unmistakable.`
+Did you know? SOS isn't an acronym - it was chosen because ··· --- ··· is unmistakable.`,
   },
 
   passwordGenerator: {
@@ -169,7 +169,7 @@ Critical uses:
 - That work account you really can't afford to lose
 - When your significant other demands shared passwords
 
-Remember: "password123" isn't a password - it's an invitation. Be smarter.`
+Remember: "password123" isn't a password - it's an invitation. Be smarter.`,
   },
 
   ulidGenerator: {
@@ -188,7 +188,7 @@ Ideal for:
 - Distributed systems where time matters
 - When you're tired of UUIDv4's randomness
 
-Tech trivia: ULIDs encode time with millisecond precision in the first 48 bits.`
+Tech trivia: ULIDs encode time with millisecond precision in the first 48 bits.`,
   },
 
   urlEncoder: {
@@ -205,7 +205,7 @@ When encoding saves the day:
 - Fixing broken links with spaces
 - That email with 20 unencoded ampersands
 
-Did you know? Spaces can be encoded as %20 we handle both.`
+Did you know? Spaces can be encoded as %20 we handle both.`,
   },
 
   csvJson: {
@@ -224,7 +224,7 @@ Perfect for:
 - Preparing dataset for D3.js visualizations
 - That analytics report that only exports as CSV
 
-Pro tip: We automatically escape quotes and special characters - no more broken parsers!`
+Pro tip: We automatically escape quotes and special characters - no more broken parsers!`,
   },
 
   jsonToTs: {
@@ -243,7 +243,7 @@ Essential for:
 - Config file interfaces
 - That moment when you're tired of \`any\` types
 
-Fun fact: Proper typing can catch up to 15% of bugs before runtime.`
+Fun fact: Proper typing can catch up to 15% of bugs before runtime.`,
   },
 
   jsonToPython: {
@@ -262,7 +262,7 @@ When to use:
 - Creating structured config files
 - That Flask/Django project needing type safety
 
-Remember: Explicit is better than implicit - even when it's auto-generated!`
+Remember: Explicit is better than implicit - even when it's auto-generated!`,
   },
 
   jsonToPydantic: {
@@ -281,7 +281,7 @@ Perfect for:
 - Configuration with validation
 - Anywhere you'd normally use dicts and regret it
 
-Pro tip: Pydantic models can save hours of debugging by catching bad data early.`
+Pro tip: Pydantic models can save hours of debugging by catching bad data early.`,
   },
 
   baseNumber: {
@@ -301,7 +301,7 @@ When base matters:
 - Creating short unique IDs
 - That cryptography class you're taking
 
-Did you know? Base64 isn't actually a number base - it's an encoding scheme.`
+Did you know? Base64 isn't actually a number base - it's an encoding scheme.`,
   },
 
   textBase: {
@@ -319,7 +319,7 @@ Fun uses:
 - Understanding character encoding
 - Sending secret messages only machines understand
 
-Tech trivia: The word "text" in hex is 0x74657874. Now you know.`
+Tech trivia: The word "text" in hex is 0x74657874. Now you know.`,
   },
 
   unixUtc: {
@@ -337,7 +337,7 @@ Essential for:
 - API expiration timestamps
 - That moment when you need to know what 1618033988 means
 
-Fun fact: The UNIX epoch (Jan 1 1970) is called "the birthday of modern computing".`
+Fun fact: The UNIX epoch (Jan 1 1970) is called "the birthday of modern computing".`,
   },
 
   timezone: {
@@ -359,7 +359,7 @@ Fun fact: The UNIX epoch (Jan 1 1970) is called "the birthday of modern computin
   - Freelancers juggling international clients
   - Event planners and webinar hosts
 
-  **Pro Tip:** Use the multi-timezone or range converters for effortless global scheduling. "9 AM PST" might mean very different things elsewhere—make sure your invite doesn’t need a detective to decode it.`
+  **Pro Tip:** Use the multi-timezone or range converters for effortless global scheduling. "9 AM PST" might mean very different things elsewhere—make sure your invite doesn’t need a detective to decode it.`,
   },
 
   loremIpsum: {
@@ -379,7 +379,7 @@ When filler text saves the day:
 - CMS template setup
 - That presentation needing "something here"
 
-Did you know? Lorem Ipsum comes from a 2000-year-old Latin text by Cicero. The original placeholder content.`
+Did you know? Lorem Ipsum comes from a 2000-year-old Latin text by Cicero. The original placeholder content.`,
   },
 
   textCompare: {
@@ -398,7 +398,7 @@ Critical uses:
 - Legal document review
 - Finding that one line that broke everything
 
-Pro tip: Great for comparing API responses before/after changes.`
+Pro tip: Great for comparing API responses before/after changes.`,
   },
 
   jsonValidator: {
@@ -417,7 +417,7 @@ Essential for:
 - Config file cleanup
 - That moment when you realize your JSON has trailing commas
 
-Fun fact: JSON doesn't support comments, but we can still make it readable!`
+Fun fact: JSON doesn't support comments, but we can still make it readable!`,
   },
 
   textCase: {
@@ -437,7 +437,7 @@ When case matters:
 - API parameter formatting
 - That moment when you pasted ALL CAPS
 
-Did you know? Case styles exist because readability matters in different contexts.`
+Did you know? Case styles exist because readability matters in different contexts.`,
   },
 
   regexTester: {
@@ -456,7 +456,7 @@ Perfect for:
 - Data extraction from text
 - Learning regex without frustration
 
-Pro tip: Great for crafting validation patterns for forms and APIs.`
+Pro tip: Great for crafting validation patterns for forms and APIs.`,
   },
 
   markdownPreviewer: {
@@ -475,7 +475,7 @@ Essential for:
 - Documentation writing
 - That moment when **bold** doesn't look bold
 
-Fun fact: Markdown was created in 2004 as a simpler alternative to HTML.`
+Fun fact: Markdown was created in 2004 as a simpler alternative to HTML.`,
   },
 
   duplicateLineRemover: {
@@ -495,7 +495,7 @@ When deduplication helps:
 - Removing repeated imports
 - That giant list that needs simplifying
 
-Pro tip: Great for preparing data for database import.`
+Pro tip: Great for preparing data for database import.`,
   },
 
   lineBreakWhitespaceRemover: {
@@ -514,7 +514,7 @@ Essential for:
 - Making minified JS readable
 - That CSV file with inconsistent formatting
 
-Did you know? Invisible whitespace characters can break scripts and comparisons.`
+Did you know? Invisible whitespace characters can break scripts and comparisons.`,
   },
 
   stringCounter: {
@@ -533,7 +533,7 @@ Perfect for:
 - Social media post planning
 - That 280-character tweet limit
 
-Fun fact: The average English word length is 4.7 characters. Now you know.`
+Fun fact: The average English word length is 4.7 characters. Now you know.`,
   },
 
   jwtDecoder: {
@@ -553,7 +553,7 @@ Critical for:
 - Understanding OAuth flows
 - That moment when your token "should work"
 
-Pro tip: Never put sensitive data in unencrypted JWTs - they're just base64 encoded.`
+Pro tip: Never put sensitive data in unencrypted JWTs - they're just base64 encoded.`,
   },
 
   slug: {
@@ -572,7 +572,7 @@ Essential for:
 - API endpoint design
 - That CMS that doesn't auto-generate slugs
 
-Did you know? The term "slug" comes from newspaper publishing - a short label for articles.`
+Did you know? The term "slug" comes from newspaper publishing - a short label for articles.`,
   },
 
   stringReverser: {
@@ -592,7 +592,7 @@ Fun uses:
 - Debugging RTL language issues
 - That creative writing exercise
 
-Pro tip: Great for checking symmetrical designs and layouts.`
+Pro tip: Great for checking symmetrical designs and layouts.`,
   },
 
   palindromeChecker: {
@@ -610,7 +610,7 @@ Perfect for:
 - Creating word puzzles
 - Impressing your friends
 
-Fun fact: The longest English palindrome is "tattarrattat" - James Joyce's knock sound in Ulysses.`
+Fun fact: The longest English palindrome is "tattarrattat" - James Joyce's knock sound in Ulysses.`,
   },
 
   romanNumeral: {
@@ -630,7 +630,7 @@ When Roman numerals matter:
 - Clock face design
 - That tattoo you're planning
 
-Did you know? There's no zero in Roman numerals - they used "nulla" instead.`
+Did you know? There's no zero in Roman numerals - they used "nulla" instead.`,
   },
 
   natoPhonetic: {
@@ -648,7 +648,7 @@ Essential for:
 - Clear phone spellings
 - That password you need to read over the phone
 
-Fun fact: The NATO alphabet has changed over time - "Sugar" was once used for "S".`
+Fun fact: The NATO alphabet has changed over time - "Sugar" was once used for "S".`,
   },
 
   pigLatin: {
@@ -666,7 +666,7 @@ Perfect for:
 - Childhood nostalgia
 - That prank on your friends
 
-Did you know? Pig Latin isn't actually related to Latin - it's just a playful English code.`
+Did you know? Pig Latin isn't actually related to Latin - it's just a playful English code.`,
   },
 
   numeronym: {
@@ -685,7 +685,7 @@ Tech uses:
 - Project code names
 - That long variable name you're tired of typing
 
-Pro tip: Great for creating memorable project names with hidden meanings.`
+Pro tip: Great for creating memorable project names with hidden meanings.`,
   },
 
   urlParser: {
@@ -705,7 +705,7 @@ Critical for:
 - SEO analysis
 - That moment when you need one specific parameter
 
-Fun fact: The first URL was created in 1991 by Tim Berners-Lee for the World Wide Web project.`
+Fun fact: The first URL was created in 1991 by Tim Berners-Lee for the World Wide Web project.`,
   },
 
   regexCheatsheet: {
@@ -725,7 +725,7 @@ Essential for:
 - Text processing
 - That complex search-replace
 
-Did you know? Regular expressions originated in 1956 with mathematician Stephen Kleene's work.`
+Did you know? Regular expressions originated in 1956 with mathematician Stephen Kleene's work.`,
   },
 
   qrCodeGenerator: {
@@ -744,7 +744,7 @@ Use cases:
 - Restaurant menus in the post-pandemic world
 - That art project that needs a digital twist
 
-Fun fact: The three squares in QR codes are called "position detection patterns" - they help scanners orient the code.`
+Fun fact: The three squares in QR codes are called "position detection patterns" - they help scanners orient the code.`,
   },
 
   barcodeGenerator: {
@@ -764,7 +764,7 @@ Perfect for:
 - Maker projects needing IDs
 - That prototype that needs labeling
 
-Pro tip: Always verify your barcode scans with a reader before mass printing.`
+Pro tip: Always verify your barcode scans with a reader before mass printing.`,
   },
 
   barcodeReader: {
@@ -783,7 +783,7 @@ Essential for:
 - Asset tracking
 - That mystery barcode you found
 
-Did you know? The first barcode scanned was a pack of Wrigley's gum in 1974.`
+Did you know? The first barcode scanned was a pack of Wrigley's gum in 1974.`,
   },
 
   colorPicker: {
@@ -802,7 +802,7 @@ Perfect for:
 - Accessibility testing
 - That gradient that needs perfect stops
 
-Fun fact: The human eye can distinguish about 10 million different colors.`
+Fun fact: The human eye can distinguish about 10 million different colors.`,
   },
 
   faviconGenerator: {
@@ -820,7 +820,7 @@ Essential for:
 - Progressive Web Apps
 - That project that needs that extra touch
 
-Pro tip: Always include 32x32, 64x64, and 180x180 sizes for full device support.`
+Pro tip: Always include 32x32, 64x64, and 180x180 sizes for full device support.`,
   },
 
   imageCompressor: {
@@ -838,7 +838,7 @@ Critical for:
 - Mobile app assets
 - That gallery that loads too slowly
 
-Did you know? Proper image compression can improve page load times by 50% or more.`
+Did you know? Proper image compression can improve page load times by 50% or more.`,
   },
 
   gradientGenerator: {
@@ -858,7 +858,7 @@ Perfect for:
 - Data visualization
 - That design that needs more dimension
 
-Pro tip: Use subtle gradients (like white-to-very-light-gray) for professional depth.`
+Pro tip: Use subtle gradients (like white-to-very-light-gray) for professional depth.`,
   },
 
   boxShadowGenerator: {
@@ -878,7 +878,7 @@ Essential for:
 - Floating element effects
 - That design that needs to "pop"
 
-Fun fact: Proper shadow use can increase perceived usability by up to 20%.`
+Fun fact: Proper shadow use can increase perceived usability by up to 20%.`,
   },
 
   leetspeak: {
@@ -896,7 +896,7 @@ Fun uses:
 - Retro gaming vibes
 - That prank on your tech friends
 
-Did you know? Leetspeak originated in the 1980s as a way to bypass text filters on BBS systems.`
+Did you know? Leetspeak originated in the 1980s as a way to bypass text filters on BBS systems.`,
   },
 
   wordFrequencyCounter: {
@@ -914,7 +914,7 @@ Perfect for:
 - Language learning
 - That novel you're editing
 
-Pro tip: Overused words often indicate repetitive writing - great for editing.`
+Pro tip: Overused words often indicate repetitive writing - great for editing.`,
   },
 
   bitByte: {
@@ -923,8 +923,8 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Bit ↔ Byte Converter is like a Rosetta Stone for digital storage — translating between bits, bytes, kilobytes, megabytes, and beyond with pixel-perfect accuracy.
   Whether you're estimating file sizes, decoding bandwidth limits, or arguing about whether 1 MB is 1000 KB or 1024, this tool sets the record straight.
   Instantly convert between bits and bytes in all their metric and binary glory — from b to TB, it's all covered.
-  Perfect for developers, sysadmins, network nerds, and anyone who’s ever yelled at a download speed meter.`
-  },   
+  Perfect for developers, sysadmins, network nerds, and anyone who’s ever yelled at a download speed meter.`,
+  },
 
   temperature: {
     title: "Temperature Converter",
@@ -932,7 +932,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Temperature Converter is like a digital weather wizard — effortlessly translating between Celsius, Fahrenheit, and Kelvin so you never have to say “what’s 451°F in real units?” again.
   Whether you're cooking, coding, or casually wondering if -40 is really the same in both scales (it is!), this tool brings the heat and the chill.
   Instantly switch between temperature units with precision — no mental math, no boiling confusion.
-  Perfect for students, devs, and anyone who’s ever Googled “convert 100 C to F” mid-conversation.`
+  Perfect for students, devs, and anyone who’s ever Googled “convert 100 C to F” mid-conversation.`,
   },
 
   area: {
@@ -941,7 +941,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `An Area Converter is like a land surveyor with superpowers — instantly flipping between square meters, acres, hectares, square miles, and more without breaking a ruler.
   Whether you're designing a room, plotting a farm, or trying to figure out what 0.25 hectares actually means, this tool clears it up fast.
   Convert any area unit quickly and confidently — from square inches to football fields.
-  Perfect for architects, real estate buffs, students, and anyone who’s ever thought, “Wait… how big is an acre again?”`
+  Perfect for architects, real estate buffs, students, and anyone who’s ever thought, “Wait… how big is an acre again?”`,
   },
 
   length: {
@@ -950,7 +950,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Length Converter is like a tape measure that speaks every language — translating kilometers to miles, inches to centimeters, and light-years to... well, more light-years.
   Whether you're building furniture, coding units in CSS, or just curious how long a marathon really is in meters, this tool does the math for you.
   Instantly convert between any length units with full accuracy — because size *does* matter (especially in code).
-  Perfect for engineers, designers, travelers, and anyone who’s tired of Googling “how many inches in a foot” for the 10th time.`
+  Perfect for engineers, designers, travelers, and anyone who’s tired of Googling “how many inches in a foot” for the 10th time.`,
   },
 
   weight: {
@@ -959,7 +959,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Weight Converter is like a digital dumbbell for your brain — effortlessly flipping between kilograms, pounds, grams, and tons with zero sweat involved.
   Whether you're calculating cargo, measuring ingredients, or just curious how much your dog weighs in stone, this tool lifts the confusion.
   Convert weight units instantly and accurately — from micrograms to megatons.
-  Perfect for cooks, lifters, logistics pros, and anyone who’s ever yelled “what’s 5 lbs in kg?!” while meal-prepping.`
+  Perfect for cooks, lifters, logistics pros, and anyone who’s ever yelled “what’s 5 lbs in kg?!” while meal-prepping.`,
   },
 
   volume: {
@@ -968,7 +968,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Volume Converter is like a digital measuring cup for everything — effortlessly translating between liters, gallons, cups, milliliters, and more.
   Whether you're scaling recipes, tracking fuel, or just trying to figure out how much is “a pint” in real units, this tool makes volume conversion a breeze.
   Convert between any volume unit quickly and accurately — from kitchen to chemistry lab.
-  Perfect for cooks, scientists, students, and anyone who's ever asked, "How many cups is that again?"`
+  Perfect for cooks, scientists, students, and anyone who's ever asked, "How many cups is that again?"`,
   },
 
   energy: {
@@ -977,7 +977,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `An Energy Converter is like a power adapter for units — switching between joules, calories, kilowatt-hours, BTUs, and more without blowing a fuse.
   Whether you're tracking food energy, calculating physics problems, or just trying to understand what a kilojoule even means, this tool brings clarity.
   Convert any energy unit instantly and precisely.
-  Perfect for scientists, fitness enthusiasts, students, and anyone who’s ever thought, "How many calories is that in real power?"`
+  Perfect for scientists, fitness enthusiasts, students, and anyone who’s ever thought, "How many calories is that in real power?"`,
   },
 
   speed: {
@@ -986,7 +986,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Speed Converter is like cruise control for numbers — smoothly converting between km/h, mph, m/s, knots, and more in just a click.
   Whether you're clocking race times, tracking data transfer, or just wondering how fast a cheetah really is, this tool moves fast.
   Convert speed units instantly with pinpoint accuracy.
-  Perfect for athletes, engineers, physics nerds, and anyone who’s ever needed to turn “miles per hour” into “meters per second” without a calculator.`
+  Perfect for athletes, engineers, physics nerds, and anyone who’s ever needed to turn “miles per hour” into “meters per second” without a calculator.`,
   },
 
   power: {
@@ -995,7 +995,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Power Converter is like a wattage wizard — flipping between watts, horsepower, kilowatts, BTUs and more without burning out.
   Whether you're sizing up appliances, configuring circuits, or just trying to figure out how strong one horsepower really is, this tool brings the juice.
   Convert any power unit quickly and accurately — from mechanical to electrical and everything in between.
-  Perfect for engineers, electricians, physics students, and anyone who’s ever said, “Wait… how many watts is that?”`
+  Perfect for engineers, electricians, physics students, and anyone who’s ever said, “Wait… how many watts is that?”`,
   },
 
   pressure: {
@@ -1004,7 +1004,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Pressure Converter is like a stress reliever for unit confusion — smoothly translating between PSI, bar, Pascal, atm, and more.
   Whether you're inflating tires, calibrating instruments, or just trying to make sense of barometric data, this tool keeps it from getting too intense.
   Convert pressure values across metric and imperial systems with ease.
-  Perfect for engineers, mechanics, weather geeks, and anyone who’s ever asked, “Is that too much pressure… or not enough?”`
+  Perfect for engineers, mechanics, weather geeks, and anyone who’s ever asked, “Is that too much pressure… or not enough?”`,
   },
 
   angle: {
@@ -1013,7 +1013,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `An Angle Converter is like a math protractor in digital form — converting between degrees, radians, gradians, and more with pinpoint precision.
   Whether you're working on geometry, animations, or just trying to understand how π fits into a circle, this tool keeps your angles in check.
   Flip between angle units instantly — no trig needed.
-  Perfect for developers, students, game designers, and anyone who’s ever wondered, “How many radians is 90 degrees again?”`
+  Perfect for developers, students, game designers, and anyone who’s ever wondered, “How many radians is 90 degrees again?”`,
   },
 
   frequency: {
@@ -1022,7 +1022,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Frequency Converter is like a DJ for data — smoothly spinning between Hertz, kilohertz, megahertz, and gigahertz without missing a beat.
   Whether you're tuning signals, analyzing waves, or debugging system clocks, this tool keeps things on the right frequency.
   Convert frequency values instantly across scales — from audio to RF and beyond.
-  Perfect for engineers, tech enthusiasts, musicians, and anyone who’s ever asked, “How many Hz is that exactly?”`
+  Perfect for engineers, tech enthusiasts, musicians, and anyone who’s ever asked, “How many Hz is that exactly?”`,
   },
 
   fuelEconomy: {
@@ -1031,7 +1031,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Fuel Economy Converter is like your car’s translator — flipping between MPG, L/100km, km/L and other units so you know exactly how thirsty your ride is.
   Whether you're buying a new car, tracking fuel usage, or comparing international efficiency ratings, this tool delivers fast, accurate results.
   Switch between fuel economy units without manual math or mental gymnastics.
-  Perfect for drivers, travelers, mechanics, and anyone who’s ever asked, “Is 7 L/100km good?” (Spoiler: yes, kind of.)`
+  Perfect for drivers, travelers, mechanics, and anyone who’s ever asked, “Is 7 L/100km good?” (Spoiler: yes, kind of.)`,
   },
 
   timeUnit: {
@@ -1040,9 +1040,8 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`
     body: `A Time Unit Converter is like a digital timekeeper with a calculator — converting milliseconds to days, minutes to hours, or weeks to seconds without breaking a sweat.
   Whether you're debugging performance, building countdowns, or just figuring out how long “900000 ms” really is, this tool has your back.
   Convert between any time units instantly and precisely — from nanoseconds to centuries, no time frame is too weird.
-  Perfect for developers, data analysts, and anyone who’s ever Googled, “How many seconds in a month?”`
+  Perfect for developers, data analysts, and anyone who’s ever Googled, “How many seconds in a month?”`,
   },
-
 };
 
 export default seoDescriptions;

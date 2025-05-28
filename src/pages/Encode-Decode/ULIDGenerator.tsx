@@ -1,33 +1,33 @@
-import { useEffect, useState } from 'react';
-import { ulid, decodeTime } from 'ulid';
-import BackToHome from '../../components/BackToHome';
-import ErrorBox from '../../components/ErrorBox';
-import LoadingButton from '../../components/LoadingButton';
-import SectionCard from '../../components/SectionCard';
-import CopyButton from '../../components/CopyButton';
-import ClearButton from '../../components/ClearButton';
-import SEODescription from '../../components/SEODescription';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { PageSEO } from '../../components/PageSEO';
-import { updateToolUsage } from '../../utils/toolUsage';
+import { useEffect, useState } from "react";
+import { ulid, decodeTime } from "ulid";
+import BackToHome from "../../components/BackToHome";
+import ErrorBox from "../../components/ErrorBox";
+import LoadingButton from "../../components/LoadingButton";
+import SectionCard from "../../components/SectionCard";
+import CopyButton from "../../components/CopyButton";
+import ClearButton from "../../components/ClearButton";
+import SEODescription from "../../components/SEODescription";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { PageSEO } from "../../components/PageSEO";
+import { updateToolUsage } from "../../utils/toolUsage";
 
 function ULIDGenerator() {
   const seo = seoDescriptions.ulidGenerator;
-  const [singleUlid, setSingleUlid] = useState('');
+  const [singleUlid, setSingleUlid] = useState("");
   const [bulkUlids, setBulkUlids] = useState<string[]>([]);
-  const [ulidInput, setUlidInput] = useState('');
+  const [ulidInput, setUlidInput] = useState("");
   const [timestamp, setTimestamp] = useState<string | null>(null);
   const [count, setCount] = useState(5);
-  const [errorSingle, setErrorSingle] = useState('');
-  const [errorBulk, setErrorBulk] = useState('');
-  const [errorTimestamp, setErrorTimestamp] = useState('');
+  const [errorSingle, setErrorSingle] = useState("");
+  const [errorBulk, setErrorBulk] = useState("");
+  const [errorTimestamp, setErrorTimestamp] = useState("");
   const [isLoadingSingle, setIsLoadingSingle] = useState(false);
   const [isLoadingBulk, setIsLoadingBulk] = useState(false);
   const [isLoadingTimestamp, setIsLoadingTimestamp] = useState(false);
 
   useEffect(() => {
-    updateToolUsage('ulid');
+    updateToolUsage("ulid");
     // Generate initial single ULID and bulk ULIDs on mount
     fetchSingleUlid();
     fetchBulkUlids();
@@ -43,9 +43,9 @@ function ULIDGenerator() {
     try {
       const ulidStr = ulid();
       setSingleUlid(ulidStr);
-      setErrorSingle('');
+      setErrorSingle("");
     } catch (err) {
-      setErrorSingle('Failed to generate ULID');
+      setErrorSingle("Failed to generate ULID");
     } finally {
       setIsLoadingSingle(false);
     }
@@ -56,16 +56,16 @@ function ULIDGenerator() {
       setBulkUlids([]);
     }
     if (!Number.isInteger(count) || count < 1 || count > 1000) {
-      setErrorBulk('Count must be an integer between 1 and 1000');
+      setErrorBulk("Count must be an integer between 1 and 1000");
       return;
     }
     setIsLoadingBulk(true);
     try {
       const ulids = Array.from({ length: count }, () => ulid());
       setBulkUlids(ulids);
-      setErrorBulk('');
+      setErrorBulk("");
     } catch (err) {
-      setErrorBulk('Failed to generate bulk ULIDs');
+      setErrorBulk("Failed to generate bulk ULIDs");
     } finally {
       setIsLoadingBulk(false);
     }
@@ -75,29 +75,31 @@ function ULIDGenerator() {
     setIsLoadingTimestamp(true);
     try {
       if (!input || input.length !== 26) {
-        throw new Error('Invalid ULID: Must be 26 characters long');
+        throw new Error("Invalid ULID: Must be 26 characters long");
       }
       const timestampMs = decodeTime(input);
       const date = new Date(timestampMs);
       setTimestamp(date.toISOString());
-      setErrorTimestamp('');
+      setErrorTimestamp("");
     } catch (err) {
-      setErrorTimestamp(err instanceof Error ? err.message : 'Failed to extract timestamp');
+      setErrorTimestamp(
+        err instanceof Error ? err.message : "Failed to extract timestamp"
+      );
     } finally {
       setIsLoadingTimestamp(false);
     }
   };
 
   const handleClearTimestamp = () => {
-    setUlidInput('');
+    setUlidInput("");
     setTimestamp(null);
-    setErrorTimestamp('');
+    setErrorTimestamp("");
   };
 
   const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value === '' || /^[0-9]+$/.test(value)) {
-      const numValue = value === '' ? 0 : Number(value);
+    if (value === "" || /^[0-9]+$/.test(value)) {
+      const numValue = value === "" ? 0 : Number(value);
       setCount(Math.max(0, Math.min(1000, numValue))); // Clamp between 0 and 1000
     }
   };
@@ -123,6 +125,7 @@ function ULIDGenerator() {
         {/* Single ULID */}
         <SectionCard className="mb-6">
           <h3 className="text-lg font-semibold mb-4">Generate Single ULID</h3>
+          <hr className="line-break" />
           <LoadingButton onClick={fetchSingleUlid} isLoading={isLoadingSingle}>
             Generate
           </LoadingButton>
@@ -134,7 +137,10 @@ function ULIDGenerator() {
               </div>
             </div>
           )}
-          <ErrorBox message={errorSingle} id={errorSingle ? 'single-error' : undefined} />
+          <ErrorBox
+            message={errorSingle}
+            id={errorSingle ? "single-error" : undefined}
+          />
         </SectionCard>
 
         {/* Bulk ULIDs */}
@@ -142,6 +148,7 @@ function ULIDGenerator() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Generate Bulk ULIDs</h3>
           </div>
+          <hr className="line-break" />
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
             <div className="flex items-center">
               <label className="form-label text-base mr-2" htmlFor="bulk-count">
@@ -155,7 +162,7 @@ function ULIDGenerator() {
                   className="input-field w-20 text-right pr-2"
                   disabled={isLoadingBulk}
                   placeholder="1-1000"
-                  aria-describedby={errorBulk ? 'bulk-error' : undefined}
+                  aria-describedby={errorBulk ? "bulk-error" : undefined}
                 />
                 <div className="flex flex-col ml-1">
                   <button
@@ -178,7 +185,7 @@ function ULIDGenerator() {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <CopyButton text={bulkUlids.join('\n')} copyType="CopyAll" />
+              <CopyButton text={bulkUlids.join("\n")} copyType="CopyAll" />
             </div>
           </div>
 
@@ -201,7 +208,10 @@ function ULIDGenerator() {
             )}
           </div>
 
-          <ErrorBox message={errorBulk} id={errorBulk ? 'bulk-error' : undefined} />
+          <ErrorBox
+            message={errorBulk}
+            id={errorBulk ? "bulk-error" : undefined}
+          />
         </SectionCard>
 
         {/* ULID Timestamp */}
@@ -210,6 +220,7 @@ function ULIDGenerator() {
             <h3 className="text-lg font-semibold">Get Timestamp from ULID</h3>
             <ClearButton onClick={handleClearTimestamp} disabled={!ulidInput} />
           </div>
+          <hr className="line-break" />
           <div className="flex gap-4 mb-4">
             <input
               type="text"
@@ -220,12 +231,12 @@ function ULIDGenerator() {
                 const newValue = e.target.value;
                 setUlidInput(newValue);
                 setTimestamp(null); // Clear result
-                setErrorTimestamp('');
+                setErrorTimestamp("");
                 fetchTimestamp(newValue);
               }}
               className="input-field w-full"
               disabled={isLoadingTimestamp}
-              aria-describedby={errorTimestamp ? 'timestamp-error' : undefined}
+              aria-describedby={errorTimestamp ? "timestamp-error" : undefined}
             />
           </div>
 
@@ -238,7 +249,10 @@ function ULIDGenerator() {
             </div>
           )}
 
-          <ErrorBox message={errorTimestamp} id={errorTimestamp ? 'timestamp-error' : undefined} />
+          <ErrorBox
+            message={errorTimestamp}
+            id={errorTimestamp ? "timestamp-error" : undefined}
+          />
         </SectionCard>
         <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>

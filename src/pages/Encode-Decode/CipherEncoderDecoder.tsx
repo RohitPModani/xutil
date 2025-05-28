@@ -1,18 +1,18 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import BackToHome from '../../components/BackToHome';
-import ErrorBox from '../../components/ErrorBox';
-import SectionCard from '../../components/SectionCard';
-import CopyButton from '../../components/CopyButton';
-import ClearButton from '../../components/ClearButton';
-import AutoTextarea from '../../hooks/useAutoSizeTextArea';
-import SEODescription from '../../components/SEODescription';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { PageSEO } from '../../components/PageSEO';
-import { updateToolUsage } from '../../utils/toolUsage';
-import useDebounce from '../../hooks/useDebounce';
+import { useEffect, useState, useRef, useCallback } from "react";
+import BackToHome from "../../components/BackToHome";
+import ErrorBox from "../../components/ErrorBox";
+import SectionCard from "../../components/SectionCard";
+import CopyButton from "../../components/CopyButton";
+import ClearButton from "../../components/ClearButton";
+import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import SEODescription from "../../components/SEODescription";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { PageSEO } from "../../components/PageSEO";
+import { updateToolUsage } from "../../utils/toolUsage";
+import useDebounce from "../../hooks/useDebounce";
 
-type CipherType = 'rot13' | 'caesar';
+type CipherType = "rot13" | "caesar";
 
 interface ROT13Response {
   input_text: string;
@@ -50,12 +50,12 @@ function caesar(text: string, shift: number): string {
 
 function CipherEncoderDecoder() {
   const seo = seoDescriptions.cipherEncoder;
-  const [inputText, setInputText] = useState('');
-  const [cipherType, setCipherType] = useState<CipherType>('rot13');
+  const [inputText, setInputText] = useState("");
+  const [cipherType, setCipherType] = useState<CipherType>("rot13");
   const [shift, setShift] = useState(3);
-  const [shiftInput, setShiftInput] = useState('3'); // New state for input field
+  const [shiftInput, setShiftInput] = useState("3"); // New state for input field
   const [result, setResult] = useState<CipherResponse | null>(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [characterCount, setCharacterCount] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -64,21 +64,23 @@ function CipherEncoderDecoder() {
   const debouncedShift = useDebounce(shift, DEBOUNCE_DELAY);
 
   useEffect(() => {
-    updateToolUsage('cipher');
+    updateToolUsage("cipher");
   }, []);
 
   const applyCipher = useCallback(() => {
     if (!debouncedInputText.trim()) {
       setResult(null);
-      setError('');
+      setError("");
       setCharacterCount(0);
       return;
     }
 
-    if (cipherType === 'caesar') {
+    if (cipherType === "caesar") {
       const num = Number(debouncedShift);
       if (!Number.isInteger(num) || num < MIN_SHIFT || num > MAX_SHIFT) {
-        setError(`Shift must be an integer between ${MIN_SHIFT} and ${MAX_SHIFT}`);
+        setError(
+          `Shift must be an integer between ${MIN_SHIFT} and ${MAX_SHIFT}`
+        );
         setResult(null);
         return;
       }
@@ -87,7 +89,7 @@ function CipherEncoderDecoder() {
     setIsLoading(true);
     try {
       let outputText: string;
-      if (cipherType === 'rot13') {
+      if (cipherType === "rot13") {
         outputText = rot13(debouncedInputText);
         setResult({
           input_text: debouncedInputText,
@@ -102,9 +104,9 @@ function CipherEncoderDecoder() {
         });
       }
       setCharacterCount(debouncedInputText.length);
-      setError('');
+      setError("");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to apply cipher');
+      setError(err instanceof Error ? err.message : "Failed to apply cipher");
       setResult(null);
     } finally {
       setIsLoading(false);
@@ -123,17 +125,17 @@ function CipherEncoderDecoder() {
       setShiftInput(value); // Update the input field value
 
       // Only update shift if the input is a valid number
-      if (value !== '' && value !== '-' && value !== '+') {
+      if (value !== "" && value !== "-" && value !== "+") {
         const num = Number(value);
         if (num >= MIN_SHIFT && num <= MAX_SHIFT) {
           setShift(num);
-          setError('');
+          setError("");
         } else {
           setError(`Shift must be between ${MIN_SHIFT} and ${MAX_SHIFT}`);
           setShift(num); // Still update shift for debouncing, but show error
         }
       } else {
-        setError(''); // Clear error for incomplete inputs
+        setError(""); // Clear error for incomplete inputs
       }
     }
   };
@@ -143,7 +145,7 @@ function CipherEncoderDecoder() {
     setShift(newShift);
     setShiftInput(newShift.toString()); // Sync input field
     if (newShift >= MIN_SHIFT && newShift <= MAX_SHIFT) {
-      setError('');
+      setError("");
     }
   };
 
@@ -152,17 +154,17 @@ function CipherEncoderDecoder() {
     setShift(newShift);
     setShiftInput(newShift.toString()); // Sync input field
     if (newShift >= MIN_SHIFT && newShift <= MAX_SHIFT) {
-      setError('');
+      setError("");
     }
   };
 
   const handleClearAll = () => {
-    setInputText('');
-    setCipherType('rot13');
+    setInputText("");
+    setCipherType("rot13");
     setShift(3);
-    setShiftInput('3'); // Reset input field
+    setShiftInput("3"); // Reset input field
     setResult(null);
-    setError('');
+    setError("");
     setCharacterCount(0);
   };
 
@@ -186,11 +188,14 @@ function CipherEncoderDecoder() {
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Encode or Decode Text</h3>
-            <ClearButton 
-              onClick={handleClearAll} 
-              disabled={inputText === '' && cipherType === 'rot13' && shift === 3} 
+            <ClearButton
+              onClick={handleClearAll}
+              disabled={
+                inputText === "" && cipherType === "rot13" && shift === 3
+              }
             />
           </div>
+          <hr className="line-break" />
           <div className="space-y-4 mb-4">
             <div>
               <div className="flex justify-between items-center">
@@ -199,7 +204,7 @@ function CipherEncoderDecoder() {
                 </label>
                 {characterCount > 0 && (
                   <span className="text-sm text-gray-500">
-                    {characterCount} character{characterCount !== 1 ? 's' : ''}
+                    {characterCount} character{characterCount !== 1 ? "s" : ""}
                   </span>
                 )}
               </div>
@@ -211,7 +216,7 @@ function CipherEncoderDecoder() {
                 disabled={isLoading}
                 placeholder="Enter text to encode/decode"
                 ref={textareaRef}
-                aria-describedby={error ? 'cipher-error' : undefined}
+                aria-describedby={error ? "cipher-error" : undefined}
               />
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -229,7 +234,7 @@ function CipherEncoderDecoder() {
                   <option value="rot13">ROT13</option>
                   <option value="caesar">Caesar</option>
                 </select>
-                {cipherType === 'caesar' && (
+                {cipherType === "caesar" && (
                   <div className="flex items-center gap-4 mt-4">
                     <label className="form-label" htmlFor="shift-input">
                       Shift ({MIN_SHIFT} to {MAX_SHIFT}):
@@ -242,7 +247,7 @@ function CipherEncoderDecoder() {
                         onChange={handleShiftChange}
                         className="input-field w-20 text-right pr-2"
                         disabled={isLoading}
-                        aria-describedby={error ? 'cipher-error' : undefined}
+                        aria-describedby={error ? "cipher-error" : undefined}
                       />
                       <div className="flex flex-col ml-1">
                         <button
@@ -279,16 +284,17 @@ function CipherEncoderDecoder() {
                 <div className="w-full mono-output">{result.output_text}</div>
               </div>
               <p className="text-sm mt-2">
-                Cipher: {cipherType === 'rot13' ? 'ROT13' : `Caesar (Shift: ${(result as CaesarResponse).shift})`}
+                Cipher:{" "}
+                {cipherType === "rot13"
+                  ? "ROT13"
+                  : `Caesar (Shift: ${(result as CaesarResponse).shift})`}
               </p>
             </div>
           )}
 
-          {isLoading && (
-            <p className="text-muted">Processing...</p>
-          )}
+          {isLoading && <p className="text-muted">Processing...</p>}
 
-          <ErrorBox message={error} id={error ? 'cipher-error' : undefined} />
+          <ErrorBox message={error} id={error ? "cipher-error" : undefined} />
         </SectionCard>
         <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>

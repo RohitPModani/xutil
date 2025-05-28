@@ -110,7 +110,7 @@ function URLEncoderDecoder() {
               disabled={inputText === '' && outputText === '' && error === ''} 
             />
           </div>
-
+          <hr className='line-break' />
           <div className="space-y-4">
             <div>
               <label className="form-label" htmlFor="input-text">

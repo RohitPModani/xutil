@@ -1,14 +1,14 @@
-import { useEffect, useState, useCallback } from 'react';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ClearButton from '../../components/ClearButton';
-import ErrorBox from '../../components/ErrorBox';
-import CopyButton from '../../components/CopyButton';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import useResultText from '../../hooks/useResultsText';
-import { updateToolUsage } from '../../utils/toolUsage';
+import { useEffect, useState, useCallback } from "react";
+import BackToHome from "../../components/BackToHome";
+import SectionCard from "../../components/SectionCard";
+import ClearButton from "../../components/ClearButton";
+import ErrorBox from "../../components/ErrorBox";
+import CopyButton from "../../components/CopyButton";
+import SEODescription from "../../components/SEODescription";
+import { PageSEO } from "../../components/PageSEO";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import useResultText from "../../hooks/useResultsText";
+import { updateToolUsage } from "../../utils/toolUsage";
 
 interface Unit {
   value: string;
@@ -34,7 +34,7 @@ function UnitConverter({
   converterName,
   validationMessage,
   convertFunction,
-  toolName
+  toolName,
 }: UnitConverterProps) {
   const [value, setValue] = useState(defaultValue);
   const [unit, setUnit] = useState(defaultUnit);
@@ -46,43 +46,46 @@ function UnitConverter({
   }, [converterName]);
 
   const formatNumber = useCallback((num: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      maximumFractionDigits: 8
+    return new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 8,
     }).format(num);
   }, []);
 
-  const performConversion = useCallback((inputValue: string, inputUnit: string) => {
-    if (!inputValue.trim()) {
-      setError('Please enter a value');
-      setResult(null);
-      return;
-    }
-
-    const valueNum = parseFloat(inputValue);
-    if (isNaN(valueNum)) {
-      setError('Please enter a valid number');
-      setResult(null);
-      return;
-    }
-
-    if (valueNum <= 0) {
-      setError(validationMessage);
-      setResult(null);
-      return;
-    }
-
-    try {
-      const convertedValues = convertFunction(valueNum, inputUnit);
-      if (!convertedValues || Object.keys(convertedValues).length === 0) {
-        throw new Error('No conversion results returned');
+  const performConversion = useCallback(
+    (inputValue: string, inputUnit: string) => {
+      if (!inputValue.trim()) {
+        setError("Please enter a value");
+        setResult(null);
+        return;
       }
-      setResult(convertedValues);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Conversion failed');
-      setResult(null);
-    }
-  }, [convertFunction, validationMessage]);
+
+      const valueNum = parseFloat(inputValue);
+      if (isNaN(valueNum)) {
+        setError("Please enter a valid number");
+        setResult(null);
+        return;
+      }
+
+      if (valueNum <= 0) {
+        setError(validationMessage);
+        setResult(null);
+        return;
+      }
+
+      try {
+        const convertedValues = convertFunction(valueNum, inputUnit);
+        if (!convertedValues || Object.keys(convertedValues).length === 0) {
+          throw new Error("No conversion results returned");
+        }
+        setResult(convertedValues);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Conversion failed");
+        setResult(null);
+      }
+    },
+    [convertFunction, validationMessage]
+  );
 
   useEffect(() => {
     performConversion(value, unit);
@@ -97,7 +100,7 @@ function UnitConverter({
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
-    if (/^[0-9]*\.?[0-9]*$/.test(input) || input === '') {
+    if (/^[0-9]*\.?[0-9]*$/.test(input) || input === "") {
       setValue(input);
     }
   };
@@ -116,19 +119,23 @@ function UnitConverter({
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">{converterName}</h3>
-            <ClearButton 
-              onClick={handleClear} 
-              disabled={value == defaultValue && unit == defaultUnit} 
+            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+              {converterName}
+            </h3>
+            <ClearButton
+              onClick={handleClear}
+              disabled={value == defaultValue && unit == defaultUnit}
               aria-label="Reset converter to default values"
             />
           </div>
-
+          <hr className="line-break" />
           <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <label htmlFor="converter-value" className="form-label">
-                  { converterName == 'Fuel Economy Converter' ? 'Value' : 'Value (Max length: 20)' }
+                  {converterName == "Fuel Economy Converter"
+                    ? "Value"
+                    : "Value (Max length: 20)"}
                 </label>
                 <input
                   type="text"
@@ -163,12 +170,12 @@ function UnitConverter({
 
             <div className="result-box mt-1">
               <div className="flex justify-between items-center">
-                <label className="form-label text-base">Conversion Result</label>
+                <label className="form-label text-base">
+                  Conversion Result
+                </label>
                 {result && (
                   <div className="flex items-center gap-2">
-                    <CopyButton 
-                      text={getResultsText} copyType='CopyAll'
-                    />
+                    <CopyButton text={getResultsText} copyType="CopyAll" />
                   </div>
                 )}
               </div>
@@ -177,15 +184,17 @@ function UnitConverter({
                   <div className="grid grid-cols-1 gap-3">
                     {Object.entries(result).map(([key, val]) => {
                       const unit = units.find((u) => u.value === key);
-                      const displayLabel = unit ? unit.label : key.toUpperCase();
+                      const displayLabel = unit
+                        ? unit.label
+                        : key.toUpperCase();
                       const formattedVal = formatNumber(val);
                       return (
                         <div key={key} className="inner-result">
                           <span className="font-mono text-zinc-800 dark:text-white whitespace-pre-wrap break-all">
                             {displayLabel}: {formattedVal}
                           </span>
-                          <CopyButton 
-                            text={`${displayLabel}: ${formattedVal}`} 
+                          <CopyButton
+                            text={`${displayLabel}: ${formattedVal}`}
                             aria-label={`Copy ${displayLabel} value`}
                           />
                         </div>

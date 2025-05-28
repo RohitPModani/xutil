@@ -1,18 +1,18 @@
-import { useCallback, useEffect, useState, useMemo } from 'react';
-import BackToHome from '../../components/BackToHome';
-import ErrorBox from '../../components/ErrorBox';
-import SectionCard from '../../components/SectionCard';
-import CopyButton from '../../components/CopyButton';
-import AutoTextarea from '../../hooks/useAutoSizeTextArea';
-import ClearButton from '../../components/ClearButton';
-import SEODescription from '../../components/SEODescription';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { PageSEO } from '../../components/PageSEO';
-import { updateToolUsage } from '../../utils/toolUsage';
-import useDebounce from '../../hooks/useDebounce';
+import { useCallback, useEffect, useState, useMemo } from "react";
+import BackToHome from "../../components/BackToHome";
+import ErrorBox from "../../components/ErrorBox";
+import SectionCard from "../../components/SectionCard";
+import CopyButton from "../../components/CopyButton";
+import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import ClearButton from "../../components/ClearButton";
+import SEODescription from "../../components/SEODescription";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { PageSEO } from "../../components/PageSEO";
+import { updateToolUsage } from "../../utils/toolUsage";
+import useDebounce from "../../hooks/useDebounce";
 
-type HashAlgorithm = 'sha1' | 'sha256' | 'sha512';
+type HashAlgorithm = "sha1" | "sha256" | "sha512";
 
 interface HashResponse {
   text: string;
@@ -22,34 +22,40 @@ interface HashResponse {
 }
 
 const ALGORITHM_MAP: Record<HashAlgorithm, string> = {
-  sha1: 'SHA-1',
-  sha256: 'SHA-256',
-  sha512: 'SHA-512',
+  sha1: "SHA-1",
+  sha256: "SHA-256",
+  sha512: "SHA-512",
 };
 
 const ALGORITHM_OPTIONS: { value: HashAlgorithm; label: string }[] = [
-  { value: 'sha1', label: 'SHA-1' },
-  { value: 'sha256', label: 'SHA-256' },
-  { value: 'sha512', label: 'SHA-512' },
+  { value: "sha1", label: "SHA-1" },
+  { value: "sha256", label: "SHA-256" },
+  { value: "sha512", label: "SHA-512" },
 ];
 
-async function generateHash(text: string, algorithm: HashAlgorithm): Promise<HashResponse> {
+async function generateHash(
+  text: string,
+  algorithm: HashAlgorithm
+): Promise<HashResponse> {
   const trimmedText = text.trim();
-  
+
   if (!trimmedText) {
-    throw new Error('Input text cannot be empty');
+    throw new Error("Input text cannot be empty");
   }
 
   try {
     const encoder = new TextEncoder();
     const data = encoder.encode(trimmedText);
-    const hashBuffer = await crypto.subtle.digest(ALGORITHM_MAP[algorithm], data);
-    
+    const hashBuffer = await crypto.subtle.digest(
+      ALGORITHM_MAP[algorithm],
+      data
+    );
+
     // Convert buffer to hex string more efficiently
     const hashArray = new Uint8Array(hashBuffer);
     const hashedText = Array.from(hashArray)
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 
     return {
       text: trimmedText,
@@ -59,34 +65,37 @@ async function generateHash(text: string, algorithm: HashAlgorithm): Promise<Has
     };
   } catch (error) {
     throw new Error(
-      error instanceof Error 
+      error instanceof Error
         ? `Failed to generate hash: ${error.message}`
-        : 'Failed to generate hash: Unknown error'
+        : "Failed to generate hash: Unknown error"
     );
   }
 }
 
 function HashGenerator() {
   const seo = seoDescriptions.hashGenerator;
-  const [inputText, setInputText] = useState('');
-  const [algorithm, setAlgorithm] = useState<HashAlgorithm>('sha256');
+  const [inputText, setInputText] = useState("");
+  const [algorithm, setAlgorithm] = useState<HashAlgorithm>("sha256");
   const [hashResult, setHashResult] = useState<HashResponse | null>(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const debouncedInputText = useDebounce(inputText, 300);
-  const hasInput = useMemo(() => debouncedInputText.trim() !== '', [debouncedInputText]);
+  const hasInput = useMemo(
+    () => debouncedInputText.trim() !== "",
+    [debouncedInputText]
+  );
 
   // Track tool usage
   useEffect(() => {
-    updateToolUsage('hash');
+    updateToolUsage("hash");
   }, []);
 
   // Generate hash when input or algorithm changes
   useEffect(() => {
     if (!hasInput) {
       setHashResult(null);
-      setError('');
+      setError("");
       return;
     }
 
@@ -95,9 +104,11 @@ function HashGenerator() {
       try {
         const result = await generateHash(debouncedInputText, algorithm);
         setHashResult(result);
-        setError('');
+        setError("");
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to generate hash');
+        setError(
+          err instanceof Error ? err.message : "Failed to generate hash"
+        );
         setHashResult(null);
       } finally {
         setIsLoading(false);
@@ -107,23 +118,29 @@ function HashGenerator() {
     fetchHash();
   }, [debouncedInputText, algorithm, hasInput]);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(e.target.value);
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setInputText(e.target.value);
+    },
+    []
+  );
 
-  const handleAlgorithmChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setAlgorithm(e.target.value as HashAlgorithm);
-  }, []);
+  const handleAlgorithmChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setAlgorithm(e.target.value as HashAlgorithm);
+    },
+    []
+  );
 
   const handleClearAll = useCallback(() => {
-    setInputText('');
-    setAlgorithm('sha256');
+    setInputText("");
+    setAlgorithm("sha256");
     setHashResult(null);
-    setError('');
+    setError("");
   }, []);
 
   const isClearDisabled = useMemo(
-    () => inputText === '' && algorithm === 'sha256',
+    () => inputText === "" && algorithm === "sha256",
     [inputText, algorithm]
   );
 
@@ -139,14 +156,16 @@ function HashGenerator() {
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Generate Cryptographic Hash</h2>
-            <ClearButton 
-              onClick={handleClearAll} 
-              disabled={isClearDisabled} 
+            <h2 className="text-lg font-semibold">
+              Generate Cryptographic Hash
+            </h2>
+            <ClearButton
+              onClick={handleClearAll}
+              disabled={isClearDisabled}
               aria-label="Clear all inputs"
             />
           </div>
-          
+          <hr className="line-break" />
           <div className="space-y-4 mb-4">
             <div>
               <label className="form-label" htmlFor="hash-input">
@@ -159,11 +178,11 @@ function HashGenerator() {
                 className="input-field"
                 disabled={isLoading}
                 placeholder="Enter text to hash"
-                aria-describedby={error ? 'hash-error' : undefined}
+                aria-describedby={error ? "hash-error" : undefined}
                 aria-busy={isLoading}
               />
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="w-full sm:w-1/2">
                 <label className="form-label" htmlFor="hash-algorithm">
@@ -200,7 +219,10 @@ function HashGenerator() {
                 <div className="w-full mono-output" aria-label="Hashed result">
                   {hashResult.hashedText}
                 </div>
-                <CopyButton text={hashResult.hashedText} aria-label="Copy hash to clipboard" />
+                <CopyButton
+                  text={hashResult.hashedText}
+                  aria-label="Copy hash to clipboard"
+                />
               </div>
               <p className="text-sm mt-2">
                 Algorithm: {hashResult.algorithm.toUpperCase()}
@@ -208,10 +230,10 @@ function HashGenerator() {
             </div>
           )}
 
-          <ErrorBox message={error} id={error ? 'hash-error' : undefined} />
+          <ErrorBox message={error} id={error ? "hash-error" : undefined} />
         </SectionCard>
+        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>
-      <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
     </>
   );
 }

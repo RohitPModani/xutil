@@ -1,14 +1,14 @@
-import { useEffect, useState, useCallback } from 'react';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ClearButton from '../../components/ClearButton';
-import ErrorBox from '../../components/ErrorBox';
-import CopyButton from '../../components/CopyButton';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { updateToolUsage } from '../../utils/toolUsage';
+import { useEffect, useState, useCallback } from "react";
+import BackToHome from "../../components/BackToHome";
+import SectionCard from "../../components/SectionCard";
+import ClearButton from "../../components/ClearButton";
+import ErrorBox from "../../components/ErrorBox";
+import CopyButton from "../../components/CopyButton";
+import SEODescription from "../../components/SEODescription";
+import { PageSEO } from "../../components/PageSEO";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { updateToolUsage } from "../../utils/toolUsage";
 
 interface BoxShadow {
   xOffset: number; // -50 to 50
@@ -16,21 +16,71 @@ interface BoxShadow {
   blurRadius: number; // 0 to 100
   spreadRadius: number; // -50 to 50
   color: string; // HEX color
-  type: 'outset' | 'inset';
+  type: "outset" | "inset";
 }
 
 const PRESETS: { name: string; style: BoxShadow }[] = [
-  { name: 'Soft Shadow', style: { xOffset: 3, yOffset: 3, blurRadius: 15, spreadRadius: 0, color: '#00000040', type: 'outset' } },
-  { name: 'Hard Shadow', style: { xOffset: 5, yOffset: 5, blurRadius: 0, spreadRadius: 0, color: '#000000', type: 'outset' } },
-  { name: 'Inset Glow', style: { xOffset: 0, yOffset: 0, blurRadius: 10, spreadRadius: 2, color: '#FF000080', type: 'inset' } },
-  { name: 'Deep Shadow', style: { xOffset: 10, yOffset: 10, blurRadius: 20, spreadRadius: 5, color: '#00000080', type: 'outset' } },
-  { name: 'Subtle Inset', style: { xOffset: -2, yOffset: -2, blurRadius: 5, spreadRadius: -1, color: '#00000040', type: 'inset' } },
+  {
+    name: "Soft Shadow",
+    style: {
+      xOffset: 3,
+      yOffset: 3,
+      blurRadius: 15,
+      spreadRadius: 0,
+      color: "#00000040",
+      type: "outset",
+    },
+  },
+  {
+    name: "Hard Shadow",
+    style: {
+      xOffset: 5,
+      yOffset: 5,
+      blurRadius: 0,
+      spreadRadius: 0,
+      color: "#000000",
+      type: "outset",
+    },
+  },
+  {
+    name: "Inset Glow",
+    style: {
+      xOffset: 0,
+      yOffset: 0,
+      blurRadius: 10,
+      spreadRadius: 2,
+      color: "#FF000080",
+      type: "inset",
+    },
+  },
+  {
+    name: "Deep Shadow",
+    style: {
+      xOffset: 10,
+      yOffset: 10,
+      blurRadius: 20,
+      spreadRadius: 5,
+      color: "#00000080",
+      type: "outset",
+    },
+  },
+  {
+    name: "Subtle Inset",
+    style: {
+      xOffset: -2,
+      yOffset: -2,
+      blurRadius: 5,
+      spreadRadius: -1,
+      color: "#00000040",
+      type: "inset",
+    },
+  },
 ];
 
 function BoxShadowGenerator() {
   const seo = seoDescriptions.boxShadowGenerator || {
-    title: 'CSS Box Shadow Generator',
-    body: 'Create and customize CSS box shadows with this online box shadow generator tool.'
+    title: "CSS Box Shadow Generator",
+    body: "Create and customize CSS box shadows with this online box shadow generator tool.",
   };
 
   const [boxShadow, setBoxShadow] = useState<BoxShadow>({
@@ -38,13 +88,13 @@ function BoxShadowGenerator() {
     yOffset: 5,
     blurRadius: 10,
     spreadRadius: 0,
-    color: '#000000',
-    type: 'outset',
+    color: "#000000",
+    type: "outset",
   });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    updateToolUsage('box_shadow_generator');
+    updateToolUsage("box_shadow_generator");
   }, []);
 
   const validateHex = (hex: string): boolean => {
@@ -52,8 +102,9 @@ function BoxShadowGenerator() {
   };
 
   const generateCssValue = useCallback(() => {
-    const { xOffset, yOffset, blurRadius, spreadRadius, color, type } = boxShadow;
-    const inset = type === 'inset' ? 'inset ' : '';
+    const { xOffset, yOffset, blurRadius, spreadRadius, color, type } =
+      boxShadow;
+    const inset = type === "inset" ? "inset " : "";
     return `${inset}${xOffset}px ${yOffset}px ${blurRadius}px ${spreadRadius}px ${color}`;
   }, [boxShadow]);
 
@@ -63,48 +114,60 @@ function BoxShadowGenerator() {
 
   const handleXOffsetChange = useCallback((value: string) => {
     const numValue = parseInt(value, 10);
-    if (value === '' || (numValue >= -50 && numValue <= 50)) {
-      setBoxShadow((prev) => ({ ...prev, xOffset: value === '' ? 0 : numValue }));
+    if (value === "" || (numValue >= -50 && numValue <= 50)) {
+      setBoxShadow((prev) => ({
+        ...prev,
+        xOffset: value === "" ? 0 : numValue,
+      }));
       setError(null);
     } else {
-      setError('Horizontal offset must be between -50 and 50');
+      setError("Horizontal offset must be between -50 and 50");
     }
   }, []);
 
   const handleYOffsetChange = useCallback((value: string) => {
     const numValue = parseInt(value, 10);
-    if (value === '' || (numValue >= -50 && numValue <= 50)) {
-      setBoxShadow((prev) => ({ ...prev, yOffset: value === '' ? 0 : numValue }));
+    if (value === "" || (numValue >= -50 && numValue <= 50)) {
+      setBoxShadow((prev) => ({
+        ...prev,
+        yOffset: value === "" ? 0 : numValue,
+      }));
       setError(null);
     } else {
-      setError('Vertical offset must be between -50 and 50');
+      setError("Vertical offset must be between -50 and 50");
     }
   }, []);
 
   const handleBlurRadiusChange = useCallback((value: string) => {
     const numValue = parseInt(value, 10);
-    if (value === '' || (numValue >= 0 && numValue <= 100)) {
-      setBoxShadow((prev) => ({ ...prev, blurRadius: value === '' ? 0 : numValue }));
+    if (value === "" || (numValue >= 0 && numValue <= 100)) {
+      setBoxShadow((prev) => ({
+        ...prev,
+        blurRadius: value === "" ? 0 : numValue,
+      }));
       setError(null);
     } else {
-      setError('Blur radius must be between 0 and 100');
+      setError("Blur radius must be between 0 and 100");
     }
   }, []);
 
   const handleSpreadRadiusChange = useCallback((value: string) => {
     const numValue = parseInt(value, 10);
-    if (value === '' || (numValue >= -50 && numValue <= 50)) {
-      setBoxShadow((prev) => ({ ...prev, spreadRadius: value === '' ? 0 : numValue }));
+    if (value === "" || (numValue >= -50 && numValue <= 50)) {
+      setBoxShadow((prev) => ({
+        ...prev,
+        spreadRadius: value === "" ? 0 : numValue,
+      }));
       setError(null);
     } else {
-      setError('Spread radius must be between -50 and 50');
+      setError("Spread radius must be between -50 and 50");
     }
   }, []);
 
   const handleColorChange = useCallback((value: string) => {
-    let cleanValue = value.toUpperCase().replace(/[^0-9A-F#]/g, '');
-    if (cleanValue.length > 0 && cleanValue[0] !== '#') {
-      cleanValue = '#' + cleanValue;
+    let cleanValue = value.toUpperCase().replace(/[^0-9A-F#]/g, "");
+    if (cleanValue.length > 0 && cleanValue[0] !== "#") {
+      cleanValue = "#" + cleanValue;
     }
     if (cleanValue.length > 7) {
       cleanValue = cleanValue.slice(0, 7);
@@ -112,11 +175,11 @@ function BoxShadowGenerator() {
 
     setBoxShadow((prev) => ({ ...prev, color: cleanValue }));
 
-    const cleanHex = cleanValue.replace('#', '');
+    const cleanHex = cleanValue.replace("#", "");
     if (cleanHex.length === 6 && !validateHex(cleanHex)) {
-      setError('Invalid HEX color code (use 6 digits, 0-9 or A-F)');
+      setError("Invalid HEX color code (use 6 digits, 0-9 or A-F)");
     } else if (cleanHex.length > 0 && cleanHex.length < 6) {
-      setError('HEX code must be 6 digits');
+      setError("HEX code must be 6 digits");
     } else {
       setError(null);
     }
@@ -127,11 +190,14 @@ function BoxShadowGenerator() {
     setError(null);
   }, []);
 
-  const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const type = e.target.value as 'outset' | 'inset';
-    setBoxShadow((prev) => ({ ...prev, type }));
-    setError(null);
-  }, []);
+  const handleTypeChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const type = e.target.value as "outset" | "inset";
+      setBoxShadow((prev) => ({ ...prev, type }));
+      setError(null);
+    },
+    []
+  );
 
   const handlePresetSelect = useCallback((preset: BoxShadow) => {
     setBoxShadow(preset);
@@ -144,15 +210,15 @@ function BoxShadowGenerator() {
       yOffset: 5,
       blurRadius: 10,
       spreadRadius: 0,
-      color: '#000000',
-      type: 'outset',
+      color: "#000000",
+      type: "outset",
     });
     setError(null);
   }, []);
 
   const generatePresetCss = (preset: BoxShadow) => {
     const { xOffset, yOffset, blurRadius, spreadRadius, color, type } = preset;
-    const inset = type === 'inset' ? 'inset ' : '';
+    const inset = type === "inset" ? "inset " : "";
     return `${inset}${xOffset}px ${yOffset}px ${blurRadius}px ${spreadRadius}px ${color}`;
   };
 
@@ -168,7 +234,9 @@ function BoxShadowGenerator() {
 
         <SectionCard className="mb-4 section">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Box Shadow Generator</h3>
+            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              Box Shadow Generator
+            </h3>
             <ClearButton
               onClick={handleClear}
               disabled={
@@ -176,18 +244,16 @@ function BoxShadowGenerator() {
                 boxShadow.yOffset === 5 &&
                 boxShadow.blurRadius === 10 &&
                 boxShadow.spreadRadius === 0 &&
-                boxShadow.color === '#000000' &&
-                boxShadow.type === 'outset'
+                boxShadow.color === "#000000" &&
+                boxShadow.type === "outset"
               }
               aria-label="Reset box shadow"
             />
           </div>
-
+          <hr className="line-break" />
           <div className="flex flex-col space-y-3 p-2">
             <div className="space-y-2">
-              <label className="form-label">
-                Presets
-              </label>
+              <label className="form-label">Presets</label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {PRESETS.map((preset, index) => (
                   <button
@@ -200,7 +266,9 @@ function BoxShadowGenerator() {
                       className="w-12 h-12 bg-white dark:bg-zinc-900 rounded border border-zinc-200 dark:border-zinc-600"
                       style={{ boxShadow: generatePresetCss(preset.style) }}
                     />
-                    <span className="text-xs text-zinc-700 dark:text-zinc-300 mt-1">{preset.name}</span>
+                    <span className="text-xs text-zinc-700 dark:text-zinc-300 mt-1">
+                      {preset.name}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -208,9 +276,7 @@ function BoxShadowGenerator() {
 
             <div className="space-y-2">
               <div>
-                <label className="form-label mb-1">
-                  Shadow Type
-                </label>
+                <label className="form-label mb-1">Shadow Type</label>
                 <select
                   value={boxShadow.type}
                   onChange={handleTypeChange}
@@ -273,9 +339,7 @@ function BoxShadowGenerator() {
               </div>
               <div className="flex flex-col md:flex-row md:space-x-2 md:space-y-0 space-y-2 gap-2">
                 <div className="flex-1">
-                  <label className="form-label mb-1">
-                    Blur Radius (px)
-                  </label>
+                  <label className="form-label mb-1">Blur Radius (px)</label>
                   <input
                     type="range"
                     min="0"
@@ -330,7 +394,11 @@ function BoxShadowGenerator() {
                       value={boxShadow.color}
                       onChange={(e) => handleColorPickerChange(e.target.value)}
                       className="w-10 h-10 border-2 border-zinc-300 dark:border-zinc-600 rounded cursor-pointer z-10"
-                      style={{ display: 'block', appearance: 'auto', overflow: 'visible' }}
+                      style={{
+                        display: "block",
+                        appearance: "auto",
+                        overflow: "visible",
+                      }}
                       aria-label="Shadow color picker"
                     />
                     <input
@@ -357,13 +425,13 @@ function BoxShadowGenerator() {
 
             <div className="result-box">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Box Shadow CSS</h4>
+                <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  Box Shadow CSS
+                </h4>
                 <CopyButton text={generateCss()} />
               </div>
               <div className="inner-result scrollbar overflow-x-auto">
-                <pre>
-                  {generateCss()}
-                </pre>
+                <pre>{generateCss()}</pre>
               </div>
             </div>
 

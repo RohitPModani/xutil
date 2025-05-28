@@ -1,17 +1,17 @@
-import { useEffect, useState, useCallback } from 'react';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ClearButton from '../../components/ClearButton';
-import ErrorBox from '../../components/ErrorBox';
-import CopyButton from '../../components/CopyButton';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { updateToolUsage } from '../../utils/toolUsage';
-import { Download } from 'lucide-react';
-import JsBarcode from 'jsbarcode';
-import LoadingButton from '../../components/LoadingButton';
+import { useEffect, useState, useCallback } from "react";
+import BackToHome from "../../components/BackToHome";
+import SectionCard from "../../components/SectionCard";
+import ClearButton from "../../components/ClearButton";
+import ErrorBox from "../../components/ErrorBox";
+import CopyButton from "../../components/CopyButton";
+import SEODescription from "../../components/SEODescription";
+import { PageSEO } from "../../components/PageSEO";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { updateToolUsage } from "../../utils/toolUsage";
+import { Download } from "lucide-react";
+import JsBarcode from "jsbarcode";
+import LoadingButton from "../../components/LoadingButton";
 
 type BarcodeOptions = {
   text: string;
@@ -35,47 +35,47 @@ type BarcodeOptions = {
 };
 
 const DEFAULT_OPTIONS: BarcodeOptions = {
-  text: '',
-  format: 'CODE128',
+  text: "",
+  format: "CODE128",
   width: 2,
   height: 100,
   displayValue: true,
-  fontOptions: '',
-  font: 'monospace',
-  textAlign: 'center',
-  textPosition: 'bottom',
+  fontOptions: "",
+  font: "monospace",
+  textAlign: "center",
+  textPosition: "bottom",
   textMargin: 2,
   fontSize: 20,
-  background: '#ffffff',
-  lineColor: '#000000',
+  background: "#ffffff",
+  lineColor: "#000000",
   margin: 10,
 };
 
 const BARCODE_FORMATS = [
-  { value: 'CODE128', label: 'CODE128' },
-  { value: 'CODE128A', label: 'CODE128 A' },
-  { value: 'CODE128B', label: 'CODE128 B' },
-  { value: 'CODE128C', label: 'CODE128 C' },
-  { value: 'EAN13', label: 'EAN-13' },
-  { value: 'EAN8', label: 'EAN-8' },
-  { value: 'UPC', label: 'UPC' },
-  { value: 'CODE39', label: 'CODE39' },
-  { value: 'ITF14', label: 'ITF-14' },
-  { value: 'MSI', label: 'MSI' },
-  { value: 'pharmacode', label: 'Pharmacode' },
-  { value: 'codabar', label: 'Codabar' },
+  { value: "CODE128", label: "CODE128" },
+  { value: "CODE128A", label: "CODE128 A" },
+  { value: "CODE128B", label: "CODE128 B" },
+  { value: "CODE128C", label: "CODE128 C" },
+  { value: "EAN13", label: "EAN-13" },
+  { value: "EAN8", label: "EAN-8" },
+  { value: "UPC", label: "UPC" },
+  { value: "CODE39", label: "CODE39" },
+  { value: "ITF14", label: "ITF-14" },
+  { value: "MSI", label: "MSI" },
+  { value: "pharmacode", label: "Pharmacode" },
+  { value: "codabar", label: "Codabar" },
 ];
 
 function BarcodeGenerator() {
   const seo = seoDescriptions.barcodeGenerator;
-  
+
   const [options, setOptions] = useState<BarcodeOptions>(DEFAULT_OPTIONS);
-  const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
+  const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    updateToolUsage('barcode_generator');
+    updateToolUsage("barcode_generator");
   }, []);
 
   const generateBarcode = useCallback(async () => {
@@ -84,12 +84,12 @@ function BarcodeGenerator() {
       setError(null);
 
       if (!options.text) {
-        throw new Error('Please enter text to generate barcode');
+        throw new Error("Please enter text to generate barcode");
       }
 
       // Create a canvas element
-      const canvas = document.createElement('canvas');
-      
+      const canvas = document.createElement("canvas");
+
       // Generate barcode on the canvas
       JsBarcode(canvas, options.text, {
         format: options.format,
@@ -112,54 +112,71 @@ function BarcodeGenerator() {
       });
 
       // Convert canvas to data URL
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = canvas.toDataURL("image/png");
       setBarcodeDataUrl(dataUrl);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate barcode');
-      console.error('Barcode generation error:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to generate barcode"
+      );
+      console.error("Barcode generation error:", err);
     } finally {
       setIsGenerating(false);
     }
   }, [options]);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
-    
-    setOptions(prev => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
-    }));
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value, type } = e.target;
+      const checked =
+        type === "checkbox"
+          ? (e.target as HTMLInputElement).checked
+          : undefined;
 
-  const handleNumberInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setOptions(prev => ({ 
-      ...prev, 
-      [name]: value === '' ? undefined : Number(value) 
-    }));
-  }, []);
+      setOptions((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+    },
+    []
+  );
 
-  const handleSelectChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setOptions(prev => ({ ...prev, [name]: value }));
-  }, []);
+  const handleNumberInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setOptions((prev) => ({
+        ...prev,
+        [name]: value === "" ? undefined : Number(value),
+      }));
+    },
+    []
+  );
 
-  const handleColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setOptions(prev => ({ ...prev, [name]: value }));
-  }, []);
+  const handleSelectChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setOptions((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
+
+  const handleColorChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setOptions((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
   const handleClear = useCallback(() => {
     setOptions(DEFAULT_OPTIONS);
-    setBarcodeDataUrl('');
+    setBarcodeDataUrl("");
     setError(null);
   }, []);
 
   const downloadBarcode = useCallback(() => {
     if (!barcodeDataUrl) return;
-    
-    const link = document.createElement('a');
+
+    const link = document.createElement("a");
     link.href = barcodeDataUrl;
     link.download = `barcode-${options.format}-${Date.now()}.png`;
     document.body.appendChild(link);
@@ -186,7 +203,7 @@ function BarcodeGenerator() {
               aria-label="Clear inputs"
             />
           </div>
-
+          <hr className="line-break" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
@@ -215,8 +232,10 @@ function BarcodeGenerator() {
                   value={options.format}
                   onChange={handleSelectChange}
                 >
-                  {BARCODE_FORMATS.map(format => (
-                    <option key={format.value} value={format.value}>{format.label}</option>
+                  {BARCODE_FORMATS.map((format) => (
+                    <option key={format.value} value={format.value}>
+                      {format.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -347,15 +366,18 @@ function BarcodeGenerator() {
                   checked={options.displayValue || false}
                   onChange={handleInputChange}
                 />
-                <label htmlFor="displayValue" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label
+                  htmlFor="displayValue"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   Display Text
                 </label>
               </div>
 
               <div className="flex justify-center item-center">
-                <LoadingButton 
-                  onClick={generateBarcode} 
-                  disabled={isGenerating} 
+                <LoadingButton
+                  onClick={generateBarcode}
+                  disabled={isGenerating}
                   isLoading={isGenerating}
                 >
                   Generate Barcode
@@ -366,19 +388,14 @@ function BarcodeGenerator() {
             <div className="flex flex-col items-center justify-center">
               {barcodeDataUrl ? (
                 <>
-                  <img 
-                    src={barcodeDataUrl} 
-                    alt="Generated Barcode" 
+                  <img
+                    src={barcodeDataUrl}
+                    alt="Generated Barcode"
                     className="mb-4 border rounded p-2 bg-zinc-100 dark:bg-zinc-800 max-w-full"
                   />
                   <div className="flex justify-center item center gap-4">
-                    <CopyButton 
-                      text={barcodeDataUrl} 
-                    />
-                    <button
-                      onClick={downloadBarcode}
-                      className="btn-secondary"
-                    >
+                    <CopyButton text={barcodeDataUrl} />
+                    <button onClick={downloadBarcode} className="btn-secondary">
                       <Download className="sm:w-6 sm:h-6 w-5 h-5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-100" />
                     </button>
                   </div>

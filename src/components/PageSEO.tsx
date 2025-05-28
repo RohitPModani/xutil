@@ -1,5 +1,5 @@
 // src/components/PageSEO.tsx
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from "react-helmet-async";
 
 interface PageSEOProps {
   title: string;
@@ -23,7 +23,7 @@ export const PageSEO = ({
       <title>{title}</title>
       <meta name="description" content={description} />
       {keywords && <meta name="keywords" content={keywords} />}
-      
+
       {/* Open Graph (for social media previews) */}
       <meta property="og:title" content={ogTitle || title} />
       <meta property="og:description" content={ogDescription || description} />

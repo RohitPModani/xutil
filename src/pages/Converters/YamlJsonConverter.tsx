@@ -1,67 +1,68 @@
-import { useState, useRef, useEffect } from 'react';
-import BackToHome from '../../components/BackToHome';
-import ErrorBox from '../../components/ErrorBox';
-import LoadingButton from '../../components/LoadingButton';
-import SectionCard from '../../components/SectionCard';
-import CopyButton from '../../components/CopyButton';
-import ClearButton from '../../components/ClearButton';
-import AutoTextarea from '../../hooks/useAutoSizeTextArea';
-import DownloadButton from '../../components/DownloadButton';
-import SEODescription from '../../components/SEODescription';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import FileUploader from '../../components/FileUploader';
-import { useFileReset } from '../../hooks/useFileReset';
-import seoDescriptions from '../../data/seoDescriptions';
-import { PageSEO } from '../../components/PageSEO';
-import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { updateToolUsage } from '../../utils/toolUsage';
-import * as yaml from 'js-yaml';
+import { useState, useRef, useEffect } from "react";
+import BackToHome from "../../components/BackToHome";
+import ErrorBox from "../../components/ErrorBox";
+import LoadingButton from "../../components/LoadingButton";
+import SectionCard from "../../components/SectionCard";
+import CopyButton from "../../components/CopyButton";
+import ClearButton from "../../components/ClearButton";
+import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import DownloadButton from "../../components/DownloadButton";
+import SEODescription from "../../components/SEODescription";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import FileUploader from "../../components/FileUploader";
+import { useFileReset } from "../../hooks/useFileReset";
+import seoDescriptions from "../../data/seoDescriptions";
+import { PageSEO } from "../../components/PageSEO";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
+import { updateToolUsage } from "../../utils/toolUsage";
+import * as yaml from "js-yaml";
 
 interface ConversionResult {
   result: string;
-  type: 'yaml' | 'json';
+  type: "yaml" | "json";
 }
 
 enum ConversionType {
-  JSON = 'json',
-  YAML = 'yaml',
+  JSON = "json",
+  YAML = "yaml",
 }
 
 function YAMLJSONConverter() {
   const seo = seoDescriptions.yamlJson;
-  const [inputText, setInputText] = useState('');
-  const [conversionResult, setConversionResult] = useState<ConversionResult | null>(null);
-  const [fileResult, setFileResult] = useState('');
-  const [error, setError] = useState('');
+  const [inputText, setInputText] = useState("");
+  const [conversionResult, setConversionResult] =
+    useState<ConversionResult | null>(null);
+  const [fileResult, setFileResult] = useState("");
+  const [error, setError] = useState("");
   const [fileType, setFileType] = useState<ConversionType | null>(null);
-  const [fileBaseName, setFileBaseName] = useState('');
-  const [fileInputText, setFileInputText] = useState('');
+  const [fileBaseName, setFileBaseName] = useState("");
+  const [fileInputText, setFileInputText] = useState("");
   const [isConverting, setIsConverting] = useState(false);
   const textResultRef = useRef<HTMLDivElement | null>(null);
   const fileResultRef = useRef<HTMLDivElement | null>(null);
   const inputTextRef = useRef<HTMLTextAreaElement>(null);
-  const isMobile = useMediaQuery('(max-width: 640px)');
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const fileReset = useFileReset();
 
   useEffect(() => {
-    updateToolUsage('yaml_json');
+    updateToolUsage("yaml_json");
   }, []);
 
   const scrollToResult = (ref: React.RefObject<HTMLDivElement | null>) => {
-      setTimeout(() => {
-        ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-    };
+    setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
 
   const convertText = async (type: ConversionType) => {
     if (!inputText.trim()) {
-      setError('Conversion failed: Input text cannot be empty');
+      setError("Conversion failed: Input text cannot be empty");
       setConversionResult(null);
       return;
     }
 
-    setError('');
+    setError("");
     setIsConverting(true);
 
     try {
@@ -70,17 +71,17 @@ function YAMLJSONConverter() {
         // JSON to YAML
         const jsonObj = JSON.parse(inputText);
         result = yaml.dump(jsonObj, { lineWidth: -1 }); // -1 for no line folding
-        setConversionResult({ result, type: 'yaml' });
+        setConversionResult({ result, type: "yaml" });
       } else {
         // YAML to JSON
         const yamlObj = yaml.load(inputText);
         result = JSON.stringify(yamlObj, null, 2);
-        setConversionResult({ result, type: 'json' });
+        setConversionResult({ result, type: "json" });
       }
       scrollToResult(textResultRef);
     } catch (err: any) {
-      console.error('Conversion error:', err);
-      setError(`Conversion failed: ${err.message || 'Invalid format'}`);
+      console.error("Conversion error:", err);
+      setError(`Conversion failed: ${err.message || "Invalid format"}`);
       setConversionResult(null);
     } finally {
       setIsConverting(false);
@@ -89,13 +90,13 @@ function YAMLJSONConverter() {
 
   const handleFileConversion = async (file: File, type: ConversionType) => {
     if (!file) {
-      setError('File upload failed: No file selected');
-      setFileResult('');
+      setError("File upload failed: No file selected");
+      setFileResult("");
       setFileType(null);
       return;
     }
 
-    const baseName = file.name.replace(/\.[^/.]+$/, '');
+    const baseName = file.name.replace(/\.[^/.]+$/, "");
     setFileBaseName(baseName);
     setIsConverting(true);
 
@@ -117,12 +118,12 @@ function YAMLJSONConverter() {
       }
 
       setFileResult(result);
-      setError('');
+      setError("");
       scrollToResult(fileResultRef);
     } catch (err: any) {
-      console.error('File conversion error:', err);
-      setError(`File conversion failed: ${err.message || 'Invalid format'}`);
-      setFileResult('');
+      console.error("File conversion error:", err);
+      setError(`File conversion failed: ${err.message || "Invalid format"}`);
+      setFileResult("");
       setFileType(null);
     } finally {
       setIsConverting(false);
@@ -130,16 +131,16 @@ function YAMLJSONConverter() {
   };
 
   const clearTextConversion = () => {
-    setInputText('');
+    setInputText("");
     setConversionResult(null);
-    setError('');
+    setError("");
   };
 
   const clearFileConversion = () => {
-    setFileResult('');
-    setFileInputText('');
+    setFileResult("");
+    setFileInputText("");
     setFileType(null);
-    setError('');
+    setError("");
     fileReset.triggerReset();
   };
 
@@ -165,20 +166,24 @@ function YAMLJSONConverter() {
           {isMobile ? (
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Text Conversion</h3>
-              <ClearButton 
-                onClick={clearTextConversion} 
-                disabled={!inputText && !conversionResult && !error} 
+              <ClearButton
+                onClick={clearTextConversion}
+                disabled={!inputText && !conversionResult && !error}
               />
             </div>
           ) : (
-            <div className="flex items-center justify-between mb-4" ref={textResultRef}>
+            <div
+              className="flex items-center justify-between mb-4"
+              ref={textResultRef}
+            >
               <h3 className="text-lg font-semibold">Text Conversion</h3>
-              <ClearButton 
-                onClick={clearTextConversion} 
-                disabled={!inputText && !conversionResult && !error} 
+              <ClearButton
+                onClick={clearTextConversion}
+                disabled={!inputText && !conversionResult && !error}
               />
             </div>
           )}
+          <hr className="line-break" />
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1 space-y-4">
               <label className="form-label" htmlFor="input-text">
@@ -195,15 +200,15 @@ function YAMLJSONConverter() {
                 aria-label="YAML or JSON input text"
               />
               <div className="flex flex-wrap gap-2">
-                <LoadingButton 
-                  onClick={() => convertText(ConversionType.YAML)} 
+                <LoadingButton
+                  onClick={() => convertText(ConversionType.YAML)}
                   isLoading={isConverting}
                   disabled={!inputText.trim()}
                 >
                   JSON to YAML
                 </LoadingButton>
-                <LoadingButton 
-                  onClick={() => convertText(ConversionType.JSON)} 
+                <LoadingButton
+                  onClick={() => convertText(ConversionType.JSON)}
                   isLoading={isConverting}
                   disabled={!inputText.trim()}
                 >
@@ -216,30 +221,33 @@ function YAMLJSONConverter() {
               <div className="flex items-center justify-between">
                 <label className="form-label">Converted Result:</label>
                 <div className="flex items-center gap-2">
-                  <CopyButton 
-                    text={conversionResult?.result || ''} 
-                  />
+                  <CopyButton text={conversionResult?.result || ""} />
                   <DownloadButton
-                    content={conversionResult?.result || ''}
-                    fileName={`converted_result.${conversionResult?.type || 'txt'}`}
-                    fileType={conversionResult?.type || 'txt'}
+                    content={conversionResult?.result || ""}
+                    fileName={`converted_result.${
+                      conversionResult?.type || "txt"
+                    }`}
+                    fileType={conversionResult?.type || "txt"}
                     disabled={!conversionResult}
                   />
                 </div>
               </div>
               <AutoTextarea
-                value={conversionResult?.result || ''}
+                value={conversionResult?.result || ""}
                 readOnly
                 disabled={!conversionResult}
                 placeholder="Converted result will appear here..."
                 className={`input-field w-full ${
-                  !conversionResult ? 'text-zinc-400 dark:text-zinc-500' : ''
+                  !conversionResult ? "text-zinc-400 dark:text-zinc-500" : ""
                 }`}
                 aria-label="Converted YAML or JSON result"
               />
               {conversionResult && (
                 <p className="text-sm text-muted mt-1">
-                  Converted: {conversionResult.type === 'json' ? 'YAML to JSON' : 'JSON to YAML'}
+                  Converted:{" "}
+                  {conversionResult.type === "json"
+                    ? "YAML to JSON"
+                    : "JSON to YAML"}
                 </p>
               )}
             </div>
@@ -252,20 +260,24 @@ function YAMLJSONConverter() {
           {isMobile ? (
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">File Conversion</h3>
-              <ClearButton 
-                onClick={clearFileConversion} 
-                disabled={!fileInputText && !fileResult && !error} 
+              <ClearButton
+                onClick={clearFileConversion}
+                disabled={!fileInputText && !fileResult && !error}
               />
             </div>
           ) : (
-            <div className="flex items-center justify-between mb-4" ref={fileResultRef}>
+            <div
+              className="flex items-center justify-between mb-4"
+              ref={fileResultRef}
+            >
               <h3 className="text-lg font-semibold">File Conversion</h3>
-              <ClearButton 
-                onClick={clearFileConversion} 
-                disabled={!fileInputText && !fileResult && !error} 
+              <ClearButton
+                onClick={clearFileConversion}
+                disabled={!fileInputText && !fileResult && !error}
               />
             </div>
           )}
+          <hr className="line-break" />
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex-1">
               <label className="form-label" htmlFor="yaml-file-upload">
@@ -274,7 +286,9 @@ function YAMLJSONConverter() {
               <FileUploader
                 accept=".yaml,.yml"
                 label="Choose YAML"
-                onFileSelected={(file) => handleFileConversion(file, ConversionType.YAML)}
+                onFileSelected={(file) =>
+                  handleFileConversion(file, ConversionType.YAML)
+                }
                 onClear={clearFileConversion}
                 resetSignal={fileReset.resetSignal}
                 disabled={isConverting}
@@ -288,7 +302,9 @@ function YAMLJSONConverter() {
               <FileUploader
                 accept=".json"
                 label="Choose JSON"
-                onFileSelected={(file) => handleFileConversion(file, ConversionType.JSON)}
+                onFileSelected={(file) =>
+                  handleFileConversion(file, ConversionType.JSON)
+                }
                 onClear={clearFileConversion}
                 resetSignal={fileReset.resetSignal}
                 disabled={isConverting}
@@ -305,7 +321,7 @@ function YAMLJSONConverter() {
                 disabled={!fileInputText}
                 placeholder="Input text from file..."
                 className={`input-field w-full h-64 ${
-                  !fileInputText ? 'text-zinc-400 dark:text-zinc-500' : ''
+                  !fileInputText ? "text-zinc-400 dark:text-zinc-500" : ""
                 }`}
                 aria-label="Input text from uploaded file"
               />
@@ -315,14 +331,11 @@ function YAMLJSONConverter() {
               <div className="flex items-center justify-between">
                 <label className="form-label">Converted Result:</label>
                 <div>
-                  <CopyButton 
-                    text={fileResult} 
-                    className="mr-3" 
-                  />
+                  <CopyButton text={fileResult} className="mr-3" />
                   <DownloadButton
                     content={fileResult}
-                    fileName={`${fileBaseName}_converted.${fileType || 'txt'}`}
-                    fileType={fileType || 'txt'}
+                    fileName={`${fileBaseName}_converted.${fileType || "txt"}`}
+                    fileType={fileType || "txt"}
                     disabled={!fileResult}
                   />
                 </div>
@@ -332,12 +345,17 @@ function YAMLJSONConverter() {
                 readOnly
                 disabled={!fileResult}
                 placeholder="Converted result will appear here after upload..."
-                className={`input-field w-full h-64 ${!fileResult ? 'text-zinc-400 dark:text-zinc-500' : ''}`}
+                className={`input-field w-full h-64 ${
+                  !fileResult ? "text-zinc-400 dark:text-zinc-500" : ""
+                }`}
                 aria-label="Converted result from uploaded file"
               />
               {fileResult && (
                 <p className="text-sm text-muted">
-                  Converted: {fileType === ConversionType.JSON ? 'YAML to JSON' : 'JSON to YAML'}
+                  Converted:{" "}
+                  {fileType === ConversionType.JSON
+                    ? "YAML to JSON"
+                    : "JSON to YAML"}
                 </p>
               )}
             </div>

@@ -1,19 +1,25 @@
-import React from 'react';
+import React from "react";
 
-interface LoadingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface LoadingButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading: boolean;
   children: React.ReactNode;
-  className? : string
+  className?: string;
 }
 
-function LoadingButton({ isLoading, children, className, ...rest }: LoadingButtonProps) {
+function LoadingButton({
+  isLoading,
+  children,
+  className,
+  ...rest
+}: LoadingButtonProps) {
   return (
     <button
       {...rest}
       disabled={isLoading || rest.disabled}
       className={`button-primary disabled:opacity-50 ${className}`}
     >
-      {isLoading ? 'Loading...' : children}
+      {isLoading ? "Loading..." : children}
     </button>
   );
 }

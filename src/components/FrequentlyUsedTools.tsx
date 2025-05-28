@@ -1,9 +1,9 @@
 // src/components/FrequentlyUsedTools.tsx
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getMostUsedTools, resetToolUsage } from '../utils/toolUsage';
-import { RefreshCcw } from 'lucide-react';
-import { toolsMeta } from '../data/tools';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getMostUsedTools, resetToolUsage } from "../utils/toolUsage";
+import { RefreshCcw } from "lucide-react";
+import { toolsMeta } from "../data/tools";
 
 function FrequentlyUsedTools() {
   const [mostUsed, setMostUsed] = useState<string[]>([]);
@@ -29,7 +29,9 @@ function FrequentlyUsedTools() {
     <div className="card shadow-md rounded-lg p-4 sm:p-6 hover:shadow-lg transition border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white my-1 sm:my-2">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-md sm:text-xl font-semibold">Frequently Used Tools</h2>
+        <h2 className="text-md sm:text-xl font-semibold">
+          Frequently Used Tools
+        </h2>
         {mostUsed.length > 0 && (
           <button
             onClick={handleReset}
@@ -46,7 +48,7 @@ function FrequentlyUsedTools() {
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
           {mostUsed.map((toolKey, index) => {
             const tool = toolsMeta[toolKey];
-            const toolName = tool ? tool.name : toolKey.replace(/-/g, ' ');
+            const toolName = tool ? tool.name : toolKey.replace(/-/g, " ");
 
             return (
               <div
@@ -60,7 +62,9 @@ function FrequentlyUsedTools() {
           })}
         </div>
       ) : (
-        <p className="text-zinc-600 dark:text-zinc-400">No tools used recently.</p>
+        <p className="text-zinc-600 dark:text-zinc-400">
+          No tools used recently.
+        </p>
       )}
     </div>
   );

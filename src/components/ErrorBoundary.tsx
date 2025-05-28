@@ -1,4 +1,4 @@
-import { useRouteError } from 'react-router-dom';
+import { useRouteError } from "react-router-dom";
 
 function ErrorBoundary() {
   const error: any = useRouteError();
@@ -12,7 +12,7 @@ function ErrorBoundary() {
         An unexpected error occurred. Please try again or contact support.
       </p>
       <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-        Error: {error?.message || 'Unknown error'}
+        Error: {error?.message || "Unknown error"}
       </p>
       <button
         onClick={() => window.location.reload()}

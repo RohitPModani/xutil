@@ -1,19 +1,19 @@
-import { useEffect, useState, useRef } from 'react';
-import BackToHome from '../../components/BackToHome';
-import ErrorBox from '../../components/ErrorBox';
-import LoadingButton from '../../components/LoadingButton';
-import SectionCard from '../../components/SectionCard';
-import CopyButton from '../../components/CopyButton';
-import ClearButton from '../../components/ClearButton';
-import AutoTextarea from '../../hooks/useAutoSizeTextArea';
-import SEODescription from '../../components/SEODescription';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { PageSEO } from '../../components/PageSEO';
-import { updateToolUsage } from '../../utils/toolUsage';
+import { useEffect, useState, useRef } from "react";
+import BackToHome from "../../components/BackToHome";
+import ErrorBox from "../../components/ErrorBox";
+import LoadingButton from "../../components/LoadingButton";
+import SectionCard from "../../components/SectionCard";
+import CopyButton from "../../components/CopyButton";
+import ClearButton from "../../components/ClearButton";
+import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import SEODescription from "../../components/SEODescription";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { PageSEO } from "../../components/PageSEO";
+import { updateToolUsage } from "../../utils/toolUsage";
 
 function reverseString(str: string): string {
-  return str.split('').reverse().join('');
+  return str.split("").reverse().join("");
 }
 
 function rotateString(str: string, n: number): string {
@@ -24,17 +24,17 @@ function rotateString(str: string, n: number): string {
 
 export default function StringReverserRotator() {
   const seo = seoDescriptions.stringReverser;
-  const [reverseInput, setReverseInput] = useState('');
-  const [rotateInput, setRotateInput] = useState('');
-  const [reverseResult, setReverseResult] = useState('');
-  const [rotateResult, setRotateResult] = useState('');
+  const [reverseInput, setReverseInput] = useState("");
+  const [rotateInput, setRotateInput] = useState("");
+  const [reverseResult, setReverseResult] = useState("");
+  const [rotateResult, setRotateResult] = useState("");
   const [rotateBy, setRotateBy] = useState(3);
-  const [errorReverse, setErrorReverse] = useState('');
-  const [errorRotate, setErrorRotate] = useState('');
+  const [errorReverse, setErrorReverse] = useState("");
+  const [errorRotate, setErrorRotate] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    updateToolUsage('string_reverser_rotator');
+    updateToolUsage("string_reverser_rotator");
   }, []);
 
   // Auto-reverse when input changes
@@ -42,79 +42,88 @@ export default function StringReverserRotator() {
     if (reverseInput.trim()) {
       handleReverse();
     } else {
-      setReverseResult('');
-      setErrorReverse('');
+      setReverseResult("");
+      setErrorReverse("");
     }
   }, [reverseInput]);
 
   // Auto-rotate when input or rotateBy changes
   useEffect(() => {
-    if (rotateInput.trim() && Number.isInteger(rotateBy) && rotateBy >= -100 && rotateBy <= 100) {
+    if (
+      rotateInput.trim() &&
+      Number.isInteger(rotateBy) &&
+      rotateBy >= -100 &&
+      rotateBy <= 100
+    ) {
       handleRotate();
     } else {
-      setRotateResult('');
-      setErrorRotate('');
+      setRotateResult("");
+      setErrorRotate("");
     }
   }, [rotateInput, rotateBy]);
 
   const handleReverse = () => {
     if (!reverseInput.trim()) {
-      setErrorReverse('Input text cannot be empty');
-      setReverseResult('');
+      setErrorReverse("Input text cannot be empty");
+      setReverseResult("");
       return;
     }
     try {
       const result = reverseString(reverseInput);
       setReverseResult(result);
-      setErrorReverse('');
+      setErrorReverse("");
     } catch (err: any) {
-      setErrorReverse(err.message || 'Failed to reverse string');
-      setReverseResult('');
+      setErrorReverse(err.message || "Failed to reverse string");
+      setReverseResult("");
     }
   };
 
   const handleRotate = () => {
     if (!rotateInput.trim()) {
-      setErrorRotate('Input text cannot be empty');
-      setRotateResult('');
+      setErrorRotate("Input text cannot be empty");
+      setRotateResult("");
       return;
     }
     if (!Number.isInteger(rotateBy) || rotateBy < -100 || rotateBy > 100) {
-      setErrorRotate('Rotation must be an integer between -100 and 100');
-      setRotateResult('');
+      setErrorRotate("Rotation must be an integer between -100 and 100");
+      setRotateResult("");
       return;
     }
     try {
       const result = rotateString(rotateInput, rotateBy);
       setRotateResult(result);
-      setErrorRotate('');
+      setErrorRotate("");
     } catch (err: any) {
-      setErrorRotate(err.message || 'Failed to rotate string');
-      setRotateResult('');
+      setErrorRotate(err.message || "Failed to rotate string");
+      setRotateResult("");
     }
   };
 
   const handleClearReverse = () => {
-    setReverseInput('');
-    setReverseResult('');
-    setErrorReverse('');
+    setReverseInput("");
+    setReverseResult("");
+    setErrorReverse("");
   };
 
   const handleClearRotate = () => {
-    setRotateInput('');
-    setRotateResult('');
+    setRotateInput("");
+    setRotateResult("");
     setRotateBy(3);
-    setErrorRotate('');
+    setErrorRotate("");
   };
 
-  const handleReverseInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleReverseInputChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setReverseInput(e.target.value);
     if (inputRef.current) {
       inputRef.current.focus();
     }
   };
 
-  const handleRotateInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleRotateInputChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setRotateInput(e.target.value);
     if (inputRef.current) {
       inputRef.current.focus();
@@ -123,8 +132,8 @@ export default function StringReverserRotator() {
 
   const handleRotateByChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value === '' || /^-?\d*$/.test(value)) {
-      const numValue = value === '' ? 0 : Number(value);
+    if (value === "" || /^-?\d*$/.test(value)) {
+      const numValue = value === "" ? 0 : Number(value);
       setRotateBy(Math.max(-100, Math.min(100, numValue)));
     }
   };
@@ -151,8 +160,16 @@ export default function StringReverserRotator() {
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Reverse String</h3>
-            <ClearButton onClick={handleClearReverse} disabled={reverseInput === '' && reverseResult === '' && errorReverse === ''} />
+            <ClearButton
+              onClick={handleClearReverse}
+              disabled={
+                reverseInput === "" &&
+                reverseResult === "" &&
+                errorReverse === ""
+              }
+            />
           </div>
+          <hr className="line-break" />
           <div className="space-y-4 mb-4">
             <div>
               <label className="form-label" htmlFor="string-input">
@@ -165,7 +182,9 @@ export default function StringReverserRotator() {
                 className="input-field w-full"
                 placeholder="Enter text to reverse"
                 ref={inputRef}
-                aria-describedby={errorReverse ? 'string-reverse-error' : undefined}
+                aria-describedby={
+                  errorReverse ? "string-reverse-error" : undefined
+                }
                 aria-label="Text to reverse"
               />
             </div>
@@ -179,7 +198,10 @@ export default function StringReverserRotator() {
               </div>
               <div className="scrollbox mt-2">
                 <div className="inner-result">
-                  <div className="w-full mono-output" aria-label="Reversed result">
+                  <div
+                    className="w-full mono-output"
+                    aria-label="Reversed result"
+                  >
                     {reverseResult}
                   </div>
                 </div>
@@ -187,15 +209,27 @@ export default function StringReverserRotator() {
             </div>
           )}
 
-          <ErrorBox message={errorReverse} id={errorReverse ? 'string-reverse-error' : undefined} />
+          <ErrorBox
+            message={errorReverse}
+            id={errorReverse ? "string-reverse-error" : undefined}
+          />
         </SectionCard>
 
         {/* Rotate String Section */}
         <SectionCard className="mt-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Rotate String</h3>
-            <ClearButton onClick={handleClearRotate} disabled={rotateInput === '' && rotateResult === '' && rotateBy === 0 && errorRotate === ''} />
+            <ClearButton
+              onClick={handleClearRotate}
+              disabled={
+                rotateInput === "" &&
+                rotateResult === "" &&
+                rotateBy === 0 &&
+                errorRotate === ""
+              }
+            />
           </div>
+          <hr className="line-break" />
           <div className="space-y-4 mb-4">
             <div>
               <label className="form-label" htmlFor="string-input-rotate">
@@ -208,11 +242,13 @@ export default function StringReverserRotator() {
                 className="input-field w-full"
                 placeholder="Enter text to rotate"
                 ref={inputRef}
-                aria-describedby={errorRotate ? 'string-rotate-error' : undefined}
+                aria-describedby={
+                  errorRotate ? "string-rotate-error" : undefined
+                }
                 aria-label="Text to rotate"
               />
             </div>
-            <div className='flex items-center gap-4 mt-4 mb-2'>
+            <div className="flex items-center gap-4 mt-4 mb-2">
               <label className="form-label" htmlFor="rotate-by-input">
                 Rotate By (-100 to 100):
               </label>
@@ -226,7 +262,9 @@ export default function StringReverserRotator() {
                   onChange={handleRotateByChange}
                   className="input-field w-20 text-right pr-2"
                   placeholder="-100 to 100"
-                  aria-describedby={errorRotate ? 'string-rotate-error' : undefined}
+                  aria-describedby={
+                    errorRotate ? "string-rotate-error" : undefined
+                  }
                 />
                 <div className="flex flex-col ml-1">
                   <button
@@ -261,7 +299,10 @@ export default function StringReverserRotator() {
               </div>
               <div className="scrollbox mt-2">
                 <div className="inner-result">
-                  <div className="w-full mono-output" aria-label="Rotated result">
+                  <div
+                    className="w-full mono-output"
+                    aria-label="Rotated result"
+                  >
                     {rotateResult}
                   </div>
                 </div>
@@ -269,7 +310,10 @@ export default function StringReverserRotator() {
             </div>
           )}
 
-          <ErrorBox message={errorRotate} id={errorRotate ? 'string-rotate-error' : undefined} />
+          <ErrorBox
+            message={errorRotate}
+            id={errorRotate ? "string-rotate-error" : undefined}
+          />
         </SectionCard>
         <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
       </div>

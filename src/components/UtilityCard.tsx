@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router-dom';
-import { useRef, useState, useEffect } from 'react';
-import { ChevronUp } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+import { useRef, useState, useEffect } from "react";
+import { ChevronUp } from "lucide-react";
 
 interface UtilityItem {
   name: string;
@@ -17,20 +17,20 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [contentHeight, setContentHeight] = useState<string | number>('auto');
+  const [contentHeight, setContentHeight] = useState<string | number>("auto");
 
   useEffect(() => {
     if (window.innerWidth >= 640) {
       // Always open on desktop
       setIsOpen(true);
-      setContentHeight('auto');
+      setContentHeight("auto");
       return;
     }
 
     if (isOpen) {
       const scrollHeight = contentRef.current?.scrollHeight ?? 0;
       setContentHeight(scrollHeight);
-      const timeout = setTimeout(() => setContentHeight('auto'), 300);
+      const timeout = setTimeout(() => setContentHeight("auto"), 300);
       return () => clearTimeout(timeout);
     } else {
       const scrollHeight = contentRef.current?.scrollHeight ?? 0;
@@ -40,7 +40,7 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
   }, [isOpen]);
 
   const handleImplementedClick = (path: string, toolName: string) => {
-    sessionStorage.setItem('lastClickedTool', toolName);
+    sessionStorage.setItem("lastClickedTool", toolName);
     navigate(path);
   };
 
@@ -55,8 +55,9 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
         role="button"
         className="flex items-center justify-between sm:cursor-default cursor-pointer sm:mb-4"
         style={{
-          marginBottom: window.innerWidth < 640 ? (isOpen ? '1rem' : '0px') : undefined,
-          transition: 'margin-bottom 300ms ease',
+          marginBottom:
+            window.innerWidth < 640 ? (isOpen ? "1rem" : "0px") : undefined,
+          transition: "margin-bottom 300ms ease",
         }}
       >
         <h3 className="text-md sm:text-xl font-semibold flex items-center">
@@ -65,7 +66,7 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
         </h3>
         <ChevronUp
           className={`sm:hidden w-5 h-5 text-zinc-500 dark:text-zinc-300 transition-transform duration-300 ${
-            isOpen ? 'rotate-180' : ''
+            isOpen ? "rotate-180" : ""
           }`}
         />
       </div>
@@ -74,8 +75,8 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
       <div
         ref={contentRef}
         style={{
-          overflow: 'hidden',
-          transition: 'max-height 0.3s ease, opacity 0.3s ease',
+          overflow: "hidden",
+          transition: "max-height 0.3s ease, opacity 0.3s ease",
           maxHeight: isOpen ? contentHeight : 0,
           opacity: isOpen ? 1 : 0,
         }}
@@ -83,9 +84,9 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {items.map((item, index) => {
-            const toolName = typeof item === 'string' ? item : item.name;
-            const path = typeof item === 'string' ? undefined : item.path;
-            const elementId = toolName.replace(/\s+/g, '-').toLowerCase();
+            const toolName = typeof item === "string" ? item : item.name;
+            const path = typeof item === "string" ? undefined : item.path;
+            const elementId = toolName.replace(/\s+/g, "-").toLowerCase();
 
             return (
               <div

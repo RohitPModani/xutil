@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Info, X } from 'lucide-react';
-import { sectionInfo } from '../data/sectionInfo'; 
+import React, { useState } from "react";
+import { Info, X } from "lucide-react";
+import { sectionInfo } from "../data/sectionInfo";
 
 // Props for InfoDialog
 interface InfoDialogProps {
@@ -11,7 +11,12 @@ interface InfoDialogProps {
 }
 
 // InfoDialog component for displaying section information
-const InfoDialog: React.FC<InfoDialogProps> = ({ isOpen, onClose, title, content }) => {
+const InfoDialog: React.FC<InfoDialogProps> = ({
+  isOpen,
+  onClose,
+  title,
+  content,
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -39,8 +44,8 @@ const InfoDialog: React.FC<InfoDialogProps> = ({ isOpen, onClose, title, content
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
-        <hr className='line-break'/>
-  
+        <hr className="line-break" />
+
         {/* Dialog Content */}
         <p className="text-sm text-zinc-800 dark:text-zinc-200">{content}</p>
       </div>
@@ -56,8 +61,8 @@ interface InfoSectionProps {
 // InfoSection component to manage dialog state and render info button
 const InfoSection: React.FC<InfoSectionProps> = ({ sectionKey }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [dialogTitle, setDialogTitle] = useState('');
-  const [dialogContent, setDialogContent] = useState('');
+  const [dialogTitle, setDialogTitle] = useState("");
+  const [dialogContent, setDialogContent] = useState("");
 
   // Handle info icon click
   const handleInfoClick = () => {
@@ -72,8 +77,12 @@ const InfoSection: React.FC<InfoSectionProps> = ({ sectionKey }) => {
     <>
       <button
         onClick={handleInfoClick}
-        aria-label={`Information about ${sectionInfo[sectionKey]?.title || 'section'}`}
-        title={`Learn more about ${sectionInfo[sectionKey]?.title || 'section'}`}
+        aria-label={`Information about ${
+          sectionInfo[sectionKey]?.title || "section"
+        }`}
+        title={`Learn more about ${
+          sectionInfo[sectionKey]?.title || "section"
+        }`}
       >
         <Info className="w-5 h-5" />
       </button>

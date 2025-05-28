@@ -1,15 +1,15 @@
-import { useEffect, useState, useCallback } from 'react';
-import BackToHome from '../../components/BackToHome';
-import SectionCard from '../../components/SectionCard';
-import ClearButton from '../../components/ClearButton';
-import ErrorBox from '../../components/ErrorBox';
-import SEODescription from '../../components/SEODescription';
-import { PageSEO } from '../../components/PageSEO';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { updateToolUsage } from '../../utils/toolUsage';
-import { Upload } from 'lucide-react';
-import LoadingButton from '../../components/LoadingButton';
+import { useEffect, useState, useCallback } from "react";
+import BackToHome from "../../components/BackToHome";
+import SectionCard from "../../components/SectionCard";
+import ClearButton from "../../components/ClearButton";
+import ErrorBox from "../../components/ErrorBox";
+import SEODescription from "../../components/SEODescription";
+import { PageSEO } from "../../components/PageSEO";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { updateToolUsage } from "../../utils/toolUsage";
+import { Upload } from "lucide-react";
+import LoadingButton from "../../components/LoadingButton";
 
 interface FaviconResult {
   icoUrl: string;
@@ -21,42 +21,47 @@ function FaviconGenerator() {
 
   const [, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [faviconResult, setFaviconResult] = useState<FaviconResult | null>(null);
+  const [faviconResult, setFaviconResult] = useState<FaviconResult | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    updateToolUsage('favicon');
+    updateToolUsage("favicon");
   }, []);
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null);
-    setFaviconResult(null);
-    setImagePreview(null);
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setError(null);
+      setFaviconResult(null);
+      setImagePreview(null);
 
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      if (!file.type.startsWith('image/')) {
-        setError('Please upload a valid image file (PNG, JPEG, etc.)');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Image file size must be less than 5MB');
-        return;
-      }
+      if (e.target.files && e.target.files.length > 0) {
+        const file = e.target.files[0];
+        if (!file.type.startsWith("image/")) {
+          setError("Please upload a valid image file (PNG, JPEG, etc.)");
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          setError("Image file size must be less than 5MB");
+          return;
+        }
 
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImagePreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  }, []);
+        setImageFile(file);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setImagePreview(event.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    []
+  );
 
   const generateFavicon = useCallback(async () => {
     if (!imagePreview) {
-      setError('Please upload an image first');
+      setError("Please upload an image first");
       return;
     }
 
@@ -71,27 +76,29 @@ function FaviconGenerator() {
         img.onload = resolve;
       });
 
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 16;
       canvas.height = 16;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (!ctx) {
-        throw new Error('Canvas context not supported');
+        throw new Error("Canvas context not supported");
       }
 
       ctx.drawImage(img, 0, 0, 16, 16);
 
       // Generate PNG
-      const pngUrl = canvas.toDataURL('image/png');
+      const pngUrl = canvas.toDataURL("image/png");
 
       // Generate ICO (simplified, using PNG data URL as a placeholder)
       // Note: True ICO generation typically requires server-side processing
-      const icoUrl = canvas.toDataURL('image/png'); // Placeholder for ICO
+      const icoUrl = canvas.toDataURL("image/png"); // Placeholder for ICO
 
       setFaviconResult({ icoUrl, pngUrl });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate favicon');
-      console.error('Favicon generation error:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to generate favicon"
+      );
+      console.error("Favicon generation error:", err);
     } finally {
       setIsGenerating(false);
     }
@@ -105,7 +112,7 @@ function FaviconGenerator() {
   }, []);
 
   const downloadFile = (url: string, filename: string) => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = filename;
     document.body.appendChild(link);
@@ -132,17 +139,16 @@ function FaviconGenerator() {
               aria-label="Clear inputs"
             />
           </div>
-
+          <hr className="line-break" />
           <div className="flex flex-col space-y-6">
             <div className="flex flex-col space-y-2">
-              <label className="form-label">
-                Upload Image:
-              </label>
+              <label className="form-label">Upload Image:</label>
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-8 h-8 mb-2 text-zinc-500 dark:text-zinc-400" />
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    <span className="font-semibold">Click to upload</span> or drag and drop
+                    <span className="font-semibold">Click to upload</span> or
+                    drag and drop
                   </p>
                 </div>
                 <input
@@ -187,13 +193,17 @@ function FaviconGenerator() {
                 <div className="inner-result space-y-2">
                   <div className="w-full flex flex-col space-y-2">
                     <button
-                      onClick={() => downloadFile(faviconResult.icoUrl, 'favicon.ico')}
+                      onClick={() =>
+                        downloadFile(faviconResult.icoUrl, "favicon.ico")
+                      }
                       className="button-primary text-center"
                     >
                       Download ICO (16x16)
                     </button>
                     <button
-                      onClick={() => downloadFile(faviconResult.pngUrl, 'favicon.png')}
+                      onClick={() =>
+                        downloadFile(faviconResult.pngUrl, "favicon.png")
+                      }
                       className="button-primary text-center"
                     >
                       Download PNG (16x16)

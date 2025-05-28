@@ -1,6 +1,6 @@
-import { Eraser, XCircle } from 'lucide-react';
-import { useState } from 'react';
-import { showSuccess } from '../utils/toast';
+import { Eraser, XCircle } from "lucide-react";
+import { useState } from "react";
+import { showSuccess } from "../utils/toast";
 
 interface ClearButtonProps {
   onClick: () => void;
@@ -8,13 +8,17 @@ interface ClearButtonProps {
   disabled?: boolean;
 }
 
-function ClearButton({ onClick, className = '', disabled = false }: ClearButtonProps) {
+function ClearButton({
+  onClick,
+  className = "",
+  disabled = false,
+}: ClearButtonProps) {
   const [cleared, setCleared] = useState(false);
 
   const handleClear = () => {
     if (disabled || cleared) return;
     onClick();
-    showSuccess('Cleared all values!');
+    showSuccess("Cleared all values!");
     setCleared(true);
     setTimeout(() => setCleared(false), 1000);
   };
@@ -25,7 +29,7 @@ function ClearButton({ onClick, className = '', disabled = false }: ClearButtonP
       disabled={disabled || cleared}
       className={`p-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white focus:outline-none disabled:cursor-default disabled:opacity-50 ${className}`}
       aria-label="Clear all values"
-      title='Clear contents'
+      title="Clear contents"
     >
       {cleared ? (
         <XCircle className="sm:w-6 sm:h-6 w-5 h-5 text-zinc-500 dark:text-zinc-400" />

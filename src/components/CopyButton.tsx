@@ -1,5 +1,5 @@
-import { Copy, ClipboardCopy, ListCheck, CircleCheckBig } from 'lucide-react';
-import { useClipboard } from '../hooks/useClipboard';
+import { Copy, ClipboardCopy, ListCheck, CircleCheckBig } from "lucide-react";
+import { useClipboard } from "../hooks/useClipboard";
 
 interface CopyButtonProps {
   text: string;
@@ -8,17 +8,22 @@ interface CopyButtonProps {
   onCopied?: () => void;
 }
 
-function CopyButton({ text, copyType = '', className = '', onCopied }: CopyButtonProps) {
+function CopyButton({
+  text,
+  copyType = "",
+  className = "",
+  onCopied,
+}: CopyButtonProps) {
   const { copy, copied, copiedAll } = useClipboard();
 
   const handleCopy = async () => {
-    const options = copyType === 'CopyAll' ? { all: true } : undefined;
+    const options = copyType === "CopyAll" ? { all: true } : undefined;
     await copy(text, options);
     if (onCopied) onCopied();
   };
 
-  const isEmpty = !text.trim(); 
-  const isCopied = copyType === 'CopyAll' ? copiedAll : copied;
+  const isEmpty = !text.trim();
+  const isCopied = copyType === "CopyAll" ? copiedAll : copied;
   const isDisabled = isEmpty || isCopied;
 
   return (
@@ -27,9 +32,9 @@ function CopyButton({ text, copyType = '', className = '', onCopied }: CopyButto
       disabled={isDisabled}
       className={`p-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white focus:outline-none disabled:cursor-default disabled:opacity-50 ${className}`}
       aria-label="Copy"
-      title='Copy'
+      title="Copy"
     >
-      {copyType === 'CopyAll' ? (
+      {copyType === "CopyAll" ? (
         copiedAll ? (
           <ListCheck className="sm:w-7 sm:h-7 w-6 h-6 text-zinc-500 dark:text-zinc-400" />
         ) : (

@@ -1,34 +1,34 @@
-import { useState, useRef, useEffect } from 'react';
-import BackToHome from '../../components/BackToHome';
-import ErrorBox from '../../components/ErrorBox';
-import SectionCard from '../../components/SectionCard';
-import CopyButton from '../../components/CopyButton';
-import ClearButton from '../../components/ClearButton';
-import SEODescription from '../../components/SEODescription';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
-import seoDescriptions from '../../data/seoDescriptions';
-import { PageSEO } from '../../components/PageSEO';
-import { updateToolUsage } from '../../utils/toolUsage';
-import AutoTextarea from '../../hooks/useAutoSizeTextArea';
+import { useState, useRef, useEffect } from "react";
+import BackToHome from "../../components/BackToHome";
+import ErrorBox from "../../components/ErrorBox";
+import SectionCard from "../../components/SectionCard";
+import CopyButton from "../../components/CopyButton";
+import ClearButton from "../../components/ClearButton";
+import SEODescription from "../../components/SEODescription";
+import BuyMeCoffee from "../../components/BuyMeCoffee";
+import seoDescriptions from "../../data/seoDescriptions";
+import { PageSEO } from "../../components/PageSEO";
+import { updateToolUsage } from "../../utils/toolUsage";
+import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 
 export default function PigLatinConverter() {
   const seo = seoDescriptions.pigLatin;
 
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    updateToolUsage('pig_latin');
+    updateToolUsage("pig_latin");
   }, []);
 
   useEffect(() => {
     if (input.trim()) {
       convertToPigLatin();
     } else {
-      setOutput('');
-      setError('');
+      setOutput("");
+      setError("");
     }
   }, [input]);
 
@@ -36,63 +36,69 @@ export default function PigLatinConverter() {
     try {
       const result = input
         .split(/(\s+)/)
-        .map(word => {
+        .map((word) => {
           // Handle whitespace
-          if (word.trim() === '') return word;
-          
+          if (word.trim() === "") return word;
+
           // Handle punctuation and special characters
           const punctuationMatch = word.match(/^(\W+)(.*?)(\W*)$/);
           if (punctuationMatch) {
             const [_, leadingPunct, mainWord, trailingPunct] = punctuationMatch;
-            if (mainWord === '') return word;
+            if (mainWord === "") return word;
             return leadingPunct + convertWord(mainWord) + trailingPunct;
           }
-          
+
           return convertWord(word);
         })
-        .join('');
+        .join("");
 
       setOutput(result);
-      setError('');
+      setError("");
     } catch (err: any) {
-      setError(err.message || 'Error converting to Pig Latin');
-      setOutput('');
+      setError(err.message || "Error converting to Pig Latin");
+      setOutput("");
     }
   };
 
   const convertWord = (word: string) => {
-    const vowels = ['a', 'e', 'i', 'o', 'u'];
+    const vowels = ["a", "e", "i", "o", "u"];
     const lowerWord = word.toLowerCase();
-    
+
     // Find the first vowel index
     let firstVowelIndex = 0;
-    while (firstVowelIndex < word.length && !vowels.includes(lowerWord[firstVowelIndex])) {
+    while (
+      firstVowelIndex < word.length &&
+      !vowels.includes(lowerWord[firstVowelIndex])
+    ) {
       firstVowelIndex++;
     }
-    
+
     // Handle words starting with vowels
     if (firstVowelIndex === 0) {
-      return word + 'way';
+      return word + "way";
     }
-    
+
     // Handle words starting with consonant clusters
     const beginning = word.slice(0, firstVowelIndex);
     const remaining = word.slice(firstVowelIndex);
-    
+
     // Preserve capitalization
     if (word[0] === word[0].toUpperCase()) {
-      return remaining[0].toUpperCase() + 
-             remaining.slice(1) + 
-             beginning.toLowerCase() + 'ay';
+      return (
+        remaining[0].toUpperCase() +
+        remaining.slice(1) +
+        beginning.toLowerCase() +
+        "ay"
+      );
     }
-    
-    return remaining + beginning + 'ay';
+
+    return remaining + beginning + "ay";
   };
 
   const handleClear = () => {
-    setInput('');
-    setOutput('');
-    setError('');
+    setInput("");
+    setOutput("");
+    setError("");
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -115,11 +121,12 @@ export default function PigLatinConverter() {
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Pig Latin Converter</h3>
-            <ClearButton 
-              onClick={handleClear} 
-              disabled={input === '' && output === '' && error === ''} 
+            <ClearButton
+              onClick={handleClear}
+              disabled={input === "" && output === "" && error === ""}
             />
           </div>
+          <hr className="line-break" />
           <div className="space-y-4 mb-4">
             <div>
               <label className="form-label" htmlFor="pig-latin-input">
@@ -132,7 +139,7 @@ export default function PigLatinConverter() {
                 ref={inputRef}
                 className="input-field w-full"
                 placeholder="Enter English text to convert to Pig Latin"
-                aria-describedby={error ? 'pig-latin-error' : undefined}
+                aria-describedby={error ? "pig-latin-error" : undefined}
                 aria-label="Text input for Pig Latin conversion"
               />
             </div>
@@ -145,7 +152,10 @@ export default function PigLatinConverter() {
               </div>
               <div className="scrollbox mt-2">
                 <div className="inner-result">
-                  <div className="w-full mono-output" aria-label="Pig Latin translation">
+                  <div
+                    className="w-full mono-output"
+                    aria-label="Pig Latin translation"
+                  >
                     {output}
                   </div>
                 </div>
@@ -153,17 +163,28 @@ export default function PigLatinConverter() {
             </div>
           )}
 
-          <ErrorBox message={error} id={error ? 'pig-latin-error' : undefined} />
+          <ErrorBox
+            message={error}
+            id={error ? "pig-latin-error" : undefined}
+          />
         </SectionCard>
 
         <SectionCard className="mt-6">
           <h3 className="text-lg font-semibold mb-4">Pig Latin Rules</h3>
+          <hr className="line-break" />
           <div className="prose">
             <ul className="text-zinc-900 dark:text-white pl-5 space-y-2">
-              <li>For words beginning with vowel sounds, add "way" to the end</li>
-              <li>For words beginning with consonant sounds, move all consonants before the first vowel to the end and add "ay"</li>
+              <li>
+                For words beginning with vowel sounds, add "way" to the end
+              </li>
+              <li>
+                For words beginning with consonant sounds, move all consonants
+                before the first vowel to the end and add "ay"
+              </li>
               <li>Preserves capitalization and punctuation</li>
-              <li>Example: "hello" becomes "ellohay", "apple" becomes "appleway"</li>
+              <li>
+                Example: "hello" becomes "ellohay", "apple" becomes "appleway"
+              </li>
             </ul>
           </div>
         </SectionCard>

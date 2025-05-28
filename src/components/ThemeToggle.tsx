@@ -1,10 +1,10 @@
-import { Moon, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const getInitialTheme = () => {
-  const stored = localStorage.getItem('theme');
-  if (stored) return stored === 'dark';
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const stored = localStorage.getItem("theme");
+  if (stored) return stored === "dark";
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   return prefersDark;
 };
 
@@ -12,8 +12,8 @@ const ThemeToggle = () => {
   const [darkMode, setDarkMode] = useState(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+    document.documentElement.classList.toggle("dark", darkMode);
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
   return (
@@ -25,7 +25,7 @@ const ThemeToggle = () => {
     >
       <span
         className={`absolute left-1 flex items-center justify-center sm:h-6 sm:w-6 h-4 w-4 rounded-full bg-white dark:bg-zinc-900 shadow-md transform transition-all duration-500 ease-in-out ${
-          darkMode ? 'translate-x-6 sm:translate-x-8' : ''
+          darkMode ? "translate-x-6 sm:translate-x-8" : ""
         }`}
       >
         {darkMode ? (
