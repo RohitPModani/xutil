@@ -1,140 +1,145 @@
-import { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
+import { RouteObject } from 'react-router-dom';
 import ErrorBoundary from '../components/ErrorBoundary';
 import NotFound from '../pages/NotFound';
 import Layout from '../components/Layout';
 
 const Home = lazy(() => import('../pages/Home'));
-const GuidGenerator = lazy(() => import('../pages/Encode-Decode/GuidGenerator'));
-const PasswordGenerator = lazy(() => import('../pages/Encode-Decode/PasswordGenerator'));
-const HashGenerator = lazy(() => import('../pages/Encode-Decode/HashGenerator'));
-const BaseEncoderDecoder = lazy(() => import('../pages/Encode-Decode/BaseEncoderDecoder'));
-const CipherEncoderDecoder = lazy(() => import('../pages/Encode-Decode/CipherEncoderDecoder'));
-const JWTEncoderDecoder = lazy(() => import('../pages/Encode-Decode/JWTDecoder'));
-const HtmlEntities = lazy(() => import('../pages/Encode-Decode/HTMLEntities'));
-const ULIDGenerator = lazy(() => import('../pages/Encode-Decode/ULIDGenerator'));
-const MorseCodeTranslator = lazy(() => import('../pages/Encode-Decode/MorseCodeTranslator'));
-const URLEncoderDecoder = lazy(() => import('../pages/Encode-Decode/URLEncoderDecoder'));
-const XMLJSONConverter = lazy(() => import('../pages/Converters/XmlJsonConverter'));
-const YAMLJSONConverter = lazy(() => import('../pages/Converters/YamlJsonConverter'));
-const CSVJSONConverter = lazy(() => import('../pages/Converters/CsvJsonConverter'));
-const JSONTypescriptConverter = lazy(() => import('../pages/Converters/JsonTypescriptConverter'));
-const JSONPythonClassConverter = lazy(() => import('../pages/Converters/JsonPythonConverter'));
-const JSONPydanticClassConverter = lazy(() => import('../pages/Converters/JsonPydanticConverter'));
-const BaseNumberConverter = lazy(() => import('../pages/Converters/BaseNumberConverter'));
-const TextBaseConverter = lazy(() => import('../pages/Converters/TextBaseConverter'));
-const UnixUtcConverter = lazy(() => import('../pages/Converters/UnixUTCTimeConverter'));
-const TimezoneConverter = lazy(() => import('../pages/Converters/TimezoneConverter'));
-const TimeUnitConverter = lazy(() => import('../pages/GeneralConverters/TimeUnitConverter'));
-const BitByteConverter = lazy(() => import('../pages/GeneralConverters/BitByteConverter'));
-const TemperatureConverter = lazy(() => import('../pages/GeneralConverters/TemperatureConverter'));
-const LengthConverter = lazy(() => import('../pages/GeneralConverters/LengthConverter'));
-const AreaConverter = lazy(() => import('../pages/GeneralConverters/AreaConverter'));
-const WeightConverter = lazy(() => import('../pages/GeneralConverters/WeightConverter'));
-const VolumeConverter = lazy(() => import('../pages/GeneralConverters/VolumeConverter'));
-const SpeedConverter = lazy(() => import('../pages/GeneralConverters/SpeedConverter'));
-const EnergyConverter = lazy(() => import('../pages/GeneralConverters/EnergyConverter'));
-const PowerConverter = lazy(() => import('../pages/GeneralConverters/PowerConverter'));
-const PressureConverter = lazy(() => import('../pages/GeneralConverters/PressureConverter'));
-const FrequencyConverter = lazy(() => import('../pages/GeneralConverters/FrequencyConverter'));
-const AngleConverter = lazy(() => import('../pages/GeneralConverters/AngleConverter'));
-const FuelEconomyConverter = lazy(() => import('../pages/GeneralConverters/FuelEconomyConverter'));
-const LoremIpsumGenerator = lazy(() => import('../pages/Text-Utilities/LoremIpsumGenerator'));
-const SlugGenerator = lazy(() => import('../pages/Text-Utilities/SlugGenerator'));
-const TextCompare = lazy(() => import('../pages/Text-Utilities/TextCompare'));
-const JSONValidator = lazy(() => import('../pages/Text-Utilities/JSONValidator'));
-const TextCaseConverter = lazy(() => import('../pages/Text-Utilities/TextCaseConverter'));
-const RegexTester = lazy(() => import('../pages/Text-Utilities/RegexTester'));
-const MarkdownPreviewer = lazy(() => import('../pages/Text-Utilities/MarkdownPreviewer'));
-const DuplicateLineRemover = lazy(() => import('../pages/Text-Utilities/DuplicateLineRemover'));
-const LineBreakWhiteSpaceRemover = lazy(() => import('../pages/Text-Utilities/LineBreakWhiteSpaceRemover'));
-const StringCounter = lazy(() => import('../pages/Text-Utilities/StringCounter'));
-const PalindromeChecker = lazy(() => import('../pages/Fun-Text-Utilities/PalindromeChecker'));
-const StringReverserRotator = lazy(() => import('../pages/Fun-Text-Utilities/StringReverserRotator'));
-const RomanNumeralConverter = lazy(() => import('../pages/Fun-Text-Utilities/RomanNumeralConverter'));
-const NATOPhoneticAlphabetConverter = lazy(() => import('../pages/Fun-Text-Utilities/NATOPhonetic'));
-const PigLatinConverter = lazy(() => import('../pages/Fun-Text-Utilities/PigLatinConverter'));
-const NumeronymGenerator = lazy(() => import('../pages/Fun-Text-Utilities/NumeroNymGenerator'));
-const URLParser = lazy(() => import('../pages/Text-Utilities/URLParser'));
-const RegexCheatsheet = lazy(() => import('../pages/Text-Utilities/RegexCheatSheet'));
-const QRCodeGenerator = lazy(() => import('../pages/Image-Tools/QRCodeGenerator'));
-const BarcodeGenerator = lazy(() => import('../pages/Image-Tools/BarCodeGenerator'));
-const BarcodeReader = lazy(() => import('../pages/Image-Tools/BarcodeReader'));
-const ColorPicker = lazy(() => import('../pages/Image-Tools/ColorPicker'));
-const FaviconGenerator = lazy(() => import('../pages/Image-Tools/FaviconGenerator'));
-const ImageCompressor = lazy(() => import('../pages/Image-Tools/ImageCompressor'));
-const GradientGenerator = lazy(() => import('../pages/Image-Tools/GradientGenerator'));
-const BoxShadowGenerator = lazy(() => import('../pages/Image-Tools/BoxShadowGenerator'));
-const LeetSpeakTranslator = lazy(() => import('../pages/Fun-Text-Utilities/LeetSpeakTranslator'));
-const WordFrequencyCounter = lazy(() => import('../pages/Fun-Text-Utilities/WordFrequencyCounter'));
 
-export const appRoutes = [
+// Types
+type AppRoute = RouteObject & {
+  title?: string;
+  category?: string;
+};
+
+// Common wrapper for error boundary with suspense
+const withErrorBoundary = (Component: React.LazyExoticComponent<any>): React.ReactElement => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Component />
+    </Suspense>
+  );
+};
+
+// Lazy imports by category
+// Encode/Decode Tools
+const encodingTools = {
+  GuidGenerator: lazy(() => import('../pages/Encode-Decode/GuidGenerator')),
+  PasswordGenerator: lazy(() => import('../pages/Encode-Decode/PasswordGenerator')),
+  HashGenerator: lazy(() => import('../pages/Encode-Decode/HashGenerator')),
+  BaseEncoderDecoder: lazy(() => import('../pages/Encode-Decode/BaseEncoderDecoder')),
+  CipherEncoderDecoder: lazy(() => import('../pages/Encode-Decode/CipherEncoderDecoder')),
+  JWTEncoderDecoder: lazy(() => import('../pages/Encode-Decode/JWTDecoder')),
+  HtmlEntities: lazy(() => import('../pages/Encode-Decode/HTMLEntities')),
+  ULIDGenerator: lazy(() => import('../pages/Encode-Decode/ULIDGenerator')),
+  MorseCodeTranslator: lazy(() => import('../pages/Encode-Decode/MorseCodeTranslator')),
+  URLEncoderDecoder: lazy(() => import('../pages/Encode-Decode/URLEncoderDecoder')),
+};
+
+// Converter Tools
+const converterTools = {
+  XMLJSONConverter: lazy(() => import('../pages/Converters/XmlJsonConverter')),
+  YAMLJSONConverter: lazy(() => import('../pages/Converters/YamlJsonConverter')),
+  CSVJSONConverter: lazy(() => import('../pages/Converters/CsvJsonConverter')),
+  JSONTypescriptConverter: lazy(() => import('../pages/Converters/JsonTypescriptConverter')),
+  JSONPythonClassConverter: lazy(() => import('../pages/Converters/JsonPythonConverter')),
+  JSONPydanticClassConverter: lazy(() => import('../pages/Converters/JsonPydanticConverter')),
+  BaseNumberConverter: lazy(() => import('../pages/Converters/BaseNumberConverter')),
+  TextBaseConverter: lazy(() => import('../pages/Converters/TextBaseConverter')),
+  UnixUtcConverter: lazy(() => import('../pages/Converters/UnixUTCTimeConverter')),
+  TimezoneConverter: lazy(() => import('../pages/Converters/TimezoneConverter')),
+};
+
+// General Converter Tools
+const generalConverterTools = {
+  TimeUnitConverter: lazy(() => import('../pages/GeneralConverters/TimeUnitConverter')),
+  BitByteConverter: lazy(() => import('../pages/GeneralConverters/BitByteConverter')),
+  TemperatureConverter: lazy(() => import('../pages/GeneralConverters/TemperatureConverter')),
+  LengthConverter: lazy(() => import('../pages/GeneralConverters/LengthConverter')),
+  AreaConverter: lazy(() => import('../pages/GeneralConverters/AreaConverter')),
+  WeightConverter: lazy(() => import('../pages/GeneralConverters/WeightConverter')),
+  VolumeConverter: lazy(() => import('../pages/GeneralConverters/VolumeConverter')),
+  SpeedConverter: lazy(() => import('../pages/GeneralConverters/SpeedConverter')),
+  EnergyConverter: lazy(() => import('../pages/GeneralConverters/EnergyConverter')),
+  PowerConverter: lazy(() => import('../pages/GeneralConverters/PowerConverter')),
+  PressureConverter: lazy(() => import('../pages/GeneralConverters/PressureConverter')),
+  FrequencyConverter: lazy(() => import('../pages/GeneralConverters/FrequencyConverter')),
+  AngleConverter: lazy(() => import('../pages/GeneralConverters/AngleConverter')),
+  FuelEconomyConverter: lazy(() => import('../pages/GeneralConverters/FuelEconomyConverter')),
+};
+
+// Text Utility Tools
+const textTools = {
+  LoremIpsumGenerator: lazy(() => import('../pages/Text-Utilities/LoremIpsumGenerator')),
+  SlugGenerator: lazy(() => import('../pages/Text-Utilities/SlugGenerator')),
+  TextCompare: lazy(() => import('../pages/Text-Utilities/TextCompare')),
+  JSONValidator: lazy(() => import('../pages/Text-Utilities/JSONValidator')),
+  TextCaseConverter: lazy(() => import('../pages/Text-Utilities/TextCaseConverter')),
+  RegexTester: lazy(() => import('../pages/Text-Utilities/RegexTester')),
+  MarkdownPreviewer: lazy(() => import('../pages/Text-Utilities/MarkdownPreviewer')),
+  DuplicateLineRemover: lazy(() => import('../pages/Text-Utilities/DuplicateLineRemover')),
+  LineBreakWhiteSpaceRemover: lazy(() => import('../pages/Text-Utilities/LineBreakWhiteSpaceRemover')),
+  StringCounter: lazy(() => import('../pages/Text-Utilities/StringCounter')),
+  URLParser: lazy(() => import('../pages/Text-Utilities/URLParser')),
+  RegexCheatsheet: lazy(() => import('../pages/Text-Utilities/RegexCheatSheet')),
+};
+
+// Fun Text Tools
+const funTextTools = {
+  PalindromeChecker: lazy(() => import('../pages/Fun-Text-Utilities/PalindromeChecker')),
+  StringReverserRotator: lazy(() => import('../pages/Fun-Text-Utilities/StringReverserRotator')),
+  RomanNumeralConverter: lazy(() => import('../pages/Fun-Text-Utilities/RomanNumeralConverter')),
+  NATOPhoneticAlphabetConverter: lazy(() => import('../pages/Fun-Text-Utilities/NATOPhonetic')),
+  PigLatinConverter: lazy(() => import('../pages/Fun-Text-Utilities/PigLatinConverter')),
+  NumeronymGenerator: lazy(() => import('../pages/Fun-Text-Utilities/NumeroNymGenerator')),
+  LeetSpeakTranslator: lazy(() => import('../pages/Fun-Text-Utilities/LeetSpeakTranslator')),
+  WordFrequencyCounter: lazy(() => import('../pages/Fun-Text-Utilities/WordFrequencyCounter')),
+};
+
+// Image Tools
+const imageTools = {
+  QRCodeGenerator: lazy(() => import('../pages/Image-Tools/QRCodeGenerator')),
+  BarcodeGenerator: lazy(() => import('../pages/Image-Tools/BarCodeGenerator')),
+  BarcodeReader: lazy(() => import('../pages/Image-Tools/BarcodeReader')),
+  ColorPicker: lazy(() => import('../pages/Image-Tools/ColorPicker')),
+  FaviconGenerator: lazy(() => import('../pages/Image-Tools/FaviconGenerator')),
+  ImageCompressor: lazy(() => import('../pages/Image-Tools/ImageCompressor')),
+  GradientGenerator: lazy(() => import('../pages/Image-Tools/GradientGenerator')),
+  BoxShadowGenerator: lazy(() => import('../pages/Image-Tools/BoxShadowGenerator')),
+};
+
+// Helper function to create routes with error boundary
+const createRoutes = (routes: Record<string, React.LazyExoticComponent<any>>, category: string): AppRoute[] => {
+  return Object.entries(routes).map(([key, Component]) => ({
+    path: key.toLowerCase().replace(/generator|converter|decoder|encoder/g, '').replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, ''),
+    element: withErrorBoundary(Component),
+    errorElement: <ErrorBoundary />,
+    category,
+    title: key.replace(/([A-Z])/g, ' $1').trim(), // Add readable titles
+  }));
+};
+
+// Main routes configuration
+export const appRoutes: AppRoute[] = [
   {
     path: '/',
     element: <Layout />,
     children: [
-      { path: '', element: <Home />, errorElement: <ErrorBoundary /> },
-      { path: 'guid', element: <GuidGenerator />, errorElement: <ErrorBoundary /> },
-      { path: 'password', element: <PasswordGenerator />, errorElement: <ErrorBoundary /> },
-      { path: 'hash', element: <HashGenerator />, errorElement: <ErrorBoundary /> },
-      { path: 'base', element: <BaseEncoderDecoder />, errorElement: <ErrorBoundary /> },
-      { path: 'cipher', element: <CipherEncoderDecoder />, errorElement: <ErrorBoundary /> },
-      { path: 'jwt', element: <JWTEncoderDecoder />, errorElement: <ErrorBoundary /> },
-      { path: 'html', element: <HtmlEntities />, errorElement: <ErrorBoundary />},
-      { path: 'ulid', element: <ULIDGenerator />, errorElement: <ErrorBoundary />},
-      { path: 'morse', element: <MorseCodeTranslator />, errorElement: <ErrorBoundary />},
-      { path: 'eurl', element: <URLEncoderDecoder />, errorElement: <ErrorBoundary />},
-      { path: 'xml_json', element: <XMLJSONConverter />, errorElement: <ErrorBoundary />},
-      { path: 'yaml_json', element: <YAMLJSONConverter />, errorElement: <ErrorBoundary />},
-      { path: 'csv_json', element: <CSVJSONConverter />, errorElement: <ErrorBoundary />},
-      { path: 'json_ts', element: <JSONTypescriptConverter />, errorElement: <ErrorBoundary />},
-      { path: 'json_python', element: <JSONPythonClassConverter />, errorElement: <ErrorBoundary />},
-      { path: 'json_pydantic', element: <JSONPydanticClassConverter />, errorElement: <ErrorBoundary />},
-      { path: 'base_number', element: <BaseNumberConverter />, errorElement: <ErrorBoundary />},
-      { path: 'text_base', element: <TextBaseConverter />, errorElement: <ErrorBoundary />},
-      { path: 'unix_utc', element: <UnixUtcConverter />, errorElement: <ErrorBoundary />},
-      { path: 'timezone', element: <TimezoneConverter />, errorElement: <ErrorBoundary />},
-      { path: 'time', element: <TimeUnitConverter />, errorElement: <ErrorBoundary />},
-      { path: 'bit_byte', element: <BitByteConverter />, errorElement: <ErrorBoundary />},
-      { path: 'temperature', element: <TemperatureConverter />, errorElement: <ErrorBoundary />},
-      { path: 'length', element: <LengthConverter />, errorElement: <ErrorBoundary />},
-      { path: 'area', element: <AreaConverter />, errorElement: <ErrorBoundary />},
-      { path: 'weight', element: <WeightConverter />, errorElement: <ErrorBoundary />},
-      { path: 'volume', element: <VolumeConverter />, errorElement: <ErrorBoundary />},
-      { path: 'speed', element: <SpeedConverter />, errorElement: <ErrorBoundary />},
-      { path: 'energy', element: <EnergyConverter />, errorElement: <ErrorBoundary />},
-      { path: 'power', element: <PowerConverter />, errorElement: <ErrorBoundary />},
-      { path: 'pressure', element: <PressureConverter />, errorElement: <ErrorBoundary />},
-      { path: 'frequency', element: <FrequencyConverter />, errorElement: <ErrorBoundary />},
-      { path: 'angle', element: <AngleConverter />, errorElement: <ErrorBoundary />},
-      { path: 'fuel_economy', element: <FuelEconomyConverter />, errorElement: <ErrorBoundary />},
-      { path: 'lorem', element: <LoremIpsumGenerator />, errorElement: <ErrorBoundary />},
-      { path: 'slug', element: <SlugGenerator />, errorElement: <ErrorBoundary />},
-      { path: 'text_compare', element: <TextCompare />, errorElement: <ErrorBoundary />},
-      { path: 'json_validator', element: <JSONValidator />, errorElement: <ErrorBoundary />},
-      { path: 'text_case', element: <TextCaseConverter />, errorElement: <ErrorBoundary />},
-      { path: 'regex', element: <RegexTester />, errorElement: <ErrorBoundary />},
-      { path: 'markdown', element: <MarkdownPreviewer />, errorElement: <ErrorBoundary />},
-      { path: 'duplicate_line_remover', element: <DuplicateLineRemover />, errorElement: <ErrorBoundary />},
-      { path: 'line_break_whitespace_remover', element: <LineBreakWhiteSpaceRemover />, errorElement: <ErrorBoundary />},
-      { path: 'string_counter', element: <StringCounter />, errorElement: <ErrorBoundary />},
-      { path: 'palindrome', element: <PalindromeChecker />, errorElement: <ErrorBoundary />},
-      { path: 'string_reverser_rotator', element: <StringReverserRotator />, errorElement: <ErrorBoundary />},
-      { path: 'roman_numeral', element: <RomanNumeralConverter />, errorElement: <ErrorBoundary />},
-      { path: 'nato_phonetic', element: <NATOPhoneticAlphabetConverter />, errorElement: <ErrorBoundary /> },
-      { path: 'pig_latin', element: <PigLatinConverter />, errorElement: <ErrorBoundary />},
-      { path: 'numeronym', element: <NumeronymGenerator />, errorElement: <ErrorBoundary />},
-      { path: 'url_parser', element: <URLParser />, errorElement: <ErrorBoundary />},
-      { path: 'regex_cheatsheet', element: <RegexCheatsheet />, errorElement: <ErrorBoundary />},
-      { path: 'qr_code', element: <QRCodeGenerator />, errorElement: <ErrorBoundary />},
-      { path: 'barcode_generator', element: <BarcodeGenerator />, errorElement: <ErrorBoundary/>},
-      { path: 'barcode_reader', element: <BarcodeReader />, errorElement: <ErrorBoundary />},
-      { path: 'color_picker', element: <ColorPicker />, errorElement: <ErrorBoundary />},
-      { path: 'favicon', element: <FaviconGenerator />, errorElement: <ErrorBoundary />},
-      { path: 'image_compressor', element: <ImageCompressor />, errorElement: <ErrorBoundary />},
-      { path: 'gradient_generator', element: <GradientGenerator />, errorElement: <ErrorBoundary />},
-      { path: 'box_shadow_generator', element: <BoxShadowGenerator />, errorElement: <ErrorBoundary />},
-      { path: 'leetspeak', element: <LeetSpeakTranslator />, errorElement: <ErrorBoundary /> },
-      { path: 'word_frequency_counter', element: <WordFrequencyCounter />, errorElement: <ErrorBoundary /> },
+      { 
+        path: '', 
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <Home />
+          </Suspense>
+        ), 
+        errorElement: <ErrorBoundary /> 
+      },
+      ...createRoutes(encodingTools, 'Encoding & Decoding'),
+      ...createRoutes(converterTools, 'Converters'),
+      ...createRoutes(generalConverterTools, 'General Converters'),
+      ...createRoutes(textTools, 'Text Utilities'),
+      ...createRoutes(funTextTools, 'Fun Text Tools'),
+      ...createRoutes(imageTools, 'Image Tools'),
       { path: '*', element: <NotFound /> },
     ],
   }
