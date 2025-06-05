@@ -12,7 +12,6 @@ import QRCode from "qrcode";
 import LoadingButton from "../../components/LoadingButton";
 import { Download } from "lucide-react";
 import { saveAs } from "file-saver";
-import DownloadButton from "../../components/DownloadButton";
 
 type QRCodeOptions = {
   actionType: string;
