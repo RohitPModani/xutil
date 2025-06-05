@@ -768,8 +768,8 @@ Pro tip: Always verify your barcode scans with a reader before mass printing.`,
   },
 
   barcodeReader: {
-    title: "Barcode Decoder",
-    seo: "Barcode Reader Online | Free Tool",
+    title: "Barcode / QR Decoder",
+    seo: "Barcode / QR Reader Online | Free Tool",
     body: `Decode barcodes from images or camera input. Discover what's hidden in those black lines.
 
 **Reading features:**

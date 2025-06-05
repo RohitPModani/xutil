@@ -97,7 +97,7 @@ const allUtilities = [
     items: [
       { name: 'QR Code Generator', path: '/qr_code' },
       { name: 'Barcode Generator', path: '/barcode_generator' },
-      { name: 'Barcode Reader', path: '/barcode_reader' },
+      { name: 'Barcode / QR Reader', path: '/barcode_reader' },
       { name: 'Color Picker', path: '/color_picker' },
       { name: 'Favicon Generator', path: '/favicon' },
       { name: 'Image Compressor', path: '/image_compressor' },

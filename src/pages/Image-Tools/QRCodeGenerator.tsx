@@ -3,7 +3,6 @@ import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
-import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
 import BuyMeCoffee from "../../components/BuyMeCoffee";
@@ -12,6 +11,8 @@ import { updateToolUsage } from "../../utils/toolUsage";
 import QRCode from "qrcode";
 import LoadingButton from "../../components/LoadingButton";
 import { Download } from "lucide-react";
+import { saveAs } from "file-saver";
+import DownloadButton from "../../components/DownloadButton";
 
 type QRCodeOptions = {
   actionType: string;
@@ -42,6 +43,7 @@ type QRCodeOptions = {
   eventEnd?: Date | string;
   eventLocation?: string;
   eventDescription?: string;
+  downloadFormat?: "png" | "svg";
 };
 
 const DEFAULT_OPTIONS: QRCodeOptions = {
@@ -53,6 +55,7 @@ const DEFAULT_OPTIONS: QRCodeOptions = {
   errorCorrectionLevel: "M",
   eventStart: new Date(),
   eventEnd: new Date(Date.now() + 60 * 60 * 1000), // Default to 1 hour later
+  downloadFormat: "png",
 };
 
 const ACTION_TYPES = [
@@ -71,7 +74,13 @@ function QRCodeGenerator() {
   const seo = seoDescriptions.qrCodeGenerator;
 
   const [options, setOptions] = useState<QRCodeOptions>(DEFAULT_OPTIONS);
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
+  const [qrCodeDataUrls, setQrCodeDataUrls] = useState<{
+    png: string;
+    svg: string;
+  }>({
+    png: "",
+    svg: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -183,18 +192,33 @@ function QRCodeGenerator() {
         throw new Error("Please enter content to generate QR code");
       }
 
-      const dataUrl = await QRCode.toDataURL(qrContent, {
-        width: options.size,
-        color: {
-          dark: options.colorDark,
-          light: options.colorLight,
-        },
-        errorCorrectionLevel: options.errorCorrectionLevel,
-        type: "image/png",
-        margin: 1,
-      });
+      const [pngDataUrl, svgDataUrl] = await Promise.all([
+        QRCode.toDataURL(qrContent, {
+          width: options.size,
+          color: {
+            dark: options.colorDark,
+            light: options.colorLight,
+          },
+          errorCorrectionLevel: options.errorCorrectionLevel,
+          type: "image/png",
+          margin: 1,
+        }),
+        QRCode.toString(qrContent, {
+          type: "svg",
+          width: options.size,
+          margin: 1,
+          color: {
+            dark: options.colorDark,
+            light: options.colorLight,
+          },
+          errorCorrectionLevel: options.errorCorrectionLevel,
+        }),
+      ]);
 
-      setQrCodeDataUrl(dataUrl);
+      setQrCodeDataUrls({
+        png: pngDataUrl,
+        svg: svgDataUrl,
+      });
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to generate QR code"
@@ -233,27 +257,39 @@ function QRCodeGenerator() {
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const { value } = e.target;
       setOptions((_prev) => ({ ...DEFAULT_OPTIONS, actionType: value }));
-      setQrCodeDataUrl("");
+      setQrCodeDataUrls({
+        png: "",
+        svg: "",
+      });
     },
     []
   );
 
   const handleClear = useCallback(() => {
     setOptions(DEFAULT_OPTIONS);
-    setQrCodeDataUrl("");
+    setQrCodeDataUrls({
+      png: "",
+      svg: "",
+    });
     setError(null);
   }, []);
 
   const downloadQRCode = useCallback(() => {
-    if (!qrCodeDataUrl) return;
-
-    const link = document.createElement("a");
-    link.href = qrCodeDataUrl;
-    link.download = `qr-code-${options.actionType}-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, [qrCodeDataUrl, options.actionType]);
+    if (!qrCodeDataUrls.png) return;
+    const format = options.downloadFormat;
+    const fileName = `qr-code-${options.actionType}-${Date.now()}.${format}`;
+    if (format === "png") {
+      const link = document.createElement("a");
+      link.href = qrCodeDataUrls.png;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      const blob = new Blob([qrCodeDataUrls.svg], { type: "image/svg+xml" });
+      saveAs(blob, fileName);
+    }
+  }, [qrCodeDataUrls, options.actionType, options.downloadFormat]);
 
   const renderActionFields = () => {
     switch (options.actionType) {
@@ -618,7 +654,8 @@ function QRCodeGenerator() {
               onClick={handleClear}
               disabled={
                 !options.text &&
-                !qrCodeDataUrl &&
+                !qrCodeDataUrls.png &&
+                !qrCodeDataUrls.svg &&
                 !options.firstName &&
                 !options.phone &&
                 !options.email &&
@@ -747,17 +784,31 @@ function QRCodeGenerator() {
             </div>
 
             <div className="flex flex-col items-center justify-center">
-              {qrCodeDataUrl ? (
+              {qrCodeDataUrls.png ? (
                 <>
                   <img
-                    src={qrCodeDataUrl}
+                    src={qrCodeDataUrls.png}
                     alt="Generated QR Code"
                     className="mb-4 border rounded p-2 bg-white"
                   />
-                  <div className="flex justify-center item center gap-4">
-                    <CopyButton text={qrCodeDataUrl} />
-                    <button onClick={downloadQRCode} className="btn-secondary">
-                      <Download className="sm:w-6 sm:h-6 w-5 h-5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-100" />
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-center gap-2">
+                      <select
+                        id="downloadFormat"
+                        name="downloadFormat"
+                        className="input-field w-24"
+                        value={options.downloadFormat}
+                        onChange={handleSelectChange}
+                      >
+                        <option value="png">PNG</option>
+                        <option value="svg">SVG</option>
+                      </select>
+                    </div>
+                    <button
+                      onClick={downloadQRCode}
+                      className="button-primary flex items-center justify-center gap-2"
+                    >
+                      <Download /> Download
                     </button>
                   </div>
                 </>
