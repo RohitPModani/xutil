@@ -26,7 +26,7 @@ function FrequentlyUsedTools() {
   };
 
   return (
-    <div className="card shadow-md rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white group">
+    <div className="card mt-4 shadow-md rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white group">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-md sm:text-xl font-semibold flex items-center text-zinc-900 dark:text-white group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors duration-200">
