@@ -26,16 +26,16 @@ function FrequentlyUsedTools() {
   };
 
   return (
-    <div className="card shadow-md rounded-lg p-4 sm:p-6 hover:shadow-lg transition border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white my-1 sm:my-2">
+    <div className="card shadow-md rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white group">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-md sm:text-xl font-semibold">
+        <h2 className="text-md sm:text-xl font-semibold flex items-center text-zinc-900 dark:text-white group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors duration-200">
           Frequently Used Tools
         </h2>
         {mostUsed.length > 0 && (
           <button
             onClick={handleReset}
-            className="transition-all duration-200 flex items-center gap-1 px-2 py-1 bg-zinc-200 dark:bg-zinc-700 rounded hover:bg-zinc-300 dark:hover:bg-zinc-600"
+            className="transition-all duration-200 flex items-center gap-1 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-700 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-600 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
           >
             <RefreshCcw size={14} />
             Reset
@@ -54,7 +54,7 @@ function FrequentlyUsedTools() {
               <div
                 key={index}
                 onClick={() => handleToolClick(tool.path)}
-                className="bg-zinc-100 dark:bg-zinc-600 border border-transparent hover:border-zinc-800 dark:hover:border-white transition-all duration-300 text-zinc-800 dark:text-white sm:p-3 p-2 rounded cursor-pointer"
+                className="bg-zinc-50 dark:bg-zinc-700/50 border border-zinc-200 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 transition-all duration-200 text-zinc-800 dark:text-white sm:p-3 p-2 rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-600/50 hover:scale-[1.02] hover:shadow-sm"
               >
                 {toolName}
               </div>

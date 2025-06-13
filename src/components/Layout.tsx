@@ -107,18 +107,18 @@ function Layout() {
 
   return (
     <div className="section min-h-screen transition-colors duration-300">
-      <header className="w-full flex items-center justify-between px-4 py-4 sm:py-6 max-w-7xl mx-auto gap-2 sm:gap-4">
+      <header className="w-full flex items-center justify-between px-4 py-4 sm:py-6 max-w-7xl mx-auto gap-2 sm:gap-4 bg-zinc-100/80 dark:bg-zinc-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-zinc-200 dark:border-zinc-800">
         <div className="flex-shrink-0 flex items-center gap-2">
           <button
             onClick={handleLogoClick}
-            className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-white hover:text-zinc-700 dark:hover:text-zinc-400 transition focus:outline-none"
+            className="text-lg sm:text-2xl font-bold text-zinc-900 dark:text-white hover:text-zinc-700 dark:hover:text-zinc-300 transition focus:outline-none"
           >
             XUtil
           </button>
           <button
             onClick={() => setIsFormOpen(true)}
             disabled={isSubmitting}
-            className="text-xs sm:text-sm px-2 py-1 rounded-md border border-zinc-400 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+            className="text-xs sm:text-sm px-3 py-1.5 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 hover:scale-105"
           >
             {isMobile ? "Request" : "Request a Tool"}
           </button>
@@ -127,19 +127,19 @@ function Layout() {
         <div className="flex-1 max-w-[50%] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg mx-auto flex items-center">
           {isHomePage ? (
             <div className="relative w-full">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
               <input
                 ref={searchInputRef}
                 type="text"
                 placeholder={`Search tools... (${shortcutHint})`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-8 py-1.5 sm:py-2 text-sm rounded-full border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                className="w-full pl-10 pr-10 py-2 sm:py-2.5 text-sm rounded-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400 transition-all duration-200"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-200"
                   aria-label="Clear search"
                 >
                   <X className="w-4 h-4" />
@@ -151,16 +151,16 @@ function Layout() {
           )}
         </div>
 
-        <div className="flex-shrink-0 flex items-center gap-2 sm:gap-4">
+        <div className="flex-shrink-0 flex items-center gap-3 sm:gap-4">
           <a
             href="https://github.com/RohitPModani/xutil.git"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-white hover:text-zinc-700 dark:hover:text-zinc-400 transition focus:outline-none"
+            className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors duration-200 focus:outline-none"
             title="Github"
             aria-label="Github"
           >
-            <GitHub className="w-5 h-5 sm:w-7 sm:h-7" />
+            <GitHub className="w-5 h-5 sm:w-6 sm:h-6" />
           </a>
           <ThemeToggle />
         </div>

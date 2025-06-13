@@ -282,9 +282,8 @@ const TextCompare: React.FC = () => {
         <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
 
         <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Text Compare</h3>
-            <hr className="line-break" />
+          <div className="flex sm:items-center sm:flex-row flex-col justify-between mb-4">
+            <h3 className="text-lg font-semibold mb-2 sm:mb-0">Text Compare</h3>
             <div className="flex gap-2">
               <label className="flex items-center gap-2 mr-2">
                 <input
@@ -306,6 +305,7 @@ const TextCompare: React.FC = () => {
               <ClearButton onClick={clearTexts} disabled={!text1 && !text2} />
             </div>
           </div>
+          <hr className="line-break w-full sm:w-auto" />
           <div className="flex flex-col md:flex-row gap-6 mb-6">
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">

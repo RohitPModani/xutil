@@ -183,10 +183,10 @@ function Home() {
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="max-w-md space-y-4">
-            <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300">
+            <h3 className="text-xl font-medium text-zinc-900 dark:text-zinc-100">
               No results found for "{searchQuery}"
             </h3>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-zinc-600 dark:text-zinc-400">
               We couldn't find any tools matching your search. If you're looking for a 
               specific tool that's not available, you can request it on our GitHub Issues section.
             </p>
@@ -194,7 +194,7 @@ function Home() {
               href="https://github.com/RohitPModani/xutil/issues/new"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 sm:mt-8 inline-flex items-center justify-center button-primary"
+              className="mt-4 sm:mt-8 inline-flex items-center justify-center px-4 py-2 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 rounded-full transition-colors duration-200 hover:scale-105"
             >
               <GitHub className="w-5 h-5 mr-2" />
               Request on GitHub
@@ -202,7 +202,7 @@ function Home() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
           {filteredUtilities.map((util, index) => (
             <UtilityCard
               key={index}
