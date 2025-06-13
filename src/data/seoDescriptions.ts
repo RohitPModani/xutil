@@ -349,7 +349,7 @@ Fun fact: The UNIX epoch (Jan 1 1970) is called "the birthday of modern computin
   - Supports 300+ cities and global timezones
   - Convert single times or full time ranges
   - Multi-timezone comparison with live preview
-  - DST alerts so you don’t get caught off-guard
+  - DST alerts so you don't get caught off-guard
   - Auto-detects your local timezone
   - Save and manage frequently used zones
   - Accurate math using moment-timezone
@@ -359,7 +359,7 @@ Fun fact: The UNIX epoch (Jan 1 1970) is called "the birthday of modern computin
   - Freelancers juggling international clients
   - Event planners and webinar hosts
 
-  **Pro Tip:** Use the multi-timezone or range converters for effortless global scheduling. "9 AM PST" might mean very different things elsewhere—make sure your invite doesn’t need a detective to decode it.`,
+  **Pro Tip:** Use the multi-timezone or range converters for effortless global scheduling. "9 AM PST" might mean very different things elsewhere—make sure your invite doesn't need a detective to decode it.`,
   },
 
   loremIpsum: {
@@ -923,16 +923,16 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`,
     body: `A Bit ↔ Byte Converter is like a Rosetta Stone for digital storage — translating between bits, bytes, kilobytes, megabytes, and beyond with pixel-perfect accuracy.
   Whether you're estimating file sizes, decoding bandwidth limits, or arguing about whether 1 MB is 1000 KB or 1024, this tool sets the record straight.
   Instantly convert between bits and bytes in all their metric and binary glory — from b to TB, it's all covered.
-  Perfect for developers, sysadmins, network nerds, and anyone who’s ever yelled at a download speed meter.`,
+  Perfect for developers, sysadmins, network nerds, and anyone who's ever yelled at a download speed meter.`,
   },
 
   temperature: {
     title: "Temperature Converter",
     seo: "Temperature Conversion Online | Free Tool",
-    body: `A Temperature Converter is like a digital weather wizard — effortlessly translating between Celsius, Fahrenheit, and Kelvin so you never have to say “what’s 451°F in real units?” again.
+    body: `A Temperature Converter is like a digital weather wizard — effortlessly translating between Celsius, Fahrenheit, and Kelvin so you never have to say "what's 451°F in real units?" again.
   Whether you're cooking, coding, or casually wondering if -40 is really the same in both scales (it is!), this tool brings the heat and the chill.
   Instantly switch between temperature units with precision — no mental math, no boiling confusion.
-  Perfect for students, devs, and anyone who’s ever Googled “convert 100 C to F” mid-conversation.`,
+  Perfect for students, devs, and anyone who's ever Googled "convert 100 C to F" mid-conversation.`,
   },
 
   area: {
@@ -941,7 +941,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`,
     body: `An Area Converter is like a land surveyor with superpowers — instantly flipping between square meters, acres, hectares, square miles, and more without breaking a ruler.
   Whether you're designing a room, plotting a farm, or trying to figure out what 0.25 hectares actually means, this tool clears it up fast.
   Convert any area unit quickly and confidently — from square inches to football fields.
-  Perfect for architects, real estate buffs, students, and anyone who’s ever thought, “Wait… how big is an acre again?”`,
+  Perfect for architects, real estate buffs, students, and anyone who's ever thought, "Wait… how big is an acre again?"`,
   },
 
   length: {
@@ -950,7 +950,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`,
     body: `A Length Converter is like a tape measure that speaks every language — translating kilometers to miles, inches to centimeters, and light-years to... well, more light-years.
   Whether you're building furniture, coding units in CSS, or just curious how long a marathon really is in meters, this tool does the math for you.
   Instantly convert between any length units with full accuracy — because size *does* matter (especially in code).
-  Perfect for engineers, designers, travelers, and anyone who’s tired of Googling “how many inches in a foot” for the 10th time.`,
+  Perfect for engineers, designers, travelers, and anyone who's tired of Googling "how many inches in a foot" for the 10th time.`,
   },
 
   weight: {
@@ -959,14 +959,14 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`,
     body: `A Weight Converter is like a digital dumbbell for your brain — effortlessly flipping between kilograms, pounds, grams, and tons with zero sweat involved.
   Whether you're calculating cargo, measuring ingredients, or just curious how much your dog weighs in stone, this tool lifts the confusion.
   Convert weight units instantly and accurately — from micrograms to megatons.
-  Perfect for cooks, lifters, logistics pros, and anyone who’s ever yelled “what’s 5 lbs in kg?!” while meal-prepping.`,
+  Perfect for cooks, lifters, logistics pros, and anyone who's ever yelled "what's 5 lbs in kg?!?" while meal-prepping.`,
   },
 
   volume: {
     title: "Volume Converter",
     seo: "Volume Conversion Online | Free Tool",
     body: `A Volume Converter is like a digital measuring cup for everything — effortlessly translating between liters, gallons, cups, milliliters, and more.
-  Whether you're scaling recipes, tracking fuel, or just trying to figure out how much is “a pint” in real units, this tool makes volume conversion a breeze.
+  Whether you're scaling recipes, tracking fuel, or just trying to figure out how much is "a pint" in real units, this tool makes volume conversion a breeze.
   Convert between any volume unit quickly and accurately — from kitchen to chemistry lab.
   Perfect for cooks, scientists, students, and anyone who's ever asked, "How many cups is that again?"`,
   },
@@ -977,7 +977,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`,
     body: `An Energy Converter is like a power adapter for units — switching between joules, calories, kilowatt-hours, BTUs, and more without blowing a fuse.
   Whether you're tracking food energy, calculating physics problems, or just trying to understand what a kilojoule even means, this tool brings clarity.
   Convert any energy unit instantly and precisely.
-  Perfect for scientists, fitness enthusiasts, students, and anyone who’s ever thought, "How many calories is that in real power?"`,
+  Perfect for scientists, fitness enthusiasts, students, and anyone who's ever thought, "How many calories is that in real power?"`,
   },
 
   speed: {
@@ -986,7 +986,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`,
     body: `A Speed Converter is like cruise control for numbers — smoothly converting between km/h, mph, m/s, knots, and more in just a click.
   Whether you're clocking race times, tracking data transfer, or just wondering how fast a cheetah really is, this tool moves fast.
   Convert speed units instantly with pinpoint accuracy.
-  Perfect for athletes, engineers, physics nerds, and anyone who’s ever needed to turn “miles per hour” into “meters per second” without a calculator.`,
+  Perfect for athletes, engineers, physics nerds, and anyone who's ever needed to turn "miles per hour" into "meters per second" without a calculator.`,
   },
 
   power: {
@@ -995,7 +995,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`,
     body: `A Power Converter is like a wattage wizard — flipping between watts, horsepower, kilowatts, BTUs and more without burning out.
   Whether you're sizing up appliances, configuring circuits, or just trying to figure out how strong one horsepower really is, this tool brings the juice.
   Convert any power unit quickly and accurately — from mechanical to electrical and everything in between.
-  Perfect for engineers, electricians, physics students, and anyone who’s ever said, “Wait… how many watts is that?”`,
+  Perfect for engineers, electricians, physics students, and anyone who's ever said, "Wait… how many watts is that?"`,
   },
 
   pressure: {
@@ -1004,7 +1004,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`,
     body: `A Pressure Converter is like a stress reliever for unit confusion — smoothly translating between PSI, bar, Pascal, atm, and more.
   Whether you're inflating tires, calibrating instruments, or just trying to make sense of barometric data, this tool keeps it from getting too intense.
   Convert pressure values across metric and imperial systems with ease.
-  Perfect for engineers, mechanics, weather geeks, and anyone who’s ever asked, “Is that too much pressure… or not enough?”`,
+  Perfect for engineers, mechanics, weather geeks, and anyone who's ever asked, "Is that too much pressure… or not enough?"`,
   },
 
   angle: {
@@ -1013,7 +1013,7 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`,
     body: `An Angle Converter is like a math protractor in digital form — converting between degrees, radians, gradians, and more with pinpoint precision.
   Whether you're working on geometry, animations, or just trying to understand how π fits into a circle, this tool keeps your angles in check.
   Flip between angle units instantly — no trig needed.
-  Perfect for developers, students, game designers, and anyone who’s ever wondered, “How many radians is 90 degrees again?”`,
+  Perfect for developers, students, game designers, and anyone who's ever wondered, "How many radians is 90 degrees again?"`,
   },
 
   frequency: {
@@ -1022,25 +1022,45 @@ Pro tip: Overused words often indicate repetitive writing - great for editing.`,
     body: `A Frequency Converter is like a DJ for data — smoothly spinning between Hertz, kilohertz, megahertz, and gigahertz without missing a beat.
   Whether you're tuning signals, analyzing waves, or debugging system clocks, this tool keeps things on the right frequency.
   Convert frequency values instantly across scales — from audio to RF and beyond.
-  Perfect for engineers, tech enthusiasts, musicians, and anyone who’s ever asked, “How many Hz is that exactly?”`,
+  Perfect for engineers, tech enthusiasts, musicians, and anyone who's ever asked, "How many Hz is that exactly?"`,
   },
 
   fuelEconomy: {
     title: "Fuel Economy Converter",
     seo: "Fuel Economy Conversion Online | Free Tool",
-    body: `A Fuel Economy Converter is like your car’s translator — flipping between MPG, L/100km, km/L and other units so you know exactly how thirsty your ride is.
+    body: `A Fuel Economy Converter is like your car's translator — flipping between MPG, L/100km, km/L and other units so you know exactly how thirsty your ride is.
   Whether you're buying a new car, tracking fuel usage, or comparing international efficiency ratings, this tool delivers fast, accurate results.
   Switch between fuel economy units without manual math or mental gymnastics.
-  Perfect for drivers, travelers, mechanics, and anyone who’s ever asked, “Is 7 L/100km good?” (Spoiler: yes, kind of.)`,
+  Perfect for drivers, travelers, mechanics, and anyone who's ever asked, "Is 7 L/100km good?" (Spoiler: yes, kind of.)`,
   },
 
   timeUnit: {
     title: "Time Unit Converter",
     seo: "Time Unit Conversion Online | Free Tool",
     body: `A Time Unit Converter is like a digital timekeeper with a calculator — converting milliseconds to days, minutes to hours, or weeks to seconds without breaking a sweat.
-  Whether you're debugging performance, building countdowns, or just figuring out how long “900000 ms” really is, this tool has your back.
+  Whether you're debugging performance, building countdowns, or just figuring out how long "900000 ms" really is, this tool has your back.
   Convert between any time units instantly and precisely — from nanoseconds to centuries, no time frame is too weird.
-  Perfect for developers, data analysts, and anyone who’s ever Googled, “How many seconds in a month?”`,
+  Perfect for developers, data analysts, and anyone who's ever Googled, "How many seconds in a month?"`,
+  },
+
+  cronConverter: {
+    title: "Cron Converter",
+    seo: "Convert plain text descriptions to cron expressions | Free Online Tool",
+    body: `Transform human-readable time descriptions into precise cron expressions. No more guessing the right syntax for your scheduled tasks.
+
+**Why this tool is a game-changer:**
+- Converts natural language to standard cron format
+- Supports various scheduling patterns
+- Handles complex time expressions
+- Instant conversion with clear results
+
+Perfect for:
+- Setting up scheduled tasks in Linux/Unix systems
+- Configuring job schedulers
+- Creating automated workflows
+- When you need to schedule something but don't speak cron
+
+Pro tip: Bookmark this for when you need to set up a new scheduled task. No more cron syntax guessing games!`,
   },
 };
 

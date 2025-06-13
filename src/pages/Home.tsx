@@ -37,6 +37,7 @@ const allUtilities = [
       { name: 'Text ↔ Base Number', path: '/text_base' },
       { name: 'Unix ↔ UTC', path: '/unix_utc' },
       { name: 'Timezone', path: '/timezone' },
+      { name: 'Cron Converter', path: '/cron' },
     ],
   },
   {

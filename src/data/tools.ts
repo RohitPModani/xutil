@@ -260,4 +260,8 @@ export const toolsMeta: Record<string, { name: string; path: string }> = {
     name: "Word Frequency Counter",
     path: "word_frequency_counter",
   },
+  "/cron": {
+    name: "Cron Converter",
+    path: "cron",
+  },
 };

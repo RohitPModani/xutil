@@ -27,6 +27,7 @@ const BaseNumberConverter = lazy(() => import('../pages/Converters/BaseNumberCon
 const TextBaseConverter = lazy(() => import('../pages/Converters/TextBaseConverter'));
 const UnixUtcConverter = lazy(() => import('../pages/Converters/UnixUTCTimeConverter'));
 const TimezoneConverter = lazy(() => import('../pages/Converters/TimezoneConverter'));
+const CronConverter = lazy(() => import('../pages/Converters/CronConverter'));
 
 // General Converters
 const TimeUnitConverter = lazy(() => import('../pages/GeneralConverters/TimeUnitConverter'));
@@ -110,6 +111,7 @@ const converterRoutes = [
   createRoute('text_base', TextBaseConverter),
   createRoute('unix_utc', UnixUtcConverter),
   createRoute('timezone', TimezoneConverter),
+  createRoute('cron', CronConverter),
 ];
 
 const generalConverterRoutes = [
