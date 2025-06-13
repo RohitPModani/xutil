@@ -50,13 +50,6 @@ function CronConverter() {
     updateToolUsage("cron");
   }, []);
 
-  const parseTimeUnit = (text: string, unit: string): number | null => {
-    const num = parseInt(text);
-    if (isNaN(num)) return null;
-    const range = TIME_UNITS[unit as keyof typeof TIME_UNITS].range;
-    return num >= range[0] && num <= range[1] ? num : null;
-  };
-
   const parseMonth = (text: string): number | null => {
     const month = text.toLowerCase();
     return MONTHS[month as keyof typeof MONTHS] || null;
@@ -70,29 +63,6 @@ function CronConverter() {
   const parseSpecialTime = (text: string): { hour: number; minute: number } | null => {
     const time = text.toLowerCase();
     return TIME_KEYWORDS[time as keyof typeof TIME_KEYWORDS] || null;
-  };
-
-  const parseTimeRange = (text: string): { start: number; end: number } | null => {
-    const rangeMatch = text.match(/(\d+)\s*-\s*(\d+)/);
-    if (rangeMatch) {
-      const start = parseInt(rangeMatch[1]);
-      const end = parseInt(rangeMatch[2]);
-      if (!isNaN(start) && !isNaN(end)) {
-        return { start, end };
-      }
-    }
-    return null;
-  };
-
-  const parseTimeList = (text: string): number[] | null => {
-    const listMatch = text.match(/(\d+(?:\s*,\s*\d+)*)/);
-    if (listMatch) {
-      const numbers = listMatch[1].split(',').map(n => parseInt(n.trim()));
-      if (numbers.every(n => !isNaN(n))) {
-        return numbers;
-      }
-    }
-    return null;
   };
 
   const convertToCron = (text: string): string => {
@@ -117,7 +87,7 @@ function CronConverter() {
       // Handle time ranges (e.g., "every hour between 9 AM and 5 PM")
       const timeRangeMatch = lowerText.match(/between (\d+)(?::(\d+))?\s*(am|pm)? and (\d+)(?::(\d+))?\s*(am|pm)?/i);
       if (timeRangeMatch) {
-        let [_, startHour, startMin, startPeriod, endHour, endMin, endPeriod] = timeRangeMatch;
+        let [_, startHour, startMin, startPeriod, endHour, __, endPeriod] = timeRangeMatch;
         let startHourNum = parseInt(startHour);
         let endHourNum = parseInt(endHour);
         
