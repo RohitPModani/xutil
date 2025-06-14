@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
@@ -9,6 +9,7 @@ import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import QRCode from "qrcode";
+import LoadingButton from "../../components/LoadingButton";
 import { Download } from "lucide-react";
 import { saveAs } from "file-saver";
 
@@ -44,18 +45,6 @@ type QRCodeOptions = {
   downloadFormat?: "png" | "svg";
 };
 
-// Add this helper function for debouncing
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
 const DEFAULT_OPTIONS: QRCodeOptions = {
   actionType: "url",
   text: "",
@@ -67,8 +56,6 @@ const DEFAULT_OPTIONS: QRCodeOptions = {
   eventEnd: new Date(Date.now() + 60 * 60 * 1000), // Default to 1 hour later
   downloadFormat: "png",
 };
-
-const DEBOUNCE_DELAY = 500;
 
 const ACTION_TYPES = [
   { value: "url", label: "Website URL" },
@@ -94,325 +81,159 @@ function QRCodeGenerator() {
     svg: "",
   });
   const [error, setError] = useState<string | null>(null);
-  const [previewDataUrl, setPreviewDataUrl] = useState<string>("");
-  const [validationErrors, setValidationErrors] = useState<
-    Record<string, string>
-  >({});
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     updateToolUsage("qr_code");
   }, []);
 
-  const validateUrl = (url: string): { isValid: boolean; normalizedUrl: string; error?: string } => {
-    if (!url.trim()) {
-      return { isValid: false, normalizedUrl: '', error: 'Please enter a valid URL' };
-    }
-
-    const trimmedUrl = url.trim();
-    
-    // Check for common URL patterns and normalize them
-    let normalizedUrl = trimmedUrl;
-    
-    // If it doesn't start with a protocol, assume https://
-    if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalizedUrl)) {
-      normalizedUrl = `https://${normalizedUrl}`;
-    }
-    
-    // Handle common cases where users might enter invalid protocols
-    if (normalizedUrl.startsWith('www.')) {
-      normalizedUrl = `https://${normalizedUrl}`;
-    }
-    
+  const generateQRCode = useCallback(async () => {
     try {
-      const urlObj = new URL(normalizedUrl);
-      
-      // Check for valid protocols
-      const validProtocols = ['http:', 'https:', 'ftp:', 'ftps:', 'mailto:', 'tel:', 'sms:'];
-      if (!validProtocols.includes(urlObj.protocol)) {
-        return { 
-          isValid: false, 
-          normalizedUrl: trimmedUrl, 
-          error: 'Please enter a URL with a valid protocol (http, https, ftp, etc.)' 
-        };
-      }
-      
-      // Basic hostname validation
-      if (!urlObj.hostname || urlObj.hostname.length === 0) {
-        return { 
-          isValid: false, 
-          normalizedUrl: trimmedUrl, 
-          error: 'Please enter a valid URL with a hostname' 
-        };
-      }
-      
-      // Check for valid hostname format (basic check)
-      const hostnameRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/;
-      if (!hostnameRegex.test(urlObj.hostname) && !isValidIP(urlObj.hostname)) {
-        return { 
-          isValid: false, 
-          normalizedUrl: trimmedUrl, 
-          error: 'Please enter a valid hostname or IP address' 
-        };
-      }
-      
-      return { isValid: true, normalizedUrl: urlObj.toString() };
-    } catch (error) {
-      // Try some common fixes for malformed URLs
-      const fixes = [
-        // Remove extra spaces
-        normalizedUrl.replace(/\s+/g, ''),
-        // Fix double slashes
-        normalizedUrl.replace(/([^:]\/)\/+/g, '$1'),
-        // Add missing top-level domain for simple cases
-        normalizedUrl.includes('.') ? normalizedUrl : `${normalizedUrl}.com`
-      ];
-      
-      for (const fix of fixes) {
-        try {
-          const fixedUrl = new URL(fix);
-          if (fixedUrl.hostname) {
-            return { isValid: true, normalizedUrl: fixedUrl.toString() };
+      setIsGenerating(true);
+      setError(null);
+
+      let qrContent = "";
+
+      switch (options.actionType) {
+        case "url":
+        case "text":
+          qrContent = options.text;
+          break;
+        case "contact":
+          if (
+            !options.firstName &&
+            !options.lastName &&
+            !options.phone &&
+            !options.email
+          ) {
+            throw new Error("Please fill at least one contact field");
           }
-        } catch {
-          continue;
-        }
-      }
-      
-      return { 
-        isValid: false, 
-        normalizedUrl: trimmedUrl, 
-        error: 'Please enter a valid URL (e.g., https://example.com)' 
-      };
-    }
-  };
-
-  // Helper function to validate IP addresses
-  const isValidIP = (ip: string): boolean => {
-    // IPv4 validation
-    const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-    if (ipv4Regex.test(ip)) return true;
-    
-    // IPv6 validation (basic)
-    const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
-    if (ipv6Regex.test(ip)) return true;
-    
-    return false;
-  };
-
-  const validateInputs = useCallback(() => {
-    const errors: Record<string, string> = {};
-
-    switch (options.actionType) {
-      case "url":
-        const urlValidation = validateUrl(options.text);
-        if (!urlValidation.isValid) {
-          errors.text = urlValidation.error || "Please enter a valid URL";
-        }
-        break;
-      case "text":
-        if (!options.text.trim()) {
-          errors.text = "Please enter some text";
-        }
-        break;
-      case "contact":
-        if (!options.firstName && !options.lastName && !options.phone && !options.email) {
-          errors.contact = "Please enter at least one contact detail";
-        }
-        if (options.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(options.email)) {
-          errors.email = "Please enter a valid email address";
-        }
-        if (options.phone && !/^\+?[\d\s-()]{10,}$/.test(options.phone)) {
-          errors.phone = "Please enter a valid phone number";
-        }
-        break;
-      case "email":
-        if (!options.email) {
-          errors.email = "Email address is required";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(options.email)) {
-          errors.email = "Please enter a valid email address";
-        }
-        break;
-      case "sms":
-      case "phone":
-        if (!options.phone) {
-          errors.phone = "Phone number is required";
-        } else if (!/^\+?[\d\s-()]{10,}$/.test(options.phone)) {
-          errors.phone = "Please enter a valid phone number";
-        }
-        break;
-      case "wifi":
-        if (!options.wifiSsid) {
-          errors.wifiSsid = "WiFi SSID is required";
-        }
-        break;
-      case "whatsapp":
-        if (!options.phone) {
-          errors.phone = "Phone number is required";
-        } else if (!/^\+?[\d\s-()]{10,}$/.test(options.phone)) {
-          errors.phone = "Please enter a valid phone number";
-        }
-        break;
-      case "event":
-        if (!options.eventTitle) {
-          errors.eventTitle = "Event title is required";
-        }
-        if (options.eventStart && options.eventEnd) {
-          const start = new Date(options.eventStart);
-          const end = new Date(options.eventEnd);
-          if (end <= start) {
-            errors.eventEnd = "End time must be after start time";
+          qrContent = `BEGIN:VCARD\nVERSION:3.0\n`;
+          if (options.firstName || options.lastName) {
+            qrContent += `N:${options.lastName || ""};${
+              options.firstName || ""
+            }\n`;
+            qrContent += `FN:${options.firstName || ""} ${
+              options.lastName || ""
+            }\n`;
           }
-        }
-        break;
-    }
+          if (options.phone) qrContent += `TEL:${options.phone}\n`;
+          if (options.email) qrContent += `EMAIL:${options.email}\n`;
+          qrContent += `END:VCARD`;
+          break;
+        case "email":
+          if (!options.email) throw new Error("Email address is required");
+          qrContent = `mailto:${options.email}`;
+          if (options.emailSubject || options.emailBody) {
+            qrContent += "?";
+            const params = [];
+            if (options.emailSubject)
+              params.push(
+                `subject=${encodeURIComponent(options.emailSubject)}`
+              );
+            if (options.emailBody)
+              params.push(`body=${encodeURIComponent(options.emailBody)}`);
+            qrContent += params.join("&");
+          }
+          break;
+        case "sms":
+          if (!options.phone) throw new Error("Phone number is required");
+          qrContent = `smsto:${options.phone}`;
+          if (options.smsBody) {
+            qrContent += `:${encodeURIComponent(options.smsBody)}`;
+          }
+          break;
+        case "wifi":
+          if (!options.wifiSsid) throw new Error("WiFi SSID is required");
+          qrContent = `WIFI:T:${options.wifiEncryption || "WPA"};S:${
+            options.wifiSsid
+          };`;
+          if (options.wifiPassword) qrContent += `P:${options.wifiPassword};`;
+          qrContent += ";";
+          break;
+        case "phone":
+          if (!options.phone) throw new Error("Phone number is required");
+          qrContent = `tel:${options.phone}`;
+          break;
+        case "whatsapp":
+          if (!options.phone) throw new Error("Phone number is required");
+          qrContent = `https://wa.me/${options.phone}`;
+          if (options.whatsappMessage) {
+            qrContent += `?text=${encodeURIComponent(options.whatsappMessage)}`;
+          }
+          break;
+        case "event":
+          if (!options.eventTitle) throw new Error("Event title is required");
+          qrContent = `BEGIN:VEVENT\nSUMMARY:${options.eventTitle}\n`;
+          if (options.eventStart) {
+            const start = new Date(options.eventStart);
+            qrContent += `DTSTART:${
+              start.toISOString().replace(/[-:]/g, "").split(".")[0]
+            }Z\n`;
+          }
+          if (options.eventEnd) {
+            const end = new Date(options.eventEnd);
+            qrContent += `DTEND:${
+              end.toISOString().replace(/[-:]/g, "").split(".")[0]
+            }Z\n`;
+          }
+          if (options.eventLocation)
+            qrContent += `LOCATION:${options.eventLocation}\n`;
+          if (options.eventDescription)
+            qrContent += `DESCRIPTION:${options.eventDescription}\n`;
+          qrContent += `END:VEVENT`;
+          break;
+        default:
+          qrContent = options.text;
+      }
 
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
+      if (!qrContent) {
+        throw new Error("Please enter content to generate QR code");
+      }
+
+      const [pngDataUrl, svgDataUrl] = await Promise.all([
+        QRCode.toDataURL(qrContent, {
+          width: options.size,
+          color: {
+            dark: options.colorDark,
+            light: options.colorLight,
+          },
+          errorCorrectionLevel: options.errorCorrectionLevel,
+          type: "image/png",
+          margin: 1,
+        }),
+        QRCode.toString(qrContent, {
+          type: "svg",
+          width: options.size,
+          margin: 1,
+          color: {
+            dark: options.colorDark,
+            light: options.colorLight,
+          },
+          errorCorrectionLevel: options.errorCorrectionLevel,
+        }),
+      ]);
+
+      setQrCodeDataUrls({
+        png: pngDataUrl,
+        svg: svgDataUrl,
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to generate QR code"
+      );
+      console.error("QR code generation error:", err);
+    } finally {
+      setIsGenerating(false);
+    }
   }, [options]);
-
-  const debouncedGeneratePreview = useMemo(
-    () =>
-      debounce(async (opts: QRCodeOptions) => {
-        try {
-          if (!validateInputs()) {
-            setPreviewDataUrl("");
-            setQrCodeDataUrls({
-              png: "",
-              svg: "",
-            });
-            return;
-          }
-          const qrContent = generateQRContent(opts);
-          if (qrContent) {
-            const dataUrl = await QRCode.toDataURL(qrContent, {
-              width: opts.size,
-              color: {
-                dark: opts.colorDark,
-                light: opts.colorLight,
-              },
-              errorCorrectionLevel: opts.errorCorrectionLevel,
-              type: "image/png",
-              margin: 1,
-            });
-            setPreviewDataUrl(dataUrl);
-            setQrCodeDataUrls({
-              png: dataUrl,
-              svg: await QRCode.toString(qrContent, {
-                type: "svg",
-                width: opts.size,
-                margin: 1,
-                color: {
-                  dark: opts.colorDark,
-                  light: opts.colorLight,
-                },
-                errorCorrectionLevel: opts.errorCorrectionLevel,
-              }),
-            });
-          }
-        } catch (err) {
-          console.error("Preview generation error:", err);
-          setPreviewDataUrl("");
-          setQrCodeDataUrls({
-            png: "",
-            svg: "",
-          });
-        }
-      }, DEBOUNCE_DELAY),
-    [validateInputs]
-  );
-
-  const generateQRContent = (opts: QRCodeOptions): string => {
-    switch (opts.actionType) {
-      case "url":
-      case "text":
-        return opts.text;
-      case "contact":
-        if (!opts.firstName && !opts.lastName && !opts.phone && !opts.email) {
-          return "";
-        }
-        let qrContent = `BEGIN:VCARD\nVERSION:3.0\n`;
-        if (opts.firstName || opts.lastName) {
-          qrContent += `N:${opts.lastName || ""};${opts.firstName || ""}\n`;
-          qrContent += `FN:${opts.firstName || ""} ${opts.lastName || ""}\n`;
-        }
-        if (opts.phone) qrContent += `TEL:${opts.phone}\n`;
-        if (opts.email) qrContent += `EMAIL:${opts.email}\n`;
-        qrContent += `END:VCARD`;
-        return qrContent;
-      case "email":
-        if (!opts.email) throw new Error("Email address is required");
-        qrContent = `mailto:${opts.email}`;
-        if (opts.emailSubject || opts.emailBody) {
-          qrContent += "?";
-          const params = [];
-          if (opts.emailSubject)
-            params.push(`subject=${encodeURIComponent(opts.emailSubject)}`);
-          if (opts.emailBody)
-            params.push(`body=${encodeURIComponent(opts.emailBody)}`);
-          qrContent += params.join("&");
-        }
-        return qrContent;
-      case "sms":
-        if (!opts.phone) throw new Error("Phone number is required");
-        qrContent = `smsto:${opts.phone}`;
-        if (opts.smsBody) {
-          qrContent += `:${encodeURIComponent(opts.smsBody)}`;
-        }
-        return qrContent;
-      case "wifi":
-        if (!opts.wifiSsid) throw new Error("WiFi SSID is required");
-        qrContent = `WIFI:T:${opts.wifiEncryption || "WPA"};S:${
-          opts.wifiSsid
-        };`;
-        if (opts.wifiPassword) qrContent += `P:${opts.wifiPassword};`;
-        qrContent += ";";
-        return qrContent;
-      case "phone":
-        if (!opts.phone) throw new Error("Phone number is required");
-        qrContent = `tel:${opts.phone}`;
-        return qrContent;
-      case "whatsapp":
-        if (!opts.phone) throw new Error("Phone number is required");
-        qrContent = `https://wa.me/${opts.phone}`;
-        if (opts.whatsappMessage) {
-          qrContent += `?text=${encodeURIComponent(opts.whatsappMessage)}`;
-        }
-        return qrContent;
-      case "event":
-        if (!opts.eventTitle) throw new Error("Event title is required");
-        qrContent = `BEGIN:VEVENT\nSUMMARY:${opts.eventTitle}\n`;
-        if (opts.eventStart) {
-          const start = new Date(opts.eventStart);
-          qrContent += `DTSTART:${
-            start.toISOString().replace(/[-:]/g, "").split(".")[0]
-          }Z\n`;
-        }
-        if (opts.eventEnd) {
-          const end = new Date(opts.eventEnd);
-          qrContent += `DTEND:${
-            end.toISOString().replace(/[-:]/g, "").split(".")[0]
-          }Z\n`;
-        }
-        if (opts.eventLocation) qrContent += `LOCATION:${opts.eventLocation}\n`;
-        if (opts.eventDescription)
-          qrContent += `DESCRIPTION:${opts.eventDescription}\n`;
-        qrContent += `END:VEVENT`;
-        return qrContent;
-      default:
-        return opts.text;
-    }
-  };
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
-      setOptions((prev) => {
-        const newOptions = { ...prev, [name]: value };
-        debouncedGeneratePreview(newOptions);
-        return newOptions;
-      });
+      setOptions((prev) => ({ ...prev, [name]: value }));
     },
-    [debouncedGeneratePreview]
+    []
   );
 
   const handleColorChange = useCallback(
@@ -439,27 +260,8 @@ function QRCodeGenerator() {
         png: "",
         svg: "",
       });
-      setPreviewDataUrl("");
-      setError(null);
     },
     []
-  );
-
-  const handleUrlBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      if (name === 'text' && options.actionType === 'url' && value.trim()) {
-        const urlValidation = validateUrl(value);
-        if (urlValidation.isValid && urlValidation.normalizedUrl !== value) {
-          setOptions((prev) => {
-            const newOptions = { ...prev, [name]: urlValidation.normalizedUrl };
-            debouncedGeneratePreview(newOptions);
-            return newOptions;
-          });
-        }
-      }
-    },
-    [options.actionType, debouncedGeneratePreview]
   );
 
   const handleClear = useCallback(() => {
@@ -468,9 +270,7 @@ function QRCodeGenerator() {
       png: "",
       svg: "",
     });
-    setPreviewDataUrl("");
     setError(null);
-    setValidationErrors({});
   }, []);
 
   const downloadQRCode = useCallback(() => {
@@ -491,17 +291,6 @@ function QRCodeGenerator() {
   }, [qrCodeDataUrls, options.actionType, options.downloadFormat]);
 
   const renderActionFields = () => {
-    const renderError = (field: string) => {
-      if (validationErrors[field]) {
-        return (
-          <div className="text-red-500 text-sm mt-1">
-            {validationErrors[field]}
-          </div>
-        );
-      }
-      return null;
-    };
-
     switch (options.actionType) {
       case "contact":
         return (
@@ -839,11 +628,9 @@ function QRCodeGenerator() {
                 className="input-field"
                 value={options.text}
                 onChange={handleInputChange}
-                onBlur={handleUrlBlur}
                 required
               />
             )}
-            {renderError("text")}
           </div>
         );
     }
@@ -983,13 +770,23 @@ function QRCodeGenerator() {
                   </div>
                 </div>
               </div>
+
+              <div className="flex justify-center item-center">
+                <LoadingButton
+                  onClick={generateQRCode}
+                  disabled={isGenerating}
+                  isLoading={isGenerating}
+                >
+                  Generate QR Code
+                </LoadingButton>
+              </div>
             </div>
 
             <div className="flex flex-col items-center justify-center">
-              {qrCodeDataUrls.png || previewDataUrl ? (
+              {qrCodeDataUrls.png ? (
                 <>
                   <img
-                    src={qrCodeDataUrls.png || previewDataUrl}
+                    src={qrCodeDataUrls.png}
                     alt="Generated QR Code"
                     className="mb-4 border rounded p-2 bg-white"
                   />
@@ -1009,7 +806,6 @@ function QRCodeGenerator() {
                     <button
                       onClick={downloadQRCode}
                       className="button-primary flex items-center justify-center gap-2"
-                      disabled={!previewDataUrl}
                     >
                       <Download /> Download
                     </button>
