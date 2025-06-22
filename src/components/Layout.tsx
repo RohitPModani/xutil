@@ -186,59 +186,83 @@ function Layout() {
         )}
       </div>
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center px-4">
-          <div className="border border-zinc-300 dark:border-zinc-600  bg-zinc-100 text-zinc-800 dark:bg-zinc-900 dark:text-white rounded-lg shadow-lg w-full max-w-md p-6">
-            <h2 className="text-lg font-semibold mb-4">Request a New Tool</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Your Name"
-                required
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="input-field"
-              />
-              <input
-                type="text"
-                placeholder="Tool Name"
-                required
-                value={formData.tool}
-                onChange={(e) =>
-                  setFormData({ ...formData, tool: e.target.value })
-                }
-                className="input-field"
-              />
-              <textarea
-                placeholder="Brief Description"
-                required
-                value={formData.desc}
-                onChange={(e) =>
-                  setFormData({ ...formData, desc: e.target.value })
-                }
-                className="input-field"
-                rows={4}
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsFormOpen(false)}
-                  className="px-4 py-2 bg-zinc-300 hover:bg-zinc-400 dark:bg-zinc-700 dark:hover:bg-zinc-600 font-semibold rounded-full"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 dark:bg-white dark:hover:bg-zinc-300 text-white dark:text-zinc-900 font-semibold rounded-full"
-                >
-                  Submit
-                </button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+          <div className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white shadow-elevated rounded-xl p-4 sm:p-6 w-full max-w-md relative">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h2 className="text-section text-zinc-900 dark:text-white">Request a New Tool</h2>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Help us improve XUtil by suggesting a new tool you'd like to see.
+                </p>
               </div>
-            </form>
+            
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="form-label">Your Name</label>
+                  <input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your name"
+                    required
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="input-field"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="tool" className="form-label">Tool Name</label>
+                  <input
+                    id="tool"
+                    type="text"
+                    placeholder="e.g., JSON to YAML Converter"
+                    required
+                    value={formData.tool}
+                    onChange={(e) =>
+                      setFormData({ ...formData, tool: e.target.value })
+                    }
+                    className="input-field"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="desc" className="form-label">Brief Description</label>
+                  <textarea
+                    id="desc"
+                    placeholder="Describe what this tool should do..."
+                    required
+                    value={formData.desc}
+                    onChange={(e) =>
+                      setFormData({ ...formData, desc: e.target.value })
+                    }
+                    className="input-field resize-none"
+                    rows={4}
+                  />
+                </div>
+                
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsFormOpen(false)}
+                    className="px-4 py-2 rounded-full bg-zinc-300 dark:bg-zinc-700 text-zinc-800 dark:text-white hover:bg-zinc-400 dark:hover:bg-zinc-600 transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-4 py-2 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors duration-200"
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit Request"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-      )}
+        )}
     </div>
   );
 }
