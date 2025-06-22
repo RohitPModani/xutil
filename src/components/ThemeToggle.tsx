@@ -19,7 +19,7 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={() => setDarkMode(!darkMode)}
-      className="relative border border-zinc-400 dark:border-zinc-500 inline-flex items-center sm:h-8 sm:w-16 h-6 w-12 rounded-full bg-zinc-300 dark:bg-zinc-700 transition-colors focus:outline-none shadow-inner"
+      className="relative border border-zinc-400 dark:border-zinc-500 inline-flex items-center sm:h-8 sm:w-16 h-6 w-12 rounded-full bg-zinc-300/30 dark:bg-zinc-700/30 transition-colors focus:outline-none shadow-inner"
       aria-label="Toggle theme"
       title="Toggle theme"
     >
