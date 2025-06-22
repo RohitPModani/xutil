@@ -1,4 +1,3 @@
-// components/ToggleSwitch.tsx
 import React from "react";
 
 interface ToggleOption {

@@ -4,7 +4,7 @@ import { showSuccess, showError } from "../utils/toast";
 export function useClipboard(timeout: number = 1500) {
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [copiedAll, setCopiedAll] = useState<boolean>(false); // ✅ NEW
+  const [copiedAll, setCopiedAll] = useState<boolean>(false);
 
   const copy = async (
     text: string,

@@ -2,7 +2,7 @@ import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const getInitialTheme = () => {
-  const stored = localStorage.getItem("theme");
+  const stored = localStorage.getItem("xutil-theme");
   if (stored) return stored === "dark";
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   return prefersDark;
@@ -13,7 +13,7 @@ const ThemeToggle = () => {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem("theme", darkMode ? "dark" : "light");
+    localStorage.setItem("xutil-theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
   return (
