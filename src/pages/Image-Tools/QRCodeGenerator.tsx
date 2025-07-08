@@ -34,6 +34,7 @@ type QRCodeOptions = {
   wifiSsid?: string;
   wifiPassword?: string;
   wifiEncryption?: "WPA" | "WEP" | "nopass";
+  wifiHidden?: 0;
   // WhatsApp specific fields
   whatsappMessage?: string;
   // Calendar event specific fields
@@ -149,6 +150,7 @@ function QRCodeGenerator() {
             options.wifiSsid
           };`;
           if (options.wifiPassword) qrContent += `P:${options.wifiPassword};`;
+          if (options.wifiHidden) qrContent += `H:true;`;
           qrContent += ";";
           break;
         case "phone":
@@ -470,6 +472,21 @@ function QRCodeGenerator() {
                 <option value="WPA">WPA/WPA2</option>
                 <option value="WEP">WEP</option>
                 <option value="nopass">None (Open)</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="wifiHidden" className="form-label">
+                Hidden:
+              </label>
+              <select
+                  id="wifiHidden"
+                  name="wifiHidden"
+                  className="input-field"
+                  value={options.wifiHidden || 0}
+                  onChange={handleSelectChange}
+              >
+                <option value="1">Yes</option>
+                <option value="0">No</option>
               </select>
             </div>
           </div>
