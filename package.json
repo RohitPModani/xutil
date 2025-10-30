@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
+    "@vercel/analytics": "^1.5.0",
     "@zxing/browser": "^0.1.5",
     "axios": "^1.8.4",
     "diff": "^7.0.0",
