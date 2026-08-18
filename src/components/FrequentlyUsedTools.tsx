@@ -1,72 +1,95 @@
-// src/components/FrequentlyUsedTools.tsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { getMostUsedTools, resetToolUsage } from "../utils/toolUsage";
-import { Clock, RefreshCcw } from "lucide-react";
+import { Clock, RotateCcw } from "lucide-react";
 import { toolsMeta } from "../data/tools";
+
+const ACCENT = "#F59E0B";
+
+const ACCENT_VARS = {
+  "--accent": ACCENT,
+  "--accent-border": `${ACCENT}88`,
+  "--accent-bg": `${ACCENT}14`,
+} as React.CSSProperties;
+
+function FreqTool({ toolKey }: { toolKey: string }) {
+  const tool = toolsMeta[toolKey];
+
+  // A stored key can outlive the tool it points at, so skip anything we can no
+  // longer resolve rather than rendering a dead target.
+  if (!tool) return null;
+
+  return (
+    <Link
+      to={tool.path}
+      style={ACCENT_VARS}
+      className="tool-pill whitespace-nowrap !py-1.5 !px-3"
+    >
+      {tool.name}
+    </Link>
+  );
+}
 
 function FrequentlyUsedTools() {
   const [mostUsed, setMostUsed] = useState<string[]>([]);
-  const navigate = useNavigate();
 
-  // Fetch most used tools on component mount
   useEffect(() => {
     setMostUsed(getMostUsedTools());
   }, []);
 
-  // Handle navigation on tool click
-  const handleToolClick = (path: string) => {
-    navigate(path);
-  };
-
-  // Reset frequently used tools
   const handleReset = () => {
     resetToolUsage();
     setMostUsed(getMostUsedTools());
   };
 
   return (
-    <div className="card mt-4 shadow-md rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white group">
+    <div
+      className="rounded-xl overflow-hidden bg-white dark:bg-zinc-800/70 border border-zinc-200/80 dark:border-zinc-700/40 shadow-sm"
+      style={{ borderTop: `3px solid ${ACCENT}` }}
+    >
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-md sm:text-xl font-semibold flex items-center text-zinc-900 dark:text-white group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors duration-200">
-          <Clock className="w-5 h-5 mr-3 text-zinc-600 dark:text-zinc-400" />
-          Frequently Used Tools
-        </h2>
+      <div className="px-4 pt-4 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div
+            className="p-1.5 rounded-lg"
+            style={{ backgroundColor: `${ACCENT}1a` }}
+          >
+            <Clock className="w-4 h-4" style={{ color: ACCENT }} />
+          </div>
+          <h2
+            className="font-display font-bold text-zinc-900 dark:text-white text-sm sm:text-base"
+          >
+            Recently Used
+          </h2>
+        </div>
         {mostUsed.length > 0 && (
           <button
             onClick={handleReset}
-            className="transition-all duration-200 flex items-center gap-1 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-700 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-600 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+            className="flex items-center gap-1.5 text-xs font-mono px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700/60 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600 bg-zinc-50 dark:bg-zinc-900/40 transition-all duration-200"
           >
-            <RefreshCcw size={14} />
+            <RotateCcw size={11} />
             Reset
           </button>
         )}
       </div>
 
-      {/* Always Open Content */}
-      {mostUsed.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
-          {mostUsed.map((toolKey, index) => {
-            const tool = toolsMeta[toolKey];
-            const toolName = tool ? tool.name : toolKey.replace(/-/g, " ");
+      {/* Divider */}
+      <div className="h-px mx-4 bg-zinc-100 dark:bg-zinc-700/40" />
 
-            return (
-              <div
-                key={index}
-                onClick={() => handleToolClick(tool.path)}
-                className="bg-zinc-50 dark:bg-zinc-700/50 border border-zinc-200 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 transition-all duration-200 text-zinc-800 dark:text-white sm:p-3 p-2 rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-600/50 hover:scale-[1.02] hover:shadow-sm"
-              >
-                {toolName}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <p className="text-zinc-600 dark:text-zinc-400">
-          No tools used recently.
-        </p>
-      )}
+      {/* Tools */}
+      <div className="p-3">
+        {mostUsed.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {mostUsed.map((toolKey) => (
+              <FreqTool key={toolKey} toolKey={toolKey} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-400 dark:text-zinc-500 font-mono px-1 py-1">
+            Open any tool to see it here.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

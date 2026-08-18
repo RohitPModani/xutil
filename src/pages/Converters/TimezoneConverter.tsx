@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import moment from "moment-timezone";
-import Select, { GroupBase } from "react-select";
+import { DateTime } from "luxon";
+import Select, { GroupBase, StylesConfig } from "react-select";
 import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
@@ -22,10 +22,22 @@ import {
   Trash2,
 } from "lucide-react";
 
+// Luxon format tokens matching the datetime-local input and the display output.
+const INPUT_FORMAT = "yyyy-MM-dd'T'HH:mm";
+const OUTPUT_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+const nowInput = () => DateTime.now().toFormat(INPUT_FORMAT);
+
+const guessLocalZone = () => {
+  const zone = DateTime.local().zoneName || "UTC";
+  // Older ICU builds still report the deprecated alias for India.
+  return zone === "Asia/Calcutta" ? "Asia/Kolkata" : zone;
+};
+
 function TimezoneConverter() {
   const seo = seoDescriptions.timezone;
   const [datetimeStr, setDatetimeStr] = useState(
-    moment().format("YYYY-MM-DDTHH:mm")
+    nowInput()
   );
   const [fromZone, setFromZone] = useState<TimezoneOption | null>(null);
   const [toZone, setToZone] = useState<TimezoneOption | null>(null);
@@ -36,20 +48,19 @@ function TimezoneConverter() {
   const [isFromZoneDST, setIsFromZoneDST] = useState(false);
   const [isToZoneDST, setIsToZoneDST] = useState(false);
   const [savedTimezones, setSavedTimezones] = useState<TimezoneOption[]>([]);
-  const [currentTime, setCurrentTime] = useState(
-    moment().format("YYYY-MM-DD HH:mm:ss")
-  );
+  // Drives the once-a-second re-render of the saved-timezone clocks.
+  const [, setClockTick] = useState(0);
   const [multiZoneDatetime, setMultiZoneDatetime] = useState(
-    moment().format("YYYY-MM-DDTHH:mm")
+    nowInput()
   );
   const [selectedMultiZones, setSelectedMultiZones] = useState<
     TimezoneOption[]
   >([]);
   const [rangeStartDatetime, setRangeStartDatetime] = useState(
-    moment().format("YYYY-MM-DDTHH:mm")
+    nowInput()
   );
   const [rangeEndDatetime, setRangeEndDatetime] = useState(
-    moment().add(1, "hour").format("YYYY-MM-DDTHH:mm")
+    DateTime.now().plus({ hours: 1 }).toFormat(INPUT_FORMAT)
   );
   const [selectedRangeZones, setSelectedRangeZones] = useState<
     TimezoneOption[]
@@ -108,7 +119,7 @@ function TimezoneConverter() {
   // Update current time every second
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTime(moment().format("YYYY-MM-DD HH:mm:ss"));
+      setClockTick((tick) => tick + 1);
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -130,14 +141,13 @@ function TimezoneConverter() {
 
   // Set default timezones
   useEffect(() => {
-    let localZone = moment.tz.guess() || "UTC";
-    localZone = localZone === "Asia/Calcutta" ? "Asia/Kolkata" : localZone;
+    const localZone = guessLocalZone();
     const defaultFromZone =
       allTimezones.find((tz) => tz.value === localZone) ||
       allTimezones.find((tz) => tz.value === "UTC");
     setFromZone(defaultFromZone || null);
     setToZone(allTimezones.find((tz) => tz.value === "UTC") || null);
-    setDatetimeStr(moment().format("YYYY-MM-DDTHH:mm"));
+    setDatetimeStr(nowInput());
     setMultiZoneFromZone(defaultFromZone || null);
     setRangeZoneFromZone(defaultFromZone || null);
   }, []);
@@ -155,8 +165,8 @@ function TimezoneConverter() {
   const checkDST = (zone: string, datetime: string): boolean => {
     if (!zone || !datetime || !isValidDatetime(datetime)) return false;
     try {
-      const dt = moment.tz(datetime, "YYYY-MM-DDTHH:mm", zone);
-      return dt.isValid() && dt.isDST();
+      const dt = DateTime.fromFormat(datetime, INPUT_FORMAT, { zone });
+      return dt.isValid && dt.isInDST;
     } catch {
       return false;
     }
@@ -179,33 +189,33 @@ function TimezoneConverter() {
     }
 
     try {
-      const dt = moment.tz(datetime, "YYYY-MM-DDTHH:mm", fromZoneVal);
-      if (!dt.isValid()) {
+      const dt = DateTime.fromFormat(datetime, INPUT_FORMAT, {
+        zone: fromZoneVal,
+      });
+      if (!dt.isValid) {
         setError("Invalid datetime or timezone.");
         return "";
       }
-      const converted = dt.tz(toZoneVal).format("YYYY-MM-DD HH:mm:ss");
+      const converted = dt.setZone(toZoneVal);
+      if (!converted.isValid) {
+        setError("Invalid datetime or timezone.");
+        return "";
+      }
       setError(null);
-      return converted;
-    } catch (err) {
+      return converted.toFormat(OUTPUT_FORMAT);
+    } catch {
       setError("Conversion failed.");
       return "";
     }
   };
 
-  // Update to handle datetime-local format for saved timezones
-  const getCurrentTimeInTimezone = (
-    timezone: string,
-    datetime: string = currentTime
-  ): string => {
-    try {
-      return moment
-        .tz(datetime, "YYYY-MM-DD HH:mm:ss", "UTC")
-        .tz(timezone)
-        .format("YYYY-MM-DD HH:mm:ss");
-    } catch {
-      return "Invalid timezone";
-    }
+  // Current wall-clock time in a saved zone. This reads the actual instant:
+  // the previous version formatted local time and then re-parsed it as UTC,
+  // which skewed every saved clock by the viewer's own UTC offset.
+  // Re-rendered once a second by the clock tick above.
+  const getCurrentTimeInTimezone = (timezone: string): string => {
+    const dt = DateTime.now().setZone(timezone);
+    return dt.isValid ? dt.toFormat(OUTPUT_FORMAT) : "Invalid timezone";
   };
 
   useEffect(() => {
@@ -232,8 +242,8 @@ function TimezoneConverter() {
   };
 
   const handleClear = () => {
-    setDatetimeStr(moment().format("YYYY-MM-DDTHH:mm"));
-    const localZone = moment.tz.guess() || "UTC";
+    setDatetimeStr(nowInput());
+    const localZone = guessLocalZone();
     const defaultFromZone =
       allTimezones.find((tz) => tz.value === localZone) ||
       allTimezones.find((tz) => tz.value === "UTC");
@@ -311,7 +321,7 @@ function TimezoneConverter() {
 
   const handleClearMultiZones = () => {
     setSelectedMultiZones([]);
-    setMultiZoneDatetime(moment().format("YYYY-MM-DDTHH:mm"));
+    setMultiZoneDatetime(nowInput());
     setMultiZoneError(null);
   };
 
@@ -327,7 +337,7 @@ function TimezoneConverter() {
       setRangeZoneError("Invalid end datetime format. Use YYYY-MM-DD HH:mm");
     } else if (
       rangeEndDatetime &&
-      moment(value).isAfter(moment(rangeEndDatetime))
+      DateTime.fromISO(value) > DateTime.fromISO(rangeEndDatetime)
     ) {
       setRangeZoneError("Start datetime cannot be after end datetime.");
     } else {
@@ -346,7 +356,7 @@ function TimezoneConverter() {
       setRangeZoneError("Invalid start datetime format. Use YYYY-MM-DD HH:mm");
     } else if (
       rangeStartDatetime &&
-      moment(rangeStartDatetime).isAfter(moment(value))
+      DateTime.fromISO(rangeStartDatetime) > DateTime.fromISO(value)
     ) {
       setRangeZoneError("End datetime cannot be before start datetime.");
     } else {
@@ -370,8 +380,8 @@ function TimezoneConverter() {
 
   const handleClearRangeZones = () => {
     setSelectedRangeZones([]);
-    setRangeStartDatetime(moment().format("YYYY-MM-DDTHH:mm"));
-    setRangeEndDatetime(moment().add(1, "hour").format("YYYY-MM-DDTHH:mm"));
+    setRangeStartDatetime(nowInput());
+    setRangeEndDatetime(DateTime.now().plus({ hours: 1 }).toFormat(INPUT_FORMAT));
     setRangeZoneError(null);
   };
 
@@ -382,15 +392,12 @@ function TimezoneConverter() {
     timezone: string
   ): { start: string; end: string } => {
     try {
-      const startDt = moment
-        .tz(start, "YYYY-MM-DDTHH:mm", rangeZoneFromZone?.value || "UTC")
-        .tz(timezone)
-        .format("YYYY-MM-DD HH:mm:ss");
-      const endDt = moment
-        .tz(end, "YYYY-MM-DDTHH:mm", rangeZoneFromZone?.value || "UTC")
-        .tz(timezone)
-        .format("YYYY-MM-DD HH:mm:ss");
-      return { start: startDt, end: endDt };
+      const sourceZone = rangeZoneFromZone?.value || "UTC";
+      const toTarget = (value: string) =>
+        DateTime.fromFormat(value, INPUT_FORMAT, { zone: sourceZone })
+          .setZone(timezone)
+          .toFormat(OUTPUT_FORMAT);
+      return { start: toTarget(start), end: toTarget(end) };
     } catch {
       return { start: "Invalid timezone", end: "Invalid timezone" };
     }
@@ -399,15 +406,11 @@ function TimezoneConverter() {
   // Convert selected multi-zones
   const multiZoneResults = selectedMultiZones.reduce((acc, tz) => {
     try {
-      const dt = moment
-        .tz(
-          multiZoneDatetime,
-          "YYYY-MM-DDTHH:mm",
-          multiZoneFromZone?.value || "UTC"
-        )
-        .tz(tz.value)
-        .format("YYYY-MM-DD HH:mm:ss");
-      acc[tz.label] = dt;
+      acc[tz.label] = DateTime.fromFormat(multiZoneDatetime, INPUT_FORMAT, {
+        zone: multiZoneFromZone?.value || "UTC",
+      })
+        .setZone(tz.value)
+        .toFormat(OUTPUT_FORMAT);
     } catch {
       acc[tz.label] = "Invalid timezone";
     }
@@ -428,8 +431,12 @@ function TimezoneConverter() {
     return input ? label.toLowerCase().includes(input.toLowerCase()) : true;
   };
 
-  const customSelectStyles = {
-    control: (provided: any, state: any) => ({
+  const customSelectStyles: StylesConfig<
+    TimezoneOption,
+    false,
+    GroupBase<TimezoneOption>
+  > = {
+    control: (provided, state) => ({
       ...provided,
       backgroundColor: isDark ? "#27272a" : "#ffffff",
       borderColor: state.isFocused
@@ -447,19 +454,19 @@ function TimezoneConverter() {
       transition: "all 0.2s ease",
       boxShadow: state.isFocused ? "0 0 0 1px rgba(156,163,175,0.5)" : "none",
     }),
-    singleValue: (provided: any) => ({
+    singleValue: (provided) => ({
       ...provided,
       color: isDark ? "#ffffff" : "#1f2937",
     }),
-    input: (provided: any) => ({
+    input: (provided) => ({
       ...provided,
       color: isDark ? "#ffffff" : "#1f2937",
     }),
-    placeholder: (provided: any) => ({
+    placeholder: (provided) => ({
       ...provided,
       color: isDark ? "#a1a1aa" : "#9ca3af",
     }),
-    menu: (provided: any) => ({
+    menu: (provided) => ({
       ...provided,
       backgroundColor: isDark ? "#27272a" : "#ffffff",
       borderRadius: "0.375rem",
@@ -471,7 +478,7 @@ function TimezoneConverter() {
         ? "0 1px 3px rgba(0,0,0,0.5)"
         : "0 1px 2px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1)",
     }),
-    option: (provided: any, state: any) => ({
+    option: (provided, state) => ({
       ...provided,
       backgroundColor: state.isFocused
         ? isDark
@@ -484,7 +491,7 @@ function TimezoneConverter() {
       padding: "0.5rem 0.75rem",
       cursor: "pointer",
     }),
-    groupHeading: (provided: any) => ({
+    groupHeading: (provided) => ({
       ...provided,
       fontWeight: 600,
       color: isDark ? "#a1a1aa" : "#4b5563",

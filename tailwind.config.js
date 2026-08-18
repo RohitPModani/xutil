@@ -4,6 +4,9 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        display: ['Syne Variable', 'Syne', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
       transitionProperty: {
         colors: 'background-color, border-color, color, fill, stroke',
       },

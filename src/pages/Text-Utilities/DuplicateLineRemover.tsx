@@ -42,7 +42,7 @@ function DuplicateLineRemover() {
         const uniqueLines = [...new Set(lines)];
         setResultOutput(uniqueLines.join("\n"));
         setError(null);
-      } catch (err) {
+      } catch {
         setError("Error processing text. Please check your input.");
         setResultOutput("");
       }

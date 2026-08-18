@@ -11,10 +11,12 @@ import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import { getErrorMessage } from "../../utils/errors";
+import type { JsonValue } from "../../types/json";
 
 interface JWTDecodedData {
-  headers: { [key: string]: any };
-  payload: { [key: string]: any };
+  headers: { [key: string]: JsonValue };
+  payload: { [key: string]: JsonValue };
   signature: string;
 }
 
@@ -36,7 +38,7 @@ function base64UrlDecode(str: string): string {
 
   try {
     return decodeURIComponent(escape(atob(output)));
-  } catch (e) {
+  } catch {
     return atob(output);
   }
 }
@@ -71,11 +73,11 @@ function JWTDecoder() {
           payload,
           signature,
         });
-      } catch (e) {
+      } catch {
         throw new Error("Invalid JWT - failed to decode parts");
       }
-    } catch (err: any) {
-      setDecodeError(err?.message || "Failed to decode JWT");
+    } catch (err) {
+      setDecodeError(getErrorMessage(err, "Failed to decode JWT"));
       setDecodedData(null);
     } finally {
       setIsDecodeLoading(false);

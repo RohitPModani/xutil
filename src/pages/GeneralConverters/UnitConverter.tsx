@@ -43,7 +43,7 @@ function UnitConverter({
 
   useEffect(() => {
     updateToolUsage(toolName);
-  }, [converterName]);
+  }, [toolName]);
 
   const formatNumber = useCallback((num: number): string => {
     return new Intl.NumberFormat("en-US", {

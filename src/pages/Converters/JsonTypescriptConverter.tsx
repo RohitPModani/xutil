@@ -15,6 +15,8 @@ import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { updateToolUsage } from "../../utils/toolUsage";
+import { getErrorMessage } from "../../utils/errors";
+import type { JsonValue } from "../../types/json";
 
 interface ConversionResult {
   result: string;
@@ -25,8 +27,8 @@ enum ConversionType {
   TS = "ts",
 }
 
-type AnyDict = { [key: string]: any };
-type AnyList = any[];
+type AnyDict = { [key: string]: JsonValue };
+type AnyList = JsonValue[];
 
 function jsonToTypescript(jsonData: string, interfaceName: string): string {
   try {
@@ -42,7 +44,7 @@ function jsonToTypescript(jsonData: string, interfaceName: string): string {
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    function getType(value: any, key: string, depth: number): string {
+    function getType(value: JsonValue, key: string, depth: number): string {
       if (value === null) {
         return "null";
       } else if (Array.isArray(value)) {
@@ -74,11 +76,14 @@ function jsonToTypescript(jsonData: string, interfaceName: string): string {
       }
 
       const lines: string[] = [`interface ${name} {`];
-      const properties: AnyDict = Array.isArray(obj)
-        ? obj.length > 0
-          ? obj[0]
-          : {}
-        : obj;
+      // Only an object yields named fields. An array of primitives has no
+      // keys to describe, so fall back to an empty shape rather than
+      // enumerating string indices.
+      const sample = Array.isArray(obj) ? obj[0] : obj;
+      const properties: AnyDict =
+        sample && typeof sample === "object" && !Array.isArray(sample)
+          ? sample
+          : {};
 
       for (const [key, value] of Object.entries(properties)) {
         const type = getType(value, key, depth);
@@ -92,9 +97,9 @@ function jsonToTypescript(jsonData: string, interfaceName: string): string {
 
     generateInterface(data, interfaceName, 0);
     return interfaces.join("\n\n");
-  } catch (e: any) {
+  } catch (e) {
     throw new Error(
-      `JSON to TypeScript conversion failed: ${e.message || "Invalid format"}`
+      `JSON to TypeScript conversion failed: ${getErrorMessage(e, "Invalid format")}`
     );
   }
 }
@@ -142,9 +147,9 @@ function JSONTypescriptConverter() {
       const result = jsonToTypescript(inputText, interfaceName);
       setConversionResult({ result, type: "ts" });
       scrollToResult(textResultRef);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Conversion error:", err);
-      setError(`Conversion failed: ${err.message || "Invalid format"}`);
+      setError(`Conversion failed: ${getErrorMessage(err, "Invalid format")}`);
       setConversionResult(null);
     } finally {
       setIsConverting(false);
@@ -165,9 +170,9 @@ function JSONTypescriptConverter() {
       setSelectedFile(file);
       setFileBaseName(file.name.replace(/\.[^/.]+$/, ""));
       setError("");
-    } catch (err: any) {
+    } catch (err) {
       console.error("File read error:", err);
-      setError(`File read failed: ${err.message || "Unable to read file"}`);
+      setError(`File read failed: ${getErrorMessage(err, "Unable to read file")}`);
       setFileInputText("");
       setSelectedFile(null);
     }
@@ -189,9 +194,9 @@ function JSONTypescriptConverter() {
       setFileResult(result);
       setFileType(ConversionType.TS);
       scrollToResult(fileResultRef);
-    } catch (err: any) {
+    } catch (err) {
       console.error("File conversion error:", err);
-      setError(`Conversion failed: ${err.message || "Invalid format"}`);
+      setError(`Conversion failed: ${getErrorMessage(err, "Invalid format")}`);
       setFileResult("");
       setFileType(null);
     } finally {

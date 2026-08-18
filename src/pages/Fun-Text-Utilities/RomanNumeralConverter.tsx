@@ -9,6 +9,7 @@ import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
+import { getErrorMessage } from "../../utils/errors";
 
 // Constants
 const ROMAN_NUMERAL_REGEX = /^[IVXLCDM]*$/i;
@@ -151,10 +152,10 @@ export default function RomanNumeralConverter() {
         arabicResult: result.toString(),
         errorRoman: "",
       }));
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
-        errorRoman: err.message || "Invalid Roman numeral",
+        errorRoman: getErrorMessage(err, "Invalid Roman numeral"),
         arabicResult: "",
       }));
     }
@@ -187,10 +188,10 @@ export default function RomanNumeralConverter() {
     try {
       const result = arabicToRoman(num);
       setState((prev) => ({ ...prev, romanResult: result, errorArabic: "" }));
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
-        errorArabic: err.message || "Failed to convert to Roman numeral",
+        errorArabic: getErrorMessage(err, "Failed to convert to Roman numeral"),
         romanResult: "",
       }));
     }

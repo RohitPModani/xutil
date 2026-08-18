@@ -15,6 +15,8 @@ import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { updateToolUsage } from "../../utils/toolUsage";
+import { getErrorMessage } from "../../utils/errors";
+import type { JsonValue } from "../../types/json";
 
 interface ConversionResult {
   result: string;
@@ -26,8 +28,8 @@ enum ConversionType {
   JSON = "json",
 }
 
-type AnyDict = { [key: string]: any };
-type AnyList = any[];
+type AnyDict = { [key: string]: JsonValue };
+type AnyList = JsonValue[];
 
 function flattenJson(
   data: AnyDict | AnyList,
@@ -38,7 +40,7 @@ function flattenJson(
   const headers: string[] = [];
 
   function flatten(
-    obj: any,
+    obj: JsonValue,
     prefix: string = "",
     currentRecords: AnyDict[] = [{}]
   ): AnyDict[] {
@@ -77,11 +79,16 @@ function unflattenDict(d: AnyDict, sep: string = "_"): AnyDict {
   const result: AnyDict = {};
   for (const [key, value] of Object.entries(d)) {
     const parts = key.split(sep);
-    let current = result;
+    let current: AnyDict = result;
     for (let i = 0; i < parts.length - 1; i++) {
       const part = parts[i];
-      current[part] = current[part] || {};
-      current = current[part];
+      const next = current[part];
+      // Replace a primitive sitting at this level: colliding flat keys such as
+      // "a" and "a_b" would otherwise write onto a non-object and be lost.
+      if (next === null || typeof next !== "object" || Array.isArray(next)) {
+        current[part] = {};
+      }
+      current = current[part] as AnyDict;
     }
     current[parts[parts.length - 1]] = value === null ? null : value;
   }
@@ -114,9 +121,9 @@ function jsonToCsv(jsonData: string, separator: string = "_"): string {
     );
 
     return [headers.join(","), ...rows].join("\n");
-  } catch (e: any) {
+  } catch (e) {
     throw new Error(
-      `JSON to CSV conversion failed: ${e.message || "Invalid format"}`
+      `JSON to CSV conversion failed: ${getErrorMessage(e, "Invalid format")}`
     );
   }
 }
@@ -148,9 +155,9 @@ function csvToJson(csvData: string, separator: string = "_"): string {
       unflattenDict(record, separator)
     );
     return JSON.stringify(nestedRecords, null, 2);
-  } catch (e: any) {
+  } catch (e) {
     throw new Error(
-      `CSV to JSON conversion failed: ${e.message || "Invalid format"}`
+      `CSV to JSON conversion failed: ${getErrorMessage(e, "Invalid format")}`
     );
   }
 }
@@ -223,9 +230,9 @@ function CSVJSONConverter() {
         setConversionResult({ result, type: "json" });
       }
       scrollToResult(textResultRef);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Conversion error:", err);
-      setError(`Conversion failed: ${err.message || "Invalid format"}`);
+      setError(`Conversion failed: ${getErrorMessage(err, "Invalid format")}`);
       setConversionResult(null);
     } finally {
       setIsConverting(false);
@@ -260,9 +267,9 @@ function CSVJSONConverter() {
       setFileResult(result);
       setError("");
       scrollToResult(fileResultRef);
-    } catch (err: any) {
+    } catch (err) {
       console.error("File conversion error:", err);
-      setError(`File conversion failed: ${err.message || "Invalid format"}`);
+      setError(`File conversion failed: ${getErrorMessage(err, "Invalid format")}`);
       setFileResult("");
       setFileType(null);
     } finally {

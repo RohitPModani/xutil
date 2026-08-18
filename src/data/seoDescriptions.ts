@@ -352,7 +352,7 @@ Fun fact: The UNIX epoch (Jan 1 1970) is called "the birthday of modern computin
   - DST alerts so you don't get caught off-guard
   - Auto-detects your local timezone
   - Save and manage frequently used zones
-  - Accurate math using moment-timezone
+  - Accurate math using the IANA timezone database
 
   Ideal for:
   - Remote teams scheduling across continents

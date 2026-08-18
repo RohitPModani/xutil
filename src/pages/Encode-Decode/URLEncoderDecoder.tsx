@@ -12,6 +12,7 @@ import { PageSEO } from '../../components/PageSEO';
 import { updateToolUsage } from '../../utils/toolUsage';
 import ToggleSwitch from '../../components/ToggleSwitch';
 import { ArrowDownUp } from 'lucide-react';
+import { getErrorMessage } from "../../utils/errors";
 
 function URLEncoderDecoder() {
   const seo = seoDescriptions.urlEncoder;
@@ -48,11 +49,14 @@ function URLEncoderDecoder() {
         : decodeURIComponent(inputText);
       setOutputText(result);
       setError('');
-    } catch (err: any) {
-      setError(err.message || 
-        (mode === 'encode' 
-          ? 'Failed to encode text' 
-          : 'Failed to decode text. Ensure the input is a valid URL-encoded string.')
+    } catch (err) {
+      setError(
+        getErrorMessage(
+          err,
+          mode === 'encode'
+            ? 'Failed to encode text'
+            : 'Failed to decode text. Ensure the input is a valid URL-encoded string.'
+        )
       );
       setOutputText('');
     }

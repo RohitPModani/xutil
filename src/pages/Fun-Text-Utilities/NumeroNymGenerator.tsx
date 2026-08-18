@@ -10,6 +10,7 @@ import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import { getErrorMessage } from "../../utils/errors";
 
 export default function NumeronymGenerator() {
   const seo = seoDescriptions.numeronym;
@@ -55,8 +56,8 @@ export default function NumeronymGenerator() {
 
       setOutput(result);
       setError("");
-    } catch (err: any) {
-      setError(err.message || "Error generating numeronym");
+    } catch (err) {
+      setError(getErrorMessage(err, "Error generating numeronym"));
       setOutput("");
     }
   };

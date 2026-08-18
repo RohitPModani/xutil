@@ -11,6 +11,7 @@ import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
+import { getErrorMessage } from "../../utils/errors";
 
 interface BaseEncodeResponse {
   input_text: string;
@@ -32,7 +33,7 @@ function base64Encode(text: string): string {
 function base64Decode(encoded: string): string {
   try {
     return decodeURIComponent(escape(atob(encoded)));
-  } catch (e) {
+  } catch {
     throw new Error("Invalid Base64 input");
   }
 }
@@ -197,8 +198,8 @@ function BaseEncoderDecoder() {
       });
       setDecodeResult(null);
       setError("");
-    } catch (err: any) {
-      setError(err.message || "Failed to encode text");
+    } catch (err) {
+      setError(getErrorMessage(err, "Failed to encode text"));
       setEncodeResult(null);
       setDecodeResult(null);
     } finally {
@@ -237,8 +238,8 @@ function BaseEncoderDecoder() {
       });
       setEncodeResult(null);
       setError("");
-    } catch (err: any) {
-      setError(err.message || "Failed to decode text");
+    } catch (err) {
+      setError(getErrorMessage(err, "Failed to decode text"));
       setEncodeResult(null);
       setDecodeResult(null);
     } finally {

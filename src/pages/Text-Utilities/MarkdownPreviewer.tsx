@@ -46,7 +46,7 @@ function MarkdownPreviewer() {
         const html = marked.parse(markdownInput, { async: false }) as string;
         setPreviewOutput(html);
         setError(null);
-      } catch (err) {
+      } catch {
         setError("Error rendering Markdown. Please check your syntax.");
         setPreviewOutput("");
       }

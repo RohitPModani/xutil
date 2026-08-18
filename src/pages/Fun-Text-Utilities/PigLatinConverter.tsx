@@ -10,6 +10,7 @@ import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import { getErrorMessage } from "../../utils/errors";
 
 export default function PigLatinConverter() {
   const seo = seoDescriptions.pigLatin;
@@ -54,8 +55,8 @@ export default function PigLatinConverter() {
 
       setOutput(result);
       setError("");
-    } catch (err: any) {
-      setError(err.message || "Error converting to Pig Latin");
+    } catch (err) {
+      setError(getErrorMessage(err, "Error converting to Pig Latin"));
       setOutput("");
     }
   };

@@ -11,6 +11,7 @@ import { PageSEO } from "../../components/PageSEO";
 import BuyMeCoffee from "../../components/BuyMeCoffee";
 import { updateToolUsage } from "../../utils/toolUsage";
 import seoDescriptions from "../../data/seoDescriptions";
+import { getErrorMessage } from "../../utils/errors";
 
 function RegexTester() {
   const seo = seoDescriptions.regexTester;
@@ -40,8 +41,8 @@ function RegexTester() {
       } else {
         setIsValidRegex(false);
       }
-    } catch (err: any) {
-      setError("Invalid Regex: " + err.message);
+    } catch (err) {
+      setError("Invalid Regex: " + getErrorMessage(err, "invalid pattern"));
       setIsValidRegex(false);
     } finally {
       setIsLoading(false);

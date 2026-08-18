@@ -11,6 +11,7 @@ import ClearButton from "../../components/ClearButton";
 import { updateToolUsage } from "../../utils/toolUsage";
 import seoDescriptions from "../../data/seoDescriptions";
 import BuyMeCoffee from "../../components/BuyMeCoffee";
+import { getErrorMessage } from "../../utils/errors";
 
 const JSONValidator: React.FC = () => {
   const seo = seoDescriptions.jsonValidator;
@@ -33,9 +34,9 @@ const JSONValidator: React.FC = () => {
       const formatted = JSON.stringify(parsed, null, 2);
       setJsonOutput(formatted);
       setIsValid(true);
-    } catch (err: any) {
+    } catch (err) {
       setIsValid(false);
-      setError(`Invalid JSON: ${err.message}`);
+      setError(`Invalid JSON: ${getErrorMessage(err, "could not be parsed")}`);
     } finally {
       setIsLoading(false);
     }

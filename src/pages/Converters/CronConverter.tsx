@@ -87,7 +87,7 @@ function CronConverter() {
       // Handle time ranges (e.g., "every hour between 9 AM and 5 PM")
       const timeRangeMatch = lowerText.match(/between (\d+)(?::(\d+))?\s*(am|pm)? and (\d+)(?::(\d+))?\s*(am|pm)?/i);
       if (timeRangeMatch) {
-        let [_, startHour, startMin, startPeriod, endHour, __, endPeriod] = timeRangeMatch;
+        const [_, startHour, startMin, startPeriod, endHour, __, endPeriod] = timeRangeMatch;
         let startHourNum = parseInt(startHour);
         let endHourNum = parseInt(endHour);
         
@@ -123,7 +123,7 @@ function CronConverter() {
         // Check for specific time
         const timeMatch = lowerText.match(/at (\d+)(?::(\d+))?\s*(am|pm)?/i);
         if (timeMatch) {
-          let [_, hours, minutes, period] = timeMatch;
+          const [_, hours, minutes, period] = timeMatch;
           let hourNum = parseInt(hours);
           if (period === "pm" && hourNum < 12) hourNum += 12;
           if (period === "am" && hourNum === 12) hourNum = 0;
@@ -145,7 +145,7 @@ function CronConverter() {
           // Check for time specification
           const timeMatch = lowerText.match(/at (\d+)(?::(\d+))?\s*(am|pm)?/i);
           if (timeMatch) {
-            let [_, hours, minutes, period] = timeMatch;
+            const [_, hours, minutes, period] = timeMatch;
             let hourNum = parseInt(hours);
             if (period === "pm" && hourNum < 12) hourNum += 12;
             if (period === "am" && hourNum === 12) hourNum = 0;
@@ -162,7 +162,7 @@ function CronConverter() {
         // Check if there's a time specification
         const timeMatch = lowerText.match(/at (\d+)(?::(\d+))?\s*(am|pm)?/i);
         if (timeMatch) {
-          let [_, hours, minutes, period] = timeMatch;
+          const [_, hours, minutes, period] = timeMatch;
           let hourNum = parseInt(hours);
           if (period === "pm" && hourNum < 12) hourNum += 12;
           if (period === "am" && hourNum === 12) hourNum = 0;
@@ -182,7 +182,7 @@ function CronConverter() {
         // Check if there's a time specification
         const timeMatch = lowerText.match(/at (\d+)(?::(\d+))?\s*(am|pm)?/i);
         if (timeMatch) {
-          let [_, hours, minutes, period] = timeMatch;
+          const [_, hours, minutes, period] = timeMatch;
           let hourNum = parseInt(hours);
           if (period === "pm" && hourNum < 12) hourNum += 12;
           if (period === "am" && hourNum === 12) hourNum = 0;
@@ -202,7 +202,7 @@ function CronConverter() {
         // Check if there's a time specification
         const timeMatch = lowerText.match(/at (\d+)(?::(\d+))?\s*(am|pm)?/i);
         if (timeMatch) {
-          let [_, hours, minutes, period] = timeMatch;
+          const [_, hours, minutes, period] = timeMatch;
           let hourNum = parseInt(hours);
           if (period === "pm" && hourNum < 12) hourNum += 12;
           if (period === "am" && hourNum === 12) hourNum = 0;
@@ -220,7 +220,7 @@ function CronConverter() {
       // Handle specific time (e.g., "at 2:30 PM")
       const timeMatch = lowerText.match(/at (\d+)(?::(\d+))?\s*(am|pm)?/i);
       if (timeMatch) {
-        let [_, hours, minutes, period] = timeMatch;
+        const [_, hours, minutes, period] = timeMatch;
         let hourNum = parseInt(hours);
         if (period === "pm" && hourNum < 12) hourNum += 12;
         if (period === "am" && hourNum === 12) hourNum = 0;
@@ -262,7 +262,7 @@ function CronConverter() {
 
       setError("Could not parse the time description. Please try a different format.");
       return "";
-    } catch (err) {
+    } catch {
       setError("Error converting to cron expression");
       return "";
     }

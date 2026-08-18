@@ -12,15 +12,43 @@ const DEFAULT_TOOLS: Tool[] = [
   { key: "/qr_code", usage: 0 },
 ];
 
+// Storage access is deliberately defensive: this runs on every tool page, and
+// corrupt or unavailable localStorage (private mode, quota, a bad manual edit)
+// must never take down the route.
+const readUsage = (): Record<string, number> => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem("toolUsage") || "{}");
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
+    }
+    // Drop anything non-numeric so a bad entry cannot poison the sort.
+    return Object.fromEntries(
+      Object.entries(parsed).filter(
+        ([, count]) => typeof count === "number" && Number.isFinite(count)
+      )
+    ) as Record<string, number>;
+  } catch {
+    return {};
+  }
+};
+
+const writeUsage = (usage: Record<string, number>) => {
+  try {
+    localStorage.setItem("toolUsage", JSON.stringify(usage));
+  } catch {
+    // Storage full or blocked - usage tracking is non-essential, so ignore.
+  }
+};
+
 export const updateToolUsage = (toolKey: string) => {
-  const usage = JSON.parse(localStorage.getItem("toolUsage") || "{}");
+  const usage = readUsage();
   usage[`/${toolKey}`] = (usage[`/${toolKey}`] || 0) + 1;
-  localStorage.setItem("toolUsage", JSON.stringify(usage));
+  writeUsage(usage);
 };
 
 export const getMostUsedTools = (): string[] => {
   // Get stored tool usage
-  const usage = JSON.parse(localStorage.getItem("toolUsage") || "{}");
+  const usage = readUsage();
   // Create a map of tools, starting with default tools
   const toolMap: { [key: string]: number } = {};
   DEFAULT_TOOLS.forEach((tool) => {
@@ -40,5 +68,9 @@ export const getMostUsedTools = (): string[] => {
 };
 
 export const resetToolUsage = () => {
-  localStorage.removeItem("toolUsage");
+  try {
+    localStorage.removeItem("toolUsage");
+  } catch {
+    // Nothing to do if storage is unavailable.
+  }
 };

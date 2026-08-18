@@ -11,6 +11,7 @@ import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
+import { getErrorMessage } from "../../utils/errors";
 
 function reverseString(str: string): string {
   return str.split("").reverse().join("");
@@ -72,8 +73,8 @@ export default function StringReverserRotator() {
       const result = reverseString(reverseInput);
       setReverseResult(result);
       setErrorReverse("");
-    } catch (err: any) {
-      setErrorReverse(err.message || "Failed to reverse string");
+    } catch (err) {
+      setErrorReverse(getErrorMessage(err, "Failed to reverse string"));
       setReverseResult("");
     }
   };
@@ -93,8 +94,8 @@ export default function StringReverserRotator() {
       const result = rotateString(rotateInput, rotateBy);
       setRotateResult(result);
       setErrorRotate("");
-    } catch (err: any) {
-      setErrorRotate(err.message || "Failed to rotate string");
+    } catch (err) {
+      setErrorRotate(getErrorMessage(err, "Failed to rotate string"));
       setRotateResult("");
     }
   };

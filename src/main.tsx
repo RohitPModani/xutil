@@ -1,11 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
+import "@fontsource-variable/syne";
 import "./index.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { HelmetProvider } from "react-helmet-async";
-import { Analytics } from "@vercel/analytics/react";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -13,7 +13,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <HelmetProvider>
         <App />
       </HelmetProvider>
-      <Analytics />
       <ToastContainer
         position="top-right"
         autoClose={1500}

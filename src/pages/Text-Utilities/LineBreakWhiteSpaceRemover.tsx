@@ -42,7 +42,7 @@ function LineBreakWhiteSpaceRemover() {
           .trim(); // Remove leading/trailing spaces
         setResultOutput(cleanedText);
         setError(null);
-      } catch (err) {
+      } catch {
         setError("Error processing text. Please check your input.");
         setResultOutput("");
       }

@@ -55,7 +55,7 @@ function TextBaseConverter() {
           return code.toString(base);
         })
         .join(" ");
-    } catch (err) {
+    } catch {
       setTextError("Conversion failed");
       return "";
     }
@@ -82,7 +82,7 @@ function TextBaseConverter() {
           return String.fromCharCode(code);
         })
         .join("");
-    } catch (err) {
+    } catch {
       setBaseError("Invalid input for the selected base");
       return "";
     }

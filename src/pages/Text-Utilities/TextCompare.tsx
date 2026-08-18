@@ -15,7 +15,10 @@ import DOMPurify from "dompurify";
 interface DiffLine {
   type: "added" | "removed" | "common";
   text: string;
-  html?: string;
+  /** Always the escaped form of `text`. Required, because it is the only value
+   *  fed to dangerouslySetInnerHTML - an absent one must not fall back to the
+   *  raw text. */
+  html: string;
   lineNumber: number;
 }
 
@@ -64,6 +67,19 @@ const TextCompare: React.FC = () => {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&apos;');
+  };
+
+  // Single-row status message shown in place of a diff. Escaped like any other
+  // row so every value reaching dangerouslySetInnerHTML is escaped by the same
+  // path.
+  const statusRow = (message: string) => {
+    const cell: DiffLine = {
+      type: "common",
+      text: message,
+      html: escapeXml(message),
+      lineNumber: 1,
+    };
+    return { left: cell, right: { ...cell } };
   };
 
   const formatText = (text: string, format: 'json' | 'xml' | 'text'): string => {
@@ -156,20 +172,7 @@ const TextCompare: React.FC = () => {
 
   const compareTexts = async (): Promise<void> => {
     if (!text1.trim() || !text2.trim()) {
-      setDiffLines([
-        {
-          left: {
-            type: "common",
-            text: "Please enter text in both fields.",
-            lineNumber: 1,
-          },
-          right: {
-            type: "common",
-            text: "Please enter text in both fields.",
-            lineNumber: 1,
-          },
-        },
-      ]);
+      setDiffLines([statusRow("Please enter text in both fields.")]);
       setRemovals(0);
       setAdditions(0);
       return;
@@ -195,20 +198,7 @@ const TextCompare: React.FC = () => {
 
       // Check if text is too large
       if (lines1.length > MAX_LINES || lines2.length > MAX_LINES) {
-        setDiffLines([
-          {
-            left: {
-              type: "common",
-              text: `Text is too large. Maximum ${MAX_LINES} lines allowed.`,
-              lineNumber: 1,
-            },
-            right: {
-              type: "common",
-              text: `Text is too large. Maximum ${MAX_LINES} lines allowed.`,
-              lineNumber: 1,
-            },
-          },
-        ]);
+        setDiffLines([statusRow(`Text is too large. Maximum ${MAX_LINES} lines allowed.`)]);
         return;
       }
 
@@ -238,21 +228,8 @@ const TextCompare: React.FC = () => {
         // Allow UI to update
         await new Promise(resolve => setTimeout(resolve, 0));
       }
-    } catch (error) {
-      setDiffLines([
-        {
-          left: {
-            type: "common",
-            text: "Error during comparison",
-            lineNumber: 1,
-          },
-          right: {
-            type: "common",
-            text: "Error during comparison",
-            lineNumber: 1,
-          },
-        },
-      ]);
+    } catch {
+      setDiffLines([statusRow("Error during comparison")]);
     } finally {
       setIsLoading(false);
       setIsProcessing(false);
@@ -389,7 +366,7 @@ const TextCompare: React.FC = () => {
                               : ""
                           }`}
                           dangerouslySetInnerHTML={{
-                            __html: line.left.html || line.left.text,
+                            __html: line.left.html,
                           }}
                           aria-label={
                             line.left.type === "removed"
@@ -411,7 +388,7 @@ const TextCompare: React.FC = () => {
                               : ""
                           }`}
                           dangerouslySetInnerHTML={{
-                            __html: line.right.html || line.right.text,
+                            __html: line.right.html,
                           }}
                           aria-label={
                             line.right.type === "added"

@@ -12,33 +12,42 @@ import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 
 // Utility functions for GUID generation
-const generateGuidV7 = (): string => {
-  const timestamp = Date.now();
-  const timestampHex = timestamp.toString(16).padStart(12, "0");
-  const version = "7";
-  const variant = "8";
-  const randomPart = crypto.getRandomValues(new Uint8Array(8));
-  randomPart[0] = (randomPart[0] & 0x3f) | 0x80;
-  const randomHex = Array.from(randomPart)
+
+// Formats 16 bytes as a canonical 8-4-4-4-12 UUID string.
+const formatUuid = (bytes: Uint8Array): string => {
+  const hex = Array.from(bytes)
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
 
-  return constructUuidV7(timestampHex, version, variant, randomHex);
+  return [
+    hex.substring(0, 8),
+    hex.substring(8, 12),
+    hex.substring(12, 16),
+    hex.substring(16, 20),
+    hex.substring(20, 32),
+  ].join("-");
 };
 
-const constructUuidV7 = (
-  timestampHex: string,
-  version: string,
-  variant: string,
-  randomHex: string
-): string => {
-  return `${timestampHex.substring(0, 8)}-${timestampHex.substring(
-    8,
-    12
-  )}-${version}${randomHex.substring(1, 4)}-${variant}${randomHex.substring(
-    5,
-    8
-  )}-${randomHex.substring(8, 16)}`;
+// UUID version 7 per RFC 9562: a 48-bit big-endian Unix timestamp in
+// milliseconds, followed by 74 random bits, with the version and variant
+// fields set in place.
+const generateGuidV7 = (): string => {
+  const bytes = new Uint8Array(16);
+
+  // Bytes 0-5: timestamp, most significant byte first. Divide rather than
+  // shift, since bitwise operators would truncate to 32 bits.
+  let timestamp = Date.now();
+  for (let i = 5; i >= 0; i--) {
+    bytes[i] = timestamp % 256;
+    timestamp = Math.floor(timestamp / 256);
+  }
+
+  // Bytes 6-15: random, then overwrite the version and variant nibbles.
+  crypto.getRandomValues(bytes.subarray(6));
+  bytes[6] = (bytes[6] & 0x0f) | 0x70; // version 7
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 0b10
+
+  return formatUuid(bytes);
 };
 
 const GUID_FORMATS = [
@@ -92,7 +101,7 @@ function GuidGenerator() {
         setBulkGuids(guids);
       }
       setError("");
-    } catch (err) {
+    } catch {
       setError(`Failed to generate ${isSingle ? "GUID" : "bulk GUIDs"}`);
     } finally {
       setLoading(false);

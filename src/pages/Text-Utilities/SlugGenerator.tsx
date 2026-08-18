@@ -66,7 +66,7 @@ function SlugGenerator() {
       if (!text.trim()) return "";
 
       try {
-        let slug = text
+        const slug = text
           .normalize("NFKD") // Normalize Unicode
           .replace(/[^\w\s~-]/g, "") // Remove non-alphanumeric (except spaces, ~, -)
           .trim()
@@ -89,7 +89,7 @@ function SlugGenerator() {
           default:
             return slug;
         }
-      } catch (err) {
+      } catch {
         setError("Slug generation failed. Please check your inputs.");
         return "";
       }

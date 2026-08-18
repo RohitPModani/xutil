@@ -197,7 +197,7 @@ function LoremIpsumGenerator() {
         }
       }
       return output.join(format === "html" ? " " : " ");
-    } catch (err) {
+    } catch {
       setError("Generation failed.");
       return "";
     }

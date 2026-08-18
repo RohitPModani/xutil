@@ -6,6 +6,27 @@
   .animate-spin-slow {
     animation: spin 3s linear infinite;
   }
+  /* Tool links. Accent colours arrive as custom properties from the component
+     so hover/focus never needs a React re-render. */
+  .tool-pill {
+    @apply block px-2.5 py-2 rounded-lg text-sm font-mono leading-snug border border-zinc-200 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-900/40 text-zinc-700 dark:text-zinc-300 transition-all duration-200 no-underline;
+  }
+  .tool-pill:hover,
+  .tool-pill:focus-visible {
+    border-color: var(--accent-border, theme('colors.zinc.400'));
+    background-color: var(--accent-bg, transparent);
+    color: var(--accent, inherit);
+  }
+  .tool-pill:focus-visible {
+    @apply outline-none ring-2 ring-zinc-400 dark:ring-zinc-500;
+  }
+  .stat-chip {
+    @apply px-3 py-1 text-xs font-mono border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 rounded-full tracking-widest uppercase;
+  }
+  .card-top-border {
+    border-top-width: 3px;
+    border-top-style: solid;
+  }
 }
 
 @layer components {

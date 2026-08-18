@@ -15,6 +15,8 @@ import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { updateToolUsage } from "../../utils/toolUsage";
+import { getErrorMessage } from "../../utils/errors";
+import type { JsonObject, JsonValue } from "../../types/json";
 
 interface ConversionResult {
   result: string;
@@ -66,10 +68,10 @@ function XMLJSONConverter() {
         throw new Error("Invalid XML format");
       }
 
-      const result: any = {};
+      const result: JsonObject = {};
       const root = xmlDoc.documentElement;
 
-      const parseNode = (node: Element): any => {
+      const parseNode = (node: Element): JsonValue => {
         // If node has no child elements, return its text content directly
         const hasChildElements = Array.from(node.childNodes).some(
           (child) => child.nodeType === Node.ELEMENT_NODE
@@ -79,7 +81,7 @@ function XMLJSONConverter() {
           return node.textContent?.trim() || "";
         }
 
-        const obj: any = {};
+        const obj: JsonObject = {};
 
         // Handle attributes
         if (node.attributes && node.attributes.length > 0) {
@@ -135,25 +137,37 @@ function XMLJSONConverter() {
       const rootName = Object.keys(jsonObj)[0];
       const rootObj = jsonObj[rootName];
 
-      const serializeNode = (name: string, obj: any, indent = ""): string => {
-        let xml = `${indent}<${name}`;
+      const serializeNode = (
+        name: string,
+        obj: JsonValue,
+        indent = ""
+      ): string => {
         const newIndent = indent + "  ";
 
+        // Handle simple values (non-objects and non-arrays)
+        if (typeof obj !== "object" || obj === null) {
+          return `${indent}<${name}>${escapeXmlText(String(obj))}</${name}>`;
+        }
+
+        // A nested array repeats the element rather than emitting numeric
+        // tags like <0>, which are not valid XML names.
+        if (Array.isArray(obj)) {
+          return obj
+            .map((item) => serializeNode(name, item, indent))
+            .join("\n");
+        }
+
+        let xml = `${indent}<${name}`;
+
         // Handle attributes
-        if (obj["@attributes"]) {
-          for (const [attrName, attrValue] of Object.entries(
-            obj["@attributes"]
-          )) {
+        const attributes = obj["@attributes"];
+        if (attributes && typeof attributes === "object" && !Array.isArray(attributes)) {
+          for (const [attrName, attrValue] of Object.entries(attributes)) {
             xml += ` ${attrName}="${String(attrValue).replace(
               /"/g,
               "&quot;"
             )}"`;
           }
-        }
-
-        // Handle simple values (non-objects and non-arrays)
-        if (typeof obj !== "object" || obj === null) {
-          return `${xml}>${escapeXmlText(String(obj))}</${name}>`;
         }
 
         // Handle empty objects
@@ -240,9 +254,9 @@ function XMLJSONConverter() {
         setConversionResult({ result, type: "xml" });
       }
       scrollToResult(textResultRef);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Conversion error:", err);
-      setError(`Conversion failed: ${err.message || "Invalid format"}`);
+      setError(`Conversion failed: ${getErrorMessage(err, "Invalid format")}`);
       setConversionResult(null);
     } finally {
       setIsConverting(false);
@@ -279,9 +293,9 @@ function XMLJSONConverter() {
       setFileResult(result);
       setError("");
       scrollToResult(fileResultRef);
-    } catch (err: any) {
+    } catch (err) {
       console.error("File conversion error:", err);
-      setError(`File conversion failed: ${err.message || "Invalid format"}`);
+      setError(`File conversion failed: ${getErrorMessage(err, "Invalid format")}`);
       setFileResult("");
       setFileType(null);
     } finally {

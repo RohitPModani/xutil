@@ -4,10 +4,9 @@ import aboutUsDescription from "../data/about";
 import BuyMeCoffee from "./BuyMeCoffee";
 import ThemeToggle from "./ThemeToggle";
 import ScrollToTop from "./ScrollToTop";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { GitHub } from "react-feather";
-import { useMediaQuery } from "../hooks/useMediaQuery";
 import { showError, showSuccess } from "../utils/toast";
 
 function Layout() {
@@ -19,10 +18,18 @@ function Layout() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", tool: "", desc: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Google Forms sends no CORS headers, so the response is opaque and we
+    // cannot read its status. A network-level failure still rejects, which is
+    // the only failure we can actually detect - so check connectivity up front
+    // and word the confirmation to match what we really know.
+    if (navigator.onLine === false) {
+      showError("You appear to be offline. Please try again later.");
+      return;
+    }
 
     const formDataEncoded = new URLSearchParams();
     formDataEncoded.append("entry.112796009", formData.name);
@@ -44,11 +51,12 @@ function Layout() {
         }
       );
 
-      showSuccess("Request has been submitted.");
+      showSuccess("Thanks! Your request has been sent.");
       setFormData({ name: "", tool: "", desc: "" });
       setIsFormOpen(false);
     } catch (error) {
-      showError("Something went wrong.");
+      console.error("Tool request failed:", error);
+      showError("Could not reach the server. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -57,17 +65,17 @@ function Layout() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Determine shortcut hint based on platform
-  const getIsMac = () => {
+  const isMac = useMemo(() => {
     // Prefer userAgentData if available
-    if ((navigator as any).userAgentData?.platform) {
-      return (navigator as any).userAgentData.platform
-        .toUpperCase()
-        .includes("MAC");
+    const platform = (
+      navigator as Navigator & { userAgentData?: { platform?: string } }
+    ).userAgentData?.platform;
+    if (platform) {
+      return platform.toUpperCase().includes("MAC");
     }
     // Fallback to userAgent
     return navigator.userAgent.toUpperCase().includes("MAC");
-  };
-  const isMac = getIsMac();
+  }, []);
   const shortcutHint = isMac ? "⌘ + K" : "Ctrl + K";
 
   useEffect(() => {
@@ -87,80 +95,94 @@ function Layout() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isHomePage, isMac]);
 
-  const handleLogoClick = () => {
-    resetState();
-    navigate("/");
-  };
-
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setSearchQuery("");
     // Check if in mobile view (width < 768px, matching the condition in Home.tsx)
     const isMobile = window.innerWidth < 768;
     if (!isMobile) {
       sessionStorage.removeItem("lastClickedTool");
     }
+  }, []);
+
+  const handleLogoClick = () => {
+    resetState();
+    navigate("/");
   };
 
-  const updateSearchResults = (hasResults: boolean) => {
+  const updateSearchResults = useCallback((hasResults: boolean) => {
     setHasSearchResults(hasResults);
-  };
+  }, []);
+
+  // Memoised so Home's effects key off stable identities.
+  const outletContext = useMemo(
+    () => ({ searchQuery, resetState, updateSearchResults }),
+    [searchQuery, resetState, updateSearchResults]
+  );
 
   return (
     <div className="section min-h-screen transition-colors duration-300">
-      <header className="w-full flex items-center justify-between px-4 py-4 sm:py-6 max-w-7xl mx-auto gap-2 sm:gap-4 bg-zinc-100/80 dark:bg-zinc-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-zinc-200 dark:border-zinc-800">
-        <div className="flex-shrink-0 flex items-center gap-2">
+      <header className="w-full flex items-center justify-between px-4 py-3 sm:py-4 max-w-7xl mx-auto gap-2 sm:gap-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md sticky top-0 z-50 border-b border-zinc-200/80 dark:border-zinc-800/80">
+        <div className="flex-shrink-0 flex items-center gap-2.5">
           <button
             onClick={handleLogoClick}
-            className="text-lg sm:text-2xl font-bold text-zinc-900 dark:text-white hover:text-zinc-700 dark:hover:text-zinc-300 transition focus:outline-none"
+            className="font-display text-lg sm:text-xl font-bold text-zinc-900 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors duration-200 focus:outline-none tracking-tight"
           >
             XUtil
+          </button>
+          <span className="hidden sm:block text-zinc-300 dark:text-zinc-700 text-sm select-none">/</span>
+          <button
+            onClick={() => setIsFormOpen(true)}
+            disabled={isSubmitting}
+            className="hidden sm:block text-xs px-3 py-1.5 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-zinc-800 dark:hover:text-zinc-200 font-mono transition-all duration-200"
+          >
+            request a tool
           </button>
           <button
             onClick={() => setIsFormOpen(true)}
             disabled={isSubmitting}
-            className="text-xs sm:text-sm px-3 py-1.5 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 hover:scale-105"
+            className="sm:hidden text-xs px-2.5 py-1.5 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-mono transition-all duration-200"
           >
-            {isMobile ? "Request" : "Request a Tool"}
+            request
           </button>
         </div>
 
         <div className="flex-1 max-w-[50%] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg mx-auto flex items-center">
           {isHomePage ? (
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
               <input
                 ref={searchInputRef}
                 type="text"
                 placeholder={`Search tools... (${shortcutHint})`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-10 py-2 sm:py-2.5 text-sm rounded-full border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400 transition-all duration-200"
+                className="w-full pl-9 pr-9 py-2 text-sm rounded-full border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500 transition-all duration-200 font-mono"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors duration-200"
                   aria-label="Clear search"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
           ) : (
-            <div className="h-[35px] sm:h-[38px] rounded-full border border-transparent px-3"></div>
+            <div className="h-[34px] rounded-full border border-transparent px-3"></div>
           )}
         </div>
 
-        <div className="flex-shrink-0 flex items-center gap-3 sm:gap-4">
+        <div className="flex-shrink-0 flex items-center gap-3">
           <a
             href="https://github.com/RohitPModani/xutil.git"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors duration-200 focus:outline-none"
+            className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-200 focus:outline-none"
             title="Github"
             aria-label="Github"
           >
-            <GitHub className="w-5 h-5 sm:w-6 sm:h-6" />
+            <GitHub className="w-5 h-5" />
           </a>
           <ThemeToggle />
         </div>
@@ -168,7 +190,7 @@ function Layout() {
 
       <main className="px-3 pb-6 sm:px-4 sm:pb-8 max-w-7xl mx-auto">
         <ScrollToTop />
-        <Outlet context={{ searchQuery, resetState, updateSearchResults }} />
+        <Outlet context={outletContext} />
       </main>
 
       <footer className="px-4 max-w-7xl mx-auto sm:mb-4 mb-2">

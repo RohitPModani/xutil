@@ -110,7 +110,7 @@ function BaseNumberConverter() {
     try {
       const result = convertBase(inputNumber, sourceBaseNum, targetBaseNum);
       setConvertedNumber(result);
-    } catch (err) {
+    } catch {
       setError("Conversion failed. Please check your input.");
       setConvertedNumber("");
     }

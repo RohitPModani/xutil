@@ -44,7 +44,7 @@ function ULIDGenerator() {
       const ulidStr = ulid();
       setSingleUlid(ulidStr);
       setErrorSingle("");
-    } catch (err) {
+    } catch {
       setErrorSingle("Failed to generate ULID");
     } finally {
       setIsLoadingSingle(false);
@@ -64,7 +64,7 @@ function ULIDGenerator() {
       const ulids = Array.from({ length: count }, () => ulid());
       setBulkUlids(ulids);
       setErrorBulk("");
-    } catch (err) {
+    } catch {
       setErrorBulk("Failed to generate bulk ULIDs");
     } finally {
       setIsLoadingBulk(false);

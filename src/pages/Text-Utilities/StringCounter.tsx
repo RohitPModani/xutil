@@ -57,7 +57,7 @@ function StringCounter() {
           sentenceCount,
         });
         setError(null);
-      } catch (err) {
+      } catch {
         setError("Error processing text. Please check your input.");
         setResult(null);
       }

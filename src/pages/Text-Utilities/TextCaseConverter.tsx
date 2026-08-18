@@ -36,7 +36,7 @@ function TextCaseConverter() {
 
   const toCamelCase = (str: string) =>
     str
-      .replace(/(?:^|\s)([a-z])/g, (_m: any, p1: string) => p1.toUpperCase())
+      .replace(/(?:^|\s)([a-z])/g, (_m: string, p1: string) => p1.toUpperCase())
       .replace(/\s+/g, "");
   const toDotCase = (str: string) => str.replace(/\s+/g, ".").toLowerCase();
   const toCapitalCase = (str: string) =>
@@ -51,7 +51,7 @@ function TextCaseConverter() {
   const toPathCase = (str: string) => str.replace(/\s+/g, "/").toLowerCase();
   const toPascalCase = (str: string) =>
     str
-      .replace(/(?:^|\s)([a-z])/g, (_m: any, p1: string) => p1.toUpperCase())
+      .replace(/(?:^|\s)([a-z])/g, (_m: string, p1: string) => p1.toUpperCase())
       .replace(/\s+/g, "");
   const toSentenceCase = (str: string) =>
     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();

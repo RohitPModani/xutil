@@ -11,6 +11,7 @@ import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import ToggleSwitch from "../../components/ToggleSwitch";
+import { getErrorMessage } from "../../utils/errors";
 
 type Mode = "encode" | "decode";
 
@@ -159,10 +160,10 @@ function HtmlEntities() {
           output,
         },
       });
-    } catch (err: any) {
+    } catch (err) {
       dispatch({
         type: "SET_ERROR",
-        payload: err.message.includes("Invalid HTML")
+        payload: getErrorMessage(err, "").includes("Invalid HTML")
           ? "Contains invalid HTML entities"
           : "Processing failed. Please check your input.",
       });

@@ -1,7 +1,11 @@
 import { useRouteError } from "react-router-dom";
 
 function ErrorBoundary() {
-  const error: any = useRouteError();
+  const error: unknown = useRouteError();
+
+  // Kept in the console for debugging; the raw message is not shown to users,
+  // since it can leak internal detail and rarely means anything to them.
+  console.error("Route error:", error);
 
   return (
     <div className="max-w-4xl mx-auto px-3 py-6 sm:px-4 sm:py-8">
@@ -12,7 +16,7 @@ function ErrorBoundary() {
         An unexpected error occurred. Please try again or contact support.
       </p>
       <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-        Error: {error?.message || "Unknown error"}
+        If this keeps happening, please report it on GitHub.
       </p>
       <button
         onClick={() => window.location.reload()}

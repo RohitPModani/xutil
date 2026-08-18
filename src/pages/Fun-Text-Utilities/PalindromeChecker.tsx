@@ -10,6 +10,7 @@ import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
+import { getErrorMessage } from "../../utils/errors";
 
 function isPalindrome(str: string): boolean {
   const normalized = str.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -50,8 +51,8 @@ export default function PalindromeChecker() {
       const isPal = isPalindrome(input);
       setResult(`The string '${input}' is ${isPal ? "" : "not "}a palindrome`);
       setError("");
-    } catch (err: any) {
-      setError(err.message || "Failed to check palindrome");
+    } catch (err) {
+      setError(getErrorMessage(err, "Failed to check palindrome"));
       setResult("");
     }
   };

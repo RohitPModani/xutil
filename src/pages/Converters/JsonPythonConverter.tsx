@@ -16,6 +16,8 @@ import { PageSEO } from "../../components/PageSEO";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { validateClassName } from "../../utils/jsonPythonUtils";
+import { getErrorMessage } from "../../utils/errors";
+import type { JsonValue } from "../../types/json";
 
 interface ConversionResult {
   result: string;
@@ -26,8 +28,8 @@ enum ConversionType {
   PY = "py",
 }
 
-type AnyDict = { [key: string]: any };
-type AnyList = any[];
+type AnyDict = { [key: string]: JsonValue };
+type AnyList = JsonValue[];
 
 function jsonToPython(jsonData: string, className: string): string {
   try {
@@ -51,7 +53,7 @@ function jsonToPython(jsonData: string, className: string): string {
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    function getType(value: any, key: string, depth: number): string {
+    function getType(value: JsonValue, key: string, depth: number): string {
       if (value === null) {
         return "None";
       } else if (Array.isArray(value)) {
@@ -126,11 +128,14 @@ function jsonToPython(jsonData: string, className: string): string {
       }
 
       const lines: string[] = [`@dataclass`, `class ${name}:`];
-      const properties: AnyDict = Array.isArray(obj)
-        ? obj.length > 0
-          ? obj[0]
-          : {}
-        : obj;
+      // Only an object yields named fields. An array of primitives has no
+      // keys to describe, so fall back to an empty shape rather than
+      // enumerating string indices.
+      const sample = Array.isArray(obj) ? obj[0] : obj;
+      const properties: AnyDict =
+        sample && typeof sample === "object" && !Array.isArray(sample)
+          ? sample
+          : {};
 
       for (const [key, value] of Object.entries(properties)) {
         const type = getType(value, key, depth);
@@ -143,9 +148,9 @@ function jsonToPython(jsonData: string, className: string): string {
 
     generateClass(data, className, 0);
     return [imports, ...classes].join("\n\n");
-  } catch (e: any) {
+  } catch (e) {
     throw new Error(
-      `JSON to Python conversion failed: ${e.message || "Invalid format"}`
+      `JSON to Python conversion failed: ${getErrorMessage(e, "Invalid format")}`
     );
   }
 }
@@ -202,9 +207,9 @@ function JSONPythonClassConverter() {
       const result = jsonToPython(inputText, textClassName);
       setConversionResult({ result, type: "py" });
       scrollToResult(textResultRef);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Conversion error:", err);
-      setTextError(`Conversion failed: ${err.message || "Invalid format"}`);
+      setTextError(`Conversion failed: ${getErrorMessage(err, "Invalid format")}`);
       setConversionResult(null);
     } finally {
       setIsConverting(false);
@@ -225,9 +230,9 @@ function JSONPythonClassConverter() {
       setSelectedFile(file);
       setFileBaseName(file.name.replace(/\.[^/.]+$/, ""));
       setFileError("");
-    } catch (err: any) {
+    } catch (err) {
       console.error("File read error:", err);
-      setFileError(`File read failed: ${err.message || "Unable to read file"}`);
+      setFileError(`File read failed: ${getErrorMessage(err, "Unable to read file")}`);
       setFileInputText("");
       setSelectedFile(null);
     }
@@ -259,9 +264,9 @@ function JSONPythonClassConverter() {
       setFileResult(result);
       setFileType(ConversionType.PY);
       scrollToResult(fileResultRef);
-    } catch (err: any) {
+    } catch (err) {
       console.error("File conversion error:", err);
-      setFileError(`Conversion failed: ${err.message || "Invalid format"}`);
+      setFileError(`Conversion failed: ${getErrorMessage(err, "Invalid format")}`);
       setFileResult("");
       setFileType(null);
     } finally {

@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
-import { useRef, useState, useEffect } from "react";
-import { ChevronUp } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useId, useRef, useState, useEffect } from "react";
+import { ChevronDown } from "lucide-react";
 
 interface UtilityItem {
   name: string;
@@ -11,17 +11,63 @@ interface UtilityCardProps {
   title: string;
   icon: React.ElementType;
   items: (string | UtilityItem)[];
+  color?: string;
 }
 
-function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
-  const navigate = useNavigate();
+// Accent colours are handed to CSS as custom properties so hover and focus
+// styling stays in the stylesheet - tracking hover in React state re-rendered
+// on every mouseover and left the style stuck after a tap on touch devices.
+const accentVars = (color: string) =>
+  ({
+    "--accent": color,
+    "--accent-border": `${color}88`,
+    "--accent-bg": `${color}14`,
+  }) as React.CSSProperties;
+
+function ToolPill({
+  name,
+  path,
+  color = "#71717a",
+  onClick,
+}: {
+  name: string;
+  path?: string;
+  color?: string;
+  onClick: (name: string) => void;
+}) {
+  const elementId = name.replace(/\s+/g, "-").toLowerCase();
+
+  // Rendered as a real link so it is keyboard reachable, announced as a link,
+  // and followable by crawlers.
+  if (!path) {
+    return (
+      <span id={elementId} className="tool-pill text-zinc-400 dark:text-zinc-500">
+        {name}
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      id={elementId}
+      to={path}
+      style={accentVars(color)}
+      className="tool-pill"
+      onClick={() => onClick(name)}
+    >
+      {name}
+    </Link>
+  );
+}
+
+function UtilityCard({ title, icon: Icon, items, color = "#71717a" }: UtilityCardProps) {
+  const contentId = useId();
   const [isOpen, setIsOpen] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentHeight, setContentHeight] = useState<string | number>("auto");
 
   useEffect(() => {
     if (window.innerWidth >= 640) {
-      // Always open on desktop
       setIsOpen(true);
       setContentHeight("auto");
       return;
@@ -39,40 +85,73 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
     }
   }, [isOpen]);
 
-  const handleImplementedClick = (path: string, toolName: string) => {
-    sessionStorage.setItem("lastClickedTool", toolName);
-    navigate(path);
+  // Navigation itself is handled by the Link; this only records which tool was
+  // opened so Home can scroll back to it on mobile.
+  const handleImplementedClick = (toolName: string) => {
+    try {
+      sessionStorage.setItem("lastClickedTool", toolName);
+    } catch {
+      // Non-essential, and storage can be unavailable in private mode.
+    }
   };
 
+  const toggle = () => setIsOpen((prev) => !prev);
+
   return (
-    <div className="card shadow-md rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white hover:border-zinc-400 dark:hover:border-zinc-500 group">
+    <div
+      className="rounded-xl overflow-hidden bg-white dark:bg-zinc-800/70 border border-zinc-200/80 dark:border-zinc-700/40 shadow-sm hover:shadow-md transition-all duration-300 group"
+      style={{ borderTop: `3px solid ${color}` }}
+    >
       {/* Header */}
       <div
         onClick={() => {
-          if (window.innerWidth < 640) setIsOpen((prev) => !prev);
+          if (window.innerWidth < 640) toggle();
         }}
-        aria-expanded={isOpen}
-        role="button"
-        className="flex items-center justify-between sm:cursor-default cursor-pointer sm:mb-4"
-        style={{
-          marginBottom:
-            window.innerWidth < 640 ? (isOpen ? "1rem" : "0px") : undefined,
-          transition: "margin-bottom 300ms ease",
-        }}
+        className="px-4 pt-4 pb-3 flex items-center justify-between sm:cursor-default cursor-pointer"
       >
-        <h3 className="text-md sm:text-xl font-semibold flex items-center text-zinc-900 dark:text-white group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors duration-200">
-          <Icon className="w-5 h-5 mr-2 text-zinc-600 dark:text-zinc-400" />
-          {title}
-        </h3>
-        <ChevronUp
-          className={`sm:hidden w-5 h-5 text-zinc-500 dark:text-zinc-300 transition-transform duration-300 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
+        <div className="flex items-center gap-2.5">
+          <div
+            className="p-1.5 rounded-lg shrink-0"
+            style={{ backgroundColor: `${color}1a` }}
+          >
+            <Icon className="w-4 h-4" style={{ color }} />
+          </div>
+          <h3
+            className="font-display font-bold text-zinc-900 dark:text-white text-sm sm:text-base leading-tight"
+          >
+            {title}
+          </h3>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-700/80 text-zinc-500 dark:text-zinc-400 font-mono tabular-nums">
+            {items.length}
+          </span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggle();
+            }}
+            aria-expanded={isOpen}
+            aria-controls={contentId}
+            aria-label={`${isOpen ? "Collapse" : "Expand"} ${title}`}
+            className="sm:hidden rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-500"
+          >
+            <ChevronDown
+              className={`w-4 h-4 text-zinc-400 dark:text-zinc-500 transition-transform duration-300 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+        </div>
       </div>
+
+      {/* Divider */}
+      <div className="h-px mx-4 bg-zinc-100 dark:bg-zinc-700/40" />
 
       {/* Collapsible content */}
       <div
+        id={contentId}
         ref={contentRef}
         style={{
           overflow: "hidden",
@@ -80,23 +159,21 @@ function UtilityCard({ title, icon: Icon, items }: UtilityCardProps) {
           maxHeight: isOpen ? contentHeight : 0,
           opacity: isOpen ? 1 : 0,
         }}
-        className="transition-all duration-300 sm:max-h-none sm:opacity-100 sm:overflow-visible"
+        className="sm:max-h-none sm:opacity-100 sm:overflow-visible"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 m-1">
+        <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
           {items.map((item, index) => {
             const toolName = typeof item === "string" ? item : item.name;
             const path = typeof item === "string" ? undefined : item.path;
-            const elementId = toolName.replace(/\s+/g, "-").toLowerCase();
 
             return (
-              <div
+              <ToolPill
                 key={index}
-                id={elementId}
-                className="bg-zinc-50 dark:bg-zinc-700/50 border border-zinc-200 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 transition-all duration-200 text-zinc-800 dark:text-white sm:p-3 p-2 rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-600/50 hover:scale-[1.02] hover:shadow-sm"
-                onClick={() => path && handleImplementedClick(path, toolName)}
-              >
-                {toolName}
-              </div>
+                name={toolName}
+                path={path}
+                color={color}
+                onClick={handleImplementedClick}
+              />
             );
           })}
         </div>

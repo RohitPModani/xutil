@@ -9,6 +9,7 @@ import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import LoadingButton from "../../components/LoadingButton";
+import { getErrorMessage } from "../../utils/errors";
 
 // Character sets (equivalent to Python's string module)
 const DIGITS = "0123456789";
@@ -114,6 +115,21 @@ function calculatePasswordStrength(
   return "weak";
 }
 
+// Returns a uniformly distributed integer in [0, max) using rejection
+// sampling. A plain `random % max` would favour the first
+// (2**32 % max) values, which biases the character pool and the shuffle.
+function randomInt(max: number): number {
+  if (max <= 0) throw new Error("max must be greater than zero");
+  const limit = Math.floor(0x100000000 / max) * max;
+  const buffer = new Uint32Array(1);
+  let value: number;
+  do {
+    crypto.getRandomValues(buffer);
+    value = buffer[0];
+  } while (value >= limit);
+  return value % max;
+}
+
 function generatePassword(
   length: number,
   includeNumbers: boolean,
@@ -140,35 +156,19 @@ function generatePassword(
   const requiredChars: string[] = [];
   if (includeNumbers)
     requiredChars.push(
-      DIGITS[
-        Math.floor(
-          crypto.getRandomValues(new Uint32Array(1))[0] % DIGITS.length
-        )
-      ]
+      DIGITS[randomInt(DIGITS.length)]
     );
   if (includeSpecial)
     requiredChars.push(
-      PUNCTUATION[
-        Math.floor(
-          crypto.getRandomValues(new Uint32Array(1))[0] % PUNCTUATION.length
-        )
-      ]
+      PUNCTUATION[randomInt(PUNCTUATION.length)]
     );
   if (includeLowercase)
     requiredChars.push(
-      ASCII_LOWERCASE[
-        Math.floor(
-          crypto.getRandomValues(new Uint32Array(1))[0] % ASCII_LOWERCASE.length
-        )
-      ]
+      ASCII_LOWERCASE[randomInt(ASCII_LOWERCASE.length)]
     );
   if (includeUppercase)
     requiredChars.push(
-      ASCII_UPPERCASE[
-        Math.floor(
-          crypto.getRandomValues(new Uint32Array(1))[0] % ASCII_UPPERCASE.length
-        )
-      ]
+      ASCII_UPPERCASE[randomInt(ASCII_UPPERCASE.length)]
     );
 
   const remainingLength = length - requiredChars.length;
@@ -181,18 +181,13 @@ function generatePassword(
   // Generate remaining characters
   const passwordChars = requiredChars.concat(
     Array.from({ length: remainingLength }, () => {
-      const randomIndex = Math.floor(
-        crypto.getRandomValues(new Uint32Array(1))[0] % charPool.length
-      );
-      return charPool[randomIndex];
+      return charPool[randomInt(charPool.length)];
     })
   );
 
   // Shuffle the password
   for (let i = passwordChars.length - 1; i > 0; i--) {
-    const j = Math.floor(
-      crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1)
-    );
+    const j = randomInt(i + 1);
     [passwordChars[i], passwordChars[j]] = [passwordChars[j], passwordChars[i]];
   }
 
@@ -261,10 +256,9 @@ function PasswordGenerator() {
       );
       setPassword(newPassword);
       setError("");
-    } catch (err: any) {
+    } catch (err) {
       setError(
-        err.message ||
-          "Failed to generate password. Please check your settings."
+        getErrorMessage(err, "Failed to generate password. Please check your settings.")
       );
     } finally {
       setIsLoading(false);

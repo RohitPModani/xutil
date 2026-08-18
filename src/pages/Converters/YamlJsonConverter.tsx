@@ -16,6 +16,7 @@ import { PageSEO } from "../../components/PageSEO";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { updateToolUsage } from "../../utils/toolUsage";
 import * as yaml from "js-yaml";
+import { getErrorMessage } from "../../utils/errors";
 
 interface ConversionResult {
   result: string;
@@ -79,9 +80,9 @@ function YAMLJSONConverter() {
         setConversionResult({ result, type: "json" });
       }
       scrollToResult(textResultRef);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Conversion error:", err);
-      setError(`Conversion failed: ${err.message || "Invalid format"}`);
+      setError(`Conversion failed: ${getErrorMessage(err, "Invalid format")}`);
       setConversionResult(null);
     } finally {
       setIsConverting(false);
@@ -120,9 +121,9 @@ function YAMLJSONConverter() {
       setFileResult(result);
       setError("");
       scrollToResult(fileResultRef);
-    } catch (err: any) {
+    } catch (err) {
       console.error("File conversion error:", err);
-      setError(`File conversion failed: ${err.message || "Invalid format"}`);
+      setError(`File conversion failed: ${getErrorMessage(err, "Invalid format")}`);
       setFileResult("");
       setFileType(null);
     } finally {

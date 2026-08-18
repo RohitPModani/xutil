@@ -80,7 +80,10 @@ const GradientGenerator = lazy(() => import('../pages/Image-Tools/GradientGenera
 const BoxShadowGenerator = lazy(() => import('../pages/Image-Tools/BoxShadowGenerator'));
 
 // Route configuration helper
-const createRoute = (path: string, Component: React.LazyExoticComponent<any>) => ({
+const createRoute = (
+  path: string,
+  Component: React.LazyExoticComponent<React.ComponentType>
+) => ({
   path,
   element: <Component />,
   errorElement: <ErrorBoundary />

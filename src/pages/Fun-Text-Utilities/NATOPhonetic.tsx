@@ -10,6 +10,7 @@ import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import { getErrorMessage } from "../../utils/errors";
 
 const NATO_PHONETIC_ALPHABET: { [key: string]: string } = {
   A: "Alpha",
@@ -89,8 +90,8 @@ export default function NATOPhoneticAlphabetConverter() {
 
       setOutput(result);
       setError("");
-    } catch (err: any) {
-      setError(err.message || "Invalid input");
+    } catch (err) {
+      setError(getErrorMessage(err, "Invalid input"));
       setOutput("");
     }
   };

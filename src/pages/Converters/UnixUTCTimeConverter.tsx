@@ -62,7 +62,7 @@ function UnixUtcConverter() {
       }
       setUnixError(null);
       return dt.toFormat("yyyy-MM-dd HH:mm:ss");
-    } catch (err) {
+    } catch {
       setUnixError("Conversion failed.");
       return "";
     }
@@ -87,7 +87,7 @@ function UnixUtcConverter() {
       }
       setUtcError(null);
       return dt.toUnixInteger().toString();
-    } catch (err) {
+    } catch {
       setUtcError("Conversion failed.");
       return "";
     }

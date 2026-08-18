@@ -12,6 +12,7 @@ import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { AudioLines, Music } from "lucide-react";
 import useDebounce from "../../hooks/useDebounce";
+import { getErrorMessage } from "../../utils/errors";
 
 // Extended Morse code mapping with punctuation and special characters
 const MORSE_CODE_MAP: { [key: string]: string } = {
@@ -118,7 +119,7 @@ function morseToText(morse: string): string {
     .replace(/\s+/g, " ")
     .trim();
 
-  if (!/^[.\-\/ ]+$/.test(normalizedMorse)) {
+  if (!/^[.\-/ ]+$/.test(normalizedMorse)) {
     throw new Error(
       "Morse code must contain only dots (.), dashes (-), spaces, and word separators (/)."
     );
@@ -186,8 +187,8 @@ function MorseCodeTranslator() {
       const result = textToMorse(textInput);
       setMorseResult(result);
       setErrorText("");
-    } catch (err: any) {
-      setErrorText(err.message || "Failed to convert text to Morse code");
+    } catch (err) {
+      setErrorText(getErrorMessage(err, "Failed to convert text to Morse code"));
       setMorseResult("");
     }
   };
@@ -197,8 +198,8 @@ function MorseCodeTranslator() {
       const result = morseToText(morseInput);
       setTextResult(result);
       setErrorMorse("");
-    } catch (err: any) {
-      setErrorMorse(err.message || "Failed to convert Morse code to text");
+    } catch (err) {
+      setErrorMorse(getErrorMessage(err, "Failed to convert Morse code to text"));
       setTextResult("");
     }
   };
@@ -234,8 +235,11 @@ function MorseCodeTranslator() {
     if (!morseResult || isPlaying) return;
 
     setIsPlaying(true);
-    const audioContext = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
+    const AudioContextCtor =
+      window.AudioContext ||
+      (window as Window & { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    const audioContext = new AudioContextCtor();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 

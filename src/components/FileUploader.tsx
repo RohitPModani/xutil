@@ -1,6 +1,7 @@
 // src/components/FileUploader.tsx
 import { useRef, useState, useEffect } from "react";
 import { File, X } from "lucide-react";
+import { showError } from "../utils/toast";
 
 interface FileUploaderProps {
   onFileSelected: (file: File) => void;
@@ -9,6 +10,9 @@ interface FileUploaderProps {
   label: string;
   disabled?: boolean;
   resetSignal?: number;
+  /** Rejected above this size, in MB. These tools parse the whole file in the
+   *  main thread, so an oversized input would lock up the tab. */
+  maxSizeMB?: number;
 }
 
 const FileUploader = ({
@@ -18,6 +22,7 @@ const FileUploader = ({
   label,
   disabled = false,
   resetSignal,
+  maxSizeMB = 5,
 }: FileUploaderProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [fileName, setFileName] = useState<string>("");
@@ -28,10 +33,19 @@ const FileUploader = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setFileName(file.name);
-      onFileSelected(file);
+    if (!file) return;
+
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      showError(
+        `File is too large. Please choose a file under ${maxSizeMB} MB.`
+      );
+      // Clear the input so picking the same file again still fires onChange.
+      if (inputRef.current) inputRef.current.value = "";
+      return;
     }
+
+    setFileName(file.name);
+    onFileSelected(file);
   };
 
   const handleClear = () => {

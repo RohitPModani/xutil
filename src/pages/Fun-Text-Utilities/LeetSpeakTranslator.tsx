@@ -10,6 +10,7 @@ import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import { getErrorMessage } from "../../utils/errors";
 
 export default function LeetSpeakTranslator() {
   const seo = seoDescriptions.leetspeak;
@@ -78,8 +79,8 @@ export default function LeetSpeakTranslator() {
       }
       setOutput(result);
       setError("");
-    } catch (err: any) {
-      setError(err.message || "Error converting to LeetSpeak");
+    } catch (err) {
+      setError(getErrorMessage(err, "Error converting to LeetSpeak"));
       setOutput("");
     }
   };

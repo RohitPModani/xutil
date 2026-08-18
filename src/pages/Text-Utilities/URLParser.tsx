@@ -62,7 +62,7 @@ function URLParser() {
         setResult(parsedResult);
         setJsonOutput(JSON.stringify(parsedResult, null, 2));
         setError(null);
-      } catch (err) {
+      } catch {
         setError(
           "Invalid URL. Please enter a valid URL including protocol (http/https)."
         );
