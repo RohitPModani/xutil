@@ -1,15 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { Upload } from "lucide-react";
 import LoadingButton from "../../components/LoadingButton";
+import ToolHeader from "../../components/ToolHeader";
 
 interface CompressionResult {
   compressedUrl: string;
@@ -158,16 +157,12 @@ function ImageCompressor() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-3xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="max-w-3xl mx-auto py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Image Compressor</h3>
+            <h3 className="section-title">Image Compressor</h3>
             <ClearButton
               onClick={handleClear}
               disabled={!imagePreview && !compressionResult}
@@ -178,10 +173,10 @@ function ImageCompressor() {
           <div className="flex flex-col space-y-6">
             <div className="flex flex-col space-y-2">
               <label className="form-label">Upload Image:</label>
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-raised hover:bg-raised transition-colors">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="w-8 h-8 mb-2 text-zinc-500 dark:text-zinc-400" />
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  <Upload className="w-8 h-8 mb-2 text-faint" />
+                  <p className="text-sm text-faint">
                     <span className="font-semibold">Click to upload</span> or
                     drag and drop
                   </p>
@@ -226,10 +221,10 @@ function ImageCompressor() {
                 <img
                   src={imagePreview}
                   alt="Uploaded image for compression"
-                  className="mb-4 border rounded p-2 bg-zinc-100 dark:bg-zinc-800 w-full max-h-64 object-contain"
+                  className="mb-4 border rounded p-2 bg-raised w-full max-h-64 object-contain"
                 />
               ) : (
-                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-gray-400">
+                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-faint">
                   Original image will appear here
                 </div>
               )}
@@ -238,14 +233,14 @@ function ImageCompressor() {
             {compressionResult && (
               <div className="result-box">
                 <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold">Compression Result:</h4>
+                  <h4 className="section-subtitle">Compression Result:</h4>
                 </div>
                 <div className="inner-result space-y-2">
                   <div className="w-full flex flex-col space-y-2">
                     <img
                       src={compressionResult.compressedUrl}
                       alt="Compressed image"
-                      className="border rounded p-2 bg-zinc-100 dark:bg-zinc-800 w-full max-h-64 object-contain"
+                      className="border rounded p-2 bg-raised w-full max-h-64 object-contain"
                     />
                     <div className="flex flex-col space-y-1">
                       <span>

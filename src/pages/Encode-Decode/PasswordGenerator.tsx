@@ -1,15 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import LoadingButton from "../../components/LoadingButton";
 import { getErrorMessage } from "../../utils/errors";
+import ToolHeader from "../../components/ToolHeader";
 
 // Character sets (equivalent to Python's string module)
 const DIGITS = "0123456789";
@@ -291,12 +290,8 @@ function PasswordGenerator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="space-y-4">

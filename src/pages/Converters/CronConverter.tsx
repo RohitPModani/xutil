@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ErrorBox from "../../components/ErrorBox";
 import ClearButton from "../../components/ClearButton";
 import CopyButton from "../../components/CopyButton";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import { PageSEO } from "../../components/PageSEO";
 import SEODescription from "../../components/SEODescription";
 import seoDescriptions from "../../data/seoDescriptions";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import { updateToolUsage } from "../../utils/toolUsage";
+import ToolHeader from "../../components/ToolHeader";
 
 // Common time units and their cron field positions
 const TIME_UNITS = {
@@ -282,16 +281,12 @@ function CronConverter() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Text to Cron Expression</h3>
+            <h3 className="section-title">Text to Cron Expression</h3>
             <ClearButton onClick={handleClear} disabled={!inputText} />
           </div>
           <hr className="line-break" />
@@ -301,7 +296,7 @@ function CronConverter() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               className="input-field"
-              placeholder="Enter time description (e.g., 'every 15 minutes every alternate day', 'every weekday at 9:30 AM', 'every hour between 9 AM and 5 PM')"
+              placeholder="every weekday at 9:30am"
             />
           </div>
 
@@ -324,7 +319,7 @@ function CronConverter() {
         </SectionCard>
 
         <SectionCard>
-          <h3 className="text-lg font-semibold mb-4">Supported Formats</h3>
+          <h3 className="section-title mb-4">Supported Formats</h3>
           <div className="space-y-2 text-sm">
             <p>• Time intervals (e.g., "every 15 minutes", "every 2 hours")</p>
             <p>• Specific times (e.g., "at 2:30 PM", "at midnight")</p>

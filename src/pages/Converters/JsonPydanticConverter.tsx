@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import LoadingButton from "../../components/LoadingButton";
 import SectionCard from "../../components/SectionCard";
@@ -8,7 +7,6 @@ import ClearButton from "../../components/ClearButton";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import DownloadButton from "../../components/DownloadButton";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import FileUploader from "../../components/FileUploader";
 import { useFileReset } from "../../hooks/useFileReset";
 import seoDescriptions from "../../data/seoDescriptions";
@@ -18,6 +16,7 @@ import { updateToolUsage } from "../../utils/toolUsage";
 import { validateClassName } from "../../utils/jsonPythonUtils";
 import { getErrorMessage } from "../../utils/errors";
 import type { JsonValue } from "../../types/json";
+import ToolHeader from "../../components/ToolHeader";
 
 interface ConversionResult {
   result: string;
@@ -318,18 +317,14 @@ function JSONPydanticConverter() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         {/* Text Conversion Section */}
         <SectionCard>
           {isMobile ? (
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Text Conversion</h3>
+              <h3 className="section-title">Text Conversion</h3>
               <ClearButton
                 onClick={clearTextConversion}
                 disabled={!inputText && !conversionResult && !textError}
@@ -340,7 +335,7 @@ function JSONPydanticConverter() {
               className="flex items-center justify-between mb-4"
               ref={textResultRef}
             >
-              <h3 className="text-lg font-semibold">Text Conversion</h3>
+              <h3 className="section-title">Text Conversion</h3>
               <ClearButton
                 onClick={clearTextConversion}
                 disabled={!inputText && !conversionResult && !textError}
@@ -368,7 +363,7 @@ function JSONPydanticConverter() {
               <div className="flex flex-wrap gap-2 items-center">
                 <div className="flex flex-col">
                   <div className="flex items-center">
-                    <label className="form-label text-base mr-2">
+                    <label className="form-label mr-2">
                       Class Name:
                     </label>
                     <input
@@ -408,7 +403,7 @@ function JSONPydanticConverter() {
                 disabled={!conversionResult}
                 placeholder="Converted Pydantic model will appear here..."
                 className={`input-field w-full ${
-                  !conversionResult ? "text-zinc-400 dark:text-zinc-500" : ""
+                  !conversionResult ? "text-faint" : ""
                 }`}
                 style={{ whiteSpace: "pre" }}
                 aria-label="Converted Pydantic result"
@@ -429,7 +424,7 @@ function JSONPydanticConverter() {
         <SectionCard className="mt-6">
           {isMobile ? (
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">File Conversion</h3>
+              <h3 className="section-title">File Conversion</h3>
               <ClearButton
                 onClick={clearFileConversion}
                 disabled={!fileInputText && !fileResult && !fileError}
@@ -440,7 +435,7 @@ function JSONPydanticConverter() {
               className="flex items-center justify-between mb-4"
               ref={fileResultRef}
             >
-              <h3 className="text-lg font-semibold">File Conversion</h3>
+              <h3 className="section-title">File Conversion</h3>
               <ClearButton
                 onClick={clearFileConversion}
                 disabled={!fileInputText && !fileResult && !fileError}
@@ -463,7 +458,7 @@ function JSONPydanticConverter() {
               />
               <div className="flex flex-wrap gap-2 items-center mt-4">
                 <div className="flex items-center">
-                  <label className="form-label text-base mr-2">
+                  <label className="form-label mr-2">
                     Class Name:
                   </label>
                   <input
@@ -493,7 +488,7 @@ function JSONPydanticConverter() {
                 disabled={!fileInputText}
                 placeholder="Input text from file..."
                 className={`input-field w-full h-64 ${
-                  !fileInputText ? "text-zinc-400 dark:text-zinc-500" : ""
+                  !fileInputText ? "text-faint" : ""
                 }`}
                 style={{ whiteSpace: "pre" }}
                 aria-label="Input text from uploaded file"
@@ -519,7 +514,7 @@ function JSONPydanticConverter() {
                 disabled={!fileResult}
                 placeholder="Converted result will appear here..."
                 className={`input-field w-full h-64 ${
-                  !fileResult ? "text-zinc-400 dark:text-zinc-500" : ""
+                  !fileResult ? "text-faint" : ""
                 }`}
                 style={{ whiteSpace: "pre" }}
                 aria-label="Converted result from uploaded file"

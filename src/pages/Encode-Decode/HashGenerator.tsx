@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import ClearButton from "../../components/ClearButton";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import useDebounce from "../../hooks/useDebounce";
+import ToolHeader from "../../components/ToolHeader";
 
 type HashAlgorithm = "sha1" | "sha256" | "sha512";
 
@@ -147,12 +146,8 @@ function HashGenerator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">

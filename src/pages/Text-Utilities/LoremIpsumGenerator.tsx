@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
+import ToolHeader from "../../components/ToolHeader";
 
 // Classic Lorem Ipsum words
 const LOREM_WORDS = [
@@ -219,16 +218,12 @@ function LoremIpsumGenerator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Lorem Ipsum Generator</h3>
+            <h3 className="section-title">Lorem Ipsum Generator</h3>
             <ClearButton
               onClick={handleClear}
               disabled={!count && !result && !error}

@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import LoadingButton from "../../components/LoadingButton";
 import SectionCard from "../../components/SectionCard";
@@ -8,7 +7,6 @@ import ClearButton from "../../components/ClearButton";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import DownloadButton from "../../components/DownloadButton";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import FileUploader from "../../components/FileUploader";
 import { useFileReset } from "../../hooks/useFileReset";
 import seoDescriptions from "../../data/seoDescriptions";
@@ -17,6 +15,7 @@ import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { updateToolUsage } from "../../utils/toolUsage";
 import * as yaml from "js-yaml";
 import { getErrorMessage } from "../../utils/errors";
+import ToolHeader from "../../components/ToolHeader";
 
 interface ConversionResult {
   result: string;
@@ -155,18 +154,14 @@ function YAMLJSONConverter() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         {/* Text Conversion Section */}
         <SectionCard>
           {isMobile ? (
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Text Conversion</h3>
+              <h3 className="section-title">Text Conversion</h3>
               <ClearButton
                 onClick={clearTextConversion}
                 disabled={!inputText && !conversionResult && !error}
@@ -177,7 +172,7 @@ function YAMLJSONConverter() {
               className="flex items-center justify-between mb-4"
               ref={textResultRef}
             >
-              <h3 className="text-lg font-semibold">Text Conversion</h3>
+              <h3 className="section-title">Text Conversion</h3>
               <ClearButton
                 onClick={clearTextConversion}
                 disabled={!inputText && !conversionResult && !error}
@@ -239,7 +234,7 @@ function YAMLJSONConverter() {
                 disabled={!conversionResult}
                 placeholder="Converted result will appear here..."
                 className={`input-field w-full ${
-                  !conversionResult ? "text-zinc-400 dark:text-zinc-500" : ""
+                  !conversionResult ? "text-faint" : ""
                 }`}
                 aria-label="Converted YAML or JSON result"
               />
@@ -260,7 +255,7 @@ function YAMLJSONConverter() {
         <SectionCard className="mt-6">
           {isMobile ? (
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">File Conversion</h3>
+              <h3 className="section-title">File Conversion</h3>
               <ClearButton
                 onClick={clearFileConversion}
                 disabled={!fileInputText && !fileResult && !error}
@@ -271,7 +266,7 @@ function YAMLJSONConverter() {
               className="flex items-center justify-between mb-4"
               ref={fileResultRef}
             >
-              <h3 className="text-lg font-semibold">File Conversion</h3>
+              <h3 className="section-title">File Conversion</h3>
               <ClearButton
                 onClick={clearFileConversion}
                 disabled={!fileInputText && !fileResult && !error}
@@ -322,7 +317,7 @@ function YAMLJSONConverter() {
                 disabled={!fileInputText}
                 placeholder="Input text from file..."
                 className={`input-field w-full h-64 ${
-                  !fileInputText ? "text-zinc-400 dark:text-zinc-500" : ""
+                  !fileInputText ? "text-faint" : ""
                 }`}
                 aria-label="Input text from uploaded file"
               />
@@ -347,7 +342,7 @@ function YAMLJSONConverter() {
                 disabled={!fileResult}
                 placeholder="Converted result will appear here after upload..."
                 className={`input-field w-full h-64 ${
-                  !fileResult ? "text-zinc-400 dark:text-zinc-500" : ""
+                  !fileResult ? "text-faint" : ""
                 }`}
                 aria-label="Converted result from uploaded file"
               />

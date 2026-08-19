@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import LoadingButton from "../../components/LoadingButton";
 import SectionCard from "../../components/SectionCard";
@@ -8,10 +7,10 @@ import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import ClearButton from "../../components/ClearButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import { updateToolUsage } from "../../utils/toolUsage";
 import seoDescriptions from "../../data/seoDescriptions";
 import { getErrorMessage } from "../../utils/errors";
+import ToolHeader from "../../components/ToolHeader";
 
 function RegexTester() {
   const seo = seoDescriptions.regexTester;
@@ -60,17 +59,13 @@ function RegexTester() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex justify-between items-center mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-3xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex flex-col">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+              <h3 className="section-title">
                 Regex Tester
               </h3>
               <ClearButton

@@ -9,13 +9,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['cog-dark.svg', 'cog-light.svg', 'favicon.svg', 'robots.txt', 'apple-touch-icon.png'],
+      includeAssets: ['cog_dark.svg', 'cog_light.svg', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
         name: 'XUtil - Developer Tools',
         short_name: 'XUtil',
         description: 'Offline-first dev tools for everyone',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
+        theme_color: '#14161a',
+        background_color: '#14161a',
         display: 'standalone',
         start_url: '/',
         icons: [

@@ -1,14 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import useResultText from "../../hooks/useResultsText";
 import { updateToolUsage } from "../../utils/toolUsage";
+import ToolHeader from "../../components/ToolHeader";
 
 interface Unit {
   value: string;
@@ -110,18 +109,12 @@ function UnitConverter({
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex justify-between items-center gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
-              {converterName}
-            </h3>
+            <h2 className="label">Convert</h2>
             <ClearButton
               onClick={handleClear}
               disabled={value == defaultValue && unit == defaultUnit}
@@ -170,7 +163,7 @@ function UnitConverter({
 
             <div className="result-box mt-1">
               <div className="flex justify-between items-center">
-                <label className="form-label text-base">
+                <label className="form-label">
                   Conversion Result
                 </label>
                 {result && (
@@ -190,7 +183,7 @@ function UnitConverter({
                       const formattedVal = formatNumber(val);
                       return (
                         <div key={key} className="inner-result">
-                          <span className="font-mono text-zinc-800 dark:text-white whitespace-pre-wrap break-all">
+                          <span className="font-mono text-ink whitespace-pre-wrap break-all">
                             {displayLabel}: {formattedVal}
                           </span>
                           <CopyButton

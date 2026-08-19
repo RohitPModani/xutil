@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import ToolHeader from "../../components/ToolHeader";
 
 function TextCaseConverter() {
   const seo = seoDescriptions.textCase || {
@@ -111,16 +110,12 @@ function TextCaseConverter() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex justify-between items-center mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-3xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+            <h3 className="section-title">
               Text Case Converter
             </h3>
             <div className="flex items-center gap-2">
@@ -154,7 +149,7 @@ function TextCaseConverter() {
                       <CopyButton text={val} />
                     </div>
                     <div className="inner-result">
-                      <span className="mono-output text-zinc-900 dark:text-white">
+                      <span className="mono-output text-ink">
                         {val}
                       </span>
                     </div>

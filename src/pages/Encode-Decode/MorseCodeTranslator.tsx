@@ -1,18 +1,17 @@
 import { useEffect, useState, useRef } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
 import ClearButton from "../../components/ClearButton";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { AudioLines, Music } from "lucide-react";
 import useDebounce from "../../hooks/useDebounce";
 import { getErrorMessage } from "../../utils/errors";
+import ToolHeader from "../../components/ToolHeader";
 
 // Extended Morse code mapping with punctuation and special characters
 const MORSE_CODE_MAP: { [key: string]: string } = {
@@ -289,16 +288,12 @@ function MorseCodeTranslator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Text to Morse Code</h3>
+            <h3 className="section-title">Text to Morse Code</h3>
             <div className="flex gap-2">
               <ClearButton
                 onClick={handleClearTexttoMorse}
@@ -319,7 +314,7 @@ function MorseCodeTranslator() {
                 value={textInput}
                 onChange={handleTextChange}
                 className="input-field w-full"
-                placeholder="Enter text to convert into Morse code (letters, numbers, and common punctuation)"
+                placeholder="hello world"
                 ref={textRef}
                 aria-describedby={errorText ? "morse-text-error" : undefined}
               />
@@ -338,9 +333,9 @@ function MorseCodeTranslator() {
                     aria-label="Play Morse code as sound"
                   >
                     {isPlaying ? (
-                      <AudioLines className="sm:w-5 sm:h-5 w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+                      <AudioLines className="sm:w-5 sm:h-5 w-4 h-4 text-faint" />
                     ) : (
-                      <Music className="sm:w-5 sm:h-5 w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+                      <Music className="sm:w-5 sm:h-5 w-4 h-4 text-faint" />
                     )}
                   </button>
                   <CopyButton text={morseResult} />
@@ -362,7 +357,7 @@ function MorseCodeTranslator() {
 
         <SectionCard className="mt-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Morse Code to Text</h3>
+            <h3 className="section-title">Morse Code to Text</h3>
             <ClearButton
               onClick={handleClearMorsetoText}
               disabled={
@@ -381,13 +376,13 @@ function MorseCodeTranslator() {
                 value={morseInput}
                 onChange={handleMorseChange}
                 className="input-field w-full"
-                placeholder="Enter Morse code (e.g., .- -... / -.- -..) with spaces between letters and / for word breaks"
+                placeholder=".... . .-.. .-.. --- / .-- --- .-. .-.. -.."
                 ref={morseRef}
                 aria-describedby={errorMorse ? "morse-code-error" : undefined}
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              <span className="text-sm text-gray-600">Common sequences:</span>
+              <span className="text-sm text-dim">Common sequences:</span>
               {Object.entries(COMMON_SEQUENCES).map(([text, code]) => (
                 <button
                   key={text}

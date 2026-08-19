@@ -1,15 +1,14 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
 import ClearButton from "../../components/ClearButton";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { getErrorMessage } from "../../utils/errors";
+import ToolHeader from "../../components/ToolHeader";
 
 // Constants
 const ROMAN_NUMERAL_REGEX = /^[IVXLCDM]*$/i;
@@ -250,17 +249,13 @@ export default function RomanNumeralConverter() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         {/* Roman to Arabic Section */}
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Roman to Arabic</h3>
+            <h3 className="section-title">Roman to Arabic</h3>
             <ClearButton
               onClick={handleClearRoman}
               disabled={!romanInput && !arabicResult && !errorRoman}
@@ -305,7 +300,7 @@ export default function RomanNumeralConverter() {
         {/* Arabic to Roman Section */}
         <SectionCard className="mt-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Arabic to Roman</h3>
+            <h3 className="section-title">Arabic to Roman</h3>
             <ClearButton
               onClick={handleClearArabic}
               disabled={!arabicInput && !romanResult && !errorArabic}

@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ErrorBox from "../../components/ErrorBox";
 import ClearButton from "../../components/ClearButton";
 import CopyButton from "../../components/CopyButton";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import { PageSEO } from "../../components/PageSEO";
 import SEODescription from "../../components/SEODescription";
 import seoDescriptions from "../../data/seoDescriptions";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import { updateToolUsage } from "../../utils/toolUsage";
+import ToolHeader from "../../components/ToolHeader";
 
 const BASE_OPTIONS = [
   { value: 2, label: "2 (Binary)" },
@@ -113,16 +112,12 @@ function TextBaseConverter() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Text ➔ Base Conversion</h3>
+            <h3 className="section-title">Text ➔ Base Conversion</h3>
             <ClearButton onClick={handleTextClear} disabled={!inputText} />
           </div>
           <hr className="line-break" />
@@ -138,7 +133,7 @@ function TextBaseConverter() {
             />
           </div>
           <div className="flex gap-2 mt-4 items-center">
-            <label className="form-label mr-2 text-sm sm:text-base">
+            <label className="form-label mr-2">
               Target Base:
             </label>
             <select
@@ -174,7 +169,7 @@ function TextBaseConverter() {
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Base ➔ Text Conversion</h3>
+            <h3 className="section-title">Base ➔ Text Conversion</h3>
             <ClearButton onClick={handleBaseClear} disabled={!baseInput} />
           </div>
           <hr className="line-break" />
@@ -188,7 +183,7 @@ function TextBaseConverter() {
             />
           </div>
           <div className="flex gap-2 mt-4 items-center">
-            <label className="form-label mr-2 text-sm sm:text-base">
+            <label className="form-label mr-2">
               Source Base:
             </label>
             <select

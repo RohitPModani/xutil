@@ -1,16 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
 import ClearButton from "../../components/ClearButton";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import { getErrorMessage } from "../../utils/errors";
+import ToolHeader from "../../components/ToolHeader";
 
 const NATO_PHONETIC_ALPHABET: { [key: string]: string } = {
   A: "Alpha",
@@ -112,16 +111,12 @@ export default function NATOPhoneticAlphabetConverter() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">
+            <h3 className="section-title">
               Phonetic Alphabet Converter
             </h3>
             <ClearButton

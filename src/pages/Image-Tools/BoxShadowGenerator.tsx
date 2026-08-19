@@ -1,14 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
+import ToolHeader from "../../components/ToolHeader";
 
 interface BoxShadow {
   xOffset: number; // -50 to 50
@@ -225,16 +224,12 @@ function BoxShadowGenerator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-3xl mx-auto px-2 py-4 section">
-        <div className="flex items-center justify-between mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="max-w-3xl mx-auto py-6">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4 section">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            <h3 className="section-title">
               Box Shadow Generator
             </h3>
             <ClearButton
@@ -259,14 +254,14 @@ function BoxShadowGenerator() {
                   <button
                     key={index}
                     onClick={() => handlePresetSelect(preset.style)}
-                    className="flex flex-col items-center p-2 bg-zinc-50 dark:bg-zinc-700 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition cursor-pointer"
+                    className="flex flex-col items-center p-2 bg-raised rounded-lg hover:bg-raised transition cursor-pointer"
                     aria-label={`Select ${preset.name} preset`}
                   >
                     <div
-                      className="w-12 h-12 bg-white dark:bg-zinc-900 rounded border border-zinc-200 dark:border-zinc-600"
+                      className="w-12 h-12 bg-surface rounded border border-line"
                       style={{ boxShadow: generatePresetCss(preset.style) }}
                     />
-                    <span className="text-xs text-zinc-700 dark:text-zinc-300 mt-1">
+                    <span className="text-xs text-dim mt-1">
                       {preset.name}
                     </span>
                   </button>
@@ -309,12 +304,12 @@ function BoxShadowGenerator() {
                     onChange={(e) => handleXOffsetChange(e.target.value)}
                     min="-50"
                     max="50"
-                    className="w-full p-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition text-sm"
+                    className="w-full p-2 border border-line rounded-lg bg-surface text-ink focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition text-sm"
                     aria-label="Horizontal offset value"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="form-label">
                     Vertical Offset (px)
                   </label>
                   <input
@@ -332,7 +327,7 @@ function BoxShadowGenerator() {
                     onChange={(e) => handleYOffsetChange(e.target.value)}
                     min="-50"
                     max="50"
-                    className="w-full p-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition text-sm"
+                    className="w-full p-2 border border-line rounded-lg bg-surface text-ink focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition text-sm"
                     aria-label="Vertical offset value"
                   />
                 </div>
@@ -355,12 +350,12 @@ function BoxShadowGenerator() {
                     onChange={(e) => handleBlurRadiusChange(e.target.value)}
                     min="0"
                     max="100"
-                    className="w-full p-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition text-sm"
+                    className="w-full p-2 border border-line rounded-lg bg-surface text-ink focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition text-sm"
                     aria-label="Blur radius value"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="form-label">
                     Spread Radius (px)
                   </label>
                   <input
@@ -378,14 +373,14 @@ function BoxShadowGenerator() {
                     onChange={(e) => handleSpreadRadiusChange(e.target.value)}
                     min="-50"
                     max="50"
-                    className="w-full p-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition text-sm"
+                    className="w-full p-2 border border-line rounded-lg bg-surface text-ink focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition text-sm"
                     aria-label="Spread radius value"
                   />
                 </div>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="form-label">
                     Shadow Color
                   </label>
                   <div className="flex items-center space-x-2">
@@ -393,7 +388,7 @@ function BoxShadowGenerator() {
                       type="color"
                       value={boxShadow.color}
                       onChange={(e) => handleColorPickerChange(e.target.value)}
-                      className="w-10 h-10 border-2 border-zinc-300 dark:border-zinc-600 rounded cursor-pointer z-10"
+                      className="w-10 h-10 border-2 border-line rounded cursor-pointer z-10"
                       style={{
                         display: "block",
                         appearance: "auto",
@@ -406,7 +401,7 @@ function BoxShadowGenerator() {
                       value={boxShadow.color}
                       onChange={(e) => handleColorChange(e.target.value)}
                       placeholder="#000000"
-                      className="flex-1 p-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition text-sm"
+                      className="flex-1 p-2 border border-line rounded-lg bg-surface text-ink focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition text-sm"
                       maxLength={7}
                       aria-label="Shadow color HEX value"
                     />
@@ -417,7 +412,7 @@ function BoxShadowGenerator() {
 
             <div className="flex flex-col items-center">
               <div
-                className="w-full h-20 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-600"
+                className="w-full h-20 bg-surface rounded-lg border border-line"
                 style={{ boxShadow: generateCssValue() }}
                 aria-label="Box shadow preview"
               />
@@ -425,7 +420,7 @@ function BoxShadowGenerator() {
 
             <div className="result-box">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                <h4 className="section-subtitle">
                   Box Shadow CSS
                 </h4>
                 <CopyButton text={generateCss()} />

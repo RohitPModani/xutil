@@ -1,16 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
 import ClearButton from "../../components/ClearButton";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import { getErrorMessage } from "../../utils/errors";
+import ToolHeader from "../../components/ToolHeader";
 
 export default function LeetSpeakTranslator() {
   const seo = seoDescriptions.leetspeak;
@@ -101,16 +100,12 @@ export default function LeetSpeakTranslator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">LeetSpeak Translator</h3>
+            <h3 className="section-title">LeetSpeak Translator</h3>
             <ClearButton
               onClick={handleClear}
               disabled={input === "" && output === "" && error === ""}
@@ -157,10 +152,10 @@ export default function LeetSpeakTranslator() {
         </SectionCard>
 
         <SectionCard className="mt-6">
-          <h3 className="text-lg font-semibold mb-4">About LeetSpeak (1337)</h3>
+          <h3 className="section-title mb-4">About LeetSpeak (1337)</h3>
           <hr className="line-break" />
           <div className="prose">
-            <ul className="text-zinc-900 dark:text-white pl-5 space-y-2">
+            <ul className="text-ink pl-5 space-y-2">
               <li>
                 LeetSpeak (or "1337") is an alternative alphabet that replaces
                 letters with similar-looking numbers or special characters

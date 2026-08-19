@@ -1,16 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
 import ClearButton from "../../components/ClearButton";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import { getErrorMessage } from "../../utils/errors";
+import ToolHeader from "../../components/ToolHeader";
 
 export default function NumeronymGenerator() {
   const seo = seoDescriptions.numeronym;
@@ -104,16 +103,12 @@ export default function NumeronymGenerator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Numeronym Generator</h3>
+            <h3 className="section-title">Numeronym Generator</h3>
             <ClearButton
               onClick={handleClear}
               disabled={input === "" && output === "" && error === ""}
@@ -181,9 +176,9 @@ export default function NumeronymGenerator() {
         </SectionCard>
 
         <SectionCard className="mt-6">
-          <h3 className="text-lg font-semibold mb-4">About Numeronyms</h3>
+          <h3 className="section-title mb-4">About Numeronyms</h3>
           <hr className="line-break" />
-          <div className="prose text-zinc-900 dark:text-white ">
+          <div className="prose text-ink ">
             <p className="mb-4">
               Numeronyms are abbreviations where the middle letters are replaced
               with their count. Commonly used in tech (like i18n for
@@ -191,19 +186,19 @@ export default function NumeronymGenerator() {
             </p>
             <ul className="list-disc pl-5 space-y-2">
               <li>
-                <strong className="text-zinc-900 dark:text-white">i18n</strong>{" "}
+                <strong className="text-ink">i18n</strong>{" "}
                 - internationalization (18 letters between i and n)
               </li>
               <li>
-                <strong className="text-zinc-900 dark:text-white">l10n</strong>{" "}
+                <strong className="text-ink">l10n</strong>{" "}
                 - localization (10 letters between l and n)
               </li>
               <li>
-                <strong className="text-zinc-900 dark:text-white">k8s</strong> -
+                <strong className="text-ink">k8s</strong> -
                 kubernetes (8 letters between k and s)
               </li>
               <li>
-                <strong className="text-zinc-900 dark:text-white">a11y</strong>{" "}
+                <strong className="text-ink">a11y</strong>{" "}
                 - accessibility (11 letters between a and y)
               </li>
             </ul>

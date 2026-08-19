@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
+import ToolHeader from "../../components/ToolHeader";
 import ClearButton from "../../components/ClearButton";
 import CopyButton from "../../components/CopyButton";
 import SectionCard from "../../components/SectionCard";
@@ -132,7 +132,7 @@ const TextCompare: React.FC = () => {
           diff
             .map((part) => {
               if (part.removed) {
-                return `<span class="bg-red-300 dark:bg-red-400 dark:text-zinc-900">${escapeXml(part.value)}</span>`;
+                return `<span class="bg-red-300 dark:bg-red-400 dark:text-ink">${escapeXml(part.value)}</span>`;
               }
               return part.added ? "" : escapeXml(part.value);
             })
@@ -143,7 +143,7 @@ const TextCompare: React.FC = () => {
           diff
             .map((part) => {
               if (part.added) {
-                return `<span class="bg-green-300 dark:bg-green-400 dark:text-zinc-900">${escapeXml(part.value)}</span>`;
+                return `<span class="bg-green-300 dark:bg-green-400 dark:text-ink">${escapeXml(part.value)}</span>`;
               }
               return part.removed ? "" : escapeXml(part.value);
             })
@@ -252,15 +252,12 @@ const TextCompare: React.FC = () => {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8">
-        <div className="flex flex-row items-center justify-start gap-3 mb-4">
-          <BackToHome />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex sm:items-center sm:flex-row flex-col justify-between mb-4">
-            <h3 className="text-lg font-semibold mb-2 sm:mb-0">Text Compare</h3>
+            <h3 className="section-title mb-2 sm:mb-0">Text Compare</h3>
             <div className="flex gap-2">
               <label className="flex items-center gap-2 mr-2">
                 <input
@@ -320,7 +317,7 @@ const TextCompare: React.FC = () => {
           {diffLines.length > 0 && (
             <div className="space-y-4">
               <label className="form-label mb-0">Differences:</label>
-              <div className="flex items-center justify-between text-sm text-zinc-700 dark:text-zinc-300 mb-2">
+              <div className="flex items-center justify-between text-sm text-dim mb-2">
                 <div className="flex gap-4">
                   <span
                     className="flex items-center"
@@ -353,16 +350,16 @@ const TextCompare: React.FC = () => {
                 >
                   <tbody>
                     {diffLines.map((line, index) => (
-                      <tr key={index} className="dark:bg-zinc-800">
-                        <td className="w-12 text-right pr-2 border border-gray-300 dark:border-gray-700">
+                      <tr key={index} className="bg-surface">
+                        <td className="w-12 text-right pr-2 border border-line dark:border-line">
                           {line.left.lineNumber}
                         </td>
                         <td
                           className={`w-1/2 p-1 text-sm sm:text-base ${
                             line.left.type === "removed"
-                              ? "bg-red-100 dark:bg-red-200 dark:text-zinc-900"
+                              ? "bg-red-100 dark:bg-red-200 dark:text-ink"
                               : line.left.type === "added"
-                              ? "bg-green-100 dark:bg-green-200 dark:text-zinc-900"
+                              ? "bg-green-100 dark:bg-green-200 dark:text-ink"
                               : ""
                           }`}
                           dangerouslySetInnerHTML={{
@@ -376,15 +373,15 @@ const TextCompare: React.FC = () => {
                               : "Common text"
                           }
                         />
-                        <td className="w-12 text-right pr-2 border-r border-gray-300 dark:border-gray-700">
+                        <td className="w-12 text-right pr-2 border-r border-line dark:border-line">
                           {line.right.lineNumber}
                         </td>
                         <td
                           className={`w-1/2 p-1 text-sm sm:text-base ${
                             line.right.type === "added"
-                              ? "bg-green-100 dark:bg-green-200 dark:text-zinc-900"
+                              ? "bg-green-100 dark:bg-green-200 dark:text-ink"
                               : line.right.type === "removed"
-                              ? "bg-red-100 dark:bg-red-200 dark:text-zinc-900"
+                              ? "bg-red-100 dark:bg-red-200 dark:text-ink"
                               : ""
                           }`}
                           dangerouslySetInnerHTML={{

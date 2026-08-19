@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import CopyButton from "../../components/CopyButton";
@@ -7,11 +6,11 @@ import DownloadButton from "../../components/DownloadButton";
 import ErrorBox from "../../components/ErrorBox";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { marked } from "marked";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import ToolHeader from "../../components/ToolHeader";
 
 // Configure marked to render lists properly
 marked.setOptions({
@@ -67,16 +66,12 @@ function MarkdownPreviewer() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex justify-between items-center mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">Markdown Previewer</h3>
+            <h3 className="section-title">Markdown Previewer</h3>
             <ClearButton
               onClick={handleClear}
               disabled={!markdownInput && !previewOutput && !error}

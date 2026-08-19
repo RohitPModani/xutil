@@ -1,15 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { Paintbrush, Trash2 } from "lucide-react";
+import ToolHeader from "../../components/ToolHeader";
 
 interface ColorStop {
   color: string;
@@ -179,7 +178,7 @@ function GradientGenerator() {
 
   const renderColorStopBar = () => {
     return (
-      <div className="relative w-full h-6 bg-zinc-200 dark:bg-zinc-700 rounded-full">
+      <div className="relative w-full h-6 bg-raised rounded-full">
         {gradient.colorStops.map((stop, index) => (
           <div
             key={index}
@@ -200,16 +199,12 @@ function GradientGenerator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-3xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-5">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="max-w-3xl mx-auto py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Gradient Generator</h3>
+            <h3 className="section-title">Gradient Generator</h3>
             <ClearButton
               onClick={handleClear}
               disabled={
@@ -228,7 +223,7 @@ function GradientGenerator() {
                 <select
                   value={gradient.type}
                   onChange={handleTypeChange}
-                  className="w-full p-2.5 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400 transition text-sm"
+                  className="input-field"
                 >
                   <option value="linear">Linear</option>
                   <option value="radial">Radial</option>
@@ -241,7 +236,7 @@ function GradientGenerator() {
                 <select
                   value={gradient.direction}
                   onChange={handleDirectionChange}
-                  className="w-full p-2.5 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400 transition text-sm"
+                  className="input-field"
                 >
                   {gradient.type === "linear" ? (
                     <>
@@ -267,12 +262,12 @@ function GradientGenerator() {
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="label">
                   Color Stops
                 </label>
                 <button
                   onClick={addColorStop}
-                  className="flex items-center px-3 py-1.5 bg-zinc-600 text-white rounded-lg hover:bg-zinc-700 dark:bg-zinc-500 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="button-quiet"
                   disabled={gradient.colorStops.length >= 10}
                 >
                   <Paintbrush className="w-4 h-4 mr-1" />
@@ -283,7 +278,7 @@ function GradientGenerator() {
               {gradient.colorStops.map((stop, index) => (
                 <div
                   key={index}
-                  className="flex flex-col justify-between md:flex-row md:space-x-4 md:space-y-0 space-y-2 bg-zinc-50 dark:bg-zinc-800 p-3 rounded-lg shadow-sm"
+                  className="flex flex-col justify-between md:flex-row md:space-x-4 md:space-y-0 space-y-2 bg-raised p-3 rounded-lg shadow-sm"
                 >
                   <div className="flex items-center space-x-2">
                     <input
@@ -292,7 +287,7 @@ function GradientGenerator() {
                       onChange={(e) =>
                         handleColorPickerChange(index, e.target.value)
                       }
-                      className="w-10 h-10 border-2 border-zinc-300 dark:border-zinc-600 rounded cursor-pointer z-10"
+                      className="w-10 h-10 border-2 border-line rounded cursor-pointer z-10"
                       style={{ display: "block", appearance: "auto" }}
                       aria-label={`Color picker for stop ${index + 1}`}
                     />
@@ -301,7 +296,7 @@ function GradientGenerator() {
                       value={stop.color}
                       onChange={(e) => handleColorChange(index, e.target.value)}
                       placeholder="#FF0000"
-                      className="flex-1 p-2.5 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400 transition text-sm"
+                      className="input-field flex-1"
                       maxLength={7}
                       aria-label={`HEX color for stop ${index + 1}`}
                     />
@@ -316,7 +311,7 @@ function GradientGenerator() {
                       placeholder="0"
                       min="0"
                       max="100"
-                      className="flex-1 md:w-30 p-2.5 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400 transition text-sm"
+                      className="input-field flex-1"
                       aria-label={`Position for stop ${index + 1}`}
                     />
                     <button
@@ -334,7 +329,7 @@ function GradientGenerator() {
 
             <div className="flex flex-col items-center">
               <div
-                className="w-full h-24 border-2 border-zinc-200 dark:border-zinc-700 rounded-lg shadow-inner"
+                className="w-full h-24 border-2 border-line rounded-lg shadow-inner"
                 style={{ background: generateCss() }}
                 aria-label="Gradient preview"
               />
@@ -342,7 +337,7 @@ function GradientGenerator() {
 
             <div className="result-box">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                <h4 className="section-subtitle">
                   Gradient CSS
                 </h4>
                 <CopyButton text={`background: ${generateCss()};`} />

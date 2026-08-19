@@ -5,7 +5,26 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['Syne Variable', 'Syne', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // Condensed carries labels and eyebrows - engineering-lettering
+        // proportions at small sizes. Sans carries prose. Mono carries every
+        // value the user can copy, so data always looks like data.
+        display: ['IBM Plex Sans Condensed', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['IBM Plex Sans Variable', 'IBM Plex Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
+      colors: {
+        ground: 'rgb(var(--ground) / <alpha-value>)',
+        surface: 'rgb(var(--surface) / <alpha-value>)',
+        raised: 'rgb(var(--raised) / <alpha-value>)',
+        line: 'rgb(var(--line) / <alpha-value>)',
+        ink: 'rgb(var(--ink) / <alpha-value>)',
+        dim: 'rgb(var(--dim) / <alpha-value>)',
+        faint: 'rgb(var(--faint) / <alpha-value>)',
+        // The two accents are semantic, not decorative: source is what you
+        // put in, result is what you get back.
+        source: 'rgb(var(--source) / <alpha-value>)',
+        result: 'rgb(var(--result) / <alpha-value>)',
+        alert: 'rgb(var(--alert) / <alpha-value>)',
       },
       transitionProperty: {
         colors: 'background-color, border-color, color, fill, stroke',
@@ -29,15 +48,12 @@ export default {
         },
       },
       animation: {
-        'fadeIn': 'fadeIn 0.5s ease-in-out',
-        'slideIn': 'slideIn 0.3s ease-out',
-        'scaleIn': 'scaleIn 0.2s ease-out',
+        fadeIn: 'fadeIn 0.5s ease-in-out',
+        slideIn: 'slideIn 0.3s ease-out',
+        scaleIn: 'scaleIn 0.2s ease-out',
         'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
     },
   },
-  plugins: [
-    require('tailwind-scrollbar'),
-    require('@tailwindcss/typography'),
-  ],
+  plugins: [require('tailwind-scrollbar'), require('@tailwindcss/typography')],
 }

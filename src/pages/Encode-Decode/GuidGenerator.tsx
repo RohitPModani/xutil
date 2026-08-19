@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import LoadingButton from "../../components/LoadingButton";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
+import ToolHeader from "../../components/ToolHeader";
 
 // Utility functions for GUID generation
 
@@ -122,15 +121,11 @@ function GuidGenerator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-6">
-          <h3 className="text-lg font-semibold mb-4">Generate Single GUID</h3>
+          <h3 className="section-title mb-4">Generate Single GUID</h3>
           <hr className="line-break" />
           <div className="flex items-center justify-start mb-4">
             <label htmlFor="single-guid-format" className="sr-only">
@@ -172,7 +167,7 @@ function GuidGenerator() {
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Generate Bulk GUIDs</h3>
+            <h3 className="section-title">Generate Bulk GUIDs</h3>
             <CopyButton text={bulkGuids.join("\n")} copyType="CopyAll" />
           </div>
           <hr className="line-break" />
@@ -201,7 +196,7 @@ function GuidGenerator() {
               <div className="flex items-center">
                 <label
                   htmlFor="guid-count"
-                  className="form-label text-base mr-2"
+                  className="form-label mr-2"
                 >
                   Count (1-1000):
                 </label>
@@ -250,7 +245,7 @@ function GuidGenerator() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {bulkGuids.map((guid, index) => (
                   <div key={index} className="inner-result">
-                    <span className="font-mono text-zinc-800 dark:text-white truncate">
+                    <span className="font-mono text-ink truncate">
                       {guid}
                     </span>
                     <CopyButton text={guid} />

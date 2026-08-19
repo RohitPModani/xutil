@@ -1,15 +1,14 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { REGEX_CATEGORIES } from "../../data/regexConstants"; // Suggested to move constants to separate file
+import ToolHeader from "../../components/ToolHeader";
 
 type RegexItem = {
   pattern: string;
@@ -23,7 +22,7 @@ type RegexCategory = {
 
 const CategorySection = ({ category }: { category: RegexCategory }) => (
   <div className="mb-6">
-    <h4 className="text-md font-semibold mb-2">{category.name}</h4>
+    <h4 className="section-subtitle mb-2">{category.name}</h4>
     <div className="result-box grid grid-cols-1 md:grid-cols-2 gap-4">
       {category.items.map((item) => (
         <div
@@ -32,7 +31,7 @@ const CategorySection = ({ category }: { category: RegexCategory }) => (
         >
           <div>
             <code className="font-mono text-sm">{item.pattern}</code>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-dim dark:text-faint">
               {item.description}
             </p>
           </div>
@@ -97,16 +96,12 @@ function RegexCheatsheet() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Regex Cheatsheet</h3>
+            <h3 className="section-title">Regex Cheatsheet</h3>
             <ClearButton
               onClick={handleClear}
               disabled={!filter}
@@ -135,7 +130,7 @@ function RegexCheatsheet() {
               <CategorySection key={category.name} category={category} />
             ))
           ) : (
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-dim dark:text-faint">
               No patterns match your filter.
             </p>
           )}

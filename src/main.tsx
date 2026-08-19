@@ -1,7 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
-import "@fontsource-variable/syne";
+// Latin subsets only, at the weights actually used.
+import "@fontsource-variable/ibm-plex-sans";
+import "@fontsource/ibm-plex-sans-condensed/latin-500.css";
+import "@fontsource/ibm-plex-sans-condensed/latin-600.css";
+import "@fontsource/ibm-plex-mono/latin-400.css";
+import "@fontsource/ibm-plex-mono/latin-500.css";
 import "./index.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

@@ -64,43 +64,47 @@ function Layout() {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Determine shortcut hint based on platform
   const isMac = useMemo(() => {
-    // Prefer userAgentData if available
     const platform = (
       navigator as Navigator & { userAgentData?: { platform?: string } }
     ).userAgentData?.platform;
     if (platform) {
       return platform.toUpperCase().includes("MAC");
     }
-    // Fallback to userAgent
     return navigator.userAgent.toUpperCase().includes("MAC");
   }, []);
-  const shortcutHint = isMac ? "⌘ + K" : "Ctrl + K";
+  const shortcutHint = isMac ? "⌘K" : "Ctrl K";
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        (isMac && e.metaKey && e.key === "k") ||
-        (!isMac && e.ctrlKey && e.key === "k")
-      ) {
-        e.preventDefault();
-        if (isHomePage && searchInputRef.current) {
-          searchInputRef.current.focus();
-        }
+      const isShortcut = isMac
+        ? e.metaKey && e.key === "k"
+        : e.ctrlKey && e.key === "k";
+      if (!isShortcut) return;
+      e.preventDefault();
+      // From a tool page the shortcut returns you to the index, since that is
+      // where searching can actually do something.
+      if (!isHomePage) {
+        navigate("/");
+        return;
       }
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isHomePage, isMac]);
+  }, [isHomePage, isMac, navigate]);
 
   const resetState = useCallback(() => {
     setSearchQuery("");
-    // Check if in mobile view (width < 768px, matching the condition in Home.tsx)
     const isMobile = window.innerWidth < 768;
     if (!isMobile) {
-      sessionStorage.removeItem("lastClickedTool");
+      try {
+        sessionStorage.removeItem("lastClickedTool");
+      } catch {
+        // Storage can be unavailable in private mode.
+      }
     }
   }, []);
 
@@ -113,178 +117,228 @@ function Layout() {
     setHasSearchResults(hasResults);
   }, []);
 
-  // Memoised so Home's effects key off stable identities.
+  const focusSearch = useCallback(() => {
+    searchInputRef.current?.focus();
+  }, []);
+
   const outletContext = useMemo(
-    () => ({ searchQuery, resetState, updateSearchResults }),
-    [searchQuery, resetState, updateSearchResults]
+    () => ({
+      searchQuery,
+      setSearchQuery,
+      resetState,
+      updateSearchResults,
+      focusSearch,
+    }),
+    [searchQuery, resetState, updateSearchResults, focusSearch]
   );
 
   return (
-    <div className="section min-h-screen transition-colors duration-300">
-      <header className="w-full flex items-center justify-between px-4 py-3 sm:py-4 max-w-7xl mx-auto gap-2 sm:gap-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md sticky top-0 z-50 border-b border-zinc-200/80 dark:border-zinc-800/80">
-        <div className="flex-shrink-0 flex items-center gap-2.5">
+    <div className="section min-h-screen flex flex-col">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[60] focus:top-3 focus:left-3 focus:px-3 focus:py-2 focus:rounded-md focus:bg-surface focus:border focus:border-line focus:text-ink"
+      >
+        Skip to content
+      </a>
+
+      <header className="sticky top-0 z-50 border-b border-line bg-ground/90 backdrop-blur-md">
+        <div className="shell h-14 flex items-center gap-3 sm:gap-6">
           <button
             onClick={handleLogoClick}
-            className="font-display text-lg sm:text-xl font-bold text-zinc-900 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors duration-200 focus:outline-none tracking-tight"
+            className="shrink-0 font-display text-lg font-semibold tracking-tight text-ink hover:text-dim transition-colors"
           >
             XUtil
           </button>
-          <span className="hidden sm:block text-zinc-300 dark:text-zinc-700 text-sm select-none">/</span>
-          <button
-            onClick={() => setIsFormOpen(true)}
-            disabled={isSubmitting}
-            className="hidden sm:block text-xs px-3 py-1.5 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-zinc-800 dark:hover:text-zinc-200 font-mono transition-all duration-200"
-          >
-            request a tool
-          </button>
-          <button
-            onClick={() => setIsFormOpen(true)}
-            disabled={isSubmitting}
-            className="sm:hidden text-xs px-2.5 py-1.5 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-mono transition-all duration-200"
-          >
-            request
-          </button>
-        </div>
 
-        <div className="flex-1 max-w-[50%] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg mx-auto flex items-center">
           {isHomePage ? (
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
+            <div className="relative flex-1 max-w-2xl">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-faint pointer-events-none"
+                aria-hidden="true"
+              />
               <input
                 ref={searchInputRef}
-                type="text"
-                placeholder={`Search tools... (${shortcutHint})`}
+                type="search"
+                role="searchbox"
+                aria-label="Search tools"
+                placeholder="Search 63 tools"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-9 py-2 text-sm rounded-full border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500 transition-all duration-200 font-mono"
+                className="input-field pl-9 pr-16 py-2 rounded-md"
               />
-              {searchQuery && (
+              {searchQuery ? (
                 <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors duration-200"
+                  onClick={() => {
+                    setSearchQuery("");
+                    searchInputRef.current?.focus();
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 icon-button"
                   aria-label="Clear search"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
+              ) : (
+                <kbd
+                  className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:block font-mono text-[0.6875rem] text-faint pointer-events-none"
+                  aria-hidden="true"
+                >
+                  {shortcutHint}
+                </kbd>
               )}
             </div>
           ) : (
-            <div className="h-[34px] rounded-full border border-transparent px-3"></div>
+            <div className="flex-1" />
           )}
-        </div>
 
-        <div className="flex-shrink-0 flex items-center gap-3">
-          <a
-            href="https://github.com/RohitPModani/xutil.git"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-200 focus:outline-none"
-            title="Github"
-            aria-label="Github"
-          >
-            <GitHub className="w-5 h-5" />
-          </a>
-          <ThemeToggle />
+          <div className="shrink-0 flex items-center gap-1 sm:gap-2">
+            <button
+              onClick={() => setIsFormOpen(true)}
+              disabled={isSubmitting}
+              className="hidden sm:inline-flex button-quiet"
+            >
+              Request a tool
+            </button>
+            <a
+              href="https://github.com/RohitPModani/xutil.git"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="icon-button"
+              title="Source on GitHub"
+              aria-label="Source on GitHub"
+            >
+              <GitHub className="w-[18px] h-[18px]" />
+            </a>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
-      <main className="px-3 pb-6 sm:px-4 sm:pb-8 max-w-7xl mx-auto">
+      <main id="main" className="shell flex-1 pb-12">
         <ScrollToTop />
-        <Outlet context={outletContext} />
+        <div className={isHomePage ? undefined : "shell-reading"}>
+          <Outlet context={outletContext} />
+        </div>
       </main>
 
-      <footer className="px-4 max-w-7xl mx-auto sm:mb-4 mb-2">
-        {isHomePage && hasSearchResults && (
-          <AboutUsSection>{aboutUsDescription}</AboutUsSection>
-        )}
-      </footer>
-
-      {/* Remove min-h allocation */}
-      <div>
-        {isHomePage && (
-          <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50">
-            <BuyMeCoffee />
-          </div>
-        )}
-      </div>
-      {isFormOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-          <div className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white shadow-elevated rounded-xl p-4 sm:p-6 w-full max-w-md relative">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <h2 className="text-section text-zinc-900 dark:text-white">Request a New Tool</h2>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  Help us improve XUtil by suggesting a new tool you'd like to see.
-                </p>
-              </div>
-            
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="form-label">Your Name</label>
-                  <input
-                    id="name"
-                    type="text"
-                    placeholder="Enter your name"
-                    required
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="input-field"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="tool" className="form-label">Tool Name</label>
-                  <input
-                    id="tool"
-                    type="text"
-                    placeholder="e.g., JSON to YAML Converter"
-                    required
-                    value={formData.tool}
-                    onChange={(e) =>
-                      setFormData({ ...formData, tool: e.target.value })
-                    }
-                    className="input-field"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="desc" className="form-label">Brief Description</label>
-                  <textarea
-                    id="desc"
-                    placeholder="Describe what this tool should do..."
-                    required
-                    value={formData.desc}
-                    onChange={(e) =>
-                      setFormData({ ...formData, desc: e.target.value })
-                    }
-                    className="input-field resize-none"
-                    rows={4}
-                  />
-                </div>
-                
-                <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsFormOpen(false)}
-                    className="px-4 py-2 rounded-full bg-zinc-300 dark:bg-zinc-700 text-zinc-800 dark:text-white hover:bg-zinc-400 dark:hover:bg-zinc-600 transition-colors duration-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-4 py-2 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors duration-200"
-                  >
-                    {isSubmitting ? "Submitting..." : "Submit Request"}
-                  </button>
-                </div>
-              </form>
+      <footer className="border-t border-line mt-8">
+        <div className="shell py-8 space-y-8">
+          {isHomePage && hasSearchResults && !searchQuery.trim() && (
+            <AboutUsSection>{aboutUsDescription}</AboutUsSection>
+          )}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-faint font-mono">
+              Everything runs locally in your browser.
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsFormOpen(true)}
+                disabled={isSubmitting}
+                className="sm:hidden button-quiet"
+              >
+                Request a tool
+              </button>
+              <BuyMeCoffee />
             </div>
           </div>
         </div>
-        )}
+      </footer>
+
+      {isFormOpen && (
+        <div
+          className="fixed inset-0 bg-ground/70 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="request-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsFormOpen(false);
+          }}
+        >
+          <div className="card w-full max-w-md p-6 space-y-6">
+            <div className="space-y-1.5">
+              <p className="label">Request a tool</p>
+              <h2
+                id="request-title"
+                className="font-display text-xl font-semibold text-ink"
+              >
+                What should we build next?
+              </h2>
+              <p className="text-sm text-dim">
+                Tell us what you need and we will take a look.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="name" className="form-label">
+                  Your name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="Ada Lovelace"
+                  required
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="input-field"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="tool" className="form-label">
+                  Tool name
+                </label>
+                <input
+                  id="tool"
+                  type="text"
+                  placeholder="JSON to YAML converter"
+                  required
+                  value={formData.tool}
+                  onChange={(e) =>
+                    setFormData({ ...formData, tool: e.target.value })
+                  }
+                  className="input-field"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="desc" className="form-label">
+                  What should it do?
+                </label>
+                <textarea
+                  id="desc"
+                  placeholder="Takes a JSON object and returns the YAML equivalent."
+                  required
+                  value={formData.desc}
+                  onChange={(e) =>
+                    setFormData({ ...formData, desc: e.target.value })
+                  }
+                  className="input-field resize-none"
+                  rows={4}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setIsFormOpen(false)}
+                  className="button-quiet"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="button-primary"
+                >
+                  {isSubmitting ? "Sending…" : "Send request"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

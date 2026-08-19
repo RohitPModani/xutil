@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import ToolHeader from "../../components/ToolHeader";
 
 function StringCounter() {
   const seo = seoDescriptions.stringCounter;
@@ -88,16 +87,12 @@ Sentences: ${result.sentenceCount}
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex justify-between items-center mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-3xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+            <h3 className="section-title">
               String, Word, Character, Line & Sentence Counter
             </h3>
             <ClearButton
@@ -122,7 +117,7 @@ Sentences: ${result.sentenceCount}
 
             <div className="result-box mt-1">
               <div className="flex justify-between items-center">
-                <label className="form-label text-base">Count Results</label>
+                <label className="form-label">Count Results</label>
                 {result && (
                   <CopyButton text={getResultsText()} copyType="CopyAll" />
                 )}
@@ -141,7 +136,7 @@ Sentences: ${result.sentenceCount}
                         .trim();
                       return (
                         <div key={key} className="inner-result">
-                          <span className="font-mono text-zinc-800 dark:text-white">
+                          <span className="font-mono text-ink">
                             {displayLabel}: {val}
                           </span>
                           <CopyButton text={`${displayLabel}: ${val}`} />

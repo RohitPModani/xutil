@@ -2,140 +2,297 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .animate-spin-slow {
-    animation: spin 3s linear infinite;
+/*
+  XUtil surface tokens.
+
+  Every tool here does the same thing: takes something in, gives something
+  back. The palette encodes exactly that and nothing else - `source` marks
+  what you provide, `result` marks what you get. Categories are not
+  colour-coded, because their colours would mean nothing a reader could learn.
+
+  Ground is a cool graphite rather than a true black so long sessions stay
+  easy on the eyes, and the light theme is a neutral grey paper rather than a
+  warm cream, which keeps code samples reading as code.
+*/
+@layer base {
+  :root {
+    --ground: 239 239 241;
+    --surface: 255 255 255;
+    --raised: 246 246 248;
+    --line: 214 215 220;
+    --ink: 26 28 33;
+    --dim: 92 97 108;
+    --faint: 98 104 116;
+    --source: 150 88 18;
+    --result: 20 116 100;
+    --alert: 176 42 42;
   }
-  /* Tool links. Accent colours arrive as custom properties from the component
-     so hover/focus never needs a React re-render. */
-  .tool-pill {
-    @apply block px-2.5 py-2 rounded-lg text-sm font-mono leading-snug border border-zinc-200 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-900/40 text-zinc-700 dark:text-zinc-300 transition-all duration-200 no-underline;
+
+  :root.dark {
+    --ground: 20 22 26;
+    --surface: 27 30 36;
+    --raised: 34 38 45;
+    --line: 47 53 63;
+    --ink: 228 231 236;
+    --dim: 148 156 168;
+    --faint: 140 148 161;
+    --source: 217 140 63;
+    --result: 91 192 168;
+    --alert: 232 106 106;
   }
-  .tool-pill:hover,
-  .tool-pill:focus-visible {
-    border-color: var(--accent-border, theme('colors.zinc.400'));
-    background-color: var(--accent-bg, transparent);
-    color: var(--accent, inherit);
+
+  html {
+    -webkit-text-size-adjust: 100%;
   }
-  .tool-pill:focus-visible {
-    @apply outline-none ring-2 ring-zinc-400 dark:ring-zinc-500;
+
+  body {
+    @apply bg-ground text-ink font-sans antialiased;
+    font-feature-settings: 'kern' 1;
   }
-  .stat-chip {
-    @apply px-3 py-1 text-xs font-mono border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 rounded-full tracking-widest uppercase;
+
+  /* One visible focus treatment everywhere, so keyboard users always know
+     where they are. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-offset-2;
+    --tw-ring-color: rgb(var(--result));
+    --tw-ring-offset-color: rgb(var(--ground));
   }
-  .card-top-border {
-    border-top-width: 3px;
-    border-top-style: solid;
+
+  ::selection {
+    background-color: rgb(var(--result) / 0.25);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
 @layer components {
-  html,
-  body,
-  .section,
-  .card,
-  .input-field,
-  .result-box {
-    @apply transition-colors duration-300 font-mono;
-  }
-
-  body {
-    @apply bg-zinc-100 text-zinc-800 dark:bg-zinc-900 dark:text-white;
-  }
-
   .section {
-    @apply bg-zinc-100 text-zinc-800 dark:bg-zinc-900 dark:text-white;
+    @apply bg-ground text-ink;
+  }
+
+  /* One shell for the header, body and footer so the logo, the search field
+     and the first column of the index all share a left edge. It runs the full
+     width of the viewport - capping it at ~1150px stranded everything in the
+     middle third of a large monitor. */
+  .shell {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-14;
+  }
+
+  /* Tool pages opt into a reading width inside that shell. A single input
+     stretched across 2000px is unusable however much room there is. */
+  .shell-reading {
+    @apply w-full max-w-5xl mx-auto;
+  }
+
+  /* ---- Structure ------------------------------------------------------ */
+
+  /* Small caps label. Used for eyebrows and field names, never for prose. */
+  .label {
+    @apply font-display text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-faint;
+  }
+
+  .label-source {
+    @apply label;
+    color: rgb(var(--source));
+  }
+
+  .label-result {
+    @apply label;
+    color: rgb(var(--result));
+  }
+
+  .rule {
+    @apply border-0 border-t border-line;
+  }
+
+  /* Headings for the sections inside a tool page. One step below the page
+     title; these were spelled five different ways across the pages. */
+  .section-title {
+    @apply font-display text-base font-semibold tracking-tight text-ink;
+  }
+
+  .section-subtitle {
+    @apply font-display text-sm font-semibold tracking-tight text-ink;
   }
 
   .card {
-    @apply bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white;
+    @apply bg-surface border border-line rounded-lg;
   }
 
   .text-muted {
-    @apply text-zinc-600 dark:text-zinc-300;
+    @apply text-dim;
   }
+
+  /* ---- Tool index ----------------------------------------------------- */
+
+  /* One row per tool: name on the left, what it does on the right. The whole
+     row is the target, so it stays easy to hit on a phone. */
+  /* Stacked on a phone so neither the name nor the signature has to be
+     truncated; side by side once there is room for both. */
+  .tool-row {
+    @apply flex flex-col sm:flex-row sm:items-baseline sm:justify-between
+           gap-0.5 sm:gap-4 px-3 py-2 rounded-md
+           border border-transparent no-underline
+           transition-colors duration-150;
+  }
+
+  .tool-row:hover,
+  .tool-row[data-active='true'] {
+    @apply bg-raised border-line;
+  }
+
+  .tool-row-name {
+    @apply font-mono text-[0.8125rem] text-ink sm:truncate;
+  }
+
+  .tool-row:hover .tool-row-name,
+  .tool-row[data-active='true'] .tool-row-name {
+    color: rgb(var(--result));
+  }
+
+  /* The transform signature: `jwt -> header . payload`. Reads as data, and
+     tells you what a tool does faster than its name does. */
+  .sig {
+    @apply font-mono text-[0.6875rem] text-faint sm:whitespace-nowrap sm:shrink-0;
+  }
+
+  .sig-in {
+    color: rgb(var(--source));
+  }
+
+  .sig-out {
+    color: rgb(var(--result));
+  }
+
+  .sig-arrow {
+    @apply text-faint px-1;
+  }
+
+  /* ---- Controls ------------------------------------------------------- */
 
   .button-primary {
-    @apply text-sm px-3 py-1.5
-           sm:text-base sm:px-4 sm:py-2 
-           text-white bg-zinc-800 hover:bg-zinc-700 
-           dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300 
-           rounded-full font-medium 
-           transition-colors duration-100 
-           disabled:bg-zinc-300 dark:disabled:bg-zinc-400 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2
+           font-display text-sm font-semibold uppercase tracking-wider
+           px-4 py-2 rounded-md
+           bg-ink text-ground
+           transition-opacity duration-150
+           hover:opacity-85
+           disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
-  .hover-surface {
-    @apply hover:bg-zinc-200 dark:hover:bg-zinc-700;
+  .button-quiet {
+    @apply inline-flex items-center gap-2
+           font-display text-xs font-semibold uppercase tracking-wider
+           px-3 py-1.5 rounded-md
+           border border-line text-dim bg-surface
+           transition-colors duration-150
+           hover:text-ink hover:border-faint
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .icon-button {
+    @apply p-1.5 rounded-md text-faint
+           transition-colors duration-150
+           hover:text-ink hover:bg-raised
+           disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent;
   }
 
   .input-field {
-    @apply border rounded px-3 py-2 w-full dark:text-white bg-white text-sm sm:text-base rounded-md shadow-sm
-           dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 disabled:opacity-50;
+    @apply w-full font-mono text-sm
+           px-3 py-2.5 rounded-md
+           bg-surface text-ink border border-line
+           placeholder:text-faint
+           transition-colors duration-150
+           hover:border-faint
+           disabled:opacity-50;
   }
 
-  /* Style the calendar icon for datetime-local inputs in WebKit browsers */
-  .input-field[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    @apply cursor-pointer;
-    width: 20px;
-    height: 20px;
+  .input-field:focus {
+    @apply outline-none border-transparent ring-2;
+    --tw-ring-color: rgb(var(--source));
   }
 
-  /* Hover effect for calendar icon */
-  .input-field[type="datetime-local"]:hover::-webkit-calendar-picker-indicator {
-    filter: invert(35%) sepia(85%) saturate(2000%) hue-rotate(90deg)
-      brightness(95%) contrast(110%); /* Slightly different green */
+  /* Native select arrows differ per platform and ignore the palette, so the
+     control draws its own. Two rules because a data URI cannot read a custom
+     property. */
+  select.input-field {
+    @apply appearance-none pr-9 cursor-pointer bg-no-repeat;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235c616c' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+    background-size: 1rem;
   }
 
-  /* Dark mode styles for calendar icon */
-  .dark .input-field[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg)
-      brightness(100%) contrast(100%); /* White icon for dark mode */
-  }
-
-  .dark
-    .input-field[type="datetime-local"]:hover::-webkit-calendar-picker-indicator {
-    filter: invert(90%) sepia(10%) saturate(500%) hue-rotate(0deg)
-      brightness(110%) contrast(100%); /* Slightly dimmed white on hover */
-  }
-
-  .toggle-count {
-    @apply px-2 py-0.5 bg-zinc-200 dark:bg-zinc-700 text-xs rounded-t hover:bg-zinc-300 dark:hover:bg-zinc-600 disabled:opacity-50;
+  :root.dark select.input-field {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23949ca8' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
   }
 
   .form-label {
-    @apply block text-sm mb-2 text-zinc-700 dark:text-zinc-300 font-medium;
+    @apply label block mb-2;
   }
 
-  .result-box {
-    @apply border rounded mt-4 p-3 bg-zinc-100 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 rounded dark:border-zinc-500;
-  }
-
-  .inner-result {
-    @apply bg-white dark:bg-zinc-800 p-3 rounded flex justify-between items-center;
-  }
-
-  .mono-output {
-    @apply font-mono break-all whitespace-pre-wrap;
+  .checkbox-primary {
+    @apply h-4 w-4 rounded border-line mr-2;
+    accent-color: rgb(var(--result));
   }
 
   .checkbox-label {
-    @apply flex items-center text-sm text-zinc-700 dark:text-zinc-300;
+    @apply flex items-center text-sm text-dim;
   }
 
   .form-grid {
     @apply grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4;
   }
 
-  .scrollbox {
-    @apply max-h-[500px] overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-zinc-500 dark:scrollbar-track-zinc-800 rounded;
+  .toggle-count {
+    @apply flex items-center justify-center w-6 h-5 leading-none
+           bg-raised border border-line text-dim text-xs rounded
+           transition-colors hover:text-ink hover:border-faint
+           disabled:opacity-40 disabled:hover:border-line;
   }
 
-  .checkbox-primary {
-    @apply h-3 w-3 sm:h-4 sm:w-4 rounded accent-zinc-600 dark:accent-zinc-300 mr-2;
+  /* ---- Output --------------------------------------------------------- */
+
+  /* Results carry a left edge in the result colour, so the answer is
+     findable at a glance on a long page. */
+  .result-box {
+    @apply mt-4 p-3 rounded-md bg-raised border border-line border-l-2;
+    border-left-color: rgb(var(--result));
+  }
+
+  .inner-result {
+    @apply bg-surface border border-line p-3 rounded flex justify-between items-center gap-3;
+  }
+
+  .mono-output {
+    @apply font-mono text-sm text-ink break-all whitespace-pre-wrap;
+  }
+
+  .scrollbox {
+    @apply max-h-[500px] overflow-y-auto space-y-2 pr-1
+           scrollbar-thin scrollbar-thumb-line scrollbar-track-transparent;
   }
 
   .line-break {
-    @apply border-t border-zinc-300 dark:border-zinc-700 mb-4;
+    @apply rule mb-4;
+  }
+}
+
+@layer utilities {
+  .animate-spin-slow {
+    animation: spin 3s linear infinite;
+  }
+
+  /* Keeps a focused index row clear of the sticky header when arrowing. */
+  .scroll-below-header {
+    scroll-margin-top: 6rem;
   }
 }

@@ -1,15 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { Paintbrush } from "lucide-react";
+import ToolHeader from "../../components/ToolHeader";
 
 interface Color {
   hex: string;
@@ -337,16 +336,12 @@ function ColorPicker() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-3xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-6">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="max-w-3xl mx-auto py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Color Picker</h3>
+            <h3 className="section-title">Color Picker</h3>
             <ClearButton
               onClick={handleClear}
               disabled={
@@ -371,9 +366,9 @@ function ColorPicker() {
                   type="color"
                   value={color?.hex || "#000000"}
                   onChange={handleColorPickerChange}
-                  className="w-16 h-10 border-2 border-zinc-300 dark:border-zinc-600 rounded"
+                  className="w-16 h-10 border-2 border-line rounded"
                 />
-                <Paintbrush className="w-6 h-6 text-zinc-500 dark:text-zinc-400" />
+                <Paintbrush className="w-6 h-6 text-faint" />
               </div>
             </div>
 
@@ -384,7 +379,7 @@ function ColorPicker() {
                 value={hexInput}
                 onChange={handleHexChange}
                 placeholder="#FF0000"
-                className="w-full p-2 border rounded bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                className="w-full p-2 border rounded bg-raised text-ink"
                 maxLength={7}
               />
             </div>
@@ -399,7 +394,7 @@ function ColorPicker() {
                   placeholder="255"
                   min="0"
                   max="255"
-                  className="w-1/3 p-2 border rounded bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  className="w-1/3 p-2 border rounded bg-raised text-ink"
                 />
                 <input
                   type="number"
@@ -408,7 +403,7 @@ function ColorPicker() {
                   placeholder="255"
                   min="0"
                   max="255"
-                  className="w-1/3 p-2 border rounded bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  className="w-1/3 p-2 border rounded bg-raised text-ink"
                 />
                 <input
                   type="number"
@@ -417,7 +412,7 @@ function ColorPicker() {
                   placeholder="255"
                   min="0"
                   max="255"
-                  className="w-1/3 p-2 border rounded bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  className="w-1/3 p-2 border rounded bg-raised text-ink"
                 />
               </div>
             </div>
@@ -432,7 +427,7 @@ function ColorPicker() {
                   placeholder="360"
                   min="0"
                   max="360"
-                  className="w-1/3 p-2 border rounded bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  className="w-1/3 p-2 border rounded bg-raised text-ink"
                 />
                 <input
                   type="number"
@@ -441,7 +436,7 @@ function ColorPicker() {
                   placeholder="100"
                   min="0"
                   max="100"
-                  className="w-1/3 p-2 border rounded bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  className="w-1/3 p-2 border rounded bg-raised text-ink"
                 />
                 <input
                   type="number"
@@ -450,7 +445,7 @@ function ColorPicker() {
                   placeholder="100"
                   min="0"
                   max="100"
-                  className="w-1/3 p-2 border rounded bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  className="w-1/3 p-2 border rounded bg-raised text-ink"
                 />
               </div>
             </div>
@@ -458,11 +453,11 @@ function ColorPicker() {
             <div className="flex flex-col items-center">
               {color ? (
                 <div
-                  className="w-full h-64 border rounded p-2 bg-zinc-100 dark:bg-zinc-800"
+                  className="w-full h-64 border rounded p-2 bg-raised"
                   style={{ backgroundColor: color.hex }}
                 />
               ) : (
-                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-gray-400">
+                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-faint">
                   Color preview will appear here
                 </div>
               )}
@@ -471,7 +466,7 @@ function ColorPicker() {
             {color && (
               <div className="result-box">
                 <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold">Color Details:</h4>
+                  <h4 className="section-subtitle">Color Details:</h4>
                   <CopyButton text={color.hex} />
                 </div>
                 <div className="inner-result space-y-2">

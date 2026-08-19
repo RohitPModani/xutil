@@ -1,17 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import QRCode from "qrcode";
 import LoadingButton from "../../components/LoadingButton";
 import { Download } from "lucide-react";
 import { saveAs } from "file-saver";
+import ToolHeader from "../../components/ToolHeader";
 
 type QRCodeOptions = {
   actionType: string;
@@ -656,16 +655,12 @@ function QRCodeGenerator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">QR Code Generator</h3>
+            <h3 className="section-title">QR Code Generator</h3>
             <ClearButton
               onClick={handleClear}
               disabled={
@@ -829,7 +824,7 @@ function QRCodeGenerator() {
                   </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-gray-400">
+                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-faint">
                   QR Code will appear here
                 </div>
               )}

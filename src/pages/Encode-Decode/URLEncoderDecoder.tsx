@@ -1,18 +1,17 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import BackToHome from '../../components/BackToHome';
 import ErrorBox from '../../components/ErrorBox';
 import SectionCard from '../../components/SectionCard';
 import CopyButton from '../../components/CopyButton';
 import ClearButton from '../../components/ClearButton';
 import AutoTextarea from '../../hooks/useAutoSizeTextArea';
 import SEODescription from '../../components/SEODescription';
-import BuyMeCoffee from '../../components/BuyMeCoffee';
 import seoDescriptions from '../../data/seoDescriptions';
 import { PageSEO } from '../../components/PageSEO';
 import { updateToolUsage } from '../../utils/toolUsage';
 import ToggleSwitch from '../../components/ToggleSwitch';
 import { ArrowDownUp } from 'lucide-react';
 import { getErrorMessage } from "../../utils/errors";
+import ToolHeader from "../../components/ToolHeader";
 
 function URLEncoderDecoder() {
   const seo = seoDescriptions.urlEncoder;
@@ -87,17 +86,13 @@ function URLEncoderDecoder() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <h3 className="text-lg font-semibold">
+              <h3 className="section-title">
                 {mode === 'encode' ? 'URL Encoder' : 'URL Decoder'}
               </h3>
               <ToggleSwitch
@@ -136,11 +131,11 @@ function URLEncoderDecoder() {
               <div className="flex justify-center my-2">
                 <button
                   onClick={handleSwapTexts}
-                  className="bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 px-2 py-1 rounded"
+                  className="button-quiet !px-2 !py-1"
                   aria-label="Swap input and output"
                   title="Swap input and output"
                 >
-                  <ArrowDownUp className="w-5 h-5 text-zinc-600 dark:text-zinc-300" />
+                  <ArrowDownUp className="w-5 h-5 text-dim" />
                 </button>
               </div>
             )}

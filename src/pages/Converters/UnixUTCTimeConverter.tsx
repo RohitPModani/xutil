@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { DateTime } from "luxon";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ErrorBox from "../../components/ErrorBox";
 import ClearButton from "../../components/ClearButton";
 import CopyButton from "../../components/CopyButton";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import { PageSEO } from "../../components/PageSEO";
 import SEODescription from "../../components/SEODescription";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
+import ToolHeader from "../../components/ToolHeader";
 
 function UnixUtcConverter() {
   const seo = seoDescriptions.unixUtc;
@@ -120,16 +119,12 @@ function UnixUtcConverter() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Unix ➔ UTC Conversion</h3>
+            <h3 className="section-title">Unix ➔ UTC Conversion</h3>
             <ClearButton
               onClick={clearUnixToUtc}
               disabled={!unixInput && !unixToUtcResult && !errorUnix}
@@ -175,7 +170,7 @@ function UnixUtcConverter() {
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">UTC ➔ Unix Conversion</h3>
+            <h3 className="section-title">UTC ➔ Unix Conversion</h3>
             <ClearButton
               onClick={clearUtcToUnix}
               disabled={!utcInput && !utcToUnixResult && !errorUTC}

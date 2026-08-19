@@ -28,7 +28,7 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-zinc-800 rounded-lg p-4 max-w-md w-full mx-4 shadow-lg relative flex flex-col"
+        className="bg-surface rounded-lg p-4 max-w-md w-full mx-4 shadow-lg relative flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Title and Close Button Row */}
@@ -38,7 +38,7 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
           </h3>
           <button
             onClick={onClose}
-            className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white focus:outline-none transition-colors"
+            className="text-faint hover:text-ink focus:outline-none transition-colors"
             aria-label="Close dialog"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -47,7 +47,7 @@ const InfoDialog: React.FC<InfoDialogProps> = ({
         <hr className="line-break" />
 
         {/* Dialog Content */}
-        <p className="text-sm text-zinc-800 dark:text-zinc-200">{content}</p>
+        <p className="text-sm text-ink">{content}</p>
       </div>
     </div>
   );

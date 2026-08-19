@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
+import ToolHeader from "../../components/ToolHeader";
 import { DateTime } from "luxon";
 import Select, { GroupBase, StylesConfig } from "react-select";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import SectionHeader from "../../components/SectionHeader"; // Import SectionHeader
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
@@ -505,14 +504,8 @@ function TimezoneConverter() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6 flex items-center">
-          <Clock className="mr-2" size={24} /> {seo.title}
-        </h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         {/* Saved Timezones Section */}
         <SectionCard className="mb-4">
@@ -523,7 +516,7 @@ function TimezoneConverter() {
               disabled={savedTimezones.length === 0}
               aria-label="Clear all saved timezones"
               title="Clear all saved timezones"
-              className="transition-all duration-200 flex items-center gap-1 px-2 py-1 bg-zinc-200 dark:bg-zinc-700 rounded hover:bg-zinc-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="button-quiet !px-2 !py-1"
             >
               <RefreshCcw size={14} />
               Reset
@@ -553,7 +546,7 @@ function TimezoneConverter() {
                     <label className="form-label truncate">{tz.label}</label>
                     <button
                       onClick={() => handleRemoveTimezone(tz)}
-                      className="p-1 mb-3 ml-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white focus:outline-none"
+                      className="p-1 mb-3 ml-1 text-faint hover:text-ink focus:outline-none"
                       aria-label={`Remove ${tz.label} from saved timezones`}
                       title="Remove timezone"
                     >
@@ -625,7 +618,7 @@ function TimezoneConverter() {
             <div className="flex items-center justify-center sm:mt-6">
               <button
                 onClick={handleSwap}
-                className="bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 px-2 py-1 rounded mt-3 sm:mt-0 transition-colors"
+                className="button-quiet !px-2 !py-1 mt-3 sm:mt-0"
                 title="Swap source and target timezones"
                 aria-label="Swap source and target timezones"
               >
@@ -748,7 +741,7 @@ function TimezoneConverter() {
 
           <div className="result-box mt-4">
             <div className="flex justify-between items-center">
-              <label className="form-label text-base">Conversion Result</label>
+              <label className="form-label">Conversion Result</label>
               {Object.keys(multiZoneResults).length > 0 && (
                 <div className="flex items-center gap-2">
                   <CopyButton
@@ -772,7 +765,7 @@ function TimezoneConverter() {
                         key={key}
                         className="inner-result flex justify-between items-center"
                       >
-                        <span className="font-mono text-zinc-800 dark:text-white whitespace-pre-wrap break-all">
+                        <span className="font-mono text-ink whitespace-pre-wrap break-all">
                           {displayLabel}: {val}
                         </span>
                         <CopyButton
@@ -786,7 +779,7 @@ function TimezoneConverter() {
               </div>
             )}
             {selectedMultiZones.length === 0 && (
-              <div className="text-gray-500 dark:text-gray-400 text-sm mt-2">
+              <div className="text-faint dark:text-faint text-sm mt-2">
                 No timezones selected. Please select at least one timezone.
               </div>
             )}
@@ -880,7 +873,7 @@ function TimezoneConverter() {
 
           <div className="result-box mt-4">
             <div className="flex justify-between items-center">
-              <label className="form-label text-base">
+              <label className="form-label">
                 Conversion Range Results
               </label>
               {Object.keys(rangeZoneResults).length > 0 && (
@@ -906,7 +899,7 @@ function TimezoneConverter() {
                         key={key}
                         className="inner-result flex justify-between items-center"
                       >
-                        <span className="font-mono text-zinc-800 dark:text-white whitespace-pre-wrap break-all">
+                        <span className="font-mono text-ink whitespace-pre-wrap break-all">
                           {displayLabel}: {val.start} to {val.end}
                         </span>
                         <CopyButton
@@ -920,7 +913,7 @@ function TimezoneConverter() {
               </div>
             )}
             {selectedRangeZones.length === 0 && (
-              <div className="text-gray-500 dark:text-gray-400 text-sm mt-2">
+              <div className="text-faint dark:text-faint text-sm mt-2">
                 No timezones selected. Please select at least one timezone.
               </div>
             )}

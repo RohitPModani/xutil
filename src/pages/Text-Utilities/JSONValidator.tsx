@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import BackToHome from "../../components/BackToHome";
 import LoadingButton from "../../components/LoadingButton";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
@@ -10,8 +9,8 @@ import { PageSEO } from "../../components/PageSEO";
 import ClearButton from "../../components/ClearButton";
 import { updateToolUsage } from "../../utils/toolUsage";
 import seoDescriptions from "../../data/seoDescriptions";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import { getErrorMessage } from "../../utils/errors";
+import ToolHeader from "../../components/ToolHeader";
 
 const JSONValidator: React.FC = () => {
   const seo = seoDescriptions.jsonValidator;
@@ -52,16 +51,12 @@ const JSONValidator: React.FC = () => {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">
+            <h3 className="section-title">
               JSON Validator & Formatter
             </h3>
             <ClearButton onClick={handleClear} disabled={!jsonInput} />

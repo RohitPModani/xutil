@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
 import ClearButton from "../../components/ClearButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { ArrowLeftRight, ArrowUpDown } from "lucide-react";
+import ToolHeader from "../../components/ToolHeader";
 
 const BASES = [
   { value: 2, name: "Binary" },
@@ -132,16 +131,12 @@ function BaseNumberConverter() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex justify-between items-center mb-6">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+            <h3 className="section-title">
               Base Number Converter
             </h3>
             <ClearButton
@@ -189,7 +184,7 @@ function BaseNumberConverter() {
                 <div className="flex items-center justify-center sm:mt-6">
                   <button
                     onClick={handleSwap}
-                    className="bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 px-2 py-1 rounded"
+                    className="button-quiet !px-2 !py-1"
                     title="Swap Source and Target Bases"
                     aria-label="Swap source and target bases"
                   >

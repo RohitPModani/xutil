@@ -5,21 +5,26 @@ interface ErrorBoxProps {
   id?: string | null;
 }
 
+/**
+ * Says what went wrong, in the interface's voice. No apology, no mood - the
+ * message itself carries the fix.
+ */
 function ErrorBox({ message, id }: ErrorBoxProps) {
   if (!message) return null;
   return (
     <div
-      className="mt-4 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg shadow-sm animate-slideIn"
+      className="mt-4 p-3 rounded-md border border-l-2 bg-raised border-line"
+      style={{ borderLeftColor: "rgb(var(--alert))" }}
       id={id || undefined}
       role="alert"
       aria-live="polite"
     >
-      <div className="flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" />
-        <div className="flex-1">
-          <p className="font-medium text-sm sm:text-base">Error</p>
-          <p className="text-sm sm:text-base mt-1">{message}</p>
-        </div>
+      <div className="flex items-start gap-2.5">
+        <AlertCircle
+          className="w-4 h-4 shrink-0 mt-0.5 text-alert"
+          aria-hidden="true"
+        />
+        <p className="text-sm text-ink">{message}</p>
       </div>
     </div>
   );

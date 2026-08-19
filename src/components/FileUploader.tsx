@@ -65,9 +65,9 @@ const FileUploader = ({
       {/* Button-style label */}
       <label
         onClick={handleClick}
-        className={`inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full border border-zinc-300 dark:border-zinc-600 
-        bg-white dark:bg-zinc-800 text-zinc-800 dark:text-white text-sm sm:text-base font-medium 
-        shadow-sm hover:shadow-md hover:bg-zinc-100 dark:hover:bg-zinc-700 
+        className={`inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full border border-line 
+        bg-surface text-ink text-sm sm:text-base font-medium 
+        shadow-sm hover:shadow-md hover:bg-raised 
         cursor-pointer transition-all duration-200 ${
           disabled ? "opacity-50 cursor-not-allowed" : ""
         }`}
@@ -86,11 +86,11 @@ const FileUploader = ({
       />
 
       {fileName && (
-        <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-700 px-3 py-1 rounded-full text-sm sm:text-base text-zinc-800 dark:text-white max-w-xs">
+        <div className="flex items-center gap-1 bg-raised px-3 py-1 rounded-full text-sm sm:text-base text-ink max-w-xs">
           <span className="truncate">{fileName}</span>
           <button
             onClick={handleClear}
-            className="hover:text-zinc-800 dark:hover:text-white transition"
+            className="hover:text-ink transition"
             type="button"
             aria-label="Clear file"
           >

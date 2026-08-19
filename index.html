@@ -14,6 +14,8 @@
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#efeff1" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#14161a" />
     <title>XUtil</title>
 
     <!-- Light/Dark mode favicons -->
@@ -32,10 +34,16 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
     <script>
-      const theme = localStorage.getItem("xutil-theme");
-      if (theme === "dark") {
-        document.documentElement.classList.add("dark");
-      }
+      // Must mirror getInitialTheme() in ThemeToggle: a visitor whose system
+      // is dark and who has no saved preference would otherwise get a flash of
+      // the light theme before React mounts.
+      try {
+        var saved = localStorage.getItem("xutil-theme");
+        var dark = saved
+          ? saved === "dark"
+          : window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (dark) document.documentElement.classList.add("dark");
+      } catch (e) {}
     </script>
   </head>
   <body>

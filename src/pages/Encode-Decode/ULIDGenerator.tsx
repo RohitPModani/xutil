@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { ulid, decodeTime } from "ulid";
-import BackToHome from "../../components/BackToHome";
 import ErrorBox from "../../components/ErrorBox";
 import LoadingButton from "../../components/LoadingButton";
 import SectionCard from "../../components/SectionCard";
 import CopyButton from "../../components/CopyButton";
 import ClearButton from "../../components/ClearButton";
 import SEODescription from "../../components/SEODescription";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { PageSEO } from "../../components/PageSEO";
 import { updateToolUsage } from "../../utils/toolUsage";
+import ToolHeader from "../../components/ToolHeader";
 
 function ULIDGenerator() {
   const seo = seoDescriptions.ulidGenerator;
@@ -115,16 +114,12 @@ function ULIDGenerator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex flex-row items-center justify-start justify-between gap-3 mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         {/* Single ULID */}
         <SectionCard className="mb-6">
-          <h3 className="text-lg font-semibold mb-4">Generate Single ULID</h3>
+          <h3 className="section-title mb-4">Generate Single ULID</h3>
           <hr className="line-break" />
           <LoadingButton onClick={fetchSingleUlid} isLoading={isLoadingSingle}>
             Generate
@@ -146,12 +141,12 @@ function ULIDGenerator() {
         {/* Bulk ULIDs */}
         <SectionCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Generate Bulk ULIDs</h3>
+            <h3 className="section-title">Generate Bulk ULIDs</h3>
           </div>
           <hr className="line-break" />
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
             <div className="flex items-center">
-              <label className="form-label text-base mr-2" htmlFor="bulk-count">
+              <label className="form-label mr-2" htmlFor="bulk-count">
                 Count (1-1000):
               </label>
               <div className="flex items-center">
@@ -196,7 +191,7 @@ function ULIDGenerator() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {bulkUlids.map((ulid, index) => (
                   <div key={index} className="inner-result">
-                    <span className="font-mono text-zinc-800 dark:text-white truncate">
+                    <span className="font-mono text-ink truncate">
                       {ulid}
                     </span>
                     <CopyButton text={ulid} />
@@ -217,7 +212,7 @@ function ULIDGenerator() {
         {/* ULID Timestamp */}
         <SectionCard className="mt-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Get Timestamp from ULID</h3>
+            <h3 className="section-title">Get Timestamp from ULID</h3>
             <ClearButton onClick={handleClearTimestamp} disabled={!ulidInput} />
           </div>
           <hr className="line-break" />

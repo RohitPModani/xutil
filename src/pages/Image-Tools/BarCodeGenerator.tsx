@@ -1,17 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import { Download } from "lucide-react";
 import JsBarcode from "jsbarcode";
 import LoadingButton from "../../components/LoadingButton";
+import ToolHeader from "../../components/ToolHeader";
 
 type BarcodeOptions = {
   text: string;
@@ -187,16 +186,12 @@ function BarcodeGenerator() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex items-center justify-between mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-2xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard className="mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Barcode Generator</h3>
+            <h3 className="section-title">Barcode Generator</h3>
             <ClearButton
               onClick={handleClear}
               disabled={!options.text && !barcodeDataUrl}
@@ -391,17 +386,17 @@ function BarcodeGenerator() {
                   <img
                     src={barcodeDataUrl}
                     alt="Generated Barcode"
-                    className="mb-4 border rounded p-2 bg-zinc-100 dark:bg-zinc-800 max-w-full"
+                    className="mb-4 border rounded p-2 bg-raised max-w-full"
                   />
                   <div className="flex justify-center item center gap-4">
                     <CopyButton text={barcodeDataUrl} />
                     <button onClick={downloadBarcode} className="btn-secondary">
-                      <Download className="sm:w-6 sm:h-6 w-5 h-5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors duration-100" />
+                      <Download className="sm:w-6 sm:h-6 w-5 h-5 text-faint hover:text-ink transition-colors duration-100" />
                     </button>
                   </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-gray-400">
+                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-faint">
                   Barcode will appear here
                 </div>
               )}

@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import BackToHome from "../../components/BackToHome";
 import SectionCard from "../../components/SectionCard";
 import ClearButton from "../../components/ClearButton";
 import ErrorBox from "../../components/ErrorBox";
 import CopyButton from "../../components/CopyButton";
 import SEODescription from "../../components/SEODescription";
 import { PageSEO } from "../../components/PageSEO";
-import BuyMeCoffee from "../../components/BuyMeCoffee";
 import seoDescriptions from "../../data/seoDescriptions";
 import { updateToolUsage } from "../../utils/toolUsage";
 import AutoTextarea from "../../hooks/useAutoSizeTextArea";
+import ToolHeader from "../../components/ToolHeader";
 
 function URLParser() {
   const seo = seoDescriptions.urlParser;
@@ -86,16 +85,12 @@ function URLParser() {
   return (
     <>
       <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 section">
-        <div className="flex justify-between items-center mb-4">
-          <BackToHome />
-          <BuyMeCoffee variant="inline" />
-        </div>
-        <h2 className="text-3xl font-bold mb-6">{seo.title}</h2>
+      <div className="py-6 sm:py-8">
+        <ToolHeader title={seo.title} />
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
+            <h3 className="section-title">
               URL Parser
             </h3>
             <ClearButton
@@ -120,7 +115,7 @@ function URLParser() {
 
             <div className="result-box mt-1">
               <div className="flex justify-between items-center">
-                <label className="form-label text-base">
+                <label className="form-label">
                   Parsed URL (JSON)
                 </label>
                 {result && <CopyButton text={jsonOutput} />}
