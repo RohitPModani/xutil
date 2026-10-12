@@ -9,7 +9,7 @@ Every tool is a single page. Paste or type on the left, the result appears on th
 - [GUID Generator](https://xutil.in/guid): One or many UUIDs, version 4 or 7.
 - [ULID Generator](https://xutil.in/ulid): Sortable 26-character IDs with a time prefix.
 - [Password Generator](https://xutil.in/password): Random passwords with length and character-set controls.
-- [Hash Generator](https://xutil.in/hash): SHA-1, SHA-256, SHA-384 and SHA-512 for any text.
+- [Hash Generator](https://xutil.in/hash): MD5, SHA-1, SHA-256, SHA-384, SHA-512 and HMAC for text or a file.
 - [Base64 Encoder / Decoder](https://xutil.in/base): Base64, Base32 and Base58 in both directions.
 - [ROT13 / Caesar Cipher](https://xutil.in/cipher): Shift letters by any amount, or ROT13 in one click.
 - [JWT Decoder](https://xutil.in/jwt): Read a token’s header and payload without sending it anywhere.

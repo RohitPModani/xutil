@@ -30,7 +30,17 @@ const toLocalInput = (d: Date) => {
   const p = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 };
-const toIcs = (local: string) => `${new Date(local).toISOString().replace(/[-:]/g, '').split('.')[0]}Z`;
+/** UTC timestamp for iCalendar, or null when the input is not a date. */
+const toIcs = (local: string) => {
+  const t = new Date(local).getTime();
+  return Number.isNaN(t) ? null : `${new Date(t).toISOString().replace(/[-:]/g, '').split('.')[0]}Z`;
+};
+/** RFC 5545 / RFC 6350 text value: backslash, semicolon, comma and newlines are escaped. */
+const escText = (s: string) => s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+/** Wi-Fi record value: backslash, semicolon, comma, colon and double quote are escaped. */
+const escWifi = (s: string) => s.replace(/([\\;,:"])/g, '\\$1');
+const digits = (s: string) => s.replace(/\D/g, '');
+const hasScheme = (s: string) => /^[a-z][a-z0-9+.-]*:/i.test(s);
 
 const defaultFields = (): Fields => ({
   wifiEncryption: 'WPA',
@@ -43,14 +53,17 @@ function payloadFor(kind: Kind, f: Fields): string {
   const g = (k: string) => (f[k] ?? '').trim();
   switch (kind) {
     case 'url':
+      return g('text') && !hasScheme(g('text')) ? `https://${g('text')}` : g('text');
     case 'text':
       return g('text');
     case 'contact': {
       if (!g('firstName') && !g('lastName') && !g('phone') && !g('email')) return '';
       let s = 'BEGIN:VCARD\nVERSION:3.0\n';
-      if (g('firstName') || g('lastName')) s += `N:${g('lastName')};${g('firstName')}\nFN:${g('firstName')} ${g('lastName')}\n`;
-      if (g('phone')) s += `TEL:${g('phone')}\n`;
-      if (g('email')) s += `EMAIL:${g('email')}\n`;
+      if (g('firstName') || g('lastName')) {
+        s += `N:${escText(g('lastName'))};${escText(g('firstName'))}\nFN:${escText(`${g('firstName')} ${g('lastName')}`.trim())}\n`;
+      }
+      if (g('phone')) s += `TEL:${escText(g('phone'))}\n`;
+      if (g('email')) s += `EMAIL:${escText(g('email'))}\n`;
       return `${s}END:VCARD`;
     }
     case 'email': {
@@ -62,30 +75,38 @@ function payloadFor(kind: Kind, f: Fields): string {
     }
     case 'sms':
       if (!g('phone')) return '';
-      return `smsto:${g('phone')}${g('smsBody') ? `:${encodeURIComponent(g('smsBody'))}` : ''}`;
+      return `sms:${g('phone')}${g('smsBody') ? `?body=${encodeURIComponent(g('smsBody'))}` : ''}`;
     case 'wifi': {
       if (!g('wifiSsid')) return '';
-      let s = `WIFI:T:${f.wifiEncryption || 'WPA'};S:${g('wifiSsid')};`;
-      if (f.wifiPassword) s += `P:${f.wifiPassword};`;
+      const enc = f.wifiEncryption || 'WPA';
+      let s = `WIFI:T:${enc};S:${escWifi(g('wifiSsid'))};`;
+      if (enc !== 'nopass' && f.wifiPassword) s += `P:${escWifi(f.wifiPassword)};`;
       if (f.wifiHidden === '1') s += 'H:true;';
       return `${s};`;
     }
     case 'phone':
       return g('phone') ? `tel:${g('phone')}` : '';
-    case 'whatsapp':
-      if (!g('phone')) return '';
-      return `https://wa.me/${g('phone')}${g('whatsappMessage') ? `?text=${encodeURIComponent(g('whatsappMessage'))}` : ''}`;
+    case 'whatsapp': {
+      const n = digits(g('phone'));
+      if (!n) return '';
+      return `https://wa.me/${n}${g('whatsappMessage') ? `?text=${encodeURIComponent(g('whatsappMessage'))}` : ''}`;
+    }
     case 'event': {
       if (!g('eventTitle')) return '';
-      let s = `BEGIN:VEVENT\nSUMMARY:${g('eventTitle')}\n`;
-      if (f.eventStart) s += `DTSTART:${toIcs(f.eventStart)}\n`;
-      if (f.eventEnd) s += `DTEND:${toIcs(f.eventEnd)}\n`;
-      if (g('eventLocation')) s += `LOCATION:${g('eventLocation')}\n`;
-      if (g('eventDescription')) s += `DESCRIPTION:${g('eventDescription')}\n`;
+      let s = `BEGIN:VEVENT\nSUMMARY:${escText(g('eventTitle'))}\n`;
+      const start = toIcs(f.eventStart ?? '');
+      const end = toIcs(f.eventEnd ?? '');
+      if (start) s += `DTSTART:${start}\n`;
+      if (end) s += `DTEND:${end}\n`;
+      if (g('eventLocation')) s += `LOCATION:${escText(g('eventLocation'))}\n`;
+      if (g('eventDescription')) s += `DESCRIPTION:${escText(g('eventDescription'))}\n`;
       return `${s}END:VEVENT`;
     }
   }
 }
+
+const EMPTY = { png: '', svg: '', error: '' };
+const HEX_ERROR = 'Use a six-digit hex colour like #1A2B3C.';
 
 export default function QRCodeGenerator() {
   const [kind, setKind] = useState<Kind>('url');
@@ -94,7 +115,7 @@ export default function QRCodeGenerator() {
   const [level, setLevel] = useState<Level>('M');
   const [dark, setDark] = useState('#000000');
   const [light, setLight] = useState('#ffffff');
-  const [result, setResult] = useState<{ png: string; svg: string; error: string }>({ png: '', svg: '', error: '' });
+  const [result, setResult] = useState(EMPTY);
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setF((p) => ({ ...p, [k]: e.target.value }));
@@ -105,12 +126,8 @@ export default function QRCodeGenerator() {
   const opts = useDebounce(wanted, 150);
 
   useEffect(() => {
-    if (!opts.payload) {
-      setResult({ png: '', svg: '', error: '' });
-      return;
-    }
-    if (!isHex(opts.dark) || !isHex(opts.light)) {
-      setResult((r) => ({ ...r, error: 'Colours must be six-digit hex values like #1a2b3c.' }));
+    if (!opts.payload || !isHex(opts.dark) || !isHex(opts.light)) {
+      setResult(EMPTY);
       return;
     }
     let live = true;
@@ -120,7 +137,7 @@ export default function QRCodeGenerator() {
       QRCode.toString(opts.payload, { type: 'svg', width: opts.px, color, errorCorrectionLevel: opts.level, margin: 1 }),
     ])
       .then(([png, svg]) => live && setResult({ png, svg, error: '' }))
-      .catch((e: unknown) => live && setResult((r) => ({ ...r, error: getErrorMessage(e, 'Could not generate this QR code.') })));
+      .catch((e: unknown) => live && setResult({ ...EMPTY, error: getErrorMessage(e, 'Could not generate this QR code.') }));
     return () => {
       live = false;
     };
@@ -128,7 +145,11 @@ export default function QRCodeGenerator() {
 
   const clear = () => {
     setF(defaultFields());
-    setResult({ png: '', svg: '', error: '' });
+    setSize('300');
+    setLevel('M');
+    setDark('#000000');
+    setLight('#ffffff');
+    setResult(EMPTY);
   };
 
   const text = (key: string, label: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => (
@@ -143,16 +164,16 @@ export default function QRCodeGenerator() {
   );
 
   const fields: Record<Kind, React.ReactNode> = {
-    url: text('text', 'URL', { type: 'url', placeholder: 'https://example.com', autoFocus: true }),
+    url: text('text', 'URL', { type: 'url', placeholder: 'https://example.com' }),
     text: (
       <Field label="Text" htmlFor="qr-text">
-        <TextArea id="qr-text" mono={false} rows={4} value={f.text ?? ''} onChange={set('text')} autoFocus />
+        <TextArea id="qr-text" mono={false} rows={4} value={f.text ?? ''} onChange={set('text')} />
       </Field>
     ),
     contact: (
       <>
         <div className="grid grid-cols-2 gap-3">
-          {text('firstName', 'First name', { autoFocus: true })}
+          {text('firstName', 'First name')}
           {text('lastName', 'Last name')}
         </div>
         {text('phone', 'Phone', { type: 'tel', inputMode: 'tel' })}
@@ -161,21 +182,21 @@ export default function QRCodeGenerator() {
     ),
     email: (
       <>
-        {text('email', 'To', { type: 'email', inputMode: 'email', autoFocus: true })}
+        {text('email', 'To', { type: 'email', inputMode: 'email' })}
         {text('emailSubject', 'Subject')}
         {area('emailBody', 'Body')}
       </>
     ),
     sms: (
       <>
-        {text('phone', 'Phone number', { type: 'tel', inputMode: 'tel', autoFocus: true })}
+        {text('phone', 'Phone number', { type: 'tel', inputMode: 'tel' })}
         {area('smsBody', 'Message')}
       </>
     ),
     wifi: (
       <>
-        {text('wifiSsid', 'Network name (SSID)', { autoFocus: true })}
-        {text('wifiPassword', 'Password', { type: 'password', autoComplete: 'off' })}
+        {text('wifiSsid', 'Network name (SSID)')}
+        {f.wifiEncryption !== 'nopass' && text('wifiPassword', 'Password', { type: 'password', autoComplete: 'off' })}
         <Field label="Security" htmlFor="qr-wifiEncryption">
           <Select id="qr-wifiEncryption" value={f.wifiEncryption ?? 'WPA'} onChange={set('wifiEncryption')}>
             <option value="WPA">WPA / WPA2</option>
@@ -186,16 +207,16 @@ export default function QRCodeGenerator() {
         <Checkbox label="Hidden network" checked={f.wifiHidden === '1'} onChange={(e) => setF((p) => ({ ...p, wifiHidden: e.target.checked ? '1' : '0' }))} />
       </>
     ),
-    phone: text('phone', 'Phone number', { type: 'tel', inputMode: 'tel', autoFocus: true }),
+    phone: text('phone', 'Phone number', { type: 'tel', inputMode: 'tel' }),
     whatsapp: (
       <>
-        {text('phone', 'Phone number', { type: 'tel', inputMode: 'tel', autoFocus: true })}
+        {text('phone', 'Phone number', { type: 'tel', inputMode: 'tel', placeholder: '+44 20 7946 0000' })}
         {area('whatsappMessage', 'Message')}
       </>
     ),
     event: (
       <>
-        {text('eventTitle', 'Title', { autoFocus: true })}
+        {text('eventTitle', 'Title')}
         <div className="grid grid-cols-2 gap-3">
           {text('eventStart', 'Starts', { type: 'datetime-local' })}
           {text('eventEnd', 'Ends', { type: 'datetime-local' })}
@@ -207,7 +228,7 @@ export default function QRCodeGenerator() {
   };
 
   const colour = (id: string, label: string, value: string, onChange: (v: string) => void) => (
-    <Field label={label} htmlFor={id}>
+    <Field label={label} htmlFor={id} error={isHex(value) ? undefined : HEX_ERROR}>
       <ColorInput id={id} label={label} value={value} onChange={onChange} />
     </Field>
   );
@@ -225,7 +246,7 @@ export default function QRCodeGenerator() {
                 </option>
               ))}
             </Select>
-            <ClearButton onClick={clear} disabled={!payload} />
+            <ClearButton onClick={clear} />
           </>
         }
       >

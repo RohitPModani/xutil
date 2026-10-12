@@ -1,46 +1,48 @@
-import { useMemo, useState } from 'react';
-import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, Field, FileDrop, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
+import { useCallback, useState } from 'react';
+import Papa from 'papaparse';
+import { TwoWayConverter, type Format } from '../../components/TwoWayConverter';
+import { Checkbox, Field, Select } from '../../ui';
 import type { JsonObject, JsonValue } from '../../types/json';
-import { getErrorMessage } from '../../utils/errors';
+import { describeJsonError } from '../../utils/json';
 import { looksLikeJson } from '../../utils/text';
-import { useSourceText } from '../../hooks/useSourceText';
 
-type Mode = 'auto' | 'csv' | 'json';
+/** Nested keys are joined with this in column names: `address.city`. */
+const SEP = '.';
 
-const SEP = '_';
-
-function flattenJson(data: JsonValue): { records: JsonObject[]; headers: string[] } {
-  const records: JsonObject[] = [];
-  const headers: string[] = [];
-
-  function flatten(obj: JsonValue, prefix = '', current: JsonObject[] = [{}]): JsonObject[] {
-    if (Array.isArray(obj)) {
-      const next: JsonObject[] = [];
-      for (const item of obj) next.push(...flatten(item, prefix, current.map((rec) => ({ ...rec }))));
-      return next.length > 0 ? next : current;
-    }
-    if (obj && typeof obj === 'object') {
-      let next = current;
-      for (const [key, value] of Object.entries(obj)) next = flatten(value, prefix ? `${prefix}${SEP}${key}` : key, next);
-      return next;
-    }
-    if (!headers.includes(prefix)) headers.push(prefix);
-    return current.map((rec) => ({ ...rec, [prefix]: obj }));
-  }
-
-  for (const item of Array.isArray(data) ? data : [data]) records.push(...flatten(item));
-  return { records, headers };
+interface CsvOptions {
+  /** Empty string lets papaparse detect the delimiter. */
+  delimiter: string;
+  /** Turn "1" into 1 and "true" into true when reading CSV. */
+  dynamicTyping: boolean;
 }
 
-function unflatten(flat: JsonObject): JsonObject {
+/** `{ a: { b: 1 }, tags: [1, 2] }` → `{ "a.b": 1, tags: "[1,2]" }`. Arrays stay in one cell as JSON. */
+function flatten(value: JsonValue, prefix: string, out: JsonObject): JsonObject {
+  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+    for (const [key, v] of Object.entries(value)) flatten(v, prefix ? `${prefix}${SEP}${key}` : key, out);
+    return out;
+  }
+  out[prefix] = Array.isArray(value) ? JSON.stringify(value) : value;
+  return out;
+}
+
+/** Puts a flat record's `a.b` keys back into nested objects; a cell holding a JSON array becomes an array. */
+function unflatten(flat: Record<string, unknown>): JsonObject {
   const result: JsonObject = {};
-  for (const [key, value] of Object.entries(flat)) {
+  for (const [key, raw] of Object.entries(flat)) {
+    let value: JsonValue = raw === undefined || raw === '' ? null : (raw as JsonValue);
+    if (typeof value === 'string' && /^\s*\[[\s\S]*\]\s*$/.test(value)) {
+      try {
+        value = JSON.parse(value) as JsonValue;
+      } catch {
+        /* not JSON after all: keep the text */
+      }
+    }
     const parts = key.split(SEP);
     let current = result;
     for (const part of parts.slice(0, -1)) {
       const next = current[part];
-      // Colliding flat keys such as "a" and "a_b" would otherwise write onto a primitive.
+      // Colliding keys such as "a" and "a.b" would otherwise write onto a primitive.
       if (next === null || typeof next !== 'object' || Array.isArray(next)) current[part] = {};
       current = current[part] as JsonObject;
     }
@@ -49,144 +51,76 @@ function unflatten(flat: JsonObject): JsonObject {
   return result;
 }
 
-function jsonToCsv(jsonData: string): string {
-  const { records, headers } = flattenJson(JSON.parse(jsonData));
-  if (records.length === 0) return '';
-  const rows = records.map((record) =>
-    headers
-      .map((header) => {
-        const value = record[header] ?? '';
-        return typeof value === 'string' && /[,"\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-      })
-      .join(',')
-  );
-  return [headers.join(','), ...rows].join('\n');
-}
-
-function parseCsvLine(line: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (char === '"' && line[i - 1] !== '\\') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      result.push(current.replace(/""/g, '"'));
-      current = '';
-    } else {
-      current += char;
-    }
+function jsonToCsv(input: string, { delimiter }: CsvOptions): string {
+  let data: JsonValue;
+  try {
+    data = JSON.parse(input) as JsonValue;
+  } catch (e) {
+    throw new Error(describeJsonError(e, input));
   }
-  result.push(current.replace(/""/g, '"'));
-  return result.map((val) => val.trim().replace(/^"|"$/g, ''));
+  const items = Array.isArray(data) ? data : [data];
+  if (items.some((item) => item === null || typeof item !== 'object' || Array.isArray(item))) {
+    throw new Error('JSON → CSV needs an object or an array of objects.');
+  }
+  const records = items.map((item) => flatten(item, '', {}));
+  const fields = [...new Set(records.flatMap((r) => Object.keys(r)))];
+  if (fields.length === 0) return '';
+  return Papa.unparse({ fields, data: records.map((r) => fields.map((f) => r[f] ?? null)) }, { delimiter: delimiter || ',', newline: '\n' });
 }
 
-function csvToJson(csvData: string): string {
-  const lines = csvData.trim().split('\n');
-  const headers = parseCsvLine(lines[0]);
-  const records = lines.slice(1).map((line) => {
-    const values = parseCsvLine(line);
-    const record: JsonObject = {};
-    headers.forEach((header, i) => (record[header] = values[i] || null));
-    return unflatten(record);
-  });
+function csvToJson(input: string, { delimiter, dynamicTyping }: CsvOptions): string {
+  const parsed = Papa.parse<Record<string, unknown>>(input, { header: true, skipEmptyLines: true, delimiter, dynamicTyping });
+  const fatal = parsed.errors.find((e) => e.type === 'Quotes');
+  if (fatal) throw new Error(fatal.row === undefined ? fatal.message : `Row ${fatal.row + 2}: ${fatal.message}`);
+  // papaparse puts cells beyond the header row under this key; they have no column name to keep.
+  const records = parsed.data.map(({ __parsed_extra: _extra, ...row }) => unflatten(row));
   return JSON.stringify(records, null, 2);
 }
 
-function convert(input: string, mode: Mode): { out: string; to: 'csv' | 'json' } {
-  const toCsv = mode === 'json' || (mode === 'auto' && looksLikeJson(input));
-  return toCsv ? { out: jsonToCsv(input), to: 'csv' } : { out: csvToJson(input), to: 'json' };
-}
+const FORMATS: [Format, Format] = [
+  { label: 'CSV', ext: 'csv', mime: 'text/csv' },
+  { label: 'JSON', ext: 'json', mime: 'application/json', json: true },
+];
+
+const detect = (input: string): 0 | 1 => (looksLikeJson(input) ? 1 : 0);
 
 /**
- * One pane in, one pane out. Direction is detected from the input (JSON
- * starts with { or [) and can be forced with the switch. Nested keys are
- * flattened to `a_b` columns and unflattened on the way back.
+ * Nested keys are flattened to `a.b` columns and unflattened on the way
+ * back; arrays stay in one cell as JSON text, so a record never multiplies
+ * into several rows.
  */
 export default function CsvJsonConverter() {
-  const { text: input, setText: setInput, fileBase, loadFile, clear: clearSource } = useSourceText();
-  const [mode, setMode] = useState<Mode>('auto');
+  const [delimiter, setDelimiter] = useState('');
+  const [dynamicTyping, setDynamicTyping] = useState(false);
 
-  const result = useMemo(() => {
-    if (!input.trim()) return null;
-    try {
-      return { ...convert(input, mode), error: '' };
-    } catch (e) {
-      return { out: '', to: null, error: getErrorMessage(e, 'Could not parse the input.') };
-    }
-  }, [input, mode]);
-
-  const to = result?.to ?? null;
-  const fileName = `${fileBase || 'converted'}.${to ?? 'txt'}`;
+  const convert = useCallback(
+    (input: string, from: 0 | 1) => (from === 1 ? jsonToCsv(input, { delimiter, dynamicTyping }) : csvToJson(input, { delimiter, dynamicTyping })),
+    [delimiter, dynamicTyping]
+  );
 
   return (
-    <ToolPage id="csv_json">
-      <Panel
-        title="Convert"
-        actions={
-          <>
-            <Segmented
-              size="sm"
-              label="Direction"
-              value={mode}
-              onChange={setMode}
-              options={[
-                { value: 'auto', label: 'Auto' },
-                { value: 'csv', label: 'CSV → JSON' },
-                { value: 'json', label: 'JSON → CSV' },
-              ]}
-            />
-            <ClearButton
-              onClick={clearSource}
-              disabled={!input}
-            />
-          </>
-        }
-      >
-        <TwoPane>
-          <Field
-            label="Input"
-            htmlFor="cj-input"
-            hint={
-              to
-                ? `Detected ${to === 'json' ? 'CSV' : 'JSON'}; converting to ${to.toUpperCase()}. Nested keys use "_" in column names.`
-                : 'Paste CSV (first row is the header) or JSON. Direction is detected automatically.'
-            }
-          >
-            <TextArea
-              id="cj-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={'id,name,address_city\n1,Ada,London\n2,Grace,Arlington'}
-              rows={12}
-              stats
-              autoFocus
-              aria-invalid={Boolean(result?.error) || undefined}
-            />
-            <FileDrop
-              className="mt-3"
-              accept=".csv,.json"
-              label="Load a file"
-              onFile={loadFile}
-              onClear={clearSource}
-            />
+    <TwoWayConverter
+      id="csv_json"
+      formats={FORMATS}
+      accept=".csv,.tsv,.json"
+      detect={detect}
+      convert={convert}
+      wrapOutput={false}
+      placeholder={'id,name,address.city\n1,Ada,London\n2,Grace,Arlington'}
+      hint='Paste CSV (first row is the header) or JSON. Direction is detected automatically; nested keys use "." in column names.'
+      options={
+        <>
+          <Field label="Delimiter" htmlFor="cj-delimiter" className="w-40">
+            <Select id="cj-delimiter" value={delimiter} onChange={(e) => setDelimiter(e.target.value)}>
+              <option value="">Detect</option>
+              <option value=",">Comma</option>
+              <option value=";">Semicolon</option>
+              <option value={'\t'}>Tab</option>
+            </Select>
           </Field>
-          <Output
-            label={to ? `Output · ${to.toUpperCase()}` : 'Output'}
-            value={result?.out ?? ''}
-            rows={12}
-            wrap={to !== 'csv'}
-            fileName={fileName}
-            mime={to === 'json' ? 'application/json' : 'text/csv'}
-          />
-        </TwoPane>
-        {result?.error && (
-          <Callout tone="error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
-      </Panel>
-    </ToolPage>
+          <Checkbox className="pb-2" label="Infer numbers and booleans" checked={dynamicTyping} onChange={(e) => setDynamicTyping(e.target.checked)} />
+        </>
+      }
+    />
   );
 }

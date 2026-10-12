@@ -3,10 +3,11 @@ import ToolPage from '../../components/ToolPage';
 import { ClearButton, Field, Output, Panel, Select, TextArea, TwoPane } from '../../ui';
 
 function numeronym(word: string): string {
+  const chars = [...word];
   const upper = word === word.toUpperCase();
-  const first = upper ? word[0] : word[0].toLowerCase();
-  const last = upper ? word[word.length - 1] : word[word.length - 1].toLowerCase();
-  return `${first}${word.length - 2}${last}`;
+  const first = upper ? chars[0] : chars[0].toLowerCase();
+  const last = upper ? chars[chars.length - 1] : chars[chars.length - 1].toLowerCase();
+  return `${first}${chars.length - 2}${last}`;
 }
 
 function generate(text: string, minLength: number): string {
@@ -14,8 +15,8 @@ function generate(text: string, minLength: number): string {
     .split(/(\s+)/)
     .map((token) => {
       if (!token.trim()) return token;
-      const m = token.match(/^(\W*)(\w+)(\W*)$/);
-      if (!m || m[2].length < minLength) return token;
+      const m = token.match(/^(\P{L}*)(\p{L}+)(\P{L}*)$/u);
+      if (!m || [...m[2]].length < minLength) return token;
       return m[1] + numeronym(m[2]) + m[3];
     })
     .join('');

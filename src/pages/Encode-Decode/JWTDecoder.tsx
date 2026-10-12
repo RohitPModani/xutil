@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
 import { Callout, ClearButton, Field, KeyValueList, Output, Panel, TextArea, TwoPane } from '../../ui';
-import type { JsonValue } from '../../types/json';
+import type { JsonObject, JsonValue } from '../../types/json';
 import { getErrorMessage } from '../../utils/errors';
 
 interface Decoded {
-  header: Record<string, JsonValue>;
-  payload: Record<string, JsonValue>;
+  header: JsonObject;
+  payload: JsonObject;
   signature: string;
 }
 
@@ -32,18 +32,21 @@ function base64UrlDecode(str: string): string {
   }
 }
 
-function decode(token: string): Decoded {
-  const parts = token.trim().split('.');
-  if (parts.length !== 3) throw new Error('A JWT has three dot-separated parts: header.payload.signature.');
-  let header: Record<string, JsonValue>;
-  let payload: Record<string, JsonValue>;
+function parseObject(part: string, name: string): JsonObject {
+  let value: JsonValue;
   try {
-    header = JSON.parse(base64UrlDecode(parts[0]));
-    payload = JSON.parse(base64UrlDecode(parts[1]));
+    value = JSON.parse(base64UrlDecode(part));
   } catch {
-    throw new Error('The header or payload is not valid base64url-encoded JSON.');
+    throw new Error(`The ${name} is not valid base64url-encoded JSON.`);
   }
-  return { header, payload, signature: parts[2] };
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`The ${name} must be a JSON object.`);
+  return value;
+}
+
+function decode(token: string): Decoded {
+  const parts = token.trim().replace(/^Bearer\s+/i, '').split('.');
+  if (parts.length !== 3) throw new Error('A JWT has three dot-separated parts: header.payload.signature.');
+  return { header: parseObject(parts[0], 'header'), payload: parseObject(parts[1], 'payload'), signature: parts[2] };
 }
 
 const CLAIM_LABELS: Record<string, string> = {
@@ -56,10 +59,21 @@ const CLAIM_LABELS: Record<string, string> = {
   jti: 'Token id (jti)',
 };
 
-const formatTime = (v: JsonValue) =>
-  typeof v === 'number'
-    ? `${new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'long' }).format(new Date(v * 1000))} · ${v}`
-    : String(v);
+// A numeric date claim as a Date, or null when it is absent or out of range.
+function claimDate(v: JsonValue | undefined): Date | null {
+  if (typeof v !== 'number') return null;
+  const d = new Date(v * 1000);
+  return Number.isFinite(d.getTime()) ? d : null;
+}
+
+const show = (v: JsonValue) => (typeof v === 'string' ? v : JSON.stringify(v));
+
+const formatTime = (v: JsonValue) => {
+  const d = claimDate(v);
+  return d ? `${new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'long' }).format(d)} · ${show(v)}` : show(v);
+};
+
+const shortDate = (d: Date) => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(d);
 
 export default function JWTDecoder() {
   const [token, setToken] = useState('');
@@ -74,16 +88,20 @@ export default function JWTDecoder() {
   }, [token]);
 
   const data = result?.data ?? null;
-  const exp = typeof data?.payload.exp === 'number' ? data.payload.exp : null;
-  const expired = exp !== null && exp * 1000 < Date.now();
+  const now = Date.now();
+  const exp = claimDate(data?.payload.exp);
+  const nbf = claimDate(data?.payload.nbf);
+  const expired = exp !== null && exp.getTime() < now;
+  const notYet = nbf !== null && nbf.getTime() > now;
+  const unsigned = data?.header.alg === 'none';
 
   const claims = data
     ? Object.entries(data.payload)
         .filter(([k]) => k in CLAIM_LABELS)
         .map(([k, v]) => ({
           label: CLAIM_LABELS[k],
-          value: ['exp', 'nbf', 'iat'].includes(k) ? formatTime(v) : String(v),
-          copy: String(v),
+          value: ['exp', 'nbf', 'iat'].includes(k) ? formatTime(v) : show(v),
+          copy: show(v),
         }))
     : [];
 
@@ -91,7 +109,7 @@ export default function JWTDecoder() {
     <ToolPage id="jwt">
       <Panel title="Decode" actions={<ClearButton onClick={() => setToken('')} disabled={!token} />}>
         <TwoPane>
-          <Field label="Token" htmlFor="jwt-input" hint="Decoded locally. The signature is shown but not verified.">
+          <Field label="Token" htmlFor="jwt-input" hint="Decoded locally. The signature is shown but not verified." error={result?.error}>
             <TextArea
               id="jwt-input"
               value={token}
@@ -99,8 +117,6 @@ export default function JWTDecoder() {
               placeholder="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0In0.dBjftJeZ4CVP"
               rows={8}
               autoFocus
-              aria-invalid={Boolean(result?.error) || undefined}
-              aria-describedby={result?.error ? 'jwt-error' : undefined}
             />
           </Field>
           <div className="space-y-4">
@@ -121,20 +137,16 @@ export default function JWTDecoder() {
           </div>
         </TwoPane>
 
-        {result?.error && (
-          <Callout tone="error" id="jwt-error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
-
         {data && (
           <div className="mt-4 space-y-3">
-            {exp !== null && (
-              <Callout tone={expired ? 'error' : 'success'}>
-                {expired ? 'This token expired ' : 'This token is valid until '}
-                {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(exp * 1000))}.
-              </Callout>
-            )}
+            {unsigned && <Callout tone="error">Unsigned token: the header says alg "none", so nothing vouches for these claims.</Callout>}
+            {expired ? (
+              <Callout tone="error">This token expired {shortDate(exp)}.</Callout>
+            ) : notYet ? (
+              <Callout tone="info">This token is not valid until {shortDate(nbf)}.</Callout>
+            ) : exp ? (
+              <Callout tone="success">This token is valid until {shortDate(exp)}.</Callout>
+            ) : null}
             {claims.length > 0 && (
               <Output label="Registered claims" copyText={claims.map((c) => `${c.label}: ${c.value}`).join('\n')}>
                 <KeyValueList items={claims} />

@@ -1,9 +1,13 @@
 import {
+  Children,
+  cloneElement,
   forwardRef,
+  isValidElement,
   useId,
   useLayoutEffect,
   useRef,
   type InputHTMLAttributes,
+  type ReactElement,
   type ReactNode,
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
@@ -23,7 +27,26 @@ export interface FieldProps {
   children: ReactNode;
 }
 
+/**
+ * The first element child is the control: it receives `aria-describedby`
+ * pointing at the hint or error, and `aria-invalid` while there is an error,
+ * so assistive tech reads the reason, not just "invalid".
+ */
 export function Field({ label, htmlFor, hint, error, actions, className, children }: FieldProps) {
+  const descId = useId();
+  const hasDesc = Boolean(error || hint);
+  let linked = false;
+  const kids = Children.map(children, (child) => {
+    if (linked || !isValidElement(child)) return child;
+    linked = true;
+    const el = child as ReactElement<Record<string, unknown>>;
+    const existing = el.props['aria-describedby'] as string | undefined;
+    return cloneElement(el, {
+      'aria-describedby': [existing, hasDesc ? descId : undefined].filter(Boolean).join(' ') || undefined,
+      'aria-invalid': error ? true : el.props['aria-invalid'],
+    });
+  });
+
   return (
     <div className={cn('min-w-0', className)}>
       <div className="mb-1.5 flex min-h-7 items-center justify-between gap-3">
@@ -32,13 +55,15 @@ export function Field({ label, htmlFor, hint, error, actions, className, childre
         </label>
         {actions && <div className="flex shrink-0 items-center gap-1">{actions}</div>}
       </div>
-      {children}
+      {kids}
       {error ? (
-        <p className="mt-1.5 text-xs text-danger" role="alert">
+        <p id={descId} className="mt-1.5 text-xs text-danger" role="alert">
           {error}
         </p>
       ) : hint ? (
-        <p className="mt-1.5 text-xs text-muted">{hint}</p>
+        <p id={descId} className="mt-1.5 text-xs text-muted">
+          {hint}
+        </p>
       ) : null}
     </div>
   );
@@ -172,15 +197,18 @@ export interface SegmentedProps<T extends string> {
 
 /** A radio group drawn as connected buttons. Arrow keys move the selection. */
 export function Segmented<T extends string>({ options, value, onChange, label, size = 'md', className }: SegmentedProps<T>) {
-  const onKeyDown = (e: React.KeyboardEvent) => {
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const i = options.findIndex((o) => o.value === value);
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      onChange(options[(i + 1) % options.length].value);
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      onChange(options[(i - 1 + options.length) % options.length].value);
-    }
+    let next = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % options.length;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (i - 1 + options.length) % options.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = options.length - 1;
+    if (next === -1) return;
+    e.preventDefault();
+    onChange(options[next].value);
+    // Keep focus with the selection, otherwise it sits on a tabIndex=-1 button.
+    (e.currentTarget.children[next] as HTMLElement | undefined)?.focus();
   };
 
   return (

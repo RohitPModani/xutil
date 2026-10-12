@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import JsBarcode from 'jsbarcode';
 import { Download } from 'lucide-react';
 import ToolPage from '../../components/ToolPage';
-import { Button, Callout, Checkbox, ClearButton, ColorInput, EmptyState, Field, Input, Panel, PreviewBox, Select, Toolbar, TwoPane } from '../../ui';
+import { Button, Checkbox, ClearButton, ColorInput, EmptyState, Field, Input, Panel, PreviewBox, Select, Toolbar, TwoPane } from '../../ui';
 import { getErrorMessage } from '../../utils/errors';
 import { downloadBlob } from '../../utils/download';
 import { isHex } from '../../utils/color';
@@ -23,11 +23,13 @@ const FORMATS = [
 ];
 
 const DEFAULTS = { text: '', format: 'CODE128', width: '2', height: '100', fontSize: '20', margin: '10', lineColor: '#000000', background: '#ffffff', displayValue: true };
+const HEX_ERROR = 'Use a six-digit hex colour like #1A2B3C.';
 
 export default function BarCodeGenerator() {
   const [o, setO] = useState(DEFAULTS);
   const set = <K extends keyof typeof DEFAULTS>(k: K, v: (typeof DEFAULTS)[K]) => setO((p) => ({ ...p, [k]: v }));
 
+  const coloursOk = isHex(o.lineColor) && isHex(o.background);
   const jsOptions = useMemo(
     () => ({
       format: o.format,
@@ -35,17 +37,17 @@ export default function BarCodeGenerator() {
       height: Number(o.height) || 100,
       fontSize: Number(o.fontSize) || 20,
       margin: Number(o.margin) || 0,
-      lineColor: isHex(o.lineColor) ? o.lineColor : '#000000',
-      background: isHex(o.background) ? o.background : '#ffffff',
+      lineColor: o.lineColor,
+      background: o.background,
       displayValue: o.displayValue,
       font: 'monospace',
     }),
-    [o]
+    [o.format, o.width, o.height, o.fontSize, o.margin, o.lineColor, o.background, o.displayValue]
   );
 
   // Live SVG. JsBarcode throws on input that is not valid for the format.
   const result = useMemo(() => {
-    if (!o.text) return { svg: '', error: '' };
+    if (!o.text || !coloursOk) return { svg: '', error: '' };
     try {
       const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       JsBarcode(el, o.text, jsOptions);
@@ -53,7 +55,7 @@ export default function BarCodeGenerator() {
     } catch (e) {
       return { svg: '', error: getErrorMessage(e, 'Could not render this barcode.') };
     }
-  }, [o.text, jsOptions]);
+  }, [o.text, coloursOk, jsOptions]);
 
   const downloadPng = () => {
     const canvas = document.createElement('canvas');
@@ -64,7 +66,7 @@ export default function BarCodeGenerator() {
   const format = FORMATS.find((f) => f.value === o.format);
 
   const colour = (k: 'lineColor' | 'background', label: string) => (
-    <Field label={label} htmlFor={`bc-${k}`}>
+    <Field label={label} htmlFor={`bc-${k}`} error={isHex(o[k]) ? undefined : HEX_ERROR}>
       <ColorInput id={`bc-${k}`} label={label} value={o[k]} onChange={(v) => set(k, v)} />
     </Field>
   );
@@ -88,8 +90,8 @@ export default function BarCodeGenerator() {
                 ))}
               </Select>
             </Field>
-            <Field label="Value" htmlFor="bc-text" hint={format?.hint}>
-              <Input id="bc-text" value={o.text} onChange={(e) => set('text', e.target.value)} placeholder="Example 1234" autoFocus aria-invalid={Boolean(result.error) || undefined} />
+            <Field label="Value" htmlFor="bc-text" hint={format?.hint} error={result.error || undefined}>
+              <Input id="bc-text" value={o.text} onChange={(e) => set('text', e.target.value)} placeholder="Example 1234" autoFocus />
             </Field>
             <div className="grid grid-cols-2 gap-3 border-t border-line pt-3">
               {num('width', 'Bar width', 1, 10, 0.5)}
@@ -107,7 +109,7 @@ export default function BarCodeGenerator() {
               {result.svg ? (
                 <img src={`data:image/svg+xml;utf8,${encodeURIComponent(result.svg)}`} alt={`${format?.label ?? o.format} barcode for ${o.text}`} className="h-auto max-w-full" />
               ) : (
-                <EmptyState>The barcode appears here as you type</EmptyState>
+                <EmptyState>{coloursOk ? 'The barcode appears here as you type' : 'Fix the colours to see the barcode'}</EmptyState>
               )}
             </PreviewBox>
             <Toolbar className="mt-3">
@@ -120,12 +122,6 @@ export default function BarCodeGenerator() {
             </Toolbar>
           </div>
         </TwoPane>
-
-        {result.error && (
-          <Callout tone="error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
       </Panel>
     </ToolPage>
   );

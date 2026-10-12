@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { decodeTime, ulid } from 'ulid';
+import { decodeTime, isValid, monotonicFactory, ulid } from 'ulid';
 import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, CopyButton, Field, GenerateButton, Input, KeyValueList, Output, Panel, ValueBlock } from '../../ui';
+import { ClearButton, CopyButton, Field, GenerateButton, Input, KeyValueList, Output, Panel, ValueBlock } from '../../ui';
 import { getErrorMessage } from '../../utils/errors';
+
+// Bulk IDs made in the same millisecond still sort in creation order.
+const nextBulk = monotonicFactory();
 
 export default function ULIDGenerator() {
   const [count, setCount] = useState('5');
@@ -10,23 +13,22 @@ export default function ULIDGenerator() {
   const [bulk, setBulk] = useState<string[]>([]);
   const [lookup, setLookup] = useState('');
 
-  const n = Math.min(1000, Math.max(1, Number(count) || 1));
+  const n = Math.min(1000, Math.max(1, Math.floor(Number(count)) || 1));
 
-  const regenerate = useCallback(() => {
-    setSingle(ulid());
-    setBulk(Array.from({ length: n }, () => ulid()));
-  }, [n]);
+  const newSingle = useCallback(() => setSingle(ulid()), []);
+  const newBulk = useCallback(() => setBulk(Array.from({ length: n }, () => nextBulk())), [n]);
 
-  // A fresh value on load and whenever the count changes.
-  useEffect(regenerate, [regenerate]);
+  // A fresh value on load; the bulk list follows the count without touching
+  // the headline value.
+  useEffect(newSingle, [newSingle]);
+  useEffect(newBulk, [newBulk]);
 
   const decoded = useMemo(() => {
-    const id = lookup.trim().toUpperCase();
+    const id = lookup.replace(/["'`\s]/g, '').toUpperCase();
     if (!id) return null;
     try {
-      if (id.length !== 26) throw new Error('A ULID is exactly 26 characters.');
-      const ms = decodeTime(id);
-      return { ms, error: '' };
+      if (!isValid(id)) throw new Error('Not a valid ULID: 26 characters from 0–9 and A–Z without I, L, O and U.');
+      return { ms: decodeTime(id), error: '' };
     } catch (e) {
       return { ms: 0, error: getErrorMessage(e, 'Not a valid ULID.') };
     }
@@ -49,7 +51,14 @@ export default function ULIDGenerator() {
           actions={
             <>
               <CopyButton text={single} size="md" variant="primary" />
-              <GenerateButton variant="secondary" label="New" onClick={regenerate} />
+              <GenerateButton
+                variant="secondary"
+                label="New"
+                onClick={() => {
+                  newSingle();
+                  newBulk();
+                }}
+              />
             </>
           }
         />
@@ -63,6 +72,7 @@ export default function ULIDGenerator() {
               type="number"
               min={1}
               max={1000}
+              step={1}
               inputMode="numeric"
               value={count}
               onChange={(e) => setCount(e.target.value)}
@@ -75,25 +85,18 @@ export default function ULIDGenerator() {
 
       <Panel title="Decode timestamp" actions={<ClearButton onClick={() => setLookup('')} disabled={!lookup} />}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="ULID" htmlFor="ulid-lookup" hint="The first 10 characters encode when it was made.">
+          <Field label="ULID" htmlFor="ulid-lookup" hint="The first 10 characters encode when it was made." error={decoded?.error}>
             <Input
               id="ulid-lookup"
               value={lookup}
               onChange={(e) => setLookup(e.target.value)}
               placeholder="01ARZ3NDEKTSV4RRFFQ69G5FAV"
-              maxLength={26}
-              aria-invalid={Boolean(decoded?.error) || undefined}
             />
           </Field>
           <Output label="Created" copyText={items.map((i) => `${i.label}: ${i.value}`).join('\n')} placeholder="Paste a ULID to see its timestamp">
             {items.length > 0 ? <KeyValueList items={items} /> : undefined}
           </Output>
         </div>
-        {decoded?.error && (
-          <Callout tone="error" className="mt-4">
-            {decoded.error}
-          </Callout>
-        )}
       </Panel>
     </ToolPage>
   );

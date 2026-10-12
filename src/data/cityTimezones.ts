@@ -9,6 +9,12 @@ export interface TimezoneGroup {
   options: TimezoneOption[];
 }
 
+/** Zone names a browser may report that this list spells differently. */
+export const ZONE_ALIASES: Record<string, string> = {
+  "Asia/Calcutta": "Asia/Kolkata",
+  "Europe/Kyiv": "Europe/Kiev",
+};
+
 export const CITY_TIMEZONES: TimezoneGroup[] = [
   {
     label: "Africa",
@@ -1500,7 +1506,7 @@ export const CITY_TIMEZONES: TimezoneGroup[] = [
     label: "United States",
     options: [
       {
-        value: "America/New_York",
+        value: "America/Chicago",
         label: "USA / Alabama / Birmingham (CST/CDT)",
         abbreviation: "CST",
       },
@@ -1515,7 +1521,7 @@ export const CITY_TIMEZONES: TimezoneGroup[] = [
         abbreviation: "AKST",
       },
       {
-        value: "America/Denver",
+        value: "America/Phoenix",
         label: "USA / Arizona / Phoenix (MST)",
         abbreviation: "MST",
       },

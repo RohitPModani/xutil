@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
-import { Volume2 } from 'lucide-react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { Square, Volume2 } from 'lucide-react';
 import ToolPage from '../../components/ToolPage';
-import { Button, Callout, ClearButton, Field, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
+import { Button, ClearButton, Field, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
 import { getErrorMessage } from '../../utils/errors';
 
 type Direction = 'encode' | 'decode';
 
+// codec:start
 const MORSE: Record<string, string> = {
   A: '.-', B: '-...', C: '-.-.', D: '-..', E: '.', F: '..-.', G: '--.', H: '....', I: '..', J: '.---',
   K: '-.-', L: '.-..', M: '--', N: '-.', O: '---', P: '.--.', Q: '--.-', R: '.-.', S: '...', T: '-',
@@ -20,6 +21,8 @@ const TEXT: Record<string, string> = Object.fromEntries(Object.entries(MORSE).ma
 
 function textToMorse(text: string): string {
   return text
+    .normalize('NFD') // é → e + combining accent, then drop the accent
+    .replace(/[̀-ͯ]/g, '')
     .toUpperCase()
     .split(/\s+/)
     .map((word) =>
@@ -32,7 +35,14 @@ function textToMorse(text: string): string {
 }
 
 function morseToText(morse: string): string {
-  const clean = morse.replace(/\/+/g, '/').replace(/\s+/g, ' ').trim();
+  const clean = morse
+    .replace(/[_−–—]/g, '-')
+    .replace(/[•·]/g, '.')
+    .replace(/\|/g, '/')
+    // A word gap is "/" or three or more spaces; one space separates letters.
+    .replace(/\s*\/+\s*|\s{3,}/g, ' / ')
+    .replace(/\s+/g, ' ')
+    .trim();
   if (!/^[.\-/ ]+$/.test(clean)) throw new Error('Morse code uses only dots, dashes, spaces and / between words.');
   return clean
     .split('/')
@@ -50,11 +60,11 @@ function morseToText(morse: string): string {
     .join(' ')
     .trim();
 }
+// codec:end
 
 // 600 Hz sidetone. Dot = 1 unit, dash = 3, gap inside a letter 1, between
 // letters 3, between words 7.
-function play(morse: string, onEnd: () => void) {
-  const ctx = new AudioContext();
+function play(ctx: AudioContext, morse: string, onEnd: () => void) {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.frequency.value = 600;
@@ -69,13 +79,9 @@ function play(morse: string, onEnd: () => void) {
       t += ch === '.' ? unit : unit * 3;
       gain.gain.setValueAtTime(0, t);
       t += unit;
-    } else if (ch === ' ') t += unit * 2;
-    else if (ch === '/') t += unit * 2;
+    } else if (ch === ' ' || ch === '/') t += unit * 2;
   }
-  osc.onended = () => {
-    void ctx.close();
-    onEnd();
-  };
+  osc.onended = onEnd;
   osc.start();
   osc.stop(t);
 }
@@ -84,18 +90,39 @@ export default function MorseCodeTranslator() {
   const [input, setInput] = useState('');
   const [direction, setDirection] = useState<Direction>('encode');
   const [playing, setPlaying] = useState(false);
+  const ctxRef = useRef<AudioContext | null>(null);
+  const deferred = useDeferredValue(input);
 
   const result = useMemo(() => {
-    if (!input.trim()) return null;
+    if (!deferred.trim()) return null;
     try {
-      return { out: direction === 'encode' ? textToMorse(input) : morseToText(input), error: '' };
+      return { out: direction === 'encode' ? textToMorse(deferred) : morseToText(deferred), error: '' };
     } catch (e) {
       return { out: '', error: getErrorMessage(e, 'Could not translate the input.') };
     }
-  }, [input, direction]);
+  }, [deferred, direction]);
 
   const out = result?.out ?? '';
-  const morse = direction === 'encode' ? out : input;
+  const morse = direction === 'encode' ? out : deferred;
+
+  const stop = useCallback(() => {
+    ctxRef.current?.close().catch(() => {});
+    ctxRef.current = null;
+    setPlaying(false);
+  }, []);
+  useEffect(() => stop, [stop]);
+
+  const start = () => {
+    stop();
+    const ctx = new AudioContext();
+    ctxRef.current = ctx;
+    play(ctx, morse, () => {
+      if (ctxRef.current === ctx) stop();
+    });
+    // Autoplay policy can hand us a suspended context; this click is the gesture.
+    void ctx.resume();
+    setPlaying(true);
+  };
 
   return (
     <ToolPage id="morse">
@@ -121,7 +148,12 @@ export default function MorseCodeTranslator() {
           <Field
             label={direction === 'encode' ? 'Text' : 'Morse'}
             htmlFor="morse-input"
-            hint={direction === 'encode' ? 'Letters, digits and common punctuation. Anything else is skipped.' : 'Space between letters, / between words.'}
+            hint={
+              direction === 'encode'
+                ? 'Letters, digits and common punctuation. Accents are dropped; anything else is skipped.'
+                : 'One space between letters, / or three spaces between words.'
+            }
+            error={result?.error}
           >
             <TextArea
               id="morse-input"
@@ -131,7 +163,7 @@ export default function MorseCodeTranslator() {
               rows={10}
               stats
               autoFocus
-              aria-invalid={Boolean(result?.error) || undefined}
+              autoSize={input.length < 200_000}
             />
           </Field>
           <Output
@@ -142,23 +174,15 @@ export default function MorseCodeTranslator() {
               <Button
                 size="sm"
                 variant="ghost"
-                disabled={!out || playing}
-                onClick={() => {
-                  setPlaying(true);
-                  play(morse, () => setPlaying(false));
-                }}
-                icon={<Volume2 className="h-3.5 w-3.5" aria-hidden="true" />}
+                disabled={!out}
+                onClick={playing ? stop : start}
+                icon={playing ? <Square className="h-3.5 w-3.5" aria-hidden="true" /> : <Volume2 className="h-3.5 w-3.5" aria-hidden="true" />}
               >
-                {playing ? 'Playing' : 'Play'}
+                {playing ? 'Stop' : 'Play'}
               </Button>
             }
           />
         </TwoPane>
-        {result?.error && (
-          <Callout tone="error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
       </Panel>
     </ToolPage>
   );

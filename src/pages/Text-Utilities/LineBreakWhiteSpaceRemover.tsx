@@ -6,16 +6,20 @@ export default function LineBreakWhiteSpaceRemover() {
   const [input, setInput] = useState('');
   const [joinLines, setJoinLines] = useState(true);
   const [collapse, setCollapse] = useState(true);
+  const [collapseBlank, setCollapseBlank] = useState(false);
   const [trim, setTrim] = useState(true);
 
   const result = useMemo(() => {
     if (!input) return null;
     let out = input;
+    // Runs of blank lines become one blank line.
+    if (collapseBlank && !joinLines) out = out.replace(/\r?\n(?:[^\S\r\n]*\r?\n){2,}/g, '\n\n');
     if (joinLines) out = out.replace(/[\r\n]+/g, ' ');
-    if (collapse) out = joinLines ? out.replace(/\s+/g, ' ') : out.replace(/[^\S\r\n]+/g, ' ');
+    // Only runs of two or more; a single tab is left as it is.
+    if (collapse) out = out.replace(/[^\S\r\n]{2,}/g, ' ');
     if (trim) out = joinLines ? out.trim() : out.split('\n').map((l) => l.trim()).join('\n');
     return { out, before: input.split('\n').length, after: out.split('\n').length };
-  }, [input, joinLines, collapse, trim]);
+  }, [input, joinLines, collapse, collapseBlank, trim]);
 
   return (
     <ToolPage id="line_break_whitespace_remover">
@@ -29,6 +33,7 @@ export default function LineBreakWhiteSpaceRemover() {
               placeholder={'First line\n\n   second   line\t with tabs'}
               rows={12}
               autoFocus
+              autoSize={input.length < 200_000}
             />
           </Field>
           <Output label="Cleaned" value={result?.out ?? ''} rows={12} fileName="cleaned.txt" />
@@ -36,7 +41,8 @@ export default function LineBreakWhiteSpaceRemover() {
 
         <Toolbar className="mt-4 gap-x-5">
           <Checkbox label="Remove line breaks" checked={joinLines} onChange={(e) => setJoinLines(e.target.checked)} />
-          <Checkbox label="Collapse repeated spaces" checked={collapse} onChange={(e) => setCollapse(e.target.checked)} />
+          <Checkbox label="Collapse blank lines" checked={collapseBlank} disabled={joinLines} onChange={(e) => setCollapseBlank(e.target.checked)} />
+          <Checkbox label="Collapse runs of spaces and tabs" checked={collapse} onChange={(e) => setCollapse(e.target.checked)} />
           <Checkbox label="Trim leading and trailing spaces" checked={trim} onChange={(e) => setTrim(e.target.checked)} />
         </Toolbar>
 

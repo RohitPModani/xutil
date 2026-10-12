@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, EmptyState, Field, Input, KeyValueList, Output, Panel, Select } from '../../ui';
+import { ClearButton, EmptyState, Field, Input, KeyValueList, Output, Panel, Select } from '../../ui';
 
 const BASE_NAMES = [
   'Binary', 'Ternary', 'Quaternary', 'Quinary', 'Senary', 'Septenary', 'Octal', 'Nonary', 'Decimal',
@@ -14,12 +14,32 @@ const baseName = (b: number) => `${b} (${BASES[b - 2].name})`;
 const COMMON = [2, 8, 10, 16];
 
 const DIGITS = '0123456789abcdefghijklmnopqrstuvwxyz';
+const MAX_DIGITS = 4000;
+const PREFIX: Record<number, string> = { 2: '0b', 8: '0o', 16: '0x' };
 
 /** Arbitrary-length parse; parseInt loses precision above 2^53. */
 function parseBig(s: string, base: number): bigint {
+  const prefix = PREFIX[base] ?? (base === 10 ? '' : null);
+  if (prefix !== null) return BigInt(prefix + s);
   let n = 0n;
   for (const ch of s.toLowerCase()) n = n * BigInt(base) + BigInt(DIGITS.indexOf(ch));
   return n;
+}
+
+/** Strips a sign, a matching 0x/0b/0o prefix and `_`/space grouping. */
+function parseInput(value: string, base: number): { n: bigint | null; error: string } {
+  let raw = value.trim().replace(/[\s_]/g, '');
+  if (!raw) return { n: null, error: '' };
+  const negative = raw.startsWith('-');
+  if (negative) raw = raw.slice(1);
+  const prefix = PREFIX[base];
+  if (prefix && raw.toLowerCase().startsWith(prefix)) raw = raw.slice(2);
+  if (raw.length > MAX_DIGITS) return { n: null, error: `Up to ${MAX_DIGITS.toLocaleString()} digits.` };
+  if (!new RegExp(`^[${DIGITS.slice(0, base)}]+$`, 'i').test(raw)) {
+    return { n: null, error: `Only the digits ${DIGITS.slice(0, base).toUpperCase()} are valid in base ${base}.` };
+  }
+  const n = parseBig(raw, base);
+  return { n: negative ? -n : n, error: '' };
 }
 
 export default function BaseNumberConverter() {
@@ -30,14 +50,7 @@ export default function BaseNumberConverter() {
   const fromBase = Number(from);
   const toBase = Number(to);
 
-  const result = useMemo(() => {
-    const raw = value.trim();
-    if (!raw) return { n: null, error: '' };
-    if (!new RegExp(`^[${DIGITS.slice(0, fromBase)}]+$`, 'i').test(raw)) {
-      return { n: null, error: `Only the digits ${DIGITS.slice(0, fromBase).toUpperCase()} are valid in base ${fromBase}.` };
-    }
-    return { n: parseBig(raw, fromBase), error: '' };
-  }, [value, fromBase]);
+  const result = useMemo(() => parseInput(value, fromBase), [value, fromBase]);
 
   const n = result.n;
   const rows = n === null
@@ -64,7 +77,7 @@ export default function BaseNumberConverter() {
       >
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
-            <Field label="Number" htmlFor="bn-value" className="sm:col-span-2 md:col-span-1" hint="Any length; digits are checked against the base you pick.">
+            <Field label="Number" htmlFor="bn-value" className="sm:col-span-2 md:col-span-1" hint="A leading minus, a 0x/0b/0o prefix and _ or space grouping are accepted." error={result.error}>
               <Input
                 id="bn-value"
                 inputMode={fromBase <= 10 ? 'numeric' : 'text'}
@@ -72,7 +85,6 @@ export default function BaseNumberConverter() {
                 onChange={(e) => setValue(e.target.value)}
                 placeholder="255"
                 autoFocus
-                aria-invalid={Boolean(result.error) || undefined}
               />
             </Field>
             <Field label="From base" htmlFor="bn-from">
@@ -98,11 +110,6 @@ export default function BaseNumberConverter() {
             {rows.length > 0 ? <KeyValueList items={rows} /> : <EmptyState>Enter a number</EmptyState>}
           </Output>
         </div>
-        {result.error && (
-          <Callout tone="error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
       </Panel>
     </ToolPage>
   );

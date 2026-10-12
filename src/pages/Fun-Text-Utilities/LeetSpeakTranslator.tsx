@@ -4,9 +4,11 @@ import { ClearButton, Field, GenerateButton, Output, Panel, Segmented, TextArea,
 
 type Mode = 'auto' | 'encode' | 'decode';
 
+// Every token appears under exactly one letter and contains a non-letter, so
+// decoding is unambiguous and plain words inside leet text survive.
 const LEET: Record<string, string[]> = {
-  a: ['4', '@', '/\\', '^', '∂'],
-  b: ['8', '6', '|3', 'ß'],
+  a: ['4', '@', '/\\', '^'],
+  b: ['8', '|3', 'ß'],
   c: ['(', '<', '©'],
   d: ['|)', 'o|', '[)', '∂'],
   e: ['3', '€', 'є'],
@@ -16,35 +18,44 @@ const LEET: Record<string, string[]> = {
   i: ['1', '!', '|', ']['],
   j: ['_|', '</', '_]'],
   k: ['|<', '|{', '|('],
-  l: ['1', '|_', '|', '£'],
-  m: ['|\\/|', '/\\/\\', '(v)', 'em'],
+  l: ['|_', '£'],
+  m: ['|\\/|', '/\\/\\', '(v)'],
   n: ['|\\|', '/\\/', '/V', 'И'],
   o: ['0', '()', '[]', 'Ω'],
   p: ['|*', '|o', '|>', '|"'],
-  q: ['9', '0_', '(,)', 'kw'],
-  r: ['|2', '|?', 'lz', 'Я'],
-  s: ['5', '$', 'z', '§'],
+  q: ['0_', '(,)'],
+  r: ['|2', '|?', 'Я'],
+  s: ['5', '$', '§'],
   t: ['7', '+', '-|-', '†'],
   u: ['|_|', '(_)', 'µ'],
   v: ['\\/', '|/', '\\\\//'],
-  w: ['\\/\\/', 'vv', '\\^/', 'Ш'],
-  x: ['><', '}{', '×'],
+  w: ['\\/\\/', '\\^/', 'Ш'],
+  x: ['><', '×'],
   y: ['`/', '¥', '\\|/', 'Ч'],
-  z: ['2', '7_', '≥', 'z'],
+  z: ['2', '7_', '≥'],
 };
 
-// ponytail: decoding is lossy ("1" is i or l); the first letter that lists a
-// token wins, and pure-letter tokens ("vv", "em") are left alone so plain words survive.
+// Longest token first so "|_|" wins over "|".
 const DECODE: [string, string][] = Object.entries(LEET)
-  .flatMap(([letter, tokens]) => tokens.filter((t) => /[^a-z]/i.test(t)).map((t): [string, string] => [t, letter]))
-  .filter(([t], i, all) => all.findIndex(([u]) => u === t) === i)
+  .flatMap(([letter, tokens]) => tokens.map((t): [string, string] => [t, letter]))
   .sort((a, b) => b[0].length - a[0].length);
 
-function encode(text: string): string {
+// Deterministic per character position and seed, so typing more text does not
+// re-roll what is already there; Shuffle bumps the seed.
+const pick = (i: number, seed: number, n: number) => {
+  let h = Math.imul(i + 1, 0x9e3779b1) ^ Math.imul(seed + 1, 0x85ebca77);
+  h = Math.imul(h ^ (h >>> 15), 0xc2b2ae35);
+  h ^= h >>> 13;
+  return (h >>> 0) % n;
+};
+
+function encode(text: string, seed: number): string {
   let out = '';
+  let i = 0;
   for (const ch of text) {
     const options = LEET[ch.toLowerCase()];
-    out += options ? options[Math.floor(Math.random() * options.length)] : ch;
+    out += options ? options[pick(i, seed, options.length)] : ch;
+    i++;
   }
   return out;
 }
@@ -65,10 +76,24 @@ function decode(text: string): string {
   return out;
 }
 
-const looksLikeLeet = (text: string) => {
-  const chars = text.replace(/\s/g, '');
-  return chars.length > 0 && (chars.match(/[^a-z]/gi) ?? []).length / chars.length >= 0.25;
-};
+const isLetter = (c: string | undefined) => c !== undefined && /\p{L}/u.test(c);
+
+// Only tokens touching a letter count, so "Hello, world! 123" is not leet.
+function looksLikeLeet(text: string): boolean {
+  let hits = 0;
+  let i = 0;
+  while (i < text.length) {
+    const hit = DECODE.find(([t]) => text.startsWith(t, i));
+    if (!hit) {
+      i++;
+      continue;
+    }
+    if (isLetter(text[i - 1]) || isLetter(text[i + hit[0].length])) hits++;
+    i += hit[0].length;
+  }
+  const letters = (text.match(/\p{L}/gu) ?? []).length;
+  return hits > 0 && hits / (hits + letters) >= 0.25;
+}
 
 export default function LeetSpeakTranslator() {
   const [input, setInput] = useState('');
@@ -78,7 +103,7 @@ export default function LeetSpeakTranslator() {
   const result = useMemo(() => {
     if (!input.trim()) return null;
     const dir: Exclude<Mode, 'auto'> = mode === 'auto' ? (looksLikeLeet(input) ? 'decode' : 'encode') : mode;
-    return { out: dir === 'encode' ? encode(input) : decode(input), dir, seed };
+    return { out: dir === 'encode' ? encode(input, seed) : decode(input), dir };
   }, [input, mode, seed]);
 
   const dir = result?.dir;

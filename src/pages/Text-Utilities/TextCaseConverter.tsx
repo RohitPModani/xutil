@@ -4,9 +4,24 @@ import { ClearButton, Field, KeyValueList, Output, Panel, TextArea, TwoPane } fr
 
 const cap = (w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
 
-/** Every variant of `text`. Word-joined cases split on whitespace, "-" and "_". */
+/** Words of `text`: split on whitespace, `_ - . /` and camelCase/PascalCase boundaries ("XMLParser" → XML, Parser). */
+function splitWords(text: string) {
+  return text
+    .replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, '$1 $2')
+    .replace(/(\p{Lu}+)(\p{Lu}\p{Ll})/gu, '$1 $2')
+    .split(/[\s_\-./]+/)
+    .filter(Boolean);
+}
+
+const titleCase = (text: string) => text.toLowerCase().replace(/(^|\s)(\p{L})/gu, (_, p: string, c: string) => p + c.toUpperCase());
+
+/** Capital after the start of the text, a line break, or sentence-ending punctuation. */
+const sentenceCase = (text: string) =>
+  text.toLowerCase().replace(/(^\s*|[.!?]\s+|\n\s*)(\p{L})/gu, (_, p: string, c: string) => p + c.toUpperCase());
+
+/** Every variant of `text`. */
 function cases(text: string) {
-  const words = text.trim().split(/[\s_-]+/).filter(Boolean);
+  const words = splitWords(text);
   const lower = words.map((w) => w.toLowerCase());
   const pascal = words.map(cap).join('');
   return [
@@ -18,8 +33,8 @@ function cases(text: string) {
     { label: 'dot.case', value: lower.join('.') },
     { label: 'path/case', value: lower.join('/') },
     { label: 'Header-Case', value: words.map(cap).join('-') },
-    { label: 'Title Case', value: text.replace(/\b\w/g, (c) => c.toUpperCase()) },
-    { label: 'Sentence case', value: text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() },
+    { label: 'Title Case', value: titleCase(text) },
+    { label: 'Sentence case', value: sentenceCase(text) },
     { label: 'lowercase', value: text.toLowerCase() },
     { label: 'UPPERCASE', value: text.toUpperCase() },
     { label: 'mOcKiNg cAsE', value: [...text].map((c, i) => (i % 2 ? c.toUpperCase() : c.toLowerCase())).join('') },

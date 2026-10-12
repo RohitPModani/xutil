@@ -2,27 +2,44 @@ import { useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
 import { Checkbox, ClearButton, Field, Output, Panel, Stat, TextArea, Toolbar, TwoPane } from '../../ui';
 
+interface Options {
+  ignoreCase: boolean;
+  trim: boolean;
+  /** Blank lines pass through untouched instead of being dropped. */
+  keepBlank: boolean;
+}
+
+function dedupe(input: string, { ignoreCase, trim, keepBlank }: Options) {
+  const lines = input.split('\n');
+  const seen = new Set<string>();
+  const out: string[] = [];
+  let duplicates = 0;
+  let blanks = 0;
+  for (const line of lines) {
+    if (line.trim() === '') {
+      if (keepBlank) out.push(line);
+      else blanks++;
+      continue;
+    }
+    let key = trim ? line.trim() : line;
+    if (ignoreCase) key = key.toLowerCase();
+    if (seen.has(key)) {
+      duplicates++;
+      continue;
+    }
+    seen.add(key);
+    out.push(line);
+  }
+  return { out: out.join('\n'), before: lines.length, after: out.length, duplicates, blanks };
+}
+
 export default function DuplicateLineRemover() {
   const [input, setInput] = useState('');
   const [ignoreCase, setIgnoreCase] = useState(false);
   const [trim, setTrim] = useState(true);
   const [keepBlank, setKeepBlank] = useState(false);
 
-  const result = useMemo(() => {
-    if (!input) return null;
-    const lines = input.split('\n');
-    const seen = new Set<string>();
-    const out: string[] = [];
-    for (const line of lines) {
-      if (!keepBlank && line.trim() === '') continue;
-      let key = trim ? line.trim() : line;
-      if (ignoreCase) key = key.toLowerCase();
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push(line);
-    }
-    return { out: out.join('\n'), before: lines.length, after: out.length };
-  }, [input, ignoreCase, trim, keepBlank]);
+  const result = useMemo(() => (input ? dedupe(input, { ignoreCase, trim, keepBlank }) : null), [input, ignoreCase, trim, keepBlank]);
 
   return (
     <ToolPage id="duplicate_line_remover">
@@ -48,10 +65,11 @@ export default function DuplicateLineRemover() {
         </Toolbar>
 
         {result && (
-          <div className="mt-4 grid grid-cols-3 gap-3 sm:max-w-md">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:max-w-xl">
             <Stat label="Lines in" value={result.before.toLocaleString()} />
             <Stat label="Lines out" value={result.after.toLocaleString()} />
-            <Stat label="Removed" value={(result.before - result.after).toLocaleString()} />
+            <Stat label="Duplicates removed" value={result.duplicates.toLocaleString()} />
+            <Stat label="Blank lines removed" value={result.blanks.toLocaleString()} />
           </div>
         )}
       </Panel>

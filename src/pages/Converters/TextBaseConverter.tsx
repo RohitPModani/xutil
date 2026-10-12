@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, EmptyState, Field, KeyValueList, Output, Panel, Segmented, Select, TextArea, TwoPane } from '../../ui';
+import { ClearButton, EmptyState, Field, KeyValueList, Output, Panel, Segmented, Select, TextArea, TwoPane } from '../../ui';
 import { getErrorMessage } from '../../utils/errors';
 
 type Mode = 'encode' | 'decode';
+type Encoding = 'utf8' | 'utf16';
 
 const BASES = [
   { value: 2, label: 'Binary' },
@@ -13,39 +14,60 @@ const BASES = [
 ];
 
 const DIGITS = '0123456789abcdef';
+const MAX_CODE_POINT = 0x10ffff;
 
-/** Each character's UTF-16 code unit in the given base, space separated. */
-const encode = (text: string, base: number) =>
-  Array.from(text, (ch) => ch.charCodeAt(0).toString(base).toUpperCase()).join(' ');
+/** Width of one fixed-size unit in the base, for splitting unseparated input. */
+const unitWidth = (base: number, encoding: Encoding) => (base === 2 ? 8 : base === 16 ? 2 : 0) * (encoding === 'utf16' ? 2 : 1);
 
-function decode(input: string, base: number): string {
+/** Each UTF-8 byte or UTF-16 code unit in the given base, space separated. */
+const encode = (text: string, base: number, encoding: Encoding) => {
+  const units = encoding === 'utf8' ? Array.from(new TextEncoder().encode(text)) : Array.from({ length: text.length }, (_, i) => text.charCodeAt(i));
+  return units.map((u) => u.toString(base).toUpperCase()).join(' ');
+};
+
+function decode(input: string, base: number, encoding: Encoding): string {
   const valid = new RegExp(`^[${DIGITS.slice(0, base)}]+$`, 'i');
-  return input
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((token) => {
-      if (!valid.test(token)) throw new Error(`"${token}" is not a valid base-${base} number.`);
-      return String.fromCharCode(parseInt(token, base));
-    })
-    .join('');
+  let tokens = input.split(/[\s,]+/).filter(Boolean);
+  const width = unitWidth(base, encoding);
+  // "48656C6C6F" with no separators: cut into fixed-width units.
+  if (tokens.length === 1 && width && tokens[0].length > width && tokens[0].length % width === 0) {
+    tokens = tokens[0].match(new RegExp(`.{${width}}`, 'g')) ?? tokens;
+  }
+  const values = tokens.map((token) => {
+    if (!valid.test(token)) throw new Error(`"${token}" is not a valid base-${base} number.`);
+    const n = parseInt(token, base);
+    if (encoding === 'utf8' && n > 0xff) throw new Error(`"${token}" is above FF, so it is not a UTF-8 byte.`);
+    if (n > MAX_CODE_POINT) throw new Error(`"${token}" is above 10FFFF, the last Unicode code point.`);
+    return n;
+  });
+  if (encoding === 'utf8') {
+    try {
+      return new TextDecoder('utf-8', { fatal: true }).decode(new Uint8Array(values));
+    } catch {
+      throw new Error('Those bytes are not a valid UTF-8 sequence.');
+    }
+  }
+  // Surrogate pairs join naturally; a value above FFFF is taken as a code point.
+  return values.map((n) => String.fromCodePoint(n)).join('');
 }
 
 export default function TextBaseConverter() {
   const [mode, setMode] = useState<Mode>('encode');
   const [input, setInput] = useState('');
   const [base, setBase] = useState('2');
+  const [encoding, setEncoding] = useState<Encoding>('utf8');
 
   const result = useMemo(() => {
     if (!input.trim()) return null;
     if (mode === 'encode') {
-      return { rows: BASES.map((b) => ({ label: b.label, value: encode(input, b.value) })), text: '', error: '' };
+      return { rows: BASES.map((b) => ({ label: b.label, value: encode(input, b.value, encoding) })), text: '', error: '' };
     }
     try {
-      return { rows: [], text: decode(input, Number(base)), error: '' };
+      return { rows: [], text: decode(input, Number(base), encoding), error: '' };
     } catch (e) {
       return { rows: [], text: '', error: getErrorMessage(e, 'Could not decode the input.') };
     }
-  }, [input, mode, base]);
+  }, [input, mode, base, encoding]);
 
   const rows = result?.rows ?? [];
 
@@ -64,8 +86,18 @@ export default function TextBaseConverter() {
                 setInput('');
               }}
               options={[
-                { value: 'encode', label: 'Text → bytes' },
-                { value: 'decode', label: 'Bytes → text' },
+                { value: 'encode', label: 'Text → codes' },
+                { value: 'decode', label: 'Codes → text' },
+              ]}
+            />
+            <Segmented
+              size="sm"
+              label="Encoding"
+              value={encoding}
+              onChange={setEncoding}
+              options={[
+                { value: 'utf8', label: 'UTF-8 bytes' },
+                { value: 'utf16', label: 'UTF-16 units' },
               ]}
             />
             <ClearButton onClick={() => setInput('')} disabled={!input} />
@@ -88,7 +120,14 @@ export default function TextBaseConverter() {
             <Field
               label={mode === 'encode' ? 'Text' : 'Numbers'}
               htmlFor="tb-input"
-              hint={mode === 'encode' ? 'Each character becomes its character code.' : 'One number per character, separated by spaces.'}
+              hint={
+                mode === 'encode'
+                  ? encoding === 'utf8'
+                    ? 'Each UTF-8 byte becomes one number; é gives two, most emoji four.'
+                    : 'Each UTF-16 code unit becomes one number; emoji give a surrogate pair.'
+                  : 'Numbers separated by spaces or commas. Unseparated binary or hex is cut into fixed-width units.'
+              }
+              error={result?.error}
             >
               <TextArea
                 id="tb-input"
@@ -98,7 +137,6 @@ export default function TextBaseConverter() {
                 rows={6}
                 mono={mode === 'decode'}
                 autoFocus
-                aria-invalid={Boolean(result?.error) || undefined}
               />
             </Field>
           </div>
@@ -110,11 +148,6 @@ export default function TextBaseConverter() {
             <Output label="Text" value={result?.text ?? ''} rows={6} mono={false} />
           )}
         </TwoPane>
-        {result?.error && (
-          <Callout tone="error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
       </Panel>
     </ToolPage>
   );

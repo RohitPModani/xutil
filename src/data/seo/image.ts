@@ -19,7 +19,7 @@ export const imageSeo: Record<string, SEODescriptionContent> = {
 - Error correction: L (7%), M (15%, default), Q (25%) or H (30%). The percentage is how much of the code can be damaged or covered and still scan.
 - Foreground and background: six-digit hex colours, default black on white. Keep strong contrast; scanners expect dark modules on a light background.
 - Quiet zone: one module on every side.
-- Payload formats: vCard 3.0 for contacts, \`mailto:\` for email, \`smsto:\` for SMS, \`tel:\` for phone, \`WIFI:\` for networks (WPA/WPA2, WEP or open, with a hidden-network flag), \`https://wa.me/\` for WhatsApp, and a VEVENT block for events with times in UTC.
+- Payload formats: vCard 3.0 for contacts, \`mailto:\` for email, \`sms:\` with a \`?body=\` query for SMS, \`tel:\` for phone, \`WIFI:\` for networks (WPA/WPA2, WEP or open, with a hidden-network flag; backslash, semicolon, comma, colon and double quote in the name or password are escaped), \`https://wa.me/\` for WhatsApp, and a VEVENT block for events with times in UTC.
 
 The tool does not shorten links, track scans or add a logo.
 
@@ -159,19 +159,19 @@ The image is decoded in the browser from a local object URL. No request is made,
   },
   colorPicker: {
     title: 'Colour Picker',
-    seo: 'Colour Picker: Convert HEX to RGB and HSL | XUtil',
-    body: `A colour picker that converts a HEX colour code to RGB and HSL. Choose a colour with the swatch or type a six-digit hex value and copy it in each CSS format.
+    seo: 'Colour Picker: Convert HEX, RGB, HSL, HSV and CMYK | XUtil',
+    body: `A colour picker that converts between HEX, RGB, HSL, HSV and CMYK. Pick with the swatch or type a hex, rgb() or hsl() value and copy each format.
 
 ## How to use
 
-1. Click the swatch to open your browser's native colour picker, or type a hex code such as #2563EB.
-2. The HEX, RGB and HSL values update as you type, each with a Copy button; Copy on the panel copies all three lines.
+1. Click the swatch to open your browser's native colour picker, or type a colour such as #2563EB, #25E, rgb(37, 99, 235) or hsl(221, 83%, 53%).
+2. The HEX, RGB, HSL, HSV and CMYK values update as you type, each with a Copy button; Copy on the panel copies all five lines.
 3. The large swatch beneath the input shows the colour at full size.
 
 ## What it supports
 
-- Input: a six-digit hex code (#RRGGBB). Three-digit shorthand and alpha are not accepted.
-- Output: HEX in upper case, \`rgb(r, g, b)\` with values 0 to 255, and \`hsl(h, s%, l%)\` with hue in degrees and saturation and lightness rounded to whole percentages.
+- Input: #RGB, #RRGGBB, #RRGGBBAA, rgb(), rgba(), hsl() or hsla(). Alpha is accepted but dropped from the output.
+- Output: HEX in upper case, \`rgb(r, g, b)\` with values 0 to 255, \`hsl(h, s%, l%)\` and \`hsv(h, s%, v%)\` with hue in degrees and percentages rounded to whole numbers, and \`cmyk(c%, m%, y%, k%)\`.
 - Default colour: #2563EB.
 
 The tool does not pick colours from an uploaded image, build palettes or check contrast ratios.
@@ -182,6 +182,8 @@ The tool does not pick colours from an uploaded image, build palettes or check c
 #2563EB
 → rgb(37, 99, 235)
 → hsl(221, 83%, 53%)
+→ hsv(221, 84%, 92%)
+→ cmyk(84%, 58%, 0%, 8%)
 \`\`\`
 
 ## Privacy
@@ -211,7 +213,7 @@ Conversion runs in the browser. No request is made, and nothing is stored.`,
 
 1. Choose an image or drop it on the page. Any format your browser can display works, up to 5 MB; a square PNG or SVG with a transparent background gives the best result.
 2. The icons appear in a list as soon as the image loads, each with a preview and its own Download button.
-3. Download favicon.ico for the classic \`<link rel="icon">\`, favicon-180x180.png as the apple-touch-icon and favicon-192x192.png for Android and web app manifests.
+3. Download favicon.ico for the classic \`<link rel="icon">\`, apple-touch-icon.png for iOS and android-chrome-192x192.png for Android and web app manifests. Copy the HTML snippet beneath the list into your \`<head>\`.
 
 ## What it produces
 
@@ -219,21 +221,21 @@ Conversion runs in the browser. No request is made, and nothing is stored.`,
 | --- | --- |
 | favicon.ico | Contains 16, 32 and 48 px frames; browsers pick the one they need |
 | favicon-16x16.png, 32x32, 48x48 | Browser tabs, bookmarks and the Windows taskbar |
-| favicon-180x180.png | apple-touch-icon for iOS home screens |
-| favicon-192x192.png | Android home screen and \`manifest.json\` |
+| apple-touch-icon.png | 180 px icon for iOS home screens |
+| android-chrome-192x192.png | Android home screen and \`manifest.json\` |
 
 - The ICO is a real multi-image container with PNG-compressed frames, which every current browser and Windows Vista or later read.
-- The image is scaled to a square at each size. A non-square source is stretched, not cropped, so crop it first.
+- A non-square source is centre-cropped to a square, then scaled down in steps with high-quality smoothing.
 - Transparency is kept in the PNGs and the ICO.
 
-The tool does not generate the HTML link tags, a manifest file, or 512 px or maskable icons.
+The tool does not generate a manifest file, or 512 px or maskable icons.
 
 ## Example
 
 \`\`\`
 logo.png (1024×1024)
 → favicon.ico (16+32+48), favicon-16x16.png, favicon-32x32.png,
-  favicon-48x48.png, favicon-180x180.png, favicon-192x192.png
+  favicon-48x48.png, apple-touch-icon.png, android-chrome-192x192.png
 \`\`\`
 
 ## Privacy
@@ -257,22 +259,22 @@ Resizing uses a canvas in the browser. No request is made, and nothing is stored
   imageCompressor: {
     title: 'Image Compressor',
     seo: 'Image Compressor: Shrink a JPEG, PNG or WebP | XUtil',
-    body: `An image compressor that shrinks a JPEG, PNG or WebP in your browser. Set a JPEG quality and a maximum size, compare file sizes and download the result.
+    body: `An image compressor that shrinks a JPEG, PNG or WebP in your browser. Pick the output format, quality and maximum size, compare file sizes and download.
 
 ## How to use
 
 1. Choose an image or drop it on the page, up to 10 MB.
-2. Move the quality slider and set the longest side. The image is recompressed as you change them, and the Original, Compressed and Saved figures update.
-3. Compare the two previews and click Download. The file is saved as \`<name>-compressed.jpg\`.
+2. Pick the output format (it defaults to the input's), move the quality slider and set the longest side. The image is recompressed as you change them, and the Original, Compressed and Saved figures update.
+3. Compare the two previews and click Download. The file is saved as \`<name>-compressed.jpg\`, \`.png\` or \`.webp\`.
 
 ## Options
 
 - Quality: 10% to 100% in 5% steps, default 80%. Lower is smaller; around 70 to 85% is usually hard to tell from the original.
-- Longest side: default 1920 px, minimum 16. Images larger than this are scaled down proportionally; smaller images are never enlarged.
-- Output is always JPEG, whatever the input format. Transparent areas in a PNG become black, so this is not the right tool for images that need transparency.
+- Longest side: default 1920 px, from 16 to 8192. Images larger than this are scaled down proportionally; smaller images are never enlarged.
+- Output format: JPEG, PNG or WebP. JPEG has no transparency, so transparent areas become white; PNG is lossless and ignores the quality setting. If the result is larger than the original, the page says so.
 - Metadata such as EXIF orientation, location and camera details is not copied to the output.
 
-The tool does not produce PNG or WebP output, batch-process folders or crop.
+The tool does not batch-process folders or crop.
 
 ## Example
 
@@ -313,18 +315,18 @@ Compression uses a canvas in the browser. The image is never uploaded, no reques
 
 ## How to use
 
-1. Switch between Linear and Radial. Linear offers a direction (to right, to left, to bottom, to top, to bottom right, 45° or 135°); radial offers the centre point (centre, top, bottom, left or right).
-2. Set each stop's colour and its position as a percentage. Add stop appends a stop 10% after the last one, up to ten; a stop can be removed while more than two remain.
+1. Switch between Linear and Radial. Linear offers a direction (to right, to left, to bottom, to top, to bottom right, or a custom angle in degrees); radial offers the centre point (centre, top, bottom, left or right).
+2. Set each stop's colour and its position as a percentage. Add stop inserts a white stop in the middle of the widest gap, up to ten; a stop can be removed while more than two remain.
 3. The preview and the CSS update as you edit. Copy the rule, or download it as gradient.css.
 
 ## Options
 
-- Colours must be six-digit hex values; the rule is withheld until every stop is valid.
+- Colours are six-digit hex values, or eight digits to include alpha; the rule is withheld until every stop is valid.
 - Positions run from 0 to 100% and are sorted before the rule is written, so stop order in the list does not matter.
 - Radial gradients are always circular (\`circle at <position>\`).
 - Default: linear, to right, #FF0000 at 0% to #0000FF at 100%.
 
-The tool does not produce conic gradients, repeating gradients, angles other than the two listed, or alpha in stop colours.
+The tool does not produce conic or repeating gradients.
 
 ## Example
 
@@ -374,7 +376,7 @@ The rule is built in the browser. No request is made, and nothing is stored.`,
 | Colour | #RRGGBB or #RRGGBBAA | #000000 |
 | Inset | on or off | off |
 
-The rule is written as \`box-shadow: [inset] x y blur spread colour;\`. The tool produces one shadow; for layered shadows, generate each and join them with commas yourself.
+The rule is written as \`box-shadow: [inset] x y blur spread colour;\`. Up to five layers can be added and edited one at a time; the rule joins them with commas.
 
 ## Example
 

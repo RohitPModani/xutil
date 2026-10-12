@@ -49,9 +49,11 @@ export default function LoremIpsumGenerator() {
   const [html, setHtml] = useState(false);
   const [text, setText] = useState('');
 
-  const n = Math.min(MAX[unit], Math.max(1, Number(count) || 1));
+  const n = Math.min(MAX[unit], Math.max(1, Math.floor(Number(count)) || 1));
+  // The <p> option only exists for paragraphs; it must not leak into the other units.
+  const asHtml = html && unit === 'paragraphs';
 
-  const regenerate = useCallback(() => setText(generate(unit, n, opener, html)), [unit, n, opener, html]);
+  const regenerate = useCallback(() => setText(generate(unit, n, opener, asHtml)), [unit, n, opener, asHtml]);
 
   // Text on load and whenever an option changes; "New" reshuffles.
   useEffect(regenerate, [regenerate]);
@@ -82,6 +84,7 @@ export default function LoremIpsumGenerator() {
                 type="number"
                 min={1}
                 max={MAX[unit]}
+                step={1}
                 inputMode="numeric"
                 value={count}
                 onChange={(e) => setCount(e.target.value)}
@@ -97,7 +100,14 @@ export default function LoremIpsumGenerator() {
               <GenerateButton label="New" onClick={regenerate} />
             </Toolbar>
           </div>
-          <Output label={`${n} ${unit}`} value={text} rows={12} mono={false} fileName={html ? 'lorem.html' : 'lorem.txt'} />
+          <Output
+            label={`${n} ${n === 1 ? unit.slice(0, -1) : unit}`}
+            value={text}
+            rows={12}
+            mono={false}
+            fileName={asHtml ? 'lorem.html' : 'lorem.txt'}
+            mime={asHtml ? 'text/html' : 'text/plain'}
+          />
         </div>
       </Panel>
     </ToolPage>

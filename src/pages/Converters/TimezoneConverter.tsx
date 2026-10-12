@@ -3,8 +3,8 @@ import { DateTime } from 'luxon';
 import ReactSelect, { type GroupBase, type Props as SelectProps } from 'react-select';
 import { ArrowLeftRight, X } from 'lucide-react';
 import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, EmptyState, Field, IconButton, Input, KeyValueList, Output, Panel, cn } from '../../ui';
-import { CITY_TIMEZONES, type TimezoneOption } from '../../data/cityTimezones';
+import { Button, Callout, ClearButton, EmptyState, Field, IconButton, Input, KeyValueList, Output, Panel, cn } from '../../ui';
+import { CITY_TIMEZONES, ZONE_ALIASES, type TimezoneOption } from '../../data/cityTimezones';
 
 /* ---- Time helpers ------------------------------------------------------ */
 
@@ -15,27 +15,59 @@ const MAX_TARGETS = 10;
 const STORAGE_KEY = 'savedTimezones';
 
 const ALL_ZONES = CITY_TIMEZONES.flatMap((g) => g.options);
-const zoneByValue = (value: string) => ALL_ZONES.find((z) => z.value === value) ?? null;
+const UTC = ALL_ZONES.find((z) => z.value === 'UTC')!;
+
+/**
+ * Several cities share one IANA zone, so prefer the option named after the
+ * zone itself (America/New_York → "New York City", not "Birmingham").
+ * Unknown zones get a synthetic option rather than falling back to UTC.
+ */
+const zoneOption = (name: string): TimezoneOption => {
+  const value = ZONE_ALIASES[name] ?? name;
+  const city = (value.split('/').pop() ?? '').replace(/_/g, ' ').toLowerCase();
+  const matches = ALL_ZONES.filter((z) => z.value === value);
+  return matches.find((z) => z.label.toLowerCase().includes(city)) ?? matches[0] ?? { value, label: value };
+};
 
 const nowInput = () => DateTime.now().toFormat(INPUT_FORMAT);
 const laterInput = () => DateTime.now().plus({ hours: 1 }).toFormat(INPUT_FORMAT);
+const localZone = () => zoneOption(DateTime.local().zoneName || 'UTC');
 
-const localZone = () => {
-  const zone = DateTime.local().zoneName || 'UTC';
-  // Older ICU builds still report the deprecated alias for India.
-  const z = zoneByValue(zone === 'Asia/Calcutta' ? 'Asia/Kolkata' : zone);
-  return z ?? zoneByValue('UTC');
+const formatters = new Map<string, Intl.DateTimeFormat>();
+const formatterFor = (zone: string, timeStyle: 'short' | 'medium') => {
+  const key = `${zone}|${timeStyle}`;
+  let f = formatters.get(key);
+  if (!f) {
+    f = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle, timeZone: zone });
+    formatters.set(key, f);
+  }
+  return f;
 };
 
-const formatFull = (dt: DateTime) =>
-  new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short', timeZone: dt.zoneName ?? 'UTC' }).format(
-    dt.toJSDate()
-  );
+const formatFull = (dt: DateTime) => formatterFor(dt.zoneName ?? 'UTC', 'short').format(dt.toJSDate());
+/** "EDT (UTC-04:00)"; falls back to "GMT+5:30"-style names where ICU has no abbreviation. */
+const zoneTag = (dt: DateTime) => `${dt.toFormat('ZZZZ')} (UTC${dt.toFormat('ZZ')})`;
 
-/** Parse a datetime-local value as wall-clock time in `zone`; null when unparseable. */
-const parseIn = (value: string, zone: string) => {
-  const dt = DateTime.fromISO(value, { zone });
-  return dt.isValid ? dt : null;
+type Parsed = { dt: DateTime; warning: string } | { error: string };
+
+/**
+ * Parse a datetime-local value as wall-clock time in `zone`. A time inside a
+ * spring-forward gap does not exist (Luxon would silently shift it); a time
+ * inside a fall-back overlap exists twice, so the pick is reported.
+ */
+const parseIn = (value: string, zone: TimezoneOption): Parsed => {
+  const dt = DateTime.fromISO(value, { zone: zone.value });
+  const wall = DateTime.fromISO(value, { zone: 'utc' });
+  if (!dt.isValid || !wall.isValid) return { error: 'That date and time could not be read.' };
+  const key = wall.toFormat(INPUT_FORMAT);
+  if (dt.toFormat(INPUT_FORMAT) !== key) {
+    return { error: `${wall.toFormat('HH:mm')} does not exist in ${zone.label} on that date because clocks go forward.` };
+  }
+  const twice = [dt.minus({ hours: 1 }), dt.plus({ hours: 1 })].some((d) => d.toFormat(INPUT_FORMAT) === key);
+  return {
+    dt,
+    warning: twice ? `${wall.toFormat('HH:mm')} occurs twice in ${zone.label} on that date because clocks go back. The ${dt.toFormat('ZZZZ')} occurrence is used.` : '',
+  };
 };
 
 const loadSaved = (): TimezoneOption[] => {
@@ -91,6 +123,8 @@ function ZoneSelect<IsMulti extends boolean = false>(props: ZoneSelectProps<IsMu
   return (
     <ReactSelect<TimezoneOption, IsMulti, GroupBase<TimezoneOption>>
       options={CITY_TIMEZONES}
+      // Several cities share a zone value; labels are unique.
+      getOptionValue={(o) => o.label}
       unstyled
       classNames={selectClassNames}
       placeholder="Search a city"
@@ -129,7 +163,7 @@ function SavedZones() {
           inputId="tz-saved-add"
           value={null}
           isDisabled={full}
-          isOptionDisabled={(o) => saved.some((z) => z.value === o.value)}
+          isOptionDisabled={(o) => saved.some((z) => z.label === o.label)}
           onChange={(o) => o && setSaved((s) => [...s, o])}
         />
       </Field>
@@ -139,13 +173,11 @@ function SavedZones() {
           {saved.map((z) => {
             const dt = DateTime.fromJSDate(now).setZone(z.value);
             return (
-              <li key={z.value} className="flex items-center gap-3 px-3 py-2">
+              <li key={z.label} className="flex items-center gap-3 px-3 py-2">
                 <span className="min-w-0 flex-1 truncate text-sm text-ink">{z.label}</span>
-                <span className="font-mono text-[13px] tabular-nums text-ink">
-                  {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'medium', timeZone: z.value }).format(now)}
-                </span>
+                <span className="font-mono text-[13px] tabular-nums text-ink">{formatterFor(z.value, 'medium').format(now)}</span>
                 <span className="hidden w-20 text-right font-mono text-xs text-muted sm:inline">UTC{dt.toFormat('ZZ')}</span>
-                <IconButton size="sm" label={`Remove ${z.label}`} onClick={() => setSaved((s) => s.filter((x) => x.value !== z.value))}>
+                <IconButton size="sm" label={`Remove ${z.label}`} onClick={() => setSaved((s) => s.filter((x) => x.label !== z.label))}>
                   <X className="h-3.5 w-3.5" aria-hidden="true" />
                 </IconButton>
               </li>
@@ -162,22 +194,16 @@ function SavedZones() {
 /* ---- One zone to another ----------------------------------------------- */
 
 function SingleConversion() {
-  const [datetime, setDatetime] = useState(nowInput);
+  const [seed, setSeed] = useState(nowInput);
+  const [datetime, setDatetime] = useState(seed);
   const [from, setFrom] = useState<TimezoneOption | null>(localZone);
-  const [to, setTo] = useState<TimezoneOption | null>(() => zoneByValue('UTC'));
+  const [to, setTo] = useState<TimezoneOption | null>(UTC);
 
   const result = useMemo(() => {
     if (!datetime || !from || !to) return null;
-    const src = parseIn(datetime, from.value);
-    if (!src) return { error: `That date and time is not valid in ${from.label}.` };
-    const dst = src.setZone(to.value);
-    const toLocal = parseIn(datetime, to.value);
-    return {
-      error: '',
-      converted: dst,
-      fromDst: src.isInDST,
-      toDst: Boolean(toLocal?.isInDST),
-    };
+    const src = parseIn(datetime, from);
+    if ('error' in src) return { error: src.error, warning: '', converted: null, source: null };
+    return { error: '', warning: src.warning, converted: src.dt.setZone(to.value), source: src.dt };
   }, [datetime, from, to]);
 
   const swap = () => {
@@ -187,33 +213,42 @@ function SingleConversion() {
   };
 
   const reset = () => {
-    setDatetime(nowInput());
+    const s = nowInput();
+    setSeed(s);
+    setDatetime(s);
     setFrom(localZone());
-    setTo(zoneByValue('UTC'));
+    setTo(UTC);
   };
+  const pristine = datetime === seed && from?.value === localZone().value && to?.value === 'UTC';
 
-  const rows = result?.converted
-    ? [
-        { label: 'Converted', value: formatFull(result.converted) },
-        { label: 'ISO', value: result.converted.toISO() ?? '' },
-        { label: 'From zone', value: result.fromDst ? 'Daylight saving time' : 'Standard time', mono: false },
-        { label: 'To zone', value: result.toDst ? 'Daylight saving time' : 'Standard time', mono: false },
-      ]
-    : [];
+  const dst = (d: DateTime) => (d.isInDST ? 'Daylight saving time' : 'Standard time');
+  const rows =
+    result?.converted && result.source
+      ? [
+          { label: 'Converted', value: formatFull(result.converted) },
+          { label: 'Zone', value: zoneTag(result.converted) },
+          { label: 'ISO', value: result.converted.toISO() ?? '' },
+          { label: 'From zone', value: `${dst(result.source)}, ${zoneTag(result.source)}`, mono: false },
+          { label: 'To zone', value: `${dst(result.converted)}, ${zoneTag(result.converted)}`, mono: false },
+        ]
+      : [];
 
   return (
-    <Panel title="Convert" actions={<ClearButton label="Reset" onClick={reset} />}>
+    <Panel
+      title="Convert"
+      actions={
+        <>
+          <Button size="sm" onClick={() => setDatetime(nowInput())}>
+            Now
+          </Button>
+          <ClearButton label="Reset" onClick={reset} disabled={pristine} />
+        </>
+      }
+    >
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-4">
-          <Field label="Date and time" htmlFor="tz-single-time" hint="Entered as wall-clock time in the from zone.">
-            <Input
-              id="tz-single-time"
-              type="datetime-local"
-              value={datetime}
-              onChange={(e) => setDatetime(e.target.value)}
-              autoFocus
-              aria-invalid={Boolean(result?.error) || undefined}
-            />
+          <Field label="Date and time" htmlFor="tz-single-time" hint="Entered as wall-clock time in the from zone." error={result?.error}>
+            <Input id="tz-single-time" type="datetime-local" value={datetime} onChange={(e) => setDatetime(e.target.value)} autoFocus />
           </Field>
           <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
             <Field label="From" htmlFor="tz-single-from">
@@ -231,9 +266,9 @@ function SingleConversion() {
           {rows.length ? <KeyValueList items={rows} /> : <EmptyState>Pick a time and two zones</EmptyState>}
         </Output>
       </div>
-      {result?.error && (
-        <Callout tone="error" className="mt-4">
-          {result.error}
+      {result?.warning && (
+        <Callout tone="info" className="mt-4">
+          {result.warning}
         </Callout>
       )}
     </Panel>
@@ -244,46 +279,65 @@ function SingleConversion() {
 
 function MultiConversion({ range }: { range: boolean }) {
   const id = range ? 'tz-range' : 'tz-multi';
-  const [start, setStart] = useState(nowInput);
-  const [end, setEnd] = useState(laterInput);
+  const [seed, setSeed] = useState(() => ({ start: nowInput(), end: laterInput() }));
+  const [start, setStart] = useState(seed.start);
+  const [end, setEnd] = useState(seed.end);
   const [base, setBase] = useState<TimezoneOption | null>(localZone);
   const [targets, setTargets] = useState<readonly TimezoneOption[]>([]);
 
   const result = useMemo(() => {
     if (!base || !start || (range && !end)) return null;
-    const s = parseIn(start, base.value);
-    if (!s) return { error: 'The start date and time is not valid.' };
-    const e = range ? parseIn(end, base.value) : null;
-    if (range && !e) return { error: 'The end date and time is not valid.' };
-    if (e && e < s) return { error: 'The end must be after the start.' };
-    const rows = targets.map((z) => ({
-      label: z.label,
-      value: e ? `${formatFull(s.setZone(z.value))} – ${formatFull(e.setZone(z.value))}` : formatFull(s.setZone(z.value)),
-    }));
-    return { error: '', rows };
+    const s = parseIn(start, base);
+    if ('error' in s) return { field: 'start', error: s.error, warning: '', rows: [] };
+    const e = range ? parseIn(end, base) : null;
+    if (e && 'error' in e) return { field: 'end', error: e.error, warning: '', rows: [] };
+    if (e && e.dt < s.dt) return { field: 'end', error: 'The end must be after the start.', warning: '', rows: [] };
+    const rows = targets.map((z) => {
+      const a = s.dt.setZone(z.value);
+      const b = e?.dt.setZone(z.value);
+      return { label: z.label, value: `${formatFull(a)}${b ? ` – ${formatFull(b)}` : ''} ${zoneTag(b ?? a)}` };
+    });
+    return { field: '', error: '', warning: [s.warning, e?.warning].filter(Boolean).join(' '), rows };
   }, [start, end, base, targets, range]);
 
-  const clear = () => {
+  const now = () => {
     setStart(nowInput());
     setEnd(laterInput());
+  };
+  const clear = () => {
+    const next = { start: nowInput(), end: laterInput() };
+    setSeed(next);
+    setStart(next.start);
+    setEnd(next.end);
     setTargets([]);
   };
+  const pristine = start === seed.start && end === seed.end && !targets.length;
 
   const atCap = targets.length >= MAX_TARGETS;
   const rows = result?.rows ?? [];
-  const invalid = Boolean(result?.error) || undefined;
+  const errorFor = (field: string) => (result?.field === field ? result.error : undefined);
 
   return (
-    <Panel title={range ? 'Convert a range' : 'Convert to many zones'} actions={<ClearButton onClick={clear} />}>
+    <Panel
+      title={range ? 'Convert a range' : 'Convert to many zones'}
+      actions={
+        <>
+          <Button size="sm" onClick={now}>
+            Now
+          </Button>
+          <ClearButton onClick={clear} disabled={pristine} />
+        </>
+      }
+    >
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-4">
           <div className={cn('grid gap-4', range && 'sm:grid-cols-2')}>
-            <Field label={range ? 'Start' : 'Date and time'} htmlFor={`${id}-start`}>
-              <Input id={`${id}-start`} type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} aria-invalid={invalid} />
+            <Field label={range ? 'Start' : 'Date and time'} htmlFor={`${id}-start`} error={errorFor('start')}>
+              <Input id={`${id}-start`} type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} />
             </Field>
             {range && (
-              <Field label="End" htmlFor={`${id}-end`}>
-                <Input id={`${id}-end`} type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} aria-invalid={invalid} />
+              <Field label="End" htmlFor={`${id}-end`} error={errorFor('end')}>
+                <Input id={`${id}-end`} type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} />
               </Field>
             )}
           </div>
@@ -309,9 +363,9 @@ function MultiConversion({ range }: { range: boolean }) {
           {rows.length ? <KeyValueList items={rows} /> : <EmptyState>Add target zones</EmptyState>}
         </Output>
       </div>
-      {result?.error && (
-        <Callout tone="error" className="mt-4">
-          {result.error}
+      {result?.warning && (
+        <Callout tone="info" className="mt-4">
+          {result.warning}
         </Callout>
       )}
     </Panel>

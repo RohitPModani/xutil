@@ -1,23 +1,31 @@
 import { useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
-import { ClearButton, EmptyState, Field, Input, Panel } from '../../ui';
+import { Checkbox, ClearButton, EmptyState, Field, Input, Panel } from '../../ui';
 import { REGEX_CATEGORIES } from '../../data/regexConstants';
 
 export default function RegexCheatSheet() {
   const [filter, setFilter] = useState('');
+  const [jsOnly, setJsOnly] = useState(false);
 
   const sections = useMemo(() => {
     const q = filter.trim().toLowerCase();
     return REGEX_CATEGORIES.map((c) => ({
       name: c.name,
-      items: q ? c.items.filter((i) => i.pattern.toLowerCase().includes(q) || i.description.toLowerCase().includes(q)) : [...c.items],
+      items: c.items.filter(
+        (i) => (!jsOnly || i.js !== false) && (!q || i.pattern.toLowerCase().includes(q) || i.description.toLowerCase().includes(q))
+      ),
     })).filter((c) => c.items.length > 0);
-  }, [filter]);
+  }, [filter, jsOnly]);
 
   return (
     <ToolPage id="regex_cheatsheet">
       <Panel title="Find" actions={<ClearButton onClick={() => setFilter('')} disabled={!filter} />}>
-        <Field label="Filter" htmlFor="re-filter" hint="Matches the token or its description.">
+        <Field
+          label="Filter"
+          htmlFor="re-filter"
+          hint="Matches the token or its description."
+          actions={<Checkbox label="JavaScript only" checked={jsOnly} onChange={(e) => setJsOnly(e.target.checked)} />}
+        >
           <Input
             id="re-filter"
             type="search"
@@ -53,7 +61,14 @@ export default function RegexCheatSheet() {
               {section.items.map((item) => (
                 <tr key={item.pattern}>
                   <td className="w-1/3 break-all px-4 py-1.5 align-top font-mono text-[13px] text-ink">{item.pattern}</td>
-                  <td className="px-4 py-1.5 text-ink">{item.description}</td>
+                  <td className="px-4 py-1.5 text-ink">
+                    {item.description}
+                    {item.js === false && (
+                      <span className="ml-2 inline-block rounded border border-line px-1 align-middle text-[10px] font-medium uppercase tracking-wide text-muted">
+                        PCRE only
+                      </span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

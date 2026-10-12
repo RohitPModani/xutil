@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
 import { Callout, ClearButton, Field, Output, Panel, TextArea, TwoPane } from '../../ui';
 
-const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+// NFD splits accents into combining marks, which are neither letters nor
+// numbers, so "café" compares as "cafe" and any script is kept.
+const normalise = (s: string) => s.normalize('NFD').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 
 export default function PalindromeChecker() {
   const [input, setInput] = useState('');
@@ -17,7 +19,7 @@ export default function PalindromeChecker() {
     <ToolPage id="palindrome">
       <Panel title="Check" actions={<ClearButton onClick={() => setInput('')} disabled={!input} />}>
         <TwoPane>
-          <Field label="Text" htmlFor="pal-input" hint="Case, spaces and punctuation are ignored.">
+          <Field label="Text" htmlFor="pal-input" hint="Case, accents, spaces and punctuation are ignored.">
             <TextArea id="pal-input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="A man, a plan, a canal: Panama" rows={6} autoFocus mono={false} />
           </Field>
           <Output label="Normalised" value={result?.normalised ?? ''} placeholder="Letters and digits only" rows={6} />

@@ -1,4 +1,5 @@
 import UnitConverter from './UnitConverter';
+import { linearConvert } from '../../utils/units';
 
 type LengthUnit = 'mm' | 'cm' | 'm' | 'km' | 'inch' | 'ft' | 'yd' | 'mi' | 'nm';
 
@@ -11,9 +12,10 @@ const UNITS: { value: LengthUnit; label: string }[] = [
   { value: 'ft', label: 'Feet (ft)' },
   { value: 'yd', label: 'Yards (yd)' },
   { value: 'mi', label: 'Miles (mi)' },
-  { value: 'nm', label: 'Nautical Miles (nm)' },
+  { value: 'nm', label: 'Nautical Miles (nmi)' },
 ];
 
+// 1959 international yard: 1 in = 25.4 mm exactly.
 const UNIT_TO_METERS: Record<LengthUnit, number> = {
   mm: 0.001,
   cm: 0.01,
@@ -26,13 +28,6 @@ const UNIT_TO_METERS: Record<LengthUnit, number> = {
   nm: 1852,
 };
 
-function convert(value: number, unit: string): Record<string, number> {
-  if (!(unit in UNIT_TO_METERS)) throw new Error(`Unknown unit: ${unit}`);
-  const meters = value * UNIT_TO_METERS[unit as LengthUnit];
-  if (!Number.isFinite(meters)) throw new Error('The value is too large to convert.');
-  return Object.fromEntries(Object.entries(UNIT_TO_METERS).map(([k, f]) => [k, Number((meters / f).toFixed(8))]));
-}
-
 export default function LengthConverter() {
-  return <UnitConverter id="length" defaultValue="1" defaultUnit="km" units={UNITS} validationMessage="Length must be greater than zero." convert={convert} />;
+  return <UnitConverter id="length" defaultValue="1" defaultUnit="km" units={UNITS} validationMessage="Length must be greater than zero." convert={linearConvert(UNIT_TO_METERS)} />;
 }

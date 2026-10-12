@@ -4,11 +4,14 @@ import { Button, IconButton } from './Button';
 import { Callout } from './Panel';
 import { cn } from './cn';
 import { formatSize } from './format';
+import { matchesAccept } from './accept';
 
 export interface FileDropProps {
   accept: string;
   onFile: (file: File) => void;
   onClear?: () => void;
+  /** Controlled value. Pass `null` to clear the chip from outside. */
+  file?: File | null;
   label?: string;
   /** Files above this size are rejected before they can lock up the tab. */
   maxSizeMB?: number;
@@ -16,29 +19,45 @@ export interface FileDropProps {
   className?: string;
 }
 
+const describeAccept = (accept: string) =>
+  accept
+    .split(',')
+    .map((r) => r.trim())
+    .filter(Boolean)
+    .map((r) => (r.endsWith('/*') ? `${r.slice(0, -2)} files` : r))
+    .join(', ');
+
 /**
  * Click or drop. Shows the chosen file's name and size, and a way to clear it.
+ * Dropped files are checked against `accept` the same way picked ones are.
  */
-export function FileDrop({ accept, onFile, onClear, label = 'Choose a file', maxSizeMB = 5, disabled, className }: FileDropProps) {
+export function FileDrop({ accept, onFile, onClear, file: controlled, label = 'Choose a file', maxSizeMB = 5, disabled, className }: FileDropProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [internal, setInternal] = useState<File | null>(null);
+  const file = controlled === undefined ? internal : controlled;
   const [error, setError] = useState('');
   const [over, setOver] = useState(false);
   const id = useId();
 
   const take = (f: File | undefined) => {
     if (!f) return;
+    if (!matchesAccept(f, accept)) {
+      setError(`That is a ${f.type || 'file of unknown type'}. Choose ${describeAccept(accept)}.`);
+      if (inputRef.current) inputRef.current.value = '';
+      return;
+    }
     if (f.size > maxSizeMB * 1024 * 1024) {
       setError(`That file is ${formatSize(f.size)}. The limit is ${maxSizeMB} MB.`);
+      if (inputRef.current) inputRef.current.value = '';
       return;
     }
     setError('');
-    setFile(f);
+    setInternal(f);
     onFile(f);
   };
 
   const clear = () => {
-    setFile(null);
+    setInternal(null);
     setError('');
     if (inputRef.current) inputRef.current.value = '';
     onClear?.();
@@ -48,7 +67,9 @@ export function FileDrop({ accept, onFile, onClear, label = 'Choose a file', max
     e.preventDefault();
     setOver(false);
     if (disabled) return;
-    take(e.dataTransfer.files?.[0]);
+    const files = e.dataTransfer.files;
+    if (files.length > 1) setError(`Only the first of ${files.length} files is used.`);
+    take(files?.[0]);
   };
 
   return (
@@ -71,9 +92,14 @@ export function FileDrop({ accept, onFile, onClear, label = 'Choose a file', max
           id={id}
           type="file"
           accept={accept}
+          aria-label={label}
           className="sr-only"
           disabled={disabled}
-          onChange={(e) => take(e.target.files?.[0])}
+          onChange={(e) => {
+            take(e.target.files?.[0]);
+            // Reset so picking the same file again still fires onChange.
+            e.target.value = '';
+          }}
         />
         {file ? (
           <>
@@ -96,7 +122,7 @@ export function FileDrop({ accept, onFile, onClear, label = 'Choose a file', max
               {label}
             </Button>
             <span className="text-xs text-muted">
-              or drop it here · {accept.replace(/\./g, '').replace(/,/g, ', ')} · up to {maxSizeMB} MB
+              or drop it here · {accept ? `${accept.replace(/\./g, '').replace(/,/g, ', ')} · ` : ''}up to {maxSizeMB} MB
             </span>
           </>
         )}
@@ -109,4 +135,3 @@ export function FileDrop({ accept, onFile, onClear, label = 'Choose a file', max
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { cn } from './cn';
 import { CopyButton, DownloadButton } from './Actions';
@@ -74,13 +74,22 @@ export function Output({
 }: OutputProps) {
   const text = copyText ?? value ?? '';
   const empty = !text && !children;
+  const autoId = useId();
+  const controlId = id ?? autoId;
+  const labelId = `${controlId}-label`;
 
   return (
     <div className={cn('min-w-0', className)}>
       <div className="mb-1.5 flex min-h-7 items-center justify-between gap-3">
-        <label htmlFor={id} className="text-xs font-medium text-muted">
-          {label}
-        </label>
+        {children ? (
+          <span id={labelId} className="text-xs font-medium text-muted">
+            {label}
+          </span>
+        ) : (
+          <label htmlFor={controlId} className="text-xs font-medium text-muted">
+            {label}
+          </label>
+        )}
         <div className="flex shrink-0 items-center gap-1">
           {actions}
           <CopyButton text={text} />
@@ -88,15 +97,16 @@ export function Output({
         </div>
       </div>
       {children ? (
-        <div className="rounded-md border border-line bg-surface">{children}</div>
+        <div role="region" aria-labelledby={labelId} className="rounded-md border border-line bg-surface">
+          {children}
+        </div>
       ) : (
         <textarea
-          id={id}
+          id={controlId}
           readOnly
           value={value ?? ''}
           rows={rows}
           placeholder={placeholder}
-          aria-live="polite"
           spellCheck={false}
           className={cn(
             'thin-scroll block w-full resize-y rounded-md border border-line bg-surface px-3 py-2 leading-relaxed text-ink',
@@ -126,7 +136,9 @@ export function KeyValueList({ items, className }: { items: KeyValueItem[]; clas
     <dl className={cn('divide-y divide-line', className)}>
       {items.map((item, i) => (
         <div key={i} className="flex items-center gap-3 px-3 py-1.5">
-          <dt className="w-32 shrink-0 truncate text-xs text-muted sm:w-40">{item.label}</dt>
+          <dt className="w-32 shrink-0 truncate text-xs text-muted sm:w-40" title={typeof item.label === 'string' ? item.label : undefined}>
+            {item.label}
+          </dt>
           <dd className={cn('min-w-0 flex-1 break-all text-[13px] text-ink', item.mono !== false && 'font-mono')}>
             {item.value || <span className="text-muted">—</span>}
           </dd>

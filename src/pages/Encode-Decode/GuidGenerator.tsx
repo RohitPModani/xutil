@@ -36,7 +36,7 @@ export default function GuidGenerator() {
   const [single, setSingle] = useState('');
   const [bulk, setBulk] = useState<string[]>([]);
 
-  const n = Math.min(1000, Math.max(1, Number(count) || 1));
+  const n = Math.min(1000, Math.max(1, Math.floor(Number(count)) || 1));
 
   const style = useCallback(
     (id: string) => {
@@ -47,14 +47,13 @@ export default function GuidGenerator() {
     [upper, braces]
   );
 
-  const regenerate = useCallback(() => {
-    setSingle(make(version));
-    setBulk(Array.from({ length: n }, () => make(version)));
-  }, [version, n]);
+  const newSingle = useCallback(() => setSingle(make(version)), [version]);
+  const newBulk = useCallback(() => setBulk(Array.from({ length: n }, () => make(version))), [version, n]);
 
-  // A fresh value on load and whenever the settings change, so there is
-  // always something to copy without pressing a button first.
-  useEffect(regenerate, [regenerate]);
+  // A fresh value on load and when the version changes; the bulk list also
+  // follows the count, without touching the headline value.
+  useEffect(newSingle, [newSingle]);
+  useEffect(newBulk, [newBulk]);
 
   const bulkText = bulk.map(style).join('\n');
 
@@ -80,7 +79,14 @@ export default function GuidGenerator() {
           actions={
             <>
               <CopyButton text={style(single)} size="md" variant="primary" />
-              <GenerateButton variant="secondary" label="New" onClick={regenerate} />
+              <GenerateButton
+                variant="secondary"
+                label="New"
+                onClick={() => {
+                  newSingle();
+                  newBulk();
+                }}
+              />
             </>
           }
         />
@@ -99,6 +105,7 @@ export default function GuidGenerator() {
               type="number"
               min={1}
               max={1000}
+              step={1}
               inputMode="numeric"
               value={count}
               onChange={(e) => setCount(e.target.value)}

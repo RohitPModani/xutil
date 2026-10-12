@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, Field, Output, Panel, Segmented, Select, TextArea } from '../../ui';
+import { ClearButton, Field, Output, Panel, Segmented, Select, TextArea } from '../../ui';
 
 type Case = 'lower' | 'upper' | 'preserve';
 
@@ -11,11 +11,18 @@ const SEPARATORS = [
   { value: '', label: 'None' },
 ];
 
+/** Latin letters that Unicode decomposition does not reduce to ASCII. */
+const TRANSLIT: Record<string, string> = {
+  ß: 'ss', ẞ: 'SS', ø: 'o', Ø: 'O', æ: 'ae', Æ: 'AE', œ: 'oe', Œ: 'OE',
+  ł: 'l', Ł: 'L', đ: 'd', Đ: 'D', ð: 'd', Ð: 'D', þ: 'th', Þ: 'Th',
+};
+
 function slugify(text: string, separator: string, kase: Case): string {
   const parts = text
+    .replace(/[ßẞøØæÆœŒłŁđĐðÐþÞ]/g, (c) => TRANSLIT[c])
     .normalize('NFKD')
     .replace(/[^\w\s~-]/g, '')
-    .split(/[-\s]+/)
+    .split(/[\s_-]+/)
     .filter(Boolean);
   const slug = parts.join(separator);
   return kase === 'upper' ? slug.toUpperCase() : kase === 'lower' ? slug.toLowerCase() : slug;
@@ -27,12 +34,17 @@ export default function SlugGenerator() {
   const [kase, setKase] = useState<Case>('lower');
 
   const slug = useMemo(() => slugify(text, separator, kase), [text, separator, kase]);
-  const empty = text.trim() !== '' && slug === '';
+  const error =
+    text.trim() !== '' && slug === ''
+      ? /\p{L}/u.test(text)
+        ? 'Slugs keep only Latin letters and digits; this text has none, so nothing is left. Other scripts are not transliterated.'
+        : 'Nothing is left after removing punctuation. Use letters or digits.'
+      : undefined;
 
   return (
     <ToolPage id="slug">
       <Panel title="Slug" actions={<ClearButton onClick={() => setText('')} disabled={!text} />}>
-        <Field label="Text" htmlFor="slug-input" hint="Accents are stripped; punctuation is dropped.">
+        <Field label="Text" htmlFor="slug-input" hint="Accents are stripped; punctuation is dropped." error={error}>
           <TextArea
             id="slug-input"
             value={text}
@@ -42,7 +54,6 @@ export default function SlugGenerator() {
             mono={false}
             maxLength={1000}
             autoFocus
-            aria-invalid={empty || undefined}
           />
         </Field>
 
@@ -71,12 +82,6 @@ export default function SlugGenerator() {
         </div>
 
         <Output className="mt-4" label="Slug" value={slug} rows={2} />
-
-        {empty && (
-          <Callout tone="error" className="mt-4">
-            Nothing is left after removing punctuation. Use letters or digits.
-          </Callout>
-        )}
       </Panel>
     </ToolPage>
   );

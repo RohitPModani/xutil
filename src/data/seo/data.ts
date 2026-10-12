@@ -14,11 +14,11 @@ export const dataSeo: Record<string, SEODescriptionContent> = {
 
 ## How the mapping works
 
-- XML is parsed with the browser's \`DOMParser\`, so malformed XML is reported as an error rather than guessed at.
+- XML is parsed with the browser's \`DOMParser\`, so malformed XML is reported with the parser's line and column rather than guessed at.
 - Each element becomes a key; repeated sibling elements with the same name become an array.
-- Element attributes are collected under an \`@attributes\` key. Attributes on an element that has no child elements are dropped, and so is text that sits beside child elements.
-- An element with no child elements becomes its trimmed text.
-- JSON → XML needs exactly one top-level key, which becomes the root element. An \`@attributes\` object becomes attributes, a \`#text\` value becomes the element text, and an array repeats the element once per item. Output starts with an XML declaration and is indented with two spaces.
+- Element attributes are collected under an \`@attributes\` key. Text that sits beside attributes or child elements is kept under \`#text\`.
+- An element with no attributes and no child elements becomes its trimmed text.
+- JSON → XML uses a single top-level key as the root element; JSON with several keys, an array at the root or an array under the only key is wrapped in \`<root>\`. An \`@attributes\` object becomes attributes, a \`#text\` value becomes the element text, \`null\` becomes an empty element and an array repeats the element once per item. A key that is not a valid XML name is reported as an error. Output starts with an XML declaration and is indented with two spaces.
 - Namespace prefixes are kept as part of the key name (\`ns:item\`). Comments are ignored.
 
 ## Example
@@ -51,8 +51,8 @@ Parsing and conversion run in the page. A dropped file is read locally, no reque
         a: 'JSON has no attribute concept, so attributes have to live somewhere inside the element object. Putting them under @attributes keeps them separate from child elements that might share a name.',
       },
       {
-        q: 'Why does my JSON need a single top-level key to become XML?',
-        a: 'An XML document must have exactly one root element. The converter uses the first and only top-level key as that root; wrap several keys in an outer object such as {"root": {...}} first.',
+        q: 'What becomes the root element when my JSON has several keys?',
+        a: 'An XML document must have exactly one root element. A single top-level key is used as that root; otherwise the converter wraps the whole document in a <root> element, and a root array becomes <item> elements inside it.',
       },
       {
         q: 'Does the converter upload my XML file?',
@@ -68,13 +68,13 @@ Parsing and conversion run in the page. A dropped file is read locally, no reque
 ## How to use
 
 1. Paste YAML or JSON, or load a \`.yaml\`, \`.yml\` or \`.json\` file (up to 5 MB) with the file picker or by dropping it on the page.
-2. Input that starts with \`{\` or \`[\` is treated as JSON and converted to YAML; anything else is parsed as YAML and converted to JSON. Use the Auto / YAML → JSON / JSON → YAML switch to force a direction.
+2. Input that parses as JSON is converted to YAML; anything else, including flow-style YAML such as \`{a: 1}\`, is parsed as YAML and converted to JSON. Use the Auto / YAML → JSON / JSON → YAML switch to force a direction.
 3. The output updates as you type. Copy it, or Download it as \`.json\` or \`.yaml\` named after the loaded file.
 
 ## What it supports
 
-- Parsing and emitting are done by js-yaml. Loading uses its default safe schema: anchors and aliases are resolved, but custom tags that would create JavaScript objects are not executed.
-- One YAML document at a time. A multi-document stream separated by \`---\` is reported as an error.
+- Parsing and emitting are done by js-yaml. Loading uses the YAML 1.2 core schema: anchors and aliases are resolved, \`2024-01-01\` stays a string, \`0o17\` is the integer 15, and custom tags are not executed.
+- A multi-document stream separated by \`---\` becomes a JSON array with one item per document.
 - YAML → JSON output is indented with two spaces.
 - JSON → YAML output is written with no line wrapping, so long strings stay on one line.
 - A YAML parse error names the line and column.
@@ -114,34 +114,33 @@ Conversion runs in the page. A dropped file is read locally, no request is made,
         a: 'They are dropped. JSON has no comment syntax, so there is nowhere to put them; keep the original YAML if the comments matter.',
       },
       {
-        q: 'Why does the converter say "expected a single document"?',
-        a: 'The input contains more than one YAML document, separated by a --- line. The tool converts one document at a time, so split the stream and convert each part.',
+        q: 'What happens to a multi-document YAML stream?',
+        a: 'Documents separated by a --- line are converted together into a JSON array, one item per document. A stream with a single document is converted to that document alone, not wrapped in an array.',
       },
     ],
   },
   csvJson: {
     title: 'CSV ⇄ JSON',
     seo: 'CSV ⇄ JSON: Convert CSV to JSON and Back | XUtil',
-    body: `Convert CSV to a JSON array of objects, or JSON to CSV, in the browser. Nested objects become underscore-joined column names and are rebuilt on the way back.
+    body: `Convert CSV to a JSON array of objects, or JSON to CSV, in the browser. Nested objects become dot-joined column names and are rebuilt on the way back.
 
 ## How to use
 
-1. Paste CSV (the first row is the header) or JSON, or load a \`.csv\` or \`.json\` file up to 5 MB.
+1. Paste CSV (the first row is the header) or JSON, or load a \`.csv\`, \`.tsv\` or \`.json\` file up to 5 MB. The delimiter (comma, semicolon or tab) is detected, or pick one.
 2. Input that starts with \`{\` or \`[\` is treated as JSON and converted to CSV; anything else is read as CSV. Use the Auto / CSV → JSON / JSON → CSV switch to force a direction.
 3. The output updates as you type. Copy it, or Download it as \`.json\` or \`.csv\`.
 
 ## Rules
 
-- **CSV → JSON** produces an array with one object per data row. Every value is a string; an empty cell becomes \`null\`. A column named \`address_city\` becomes \`{ "address": { "city": … } }\`, so \`_\` in a header is read as a nesting separator.
-- Fields are split on commas. A field wrapped in double quotes may contain commas, and \`""\` inside quotes is one quote. A quoted field cannot span more than one line, because rows are split on line breaks first.
-- **JSON → CSV** accepts an object or an array of objects. Nested keys are joined with \`_\` to make a column. An array inside a record produces one row per item, so a record with three tags becomes three rows.
-- Values containing a comma, a quote or a line break are quoted and inner quotes doubled.
-- Numbers are not inferred in either direction; the CSV reader keeps \`1\` as the string \`"1"\`.
+- **CSV → JSON** produces an array with one object per data row. Every value is a string unless "Infer numbers and booleans" is ticked; an empty cell becomes \`null\` and blank lines are skipped. A column named \`address.city\` becomes \`{ "address": { "city": … } }\`, so \`.\` in a header is read as a nesting separator. A cell holding a JSON array such as \`["a","b"]\` becomes an array.
+- Parsing follows RFC 4180 (papaparse): a field wrapped in double quotes may contain the delimiter and line breaks, and \`""\` inside quotes is one quote.
+- **JSON → CSV** accepts an object or an array of objects. Nested keys are joined with \`.\` to make a column, and an array inside a record is written as JSON text in one cell, so a record never becomes several rows.
+- Values containing the delimiter, a quote or a line break are quoted and inner quotes doubled.
 
 ## Example
 
 \`\`\`
-id,name,address_city
+id,name,address.city
 1,Ada,London
 →
 [
@@ -163,15 +162,15 @@ Conversion runs in the page. A dropped file is read locally, no request is made,
       },
       {
         q: 'How is nested JSON represented in CSV?',
-        a: 'CSV is flat, so nested keys are joined into one column name. XUtil uses an underscore: {"address": {"city": "London"}} becomes a column called address_city, and the same column turns back into the nested object.',
+        a: 'CSV is flat, so nested keys are joined into one column name. XUtil uses a dot: {"address": {"city": "London"}} becomes a column called address.city, and the same column turns back into the nested object. Arrays are written as JSON text in one cell.',
       },
       {
         q: 'Why are all my numbers strings after converting CSV to JSON?',
-        a: 'CSV has no types; every cell is text. The converter does not guess, because a postcode like 01234 or an ID like 1e5 would be corrupted by automatic number conversion. Cast the fields you need in your own code.',
+        a: 'CSV has no types; every cell is text. By default the converter does not guess, because a postcode like 01234 or an ID like 1e5 would be corrupted by automatic number conversion. Tick "Infer numbers and booleans" to convert cells that look like numbers, true or false.',
       },
       {
         q: 'What is RFC 4180?',
-        a: 'RFC 4180 is the informal standard for CSV: comma-separated fields, CRLF line endings, optional header row, and double quotes around fields that contain commas, quotes or line breaks. Most spreadsheet exports follow it, but tab or semicolon separated files do not and are not handled here.',
+        a: 'RFC 4180 is the informal standard for CSV: comma-separated fields, CRLF line endings, optional header row, and double quotes around fields that contain commas, quotes or line breaks. Most spreadsheet exports follow it; tab and semicolon separated files are detected and handled too.',
       },
     ],
   },
@@ -188,12 +187,11 @@ Conversion runs in the page. A dropped file is read locally, no request is made,
 
 ## Inference rules
 
-- \`string\`, \`number\`, \`boolean\` and \`null\` map to the matching TypeScript type. There is no \`undefined\` and no optional \`?\` marker, because one sample cannot tell a missing field from an absent one.
-- A nested object becomes its own \`interface\` named \`<Root>_<Key>\` with the key capitalised, for example \`Data_Address\`. Nested interfaces are listed before the interface that uses them.
+- \`string\`, \`number\`, \`boolean\` and \`null\` map to the matching TypeScript type. A field that is \`null\` in some array items and set in others becomes \`T | null\`.
+- A nested object becomes its own \`interface\` named after its path, for example \`DataAddress\` or \`DataUserAddress\`, so two \`address\` objects under different parents keep their own shapes. Nested interfaces are listed before the interface that uses them.
 - An array takes the element type: \`string[]\` when all items match, a union such as \`(string | number)[]\` when they differ, and \`any[]\` when the array is empty.
-- An array of objects is typed from its first element.
-- A top-level array is also typed from its first element.
-- Interfaces are not exported and keys are written exactly as they appear; a key that is not a valid identifier needs quoting by hand.
+- An array of objects, including a top-level array, is typed from all its items: a key missing from some items gets the optional \`?\` marker.
+- Interfaces are not exported. A key that is not a valid identifier is quoted, as in \`"first-name": string\`.
 
 ## Example
 
@@ -225,7 +223,7 @@ Inference runs in the page. No request is made and nothing is stored.`,
       },
       {
         q: 'Why are nested objects separate interfaces instead of inline types?',
-        a: 'Named interfaces can be reused and referenced in function signatures, and they keep the root interface short. The generated names follow a Root_Key pattern so they can be renamed with a single search and replace.',
+        a: 'Named interfaces can be reused and referenced in function signatures, and they keep the root interface short. The generated names follow a RootKey pattern so they can be renamed with a single search and replace.',
       },
     ],
   },
@@ -242,12 +240,13 @@ Inference runs in the page. No request is made and nothing is stored.`,
 
 ## Inference rules
 
-- Integers become \`int\`, other numbers \`float\`, booleans \`bool\`, strings \`str\`, and \`null\` is written as \`None\`.
-- A string matching \`YYYY-MM-DD\` or \`DD-MM-YYYY\` becomes \`date\`; an ISO 8601 timestamp such as \`2024-01-31T09:00:00Z\` becomes \`datetime\`.
+- Integers become \`int\`, other numbers \`float\`, booleans \`bool\`, strings \`str\`, and \`null\` becomes \`Optional[Any]\`.
+- A string matching \`YYYY-MM-DD\` becomes \`date\`; an ISO 8601 timestamp such as \`2024-01-31T09:00:00Z\` becomes \`datetime\`.
 - A list becomes \`List[T]\`. Mixed element types produce \`List[Union[...]]\`, except that \`int\` and \`float\` together collapse to \`List[float]\`. An empty list is \`List[Any]\`.
-- A nested object becomes its own class named \`<Root><Key>\` with the key capitalised, for example \`RootAddress\`, listed before the class that uses it.
-- The header always imports \`dataclass\`, \`List\`, \`Any\`, \`Union\`, \`date\` and \`datetime\`.
-- Fields have no defaults and no \`Optional\`, and keys are written as given, so a key that is not a valid Python identifier needs renaming.
+- A nested object becomes its own class named after its path, for example \`RootAddress\` or \`RootUserAddress\`, listed before the class that uses it. An empty object becomes a class with \`pass\`.
+- A list of objects is typed from all its items: a key missing from some items becomes \`Optional[T] = None\` and is listed after the required fields.
+- The header imports only what the classes use.
+- A key that is not a valid Python identifier is renamed to snake_case (\`first-name\` → \`first_name\`, \`class\` → \`class_\`) with the original key in a comment.
 
 ## Example
 
@@ -255,8 +254,7 @@ Inference runs in the page. No request is made and nothing is stored.`,
 { "id": 1, "name": "Ada", "joined": "2024-01-31" }
 →
 from dataclasses import dataclass
-from typing import List, Any, Union
-from datetime import date, datetime
+from datetime import date
 
 @dataclass
 class Root:
@@ -282,15 +280,15 @@ Inference runs in the page. No request is made and nothing is stored.`,
         a: 'Parse the JSON with json.loads and unpack the dict with Root(**data). Nested objects and date strings are not converted automatically, so convert them first or use a library such as dacite or Pydantic.',
       },
       {
-        q: 'Why is a JSON null typed as None?',
-        a: 'A single null value gives no information about the real type, so the generator writes None as a placeholder. Replace it with Optional[T] once you know what the field holds.',
+        q: 'Why is a JSON null typed as Optional[Any]?',
+        a: 'A single null value gives no information about the real type, so the generator writes Optional[Any] as a placeholder. Replace Any with the real type once you know what the field holds; a sample where the field is set in another item already gets Optional[T].',
       },
     ],
   },
   jsonToPydantic: {
     title: 'JSON to Pydantic Model',
     seo: 'JSON to Pydantic: Generate BaseModel Classes | XUtil',
-    body: `Generate Pydantic models from a JSON sample. Paste JSON and BaseModel classes appear as you type, with a validator for each date or datetime field.
+    body: `Generate Pydantic models from a JSON sample. Paste JSON and BaseModel classes appear as you type, one model per nested object, with date fields typed.
 
 ## How to use
 
@@ -301,30 +299,24 @@ Inference runs in the page. No request is made and nothing is stored.`,
 ## Inference rules
 
 - Integers become \`int\`, other numbers \`float\`, booleans \`bool\`, strings \`str\`, and \`null\` becomes \`Optional[Any]\`.
-- A string matching \`YYYY-MM-DD\` becomes \`date\`; an ISO 8601 timestamp becomes \`datetime\`. Each such field gets a \`@validator(..., pre=True)\` that parses the string with \`strptime\` or \`fromisoformat\` and raises \`ValueError\` otherwise.
+- A string matching \`YYYY-MM-DD\` becomes \`date\`; an ISO 8601 timestamp becomes \`datetime\`. No validator is generated, because Pydantic parses ISO strings into these types on its own.
 - A list becomes \`List[T]\`, mixed types \`List[Union[...]]\` (\`int\` and \`float\` together collapse to \`float\`), and an empty list \`List[Any]\`.
-- A nested object becomes its own \`BaseModel\` subclass named \`<Root><Key>\`, listed before the model that uses it.
-- The header imports \`date\`, \`datetime\`, \`List\`, \`Optional\`, \`Union\`, \`BaseModel\` and \`validator\`.
-- The generated \`@validator\` is the Pydantic 1 API. It still runs in Pydantic 2 with a deprecation warning; \`field_validator\` is the v2 replacement.
-- No defaults or \`Field()\` constraints are added, and keys are written as given.
+- A nested object becomes its own \`BaseModel\` subclass named after its path, for example \`RootAddress\` or \`RootUserAddress\`, listed before the model that uses it. An empty object becomes a model with \`pass\`.
+- A list of objects is typed from all its items: a key missing from some items becomes \`Optional[T] = None\`.
+- A key that is not a valid Python identifier is renamed to snake_case and kept as an alias, for example \`first_name: str = Field(alias="first-name")\`, so the JSON still loads with \`model_validate\`.
+- The header imports only what the models use. No constraints are added.
 
 ## Example
 
 \`\`\`
 { "id": 1, "joined": "2024-01-31" }
 →
+from pydantic import BaseModel
+from datetime import date
+
 class Root(BaseModel):
     id: int
     joined: date
-
-    @validator('joined', pre=True)
-    def parse_joined(cls, v):
-        if isinstance(v, str):
-            try:
-                return datetime.strptime(v, "%Y-%m-%d").date()
-            except ValueError:
-                raise ValueError(f"Invalid date format for joined")
-        return v
 \`\`\`
 
 ## Privacy
@@ -344,8 +336,8 @@ Inference runs in the page. No request is made and nothing is stored.`,
         a: 'Yes, but it is deprecated. Pydantic 2 keeps @validator for compatibility and emits a warning; new code should use @field_validator with mode="before" for the same pre-parsing behaviour.',
       },
       {
-        q: 'Why do date fields get a validator when Pydantic already parses dates?',
-        a: 'Pydantic parses ISO 8601 strings into date and datetime on its own. The generated validator makes the accepted format explicit and gives a field-specific error message, and is safe to delete if the default parsing is enough.',
+        q: 'Why do date fields have no validator?',
+        a: 'Pydantic parses ISO 8601 strings into date and datetime on its own and raises a ValidationError for anything else, so a hand-written validator would only repeat that. Add a field_validator if you need to accept another format.',
       },
     ],
   },
@@ -407,17 +399,17 @@ Conversion runs in the page. No request is made and nothing is stored.`,
 
 ## How to use
 
-1. With the direction set to Text → bytes, type or paste text. All four encodings appear at once, each with a Copy button.
-2. Switch to Bytes → text, pick the base the numbers are written in (default binary), and paste space-separated codes. The decoded text appears in the output.
-3. Changing direction clears the input.
+1. With the direction set to Text → codes, type or paste text. All four bases appear at once, each with a Copy button.
+2. Pick the encoding: UTF-8 bytes (one number per byte) or UTF-16 units (one number per 16-bit code unit, the value JavaScript's charCodeAt gives).
+3. Switch to Codes → text, pick the base the numbers are written in (default binary), and paste the codes separated by spaces or commas. The decoded text appears in the output.
+4. Changing direction clears the input.
 
 ## What it produces
 
-- One code per character, separated by spaces. The code is the character's UTF-16 code unit, which equals the ASCII value for ASCII characters and the Unicode code point for anything up to U+FFFF.
+- With UTF-8 bytes, one number per byte: ASCII characters give one, \`é\` gives two (\`C3 A9\`) and most emoji give four. With UTF-16 units, one number per code unit: \`é\` gives \`E9\` and an emoji gives a surrogate pair such as \`D83D DE00\`. For ASCII text the two are identical.
 - Codes are not zero-padded: \`H\` is \`1001000\` in binary, not \`01001000\`, and hex digits are upper case with no \`0x\` prefix.
-- Characters beyond U+FFFF, such as most emoji, are represented by two surrogate code units rather than one value.
-- This is not UTF-8. A character such as \`é\` gives one code (\`E9\`), not the two UTF-8 bytes \`C3 A9\`.
-- When decoding, each whitespace-separated token must contain only digits valid in the chosen base; the first invalid token is named in the error.
+- When decoding, tokens may be separated by spaces or commas; a single unseparated binary or hex string is cut into 8-bit (UTF-8) or 16-bit (UTF-16) units. Each token must contain only digits valid in the chosen base; the first invalid token is named in the error.
+- UTF-8 decoding rejects values above \`FF\` and byte sequences that are not valid UTF-8. UTF-16 decoding joins surrogate pairs, also accepts a full code point such as \`1F600\`, and rejects anything above \`10FFFF\`.
 
 ## Example
 
@@ -442,8 +434,8 @@ Conversion runs in the page. No request is made and nothing is stored.`,
         a: 'ASCII defines 128 characters with codes 0 to 127. Unicode extends the same first 128 codes to over 149,000 characters; UTF-8 and UTF-16 are the encodings that turn those code points into bytes.',
       },
       {
-        q: 'Why does an emoji produce two numbers?',
-        a: 'JavaScript strings are UTF-16, and characters above U+FFFF are stored as a surrogate pair of two 16-bit units. The converter reports each unit, so one emoji gives two codes such as D83D DE00.',
+        q: 'Why does an emoji produce two or four numbers?',
+        a: 'Characters above U+FFFF need four bytes in UTF-8 (F0 9F 98 80 for 😀) and a surrogate pair of two 16-bit units in UTF-16 (D83D DE00). Pick the encoding that matches the system you are talking to.',
       },
       {
         q: 'Why is "Hello" in hex 48 65 6C 6C 6F?',
@@ -458,7 +450,7 @@ Conversion runs in the page. No request is made and nothing is stored.`,
 
 ## How to use
 
-1. In "Epoch to date", type a timestamp. Values of 100,000,000,000 (1e11) and above are read as milliseconds, smaller values as seconds; the hint says which was assumed.
+1. In "Epoch to date", type a timestamp. The unit is guessed from the size: below 1e11 is seconds, then milliseconds, from 1e14 microseconds and from 1e17 nanoseconds; the hint says which was assumed.
 2. In "Date to epoch", type a date as ISO 8601 (\`2025-05-01T13:57:00Z\`) or as \`YYYY-MM-DD HH:mm:ss\`. A date with no zone is treated as UTC.
 3. Both panels show the result as you type: seconds, milliseconds, ISO 8601, the full UTC date, the same instant in your local zone, and a relative phrase such as "in 3 days". Each row has a Copy button, and Now fills in the current time.
 
@@ -466,7 +458,7 @@ Conversion runs in the page. No request is made and nothing is stored.`,
 
 - Positive and negative timestamps (dates before 1970), and decimal seconds.
 - Any instant JavaScript's \`Date\` can hold: about 271,000 years either side of 1970.
-- Date parsing uses the browser's ISO 8601 parser. A trailing \`Z\` or an offset such as \`+05:30\` is honoured; other formats such as \`01/05/2025\` are rejected.
+- Date parsing is strict: \`YYYY-MM-DD\`, optionally followed by \`HH:mm\`, \`HH:mm:ss\` or \`HH:mm:ss.sss\` after a \`T\` or a space, then an optional \`Z\` or offset such as \`+05:30\`. Impossible dates such as \`2025-02-30\` or \`24:00\` are rejected rather than rolled over, and other formats such as \`01/05/2025\` are rejected.
 - The UTC and local rows are formatted for your browser locale. The relative row counts a month as 30 days and a year as 365.
 - Milliseconds are preserved in the ISO row and the milliseconds row; the seconds row is the floor.
 
@@ -517,7 +509,8 @@ Conversion runs in the page. No request is made and nothing is stored.`,
 
 - Over 300 cities grouped by region, searchable by city or country name. Each maps to an IANA zone such as \`America/New_York\`.
 - Daylight saving rules and historical offsets come from the browser's built-in IANA data, computed with the Luxon library, so a conversion for a date in July uses that date's offset, not today's.
-- An invalid wall-clock time, such as 02:30 on a spring-forward night, is reported as an error rather than silently shifted.
+- A wall-clock time that does not exist, such as 02:30 on a spring-forward night, is reported as an error rather than silently shifted; a time that occurs twice on a fall-back night is converted and a note says which occurrence was used.
+- Results show the zone abbreviation and UTC offset of the converted instant, and the Now button refreshes the time.
 - Results are formatted for your browser locale.
 
 ## Example
@@ -525,9 +518,10 @@ Conversion runs in the page. No request is made and nothing is stored.`,
 \`\`\`
 1 Jul 2024, 09:00 in New York → London
 → Converted  1 Jul 2024, 14:00
+→ Zone       BST (UTC+01:00)
 → ISO        2024-07-01T14:00:00.000+01:00
-→ From zone  Daylight saving time
-→ To zone    Daylight saving time
+→ From zone  Daylight saving time, EDT (UTC-04:00)
+→ To zone    Daylight saving time, BST (UTC+01:00)
 \`\`\`
 
 ## Privacy
@@ -569,20 +563,28 @@ The parser matches a fixed set of English patterns (case-insensitive). It does n
 
 | Phrase | Cron |
 | --- | --- |
-| \`every 15 minutes\`, \`every 2 hours\`, \`every 3 days\`, \`every 6 months\` | \`*/N\` in that field |
-| \`every weekday\`, \`weekdays\` | day of week \`1-5\` |
+| \`every 15 minutes\`, \`every 2 hours\`, \`every 3 days\` | \`*/N\` in that field; N must fit the field (1–59 minutes, 1–23 hours, 1–31 days) |
+| \`every 6 months\` | \`0 0 1 */6 *\` (the 1st of every sixth month) |
+| \`every 2 weeks\` | \`0 0 */14 * *\`; cron has no fortnight, so the count restarts on the 1st of each month |
+| \`every weekday\`, \`weekdays\`, \`monday to friday\` | day of week \`1-5\` |
 | \`every weekend\`, \`weekends\` | day of week \`0,6\` |
-| \`every monday\` … \`every sunday\` | day of week \`0\`–\`6\` |
+| \`every monday\` … \`every sunday\`, \`monday and wednesday\`, \`tuesday through thursday\` | day of week \`0\`–\`6\`, a list or a range |
 | \`every other day\`, \`alternate day\` | day of month \`*/2\` |
-| \`at 9:30am\`, \`at 3 pm\`, \`at 17\` | sets minute and hour; combines with the rows above |
+| \`on the 1st\`, \`on the 1st and 15th\`, \`on day 20\` | day of month |
+| \`at 9:30am\`, \`at 3 pm\`, \`at 17\`, \`at midnight\`, \`at noon\` | sets minute and hour; combines with every other row |
+| \`at 9am and 5pm\`, \`at 9, 12 and 17\` | hour list \`9,17\`; the minutes must match, since one expression holds one minute value |
 | \`between 9 am and 5 pm\` | hour \`9-17\`; minute \`0\` unless an \`every N minutes\` or \`:MM\` is given |
+| \`between 9 pm and 5 am\` | wraps past midnight as \`21-23,0-5\` |
 | \`midnight\`, \`noon\`, \`mid-day\` | \`0 0 * * *\`, \`0 12 * * *\` |
 | \`every hour\`, \`hourly\` | \`0 * * * *\` |
 | \`every day\`, \`daily\` | \`0 0 * * *\` |
+| \`every week\`, \`weekly\` | \`0 0 * * 0\` |
+| \`every month\`, \`monthly\` | \`0 0 1 * *\` |
+| \`every year\`, \`yearly\`, \`annually\` | \`0 0 1 1 *\` |
 | \`every minute\`, \`minutely\` | \`* * * * *\` |
-| \`in january\` … \`in december\` | month \`1\`–\`12\` |
+| \`in january\` … \`in december\`, \`in january and july\` | month \`1\`–\`12\` or a list |
 
-A day-level phrase with no "at" clause (\`every monday\`, \`every weekend\`, \`every 3 days\`) means midnight; add a time to move it. \`every N hours\` and hour windows fire on the hour. Input is limited to 120 characters.
+Clauses combine: \`every 2 hours on weekdays in january\` fills three fields. A day-level phrase with no "at" clause (\`every monday\`, \`every weekend\`, \`every 3 days\`) means midnight; add a time to move it. \`every N hours\` and hour windows fire on the hour. Times are checked (\`at 25:00\` and \`at 13 pm\` are errors) and zero padding is dropped (\`at 09:05\` → \`5 9\`). Input is limited to 120 characters.
 
 ## Example
 

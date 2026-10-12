@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Copy, Download, Eraser, RefreshCw } from 'lucide-react';
 import { Button, type ButtonProps } from './Button';
 import { useFlash } from './useFlash';
@@ -15,6 +15,7 @@ interface CopyButtonProps extends Omit<ButtonProps, 'onClick' | 'children'> {
 export function CopyButton({ text, label = 'Copy', compact, variant = 'ghost', size = 'sm', ...rest }: CopyButtonProps) {
   const [copied, flash] = useFlash();
   const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [text]);
 
   const copy = async () => {
     try {
@@ -102,13 +103,13 @@ export function ClearButton({ onClick, label = 'Clear', variant = 'ghost', size 
   );
 }
 
-interface RegenerateButtonProps extends Omit<ButtonProps, 'onClick' | 'children'> {
+interface GenerateButtonProps extends Omit<ButtonProps, 'onClick' | 'children'> {
   onClick: () => void;
   label?: string;
 }
 
 /** For generators: the primary action that produces a fresh value. */
-export function GenerateButton({ onClick, label = 'Generate', variant = 'primary', ...rest }: RegenerateButtonProps) {
+export function GenerateButton({ onClick, label = 'Generate', variant = 'primary', ...rest }: GenerateButtonProps) {
   return (
     <Button
       variant={variant}

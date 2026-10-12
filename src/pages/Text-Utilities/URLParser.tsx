@@ -1,6 +1,14 @@
 import { useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, EmptyState, Field, Input, KeyValueList, Output, Panel, TwoPane } from '../../ui';
+import { ClearButton, EmptyState, Field, Input, KeyValueList, Output, Panel, TwoPane } from '../../ui';
+
+const decode = (s: string) => {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s;
+  }
+};
 
 export default function URLParser() {
   const [input, setInput] = useState('');
@@ -11,10 +19,13 @@ export default function URLParser() {
       const url = new URL(input.trim());
       const parts = [
         { label: 'Protocol', value: url.protocol },
-        { label: 'Origin', value: url.origin },
+        // Opaque origins (mailto:, custom schemes) serialise as the string "null".
+        { label: 'Origin', value: url.origin === 'null' ? '' : url.origin },
+        { label: 'Host', value: url.host },
         { label: 'Hostname', value: url.hostname },
         { label: 'Port', value: url.port },
         { label: 'Path', value: url.pathname },
+        { label: 'Decoded path', value: decode(url.pathname) },
         { label: 'Query', value: url.search },
         { label: 'Fragment', value: url.hash },
         ...(url.username ? [{ label: 'Username', value: url.username }] : []),
@@ -32,7 +43,7 @@ export default function URLParser() {
   return (
     <ToolPage id="url_parser">
       <Panel title="Parse" actions={<ClearButton onClick={() => setInput('')} disabled={!input} />}>
-        <Field label="URL" htmlFor="url-input">
+        <Field label="URL" htmlFor="url-input" error={result?.error || undefined}>
           <Input
             id="url-input"
             type="url"
@@ -40,16 +51,8 @@ export default function URLParser() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="https://example.com:8080/path/to/page?q=search&page=2#top"
             autoFocus
-            aria-invalid={Boolean(result?.error) || undefined}
-            aria-describedby={result?.error ? 'url-error' : undefined}
           />
         </Field>
-
-        {result?.error && (
-          <Callout tone="error" id="url-error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
 
         {result && !result.error && (
           <TwoPane className="mt-4">

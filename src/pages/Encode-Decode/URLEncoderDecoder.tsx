@@ -1,22 +1,52 @@
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { ArrowLeftRight } from 'lucide-react';
 import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, Field, IconButton, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
+import { ClearButton, Field, IconButton, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
 
 type Direction = 'encode' | 'decode';
+type Mode = 'component' | 'uri' | 'form';
+
+const MODES: Record<Mode, { label: string; hint: string; encode: (s: string) => string; decode: (s: string) => string }> = {
+  component: {
+    label: 'Component',
+    hint: "Encodes everything except A–Z a–z 0–9 - _ . ! ~ * ' ( )",
+    encode: encodeURIComponent,
+    decode: decodeURIComponent,
+  },
+  uri: {
+    label: 'Full URL',
+    hint: 'Keeps : / ? # & = and the other separators so a whole URL stays navigable.',
+    encode: encodeURI,
+    decode: decodeURI,
+  },
+  form: {
+    label: 'Form',
+    hint: 'application/x-www-form-urlencoded, as an HTML form submits: a space becomes +.',
+    encode: (s) => new URLSearchParams([['', s]]).toString().slice(1),
+    decode: (s) => decodeURIComponent(s.replace(/\+/g, ' ')),
+  },
+};
 
 export default function URLEncoderDecoder() {
   const [input, setInput] = useState('');
   const [direction, setDirection] = useState<Direction>('encode');
+  const [mode, setMode] = useState<Mode>('component');
+  const deferred = useDeferredValue(input);
 
   const result = useMemo(() => {
-    if (!input) return null;
+    if (!deferred) return null;
     try {
-      return { out: direction === 'encode' ? encodeURIComponent(input) : decodeURIComponent(input), error: '' };
+      return { out: MODES[mode][direction](deferred), error: '' };
     } catch {
-      return { out: '', error: 'Not valid percent-encoding: every % must be followed by two hex digits.' };
+      return {
+        out: '',
+        error:
+          direction === 'encode'
+            ? 'Text contains a lone surrogate, which has no UTF-8 encoding.'
+            : 'Not valid percent-encoding: every % must be followed by two hex digits, and the bytes must be UTF-8.',
+      };
     }
-  }, [input, direction]);
+  }, [deferred, mode, direction]);
 
   const out = result?.out ?? '';
 
@@ -26,6 +56,13 @@ export default function URLEncoderDecoder() {
         title="Convert"
         actions={
           <>
+            <Segmented
+              size="sm"
+              label="Mode"
+              value={mode}
+              onChange={setMode}
+              options={(Object.keys(MODES) as Mode[]).map((m) => ({ value: m, label: MODES[m].label }))}
+            />
             <Segmented
               size="sm"
               label="Direction"
@@ -44,7 +81,8 @@ export default function URLEncoderDecoder() {
           <Field
             label={direction === 'encode' ? 'Text' : 'Encoded'}
             htmlFor="url-input"
-            hint={direction === 'encode' ? 'Encodes everything except A–Z a–z 0–9 - _ . ! ~ * \' ( )' : undefined}
+            hint={direction === 'encode' ? MODES[mode].hint : undefined}
+            error={result?.error}
           >
             <TextArea
               id="url-input"
@@ -54,7 +92,7 @@ export default function URLEncoderDecoder() {
               rows={10}
               stats
               autoFocus
-              aria-invalid={Boolean(result?.error) || undefined}
+              autoSize={input.length < 200_000}
             />
           </Field>
           <Output
@@ -76,11 +114,6 @@ export default function URLEncoderDecoder() {
             }
           />
         </TwoPane>
-        {result?.error && (
-          <Callout tone="error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
       </Panel>
     </ToolPage>
   );

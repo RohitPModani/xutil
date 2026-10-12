@@ -1,99 +1,55 @@
-import { useMemo, useState } from 'react';
 import * as yaml from 'js-yaml';
-import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, Field, FileDrop, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
-import { getErrorMessage } from '../../utils/errors';
+import { TwoWayConverter, type Format } from '../../components/TwoWayConverter';
+import { describeJsonError } from '../../utils/json';
 import { looksLikeJson } from '../../utils/text';
-import { useSourceText } from '../../hooks/useSourceText';
-
-type Mode = 'auto' | 'yaml' | 'json';
-
-function convert(input: string, mode: Mode): { out: string; to: 'yaml' | 'json' } {
-  const toYaml = mode === 'json' || (mode === 'auto' && looksLikeJson(input));
-  if (toYaml) {
-    return { out: yaml.dump(JSON.parse(input), { lineWidth: -1 }), to: 'yaml' };
-  }
-  return { out: JSON.stringify(yaml.load(input), null, 2), to: 'json' };
-}
 
 /**
- * One pane in, one pane out. Direction is detected from the input (JSON
- * starts with { or [) and can be forced with the switch.
+ * The core schema keeps `2024-01-01` a string and `0o17` an integer (the
+ * default schema turns the first into a Date). A stream of several `---`
+ * documents becomes a JSON array.
  */
-export default function YamlJsonConverter() {
-  const { text: input, setText: setInput, fileBase, loadFile, clear: clearSource } = useSourceText();
-  const [mode, setMode] = useState<Mode>('auto');
-
-  const result = useMemo(() => {
-    if (!input.trim()) return null;
-    try {
-      return { ...convert(input, mode), error: '' };
-    } catch (e) {
-      return { out: '', to: null, error: getErrorMessage(e, 'Could not parse the input.') };
+function yamlToJson(input: string): string {
+  let docs: unknown[];
+  try {
+    docs = yaml.loadAll(input, null, { schema: yaml.CORE_SCHEMA });
+  } catch (e) {
+    if (e instanceof yaml.YAMLException && e.mark) {
+      // An end-of-stream error is marked one past the last line.
+      const line = Math.min(e.mark.line + 1, input.split('\n').length);
+      throw new Error(`Line ${line}, column ${e.mark.column + 1}: ${e.reason}`);
     }
-  }, [input, mode]);
+    throw e;
+  }
+  return JSON.stringify(docs.length > 1 ? docs : (docs[0] ?? null), null, 2);
+}
 
-  const to = result?.to ?? null;
-  const fileName = `${fileBase || 'converted'}.${to ?? 'txt'}`;
+function jsonToYaml(input: string): string {
+  try {
+    return yaml.dump(JSON.parse(input), { lineWidth: -1 });
+  } catch (e) {
+    throw new Error(describeJsonError(e, input));
+  }
+}
 
-  return (
-    <ToolPage id="yaml_json">
-      <Panel
-        title="Convert"
-        actions={
-          <>
-            <Segmented
-              size="sm"
-              label="Direction"
-              value={mode}
-              onChange={setMode}
-              options={[
-                { value: 'auto', label: 'Auto' },
-                { value: 'yaml', label: 'YAML → JSON' },
-                { value: 'json', label: 'JSON → YAML' },
-              ]}
-            />
-            <ClearButton
-              onClick={clearSource}
-              disabled={!input}
-            />
-          </>
-        }
-      >
-        <TwoPane>
-          <Field label="Input" htmlFor="yj-input" hint={to ? `Detected ${to === 'json' ? 'YAML' : 'JSON'}; converting to ${to.toUpperCase()}.` : 'Paste YAML or JSON. Direction is detected automatically.'}>
-            <TextArea
-              id="yj-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={'name: xutil\ntools:\n  - jwt\n  - yaml'}
-              rows={12}
-              stats
-              autoFocus
-              aria-invalid={Boolean(result?.error) || undefined}
-            />
-            <FileDrop
-              className="mt-3"
-              accept=".yaml,.yml,.json"
-              label="Load a file"
-              onFile={loadFile}
-              onClear={clearSource}
-            />
-          </Field>
-          <Output
-            label={to ? `Output · ${to.toUpperCase()}` : 'Output'}
-            value={result?.out ?? ''}
-            rows={12}
-            fileName={fileName}
-            mime={to === 'json' ? 'application/json' : 'application/x-yaml'}
-          />
-        </TwoPane>
-        {result?.error && (
-          <Callout tone="error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
-      </Panel>
-    </ToolPage>
-  );
+const isJson = (input: string) => {
+  try {
+    JSON.parse(input);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const FORMATS: [Format, Format] = [
+  { label: 'YAML', ext: 'yaml', mime: 'application/x-yaml' },
+  { label: 'JSON', ext: 'json', mime: 'application/json', json: true },
+];
+
+/** Flow-style YAML such as `{a: 1}` looks like JSON but is not; only real JSON goes to the JSON side. */
+const detect = (input: string): 0 | 1 => (looksLikeJson(input) && isJson(input) ? 1 : 0);
+
+const convert = (input: string, from: 0 | 1) => (from === 1 ? jsonToYaml(input) : yamlToJson(input));
+
+export default function YamlJsonConverter() {
+  return <TwoWayConverter id="yaml_json" formats={FORMATS} accept=".yaml,.yml,.json" detect={detect} convert={convert} placeholder={'name: xutil\ntools:\n  - jwt\n  - yaml'} />;
 }

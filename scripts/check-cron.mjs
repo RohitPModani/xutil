@@ -23,7 +23,32 @@ const cases = {
   'every 3 days at 6 am': '0 6 */3 * *',
   'at 7:45 pm': '45 19 * * *',
   'in january': '* * * 1 *',
+  'every 6 months': '0 0 1 */6 *',
+  'at 09:05': '5 9 * * *',
+  'every day at midnight': '0 0 * * *',
+  'every monday at noon': '0 12 * * 1',
+  'every monday and wednesday at 9am': '0 9 * * 1,3',
+  'every monday, wednesday and friday': '0 0 * * 1,3,5',
+  'monday to friday at 8:15am': '15 8 * * 1-5',
+  'every 2 hours on weekdays': '0 */2 * * 1-5',
+  'every 15 minutes on weekends': '*/15 * * * 0,6',
+  'in january at 9am': '0 9 * 1 *',
+  'every day in january and july at 9am': '0 9 * 1,7 *',
+  'every hour between 9 pm and 5 am': '0 21-23,0-5 * * *',
+  'every 15 minutes between 9:30 am and 5 pm': '*/15 9-17 * * *',
+  'between 9:30 am and 5 pm': '30 9-17 * * *',
+  'every day at 9am and 5pm': '0 9,17 * * *',
+  'at 9am, noon and 5pm': '0 9,12,17 * * *',
+  'weekly': '0 0 * * 0',
+  'every week on friday': '0 0 * * 5',
+  'monthly': '0 0 1 * *',
+  'monthly on the 15th': '0 0 15 * *',
+  'on the 1st and 15th at 6am': '0 6 1,15 * *',
+  'yearly': '0 0 1 1 *',
+  'every 2 weeks': '0 0 */14 * *',
 };
+const errors = ['every 90 minutes', 'every 0 minutes', 'every 24 hours', 'at 25:00', 'at 13 pm', 'at 9:75', 'at 9:30am and 5:45pm', 'every 5 weeks', 'on the 32nd', 'tomorrow', ''];
 let bad = 0;
 for (const [i, want] of Object.entries(cases)) { const got = toCron(i); if (got !== want) { bad++; console.log('FAIL', JSON.stringify(i), 'got', got, 'want', want); } }
-console.log(bad ? `${bad} failures` : `all ${Object.keys(cases).length} cases pass`);
+for (const i of errors) { try { const got = toCron(i); bad++; console.log('FAIL', JSON.stringify(i), 'got', got, 'want an error'); } catch { /* expected */ } }
+console.log(bad ? `${bad} failures` : `all ${Object.keys(cases).length + errors.length} cases pass`);

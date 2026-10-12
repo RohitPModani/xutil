@@ -65,8 +65,8 @@ Generation runs in the browser. No request is made, and nothing is stored.`,
 ## What it does
 
 - Decomposes accented letters with Unicode NFKD normalisation and removes the combining marks, so "é" becomes "e".
-- Removes every character that is not a letter, digit, underscore, whitespace, tilde or hyphen. Letters outside ASCII that have no decomposition (for example Chinese characters) are removed, not transliterated.
-- Splits on runs of whitespace and hyphens, so "well-known  word" becomes three parts, and joins them with the chosen separator. Existing underscores inside a word are kept.
+- Transliterates the Latin letters that have no decomposition (ß → ss, ø → o, æ → ae, œ → oe, ł → l, đ → d, þ → th), then removes every character that is not a letter, digit, underscore, whitespace, tilde or hyphen. Other scripts (for example Chinese characters) are removed, not transliterated, and the tool says so.
+- Splits on runs of whitespace, hyphens and underscores, so "well-known  word" becomes three parts, and joins them with the chosen separator.
 - Shows an error when nothing remains after cleaning, for example for input that is only punctuation.
 - Does not check whether the slug is unique or already in use anywhere.
 
@@ -295,9 +295,9 @@ Parsing and formatting run in the browser. No request is made, and nothing is st
 | UPPERCASE | HELLO WORLD FROM XUTIL |
 | mOcKiNg cAsE | hElLo wOrLd fRoM XuTiL |
 
-- The word-joined cases (camel to Header) split the input on whitespace, hyphens and underscores. A run such as "XMLParser" is one word, so it is not split at the capital letters.
+- The word-joined cases (camel to Header) split the input on whitespace, hyphens, underscores, dots and slashes, and at camelCase boundaries, so "helloWorld" and "XMLParser" become two words each.
 - Title Case, Sentence case, lowercase, UPPERCASE and mOcKiNg cAsE keep the original spacing and punctuation.
-- Title Case capitalises every word, including "a" and "of"; it does not apply style-guide exceptions.
+- Title Case lowercases the text and capitalises the first letter of every whitespace-separated word, including "a" and "of"; it does not apply style-guide exceptions. Sentence case capitalises after a full stop, question mark, exclamation mark or line break.
 
 ## Example
 
@@ -380,12 +380,12 @@ Rendering runs in the browser. No request is made, and nothing is stored. Images
   lineBreakWhitespaceRemover: {
     title: 'Whitespace Remover',
     seo: 'Whitespace Remover: Strip Line Breaks, Extra Spaces | XUtil',
-    body: `A whitespace remover strips line breaks, collapses repeated spaces and tabs, and trims the ends of each line. Pick any combination of the three.
+    body: `A whitespace remover strips line breaks, collapses blank lines and runs of spaces, and trims each line. Pick any combination of the four options.
 
 ## How to use
 
 1. Paste the text. The cleaned version appears on the right as you type.
-2. Tick or untick the three options; all are on by default.
+2. Tick or untick the options; all but "Collapse blank lines" are on by default.
 3. Check the line counts before and after, then Copy or Download \`cleaned.txt\`.
 
 ## Options
@@ -393,7 +393,8 @@ Rendering runs in the browser. No request is made, and nothing is stored. Images
 | Option | What it does |
 | --- | --- |
 | Remove line breaks | Replaces every run of newlines (\`\\n\` or \`\\r\\n\`) with a single space, joining the text into one line |
-| Collapse repeated spaces | Replaces runs of spaces and tabs with one space. With line breaks kept, newlines are left alone |
+| Collapse blank lines | Replaces runs of blank lines with a single blank line. Only available while line breaks are kept |
+| Collapse runs of spaces and tabs | Replaces runs of two or more spaces or tabs with one space; a single tab is left alone. Newlines are never touched |
 | Trim leading and trailing spaces | Removes whitespace at both ends of each line, or of the whole text when lines were joined |
 
 - Order is fixed: line breaks first, then collapsing, then trimming.
@@ -499,7 +500,8 @@ Deduplication runs in the browser. No request is made, and nothing is stored.`,
 
 | Count | How it is measured |
 | --- | --- |
-| Characters | UTF-16 code units, the same as \`string.length\` in JavaScript |
+| Characters (graphemes) | User-perceived characters, segmented with \`Intl.Segmenter\`; a flag or a family emoji is 1. Older browsers fall back to code points and the label says so |
+| UTF-16 units | The same as \`string.length\` in JavaScript |
 | Without spaces | Characters that are not whitespace |
 | Bytes (UTF-8) | Length of the text encoded as UTF-8 |
 | Words | Runs of non-whitespace separated by spaces, tabs or newlines |
@@ -507,7 +509,7 @@ Deduplication runs in the browser. No request is made, and nothing is stored.`,
 | Lines | Newline characters plus one; empty text is 0 |
 | Sentences | Segments ending in \`.\`, \`!\` or \`?\` followed by a space or the end |
 
-- Characters are code units, so an emoji such as 😀 counts as 2 characters and 4 bytes, and "é" counts as 1 character and 2 bytes.
+- An emoji such as 😀 counts as 1 character, 2 UTF-16 units and 4 bytes; "é" counts as 1 character and 2 bytes.
 - "Hello," and "Hello" are different unique words; punctuation is not stripped.
 - "e.g. this" counts as two sentences, because the splitter does not know abbreviations.
 - Does not count paragraphs, syllables or reading time.
@@ -545,14 +547,14 @@ Counting runs in the browser. No request is made, and nothing is stored.`,
   regexTester: {
     title: 'Regex Tester',
     seo: 'Regex Tester: Test a Pattern with Live Matches | XUtil',
-    body: `A regex tester runs a JavaScript regular expression against sample text and highlights every match as you type, with the g, i, m, s and u flags.
+    body: `A regex tester runs a JavaScript regular expression against sample text, highlighting matches as you type, with capture groups, positions and a replace preview.
 
 ## How to use
 
 1. Type the pattern without surrounding slashes, for example \`\\d+\` rather than \`/\\d+/\`.
 2. Tick the flags you need. Only g (global) is on by default; without it, only the first match is shown.
 3. Paste the test text. Matches are highlighted in place and counted as you type.
-4. Copy to get all matched strings, one per line. A syntax error in the pattern is shown under the flags.
+4. Copy to get all matched strings, one per line. Below the highlighted text, "Groups and positions" lists every match with its numbered and named groups and character offsets, and "Replaced" shows the test text after \`String.replace\` with the "Replace with" field. A syntax error in the pattern is shown under it.
 
 ## What it supports
 
@@ -563,11 +565,14 @@ Counting runs in the browser. No request is made, and nothing is stored.`,
 | m | \`^\` and \`$\` match at line starts and ends, not only the string ends |
 | s | \`.\` also matches newlines |
 | u | Unicode mode: \`\\p{L}\` property escapes and correct handling of characters above U+FFFF |
+| v | Unicode sets mode: set operations inside classes and string properties; cannot be combined with u |
+| y | Sticky: the match must start exactly at \`lastIndex\` |
+| d | Indices: records the start and end of every group |
 
 - Uses the browser's \`RegExp\`, so the syntax is JavaScript (ECMAScript): lookbehind, named groups \`(?<name>…)\` and \`\\p{…}\` with the u flag all work; possessive quantifiers, atomic groups and \`\\A\`/\`\\z\` do not.
 - Empty matches are dropped, so a pattern such as \`a*\` reports only the non-empty hits.
-- Shows whole matches only. Capture groups are not listed separately, and there is no replace function.
-- Patterns that backtrack heavily on long text run in the page thread and can make the tab slow.
+- At most 5,000 matches are highlighted and listed; the count still covers all of them.
+- Matching runs in a Web Worker and is stopped after 2 seconds, so a catastrophically backtracking pattern reports a timeout instead of freezing the tab.
 
 ## Example
 

@@ -18,6 +18,8 @@ export interface RangeInputProps {
 export function RangeInput({ id, label, min, max, step = 1, value, onChange, className }: RangeInputProps) {
   const [text, setText] = useState(String(value));
   useEffect(() => setText(String(value)), [value]);
+  const n = Number(text);
+  const invalid = text === '' || !Number.isFinite(n) || n < min || n > max;
   return (
     <div className={cn('flex items-center gap-3', className)}>
       <input
@@ -45,6 +47,7 @@ export function RangeInput({ id, label, min, max, step = 1, value, onChange, cla
           if (e.target.value !== '' && Number.isFinite(n) && n >= min && n <= max) onChange(n);
         }}
         onBlur={() => setText(String(value))}
+        aria-invalid={invalid || undefined}
         className="w-24"
       />
     </div>

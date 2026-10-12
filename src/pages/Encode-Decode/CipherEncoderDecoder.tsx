@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, Field, Input, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
+import { ClearButton, Field, Input, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
 
 type Cipher = 'rot13' | 'caesar';
 const MIN_SHIFT = -100;
@@ -19,6 +19,7 @@ export default function CipherEncoderDecoder() {
   const [input, setInput] = useState('');
   const [cipher, setCipher] = useState<Cipher>('rot13');
   const [shift, setShift] = useState('3');
+  const deferred = useDeferredValue(input);
 
   const shiftN = Number(shift);
   const shiftError =
@@ -27,9 +28,9 @@ export default function CipherEncoderDecoder() {
       : '';
 
   const out = useMemo(() => {
-    if (!input || shiftError) return '';
-    return caesar(input, cipher === 'rot13' ? 13 : shiftN);
-  }, [input, cipher, shiftN, shiftError]);
+    if (!deferred || shiftError) return '';
+    return caesar(deferred, cipher === 'rot13' ? 13 : shiftN);
+  }, [deferred, cipher, shiftN, shiftError]);
 
   return (
     <ToolPage id="cipher">
@@ -52,7 +53,7 @@ export default function CipherEncoderDecoder() {
         }
       >
         {cipher === 'caesar' && (
-          <Field label="Shift" htmlFor="cipher-shift" hint="Negative values shift backwards" className="mb-4 max-w-[12rem]">
+          <Field label="Shift" htmlFor="cipher-shift" hint="Negative values shift backwards" error={shiftError} className="mb-4 max-w-[12rem]">
             <Input
               id="cipher-shift"
               type="number"
@@ -62,7 +63,6 @@ export default function CipherEncoderDecoder() {
               inputMode="numeric"
               value={shift}
               onChange={(e) => setShift(e.target.value)}
-              aria-invalid={Boolean(shiftError) || undefined}
             />
           </Field>
         )}
@@ -76,15 +76,11 @@ export default function CipherEncoderDecoder() {
               rows={10}
               stats
               autoFocus
+              autoSize={input.length < 200_000}
             />
           </Field>
           <Output label={cipher === 'rot13' ? 'ROT13' : `Shifted by ${shiftError ? '…' : shiftN}`} value={out} rows={10} />
         </TwoPane>
-        {shiftError && (
-          <Callout tone="error" className="mt-4">
-            {shiftError}
-          </Callout>
-        )}
       </Panel>
     </ToolPage>
   );

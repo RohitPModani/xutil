@@ -1,4 +1,5 @@
 import UnitConverter from './UnitConverter';
+import { linearConvert } from '../../utils/units';
 
 type SpeedUnit = 'm_s' | 'km_h' | 'mph' | 'ft_s' | 'kn';
 
@@ -10,21 +11,15 @@ const UNITS: { value: SpeedUnit; label: string }[] = [
   { value: 'kn', label: 'Knots (kn)' },
 ];
 
+// A knot is one nautical mile (1852 m) per hour.
 const UNIT_TO_METERS_PER_SECOND: Record<SpeedUnit, number> = {
   m_s: 1,
   km_h: 1 / 3.6,
   mph: 0.44704,
   ft_s: 0.3048,
-  kn: 0.51444444444,
+  kn: 1852 / 3600,
 };
 
-function convert(value: number, unit: string): Record<string, number> {
-  if (!(unit in UNIT_TO_METERS_PER_SECOND)) throw new Error(`Unknown unit: ${unit}`);
-  const ms = value * UNIT_TO_METERS_PER_SECOND[unit as SpeedUnit];
-  if (!Number.isFinite(ms)) throw new Error('The value is too large to convert.');
-  return Object.fromEntries(Object.entries(UNIT_TO_METERS_PER_SECOND).map(([k, f]) => [k, Number((ms / f).toFixed(8))]));
-}
-
 export default function SpeedConverter() {
-  return <UnitConverter id="speed" defaultValue="1" defaultUnit="km_h" units={UNITS} validationMessage="Speed must be greater than zero." convert={convert} />;
+  return <UnitConverter id="speed" defaultValue="1" defaultUnit="km_h" units={UNITS} validationMessage="Speed must be greater than zero." convert={linearConvert(UNIT_TO_METERS_PER_SECOND)} />;
 }

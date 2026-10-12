@@ -1,44 +1,50 @@
 import UnitConverter from './UnitConverter';
+import { linearConvert } from '../../utils/units';
 
-type BitByteUnit = 'Bit' | 'Byte' | 'Kb' | 'KB' | 'Mb' | 'MB' | 'Gb' | 'GB' | 'Tb' | 'TB' | 'Pb' | 'PB';
-
-const UNIT_TO_BITS: Record<BitByteUnit, number> = {
-  Bit: 1,
-  Byte: 8,
-  Kb: 1e3,
-  KB: 8e3,
-  Mb: 1e6,
-  MB: 8e6,
-  Gb: 1e9,
-  GB: 8e9,
-  Tb: 1e12,
-  TB: 8e12,
-  Pb: 1e15,
-  PB: 8e15,
-};
+type BitByteUnit =
+  | 'bit' | 'B'
+  | 'kbit' | 'kB' | 'Mbit' | 'MB' | 'Gbit' | 'GB' | 'Tbit' | 'TB' | 'Pbit' | 'PB'
+  | 'KiB' | 'MiB' | 'GiB' | 'TiB';
 
 const UNITS: { value: BitByteUnit; label: string }[] = [
-  { value: 'Bit', label: 'Bits (bit)' },
-  { value: 'Byte', label: 'Bytes (byte)' },
-  { value: 'Kb', label: 'Kilobits (Kb)' },
-  { value: 'KB', label: 'Kilobytes (KB)' },
-  { value: 'Mb', label: 'Megabits (Mb)' },
+  { value: 'bit', label: 'Bits (bit)' },
+  { value: 'B', label: 'Bytes (B)' },
+  { value: 'kbit', label: 'Kilobits (kbit)' },
+  { value: 'kB', label: 'Kilobytes (kB)' },
+  { value: 'Mbit', label: 'Megabits (Mbit)' },
   { value: 'MB', label: 'Megabytes (MB)' },
-  { value: 'Gb', label: 'Gigabits (Gb)' },
+  { value: 'Gbit', label: 'Gigabits (Gbit)' },
   { value: 'GB', label: 'Gigabytes (GB)' },
-  { value: 'Tb', label: 'Terabits (Tb)' },
+  { value: 'Tbit', label: 'Terabits (Tbit)' },
   { value: 'TB', label: 'Terabytes (TB)' },
-  { value: 'Pb', label: 'Petabits (Pb)' },
+  { value: 'Pbit', label: 'Petabits (Pbit)' },
   { value: 'PB', label: 'Petabytes (PB)' },
+  { value: 'KiB', label: 'Kibibytes (KiB, 1024 B)' },
+  { value: 'MiB', label: 'Mebibytes (MiB, 1024² B)' },
+  { value: 'GiB', label: 'Gibibytes (GiB, 1024³ B)' },
+  { value: 'TiB', label: 'Tebibytes (TiB, 1024⁴ B)' },
 ];
 
-function convert(value: number, unit: string): Record<string, number> {
-  if (!(unit in UNIT_TO_BITS)) throw new Error(`Unknown unit: ${unit}`);
-  const bits = value * UNIT_TO_BITS[unit as BitByteUnit];
-  if (!Number.isFinite(bits)) throw new Error('The value is too large to convert.');
-  return Object.fromEntries(Object.entries(UNIT_TO_BITS).map(([k, f]) => [k, Number((bits / f).toFixed(8))]));
-}
+// SI prefixes are powers of 1000; IEC binary prefixes are powers of 1024.
+const UNIT_TO_BITS: Record<BitByteUnit, number> = {
+  bit: 1,
+  B: 8,
+  kbit: 1e3,
+  kB: 8e3,
+  Mbit: 1e6,
+  MB: 8e6,
+  Gbit: 1e9,
+  GB: 8e9,
+  Tbit: 1e12,
+  TB: 8e12,
+  Pbit: 1e15,
+  PB: 8e15,
+  KiB: 8 * 1024,
+  MiB: 8 * 1024 ** 2,
+  GiB: 8 * 1024 ** 3,
+  TiB: 8 * 1024 ** 4,
+};
 
 export default function BitByteConverter() {
-  return <UnitConverter id="bit_byte" defaultValue="1" defaultUnit="Gb" units={UNITS} validationMessage="Value must be greater than zero." convert={convert} />;
+  return <UnitConverter id="bit_byte" defaultValue="1" defaultUnit="Gbit" units={UNITS} validationMessage="Value must be greater than zero." convert={linearConvert(UNIT_TO_BITS)} />;
 }

@@ -1,4 +1,5 @@
 import UnitConverter from './UnitConverter';
+import { linearConvert } from '../../utils/units';
 
 type TimeUnit = 'ns' | 'μs' | 'ms' | 's' | 'min' | 'hr' | 'day' | 'week' | 'month' | 'year' | 'decade' | 'century';
 
@@ -11,12 +12,13 @@ const UNITS: { value: TimeUnit; label: string }[] = [
   { value: 'hr', label: 'Hours (hr)' },
   { value: 'day', label: 'Days (day)' },
   { value: 'week', label: 'Weeks (week)' },
-  { value: 'month', label: 'Months (month)' },
-  { value: 'year', label: 'Years (year)' },
-  { value: 'decade', label: 'Decades (decade)' },
-  { value: 'century', label: 'Centuries (century)' },
+  { value: 'month', label: 'Months (1/12 year, 30.42 days)' },
+  { value: 'year', label: 'Years (365 days)' },
+  { value: 'decade', label: 'Decades (10 × 365 days)' },
+  { value: 'century', label: 'Centuries (100 × 365 days)' },
 ];
 
+// A year is a fixed 365 days and a month is one twelfth of that.
 const UNIT_TO_SECONDS: Record<TimeUnit, number> = {
   ns: 1e-9,
   μs: 1e-6,
@@ -26,19 +28,12 @@ const UNIT_TO_SECONDS: Record<TimeUnit, number> = {
   hr: 3600,
   day: 86400,
   week: 604800,
-  month: 2628000, // average: 30.42 days
-  year: 31536000, // 365 days
+  month: 31536000 / 12,
+  year: 31536000,
   decade: 315360000,
   century: 3153600000,
 };
 
-function convert(value: number, unit: string): Record<string, number> {
-  if (!(unit in UNIT_TO_SECONDS)) throw new Error(`Unknown unit: ${unit}`);
-  const seconds = value * UNIT_TO_SECONDS[unit as TimeUnit];
-  if (!Number.isFinite(seconds)) throw new Error('The value is too large to convert.');
-  return Object.fromEntries(Object.entries(UNIT_TO_SECONDS).map(([k, f]) => [k, Number((seconds / f).toFixed(8))]));
-}
-
 export default function TimeUnitConverter() {
-  return <UnitConverter id="time" defaultValue="1" defaultUnit="hr" units={UNITS} validationMessage="Time must be greater than zero." convert={convert} />;
+  return <UnitConverter id="time" defaultValue="1" defaultUnit="hr" units={UNITS} validationMessage="Time must be greater than zero." convert={linearConvert(UNIT_TO_SECONDS)} />;
 }

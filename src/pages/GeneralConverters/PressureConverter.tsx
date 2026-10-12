@@ -1,4 +1,5 @@
 import UnitConverter from './UnitConverter';
+import { linearConvert } from '../../utils/units';
 
 type PressureUnit = 'pa' | 'kpa' | 'atm' | 'bar' | 'mbar' | 'psi' | 'mmhg' | 'torr';
 
@@ -13,24 +14,19 @@ const UNITS: { value: PressureUnit; label: string }[] = [
   { value: 'torr', label: 'Torr' },
 ];
 
+// A torr is 1/760 atm by definition; mmHg is from mercury density and differs
+// by about one part in seven million.
 const UNIT_TO_PASCALS: Record<PressureUnit, number> = {
   pa: 1,
   kpa: 1000,
   atm: 101325,
   bar: 100000,
   mbar: 100,
-  psi: 6894.75729317,
+  psi: 6894.757293168,
   mmhg: 133.322387415,
-  torr: 133.322387415,
+  torr: 101325 / 760,
 };
 
-function convert(value: number, unit: string): Record<string, number> {
-  if (!(unit in UNIT_TO_PASCALS)) throw new Error(`Unknown unit: ${unit}`);
-  const pa = value * UNIT_TO_PASCALS[unit as PressureUnit];
-  if (!Number.isFinite(pa)) throw new Error('The value is too large to convert.');
-  return Object.fromEntries(Object.entries(UNIT_TO_PASCALS).map(([k, f]) => [k, Number((pa / f).toFixed(8))]));
-}
-
 export default function PressureConverter() {
-  return <UnitConverter id="pressure" defaultValue="20" defaultUnit="psi" units={UNITS} validationMessage="Pressure must be greater than zero." convert={convert} />;
+  return <UnitConverter id="pressure" defaultValue="20" defaultUnit="psi" units={UNITS} validationMessage="Pressure must be greater than zero." convert={linearConvert(UNIT_TO_PASCALS)} />;
 }

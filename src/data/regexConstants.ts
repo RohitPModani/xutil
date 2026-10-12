@@ -1,4 +1,16 @@
-export const REGEX_CATEGORIES = [
+export interface RegexItem {
+  pattern: string;
+  description: string;
+  /** `false` when the token is PCRE/Perl only and does not work in JavaScript. */
+  js?: false;
+}
+
+export interface RegexCategory {
+  name: string;
+  items: RegexItem[];
+}
+
+export const REGEX_CATEGORIES: RegexCategory[] = [
   {
     name: "Characters",
     items: [
@@ -23,43 +35,34 @@ export const REGEX_CATEGORIES = [
       { pattern: "\\f", description: "Form feed" },
       { pattern: "\\v", description: "Vertical tab" },
       { pattern: "\\xhh", description: "Character with hex code hh" },
-      {
-        pattern: "\\uhhhh",
-        description: "Unicode character with hex code hhhh",
-      },
-      { pattern: "\\u{hhhh}", description: "Unicode character (ES6+)" },
+      { pattern: "\\uhhhh", description: "Unicode character with hex code hhhh" },
+      { pattern: "\\u{hhhh}", description: "Unicode character (needs the u flag)" },
       { pattern: "\\cX", description: "Control character (X is A-Z)" },
     ],
   },
   {
     name: "Character Classes",
     items: [
-      { pattern: "[:alnum:]", description: "Alphanumeric characters" },
-      { pattern: "[:alpha:]", description: "Alphabetic characters" },
-      { pattern: "[:ascii:]", description: "ASCII characters (0-127)" },
-      { pattern: "[:blank:]", description: "Space or tab" },
-      { pattern: "[:cntrl:]", description: "Control characters" },
-      { pattern: "[:digit:]", description: "Digits (0-9)" },
-      { pattern: "[:graph:]", description: "Visible characters (no space)" },
-      { pattern: "[:lower:]", description: "Lowercase letters" },
-      { pattern: "[:print:]", description: "Visible characters + space" },
-      { pattern: "[:punct:]", description: "Punctuation" },
-      { pattern: "[:space:]", description: "Whitespace" },
-      { pattern: "[:upper:]", description: "Uppercase letters" },
-      {
-        pattern: "[:word:]",
-        description: "Word characters (letters, digits, underscore)",
-      },
-      {
-        pattern: "[:xdigit:]",
-        description: "Hexadecimal digits (0-9, a-f, A-F)",
-      },
+      { pattern: "[[:alnum:]]", description: "Alphanumeric characters", js: false },
+      { pattern: "[[:alpha:]]", description: "Alphabetic characters", js: false },
+      { pattern: "[[:ascii:]]", description: "ASCII characters (0-127)", js: false },
+      { pattern: "[[:blank:]]", description: "Space or tab", js: false },
+      { pattern: "[[:cntrl:]]", description: "Control characters", js: false },
+      { pattern: "[[:digit:]]", description: "Digits (0-9)", js: false },
+      { pattern: "[[:graph:]]", description: "Visible characters (no space)", js: false },
+      { pattern: "[[:lower:]]", description: "Lowercase letters", js: false },
+      { pattern: "[[:print:]]", description: "Visible characters + space", js: false },
+      { pattern: "[[:punct:]]", description: "Punctuation", js: false },
+      { pattern: "[[:space:]]", description: "Whitespace", js: false },
+      { pattern: "[[:upper:]]", description: "Uppercase letters", js: false },
+      { pattern: "[[:word:]]", description: "Word characters (letters, digits, underscore)", js: false },
+      { pattern: "[[:xdigit:]]", description: "Hexadecimal digits (0-9, a-f, A-F)", js: false },
     ],
   },
   {
     name: "Unicode",
     items: [
-      { pattern: "\\p{L}", description: "Any letter" },
+      { pattern: "\\p{L}", description: "Any letter (needs the u flag)" },
       { pattern: "\\p{Ll}", description: "Lowercase letter" },
       { pattern: "\\p{Lu}", description: "Uppercase letter" },
       { pattern: "\\p{N}", description: "Any number" },
@@ -77,13 +80,13 @@ export const REGEX_CATEGORIES = [
   {
     name: "Anchors",
     items: [
-      { pattern: "^", description: "Start of string/line" },
-      { pattern: "$", description: "End of string/line" },
-      { pattern: "\\A", description: "Start of string (ignore multiline)" },
-      { pattern: "\\Z", description: "End of string (before final newline)" },
-      { pattern: "\\z", description: "Absolute end of string" },
-      { pattern: "\\G", description: "End of previous match" },
-      { pattern: "\\K", description: "Reset match (keep left)" },
+      { pattern: "^", description: "Start of string, or of a line with the m flag" },
+      { pattern: "$", description: "End of string, or of a line with the m flag" },
+      { pattern: "\\A", description: "Start of string (ignore multiline)", js: false },
+      { pattern: "\\Z", description: "End of string (before final newline)", js: false },
+      { pattern: "\\z", description: "Absolute end of string", js: false },
+      { pattern: "\\G", description: "End of previous match", js: false },
+      { pattern: "\\K", description: "Reset match (keep left)", js: false },
     ],
   },
   {
@@ -98,9 +101,9 @@ export const REGEX_CATEGORIES = [
       { pattern: "*?", description: "0 or more (lazy)" },
       { pattern: "+?", description: "1 or more (lazy)" },
       { pattern: "??", description: "0 or 1 (lazy)" },
-      { pattern: "*+", description: "0 or more (possessive)" },
-      { pattern: "++", description: "1 or more (possessive)" },
-      { pattern: "?+", description: "0 or 1 (possessive)" },
+      { pattern: "*+", description: "0 or more (possessive)", js: false },
+      { pattern: "++", description: "1 or more (possessive)", js: false },
+      { pattern: "?+", description: "0 or 1 (possessive)", js: false },
     ],
   },
   {
@@ -111,21 +114,21 @@ export const REGEX_CATEGORIES = [
       { pattern: "(?<name>abc)", description: "Named capturing group" },
       { pattern: "\\1", description: "Backreference to group #1" },
       { pattern: "\\k<name>", description: "Backreference to named group" },
-      { pattern: "(?>abc)", description: "Atomic group" },
-      { pattern: "(?|(a)|(b))", description: "Branch reset group" },
-      { pattern: "(?(1)yes|no)", description: "Conditional pattern" },
-      { pattern: "(?R)", description: "Recurse entire pattern" },
-      { pattern: "(?1)", description: "Recurse first group" },
+      { pattern: "(?>abc)", description: "Atomic group", js: false },
+      { pattern: "(?|(a)|(b))", description: "Branch reset group", js: false },
+      { pattern: "(?(1)yes|no)", description: "Conditional pattern", js: false },
+      { pattern: "(?R)", description: "Recurse entire pattern", js: false },
+      { pattern: "(?1)", description: "Recurse first group", js: false },
     ],
   },
   {
     name: "Lookarounds",
     items: [
-      { pattern: "(?=abc)", description: "Positive lookahead" },
-      { pattern: "(?!abc)", description: "Negative lookahead" },
-      { pattern: "(?<=abc)", description: "Positive lookbehind" },
-      { pattern: "(?<!abc)", description: "Negative lookbehind" },
-      { pattern: "(?<=^.{5})", description: "Lookbehind for first 5 chars" },
+      { pattern: "(?=abc)", description: "Positive lookahead: followed by abc, abc not consumed" },
+      { pattern: "(?!abc)", description: "Negative lookahead: not followed by abc" },
+      { pattern: "(?<=abc)", description: "Positive lookbehind: preceded by abc, abc not consumed" },
+      { pattern: "(?<!abc)", description: "Negative lookbehind: not preceded by abc" },
+      { pattern: "(?<=^.{5})", description: "Position right after the first 5 characters of the string (JavaScript allows any length inside a lookbehind; PCRE needs a fixed length)" },
     ],
   },
   {
@@ -136,24 +139,26 @@ export const REGEX_CATEGORIES = [
       { pattern: "/m", description: "Multiline mode" },
       { pattern: "/s", description: "Dot matches newline" },
       { pattern: "/u", description: "Unicode mode" },
+      { pattern: "/v", description: "Unicode sets mode (set operations, string properties)" },
       { pattern: "/y", description: "Sticky mode" },
-      { pattern: "/x", description: "Ignore whitespace" },
-      { pattern: "(?i)", description: "Inline case-insensitive" },
-      { pattern: "(?m)", description: "Inline multiline" },
-      { pattern: "(?s)", description: "Inline dot-all" },
-      { pattern: "(?u)", description: "Inline unicode" },
-      { pattern: "(?x)", description: "Inline ignore whitespace" },
+      { pattern: "/d", description: "Record start and end indices of groups" },
+      { pattern: "/x", description: "Ignore whitespace", js: false },
+      { pattern: "(?i)", description: "Inline case-insensitive", js: false },
+      { pattern: "(?m)", description: "Inline multiline", js: false },
+      { pattern: "(?s)", description: "Inline dot-all", js: false },
+      { pattern: "(?u)", description: "Inline unicode", js: false },
+      { pattern: "(?x)", description: "Inline ignore whitespace", js: false },
     ],
   },
   {
     name: "Special Constructs",
     items: [
-      { pattern: "(*PRUNE)", description: "Discard backtracking path" },
-      { pattern: "(*SKIP)", description: "Skip current position" },
-      { pattern: "(*FAIL)", description: "Force match failure" },
-      { pattern: "(*ACCEPT)", description: "Accept current match" },
-      { pattern: "(?#comment)", description: "Inline comment" },
-      { pattern: "#...", description: "Comment in /x mode" },
+      { pattern: "(*PRUNE)", description: "Discard backtracking path", js: false },
+      { pattern: "(*SKIP)", description: "Skip current position", js: false },
+      { pattern: "(*FAIL)", description: "Force match failure", js: false },
+      { pattern: "(*ACCEPT)", description: "Accept current match", js: false },
+      { pattern: "(?#comment)", description: "Inline comment", js: false },
+      { pattern: "#...", description: "Comment in /x mode", js: false },
     ],
   },
   {
@@ -161,46 +166,21 @@ export const REGEX_CATEGORIES = [
     items: [
       { pattern: "\\d{3}-\\d{2}-\\d{4}", description: "SSN (XXX-XX-XXXX)" },
       { pattern: "\\d{4}-\\d{2}-\\d{2}", description: "Date (YYYY-MM-DD)" },
-      {
-        pattern: "(0[1-9]|1[0-2])/(0[1-9]|[12]\\d|3[01])/\\d{4}",
-        description: "Date (MM/DD/YYYY)",
-      },
-      {
-        pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",
-        description: "Email address",
-      },
-      { pattern: "https?://[\\w.-]+\\.[a-zA-Z]{2,}", description: "URL" },
-      { pattern: "#?([a-f0-9]{6}|[a-f0-9]{3})", description: "Hex color code" },
+      { pattern: "(0[1-9]|1[0-2])/(0[1-9]|[12]\\d|3[01])/\\d{4}", description: "Date (MM/DD/YYYY)" },
+      { pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", description: "Email address" },
+      { pattern: "https?://[^\\s/$.?#].[^\\s]*", description: "URL (whole address including path and query)" },
+      { pattern: "#?(?:[a-fA-F0-9]{6}|[a-fA-F0-9]{3})\\b", description: "Hex color code (either case)" },
       { pattern: "^[+-]?\\d+$", description: "Integer" },
       { pattern: "^[+-]?\\d*\\.?\\d+$", description: "Decimal number" },
       { pattern: "^(?:[01]\\d|2[0-3]):[0-5]\\d$", description: "24-hour time" },
-      {
-        pattern: "^(0[1-9]|1[0-2]):[0-5]\\d\\s[AP]M$",
-        description: "12-hour time",
-      },
+      { pattern: "^(0[1-9]|1[0-2]):[0-5]\\d\\s[AP]M$", description: "12-hour time" },
       { pattern: "\\b[A-Z][a-z]+\\b", description: "Capitalized words" },
       { pattern: "\\b\\d{5}(?:-\\d{4})?\\b", description: "US ZIP code" },
-      {
-        pattern: "\\b[1-9]\\d{2}-\\d{3}-\\d{4}\\b",
-        description: "US phone number",
-      },
-      {
-        pattern: "\\b\\d{3}\\.\\d{3}\\.\\d{4}\\b",
-        description: "US phone (XXX.XXX.XXXX)",
-      },
-      {
-        pattern: "\\b\\d{3}\\s\\d{3}\\s\\d{4}\\b",
-        description: "US phone (XXX XXX XXXX)",
-      },
-      {
-        pattern: "\\b(?:4[0-9]{12}(?:[0-9]{3})?)\\b",
-        description: "Visa card number",
-      },
-      {
-        pattern:
-          "\\b(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}\\b",
-        description: "Mastercard",
-      },
+      { pattern: "\\b[1-9]\\d{2}-\\d{3}-\\d{4}\\b", description: "US phone number" },
+      { pattern: "\\b\\d{3}\\.\\d{3}\\.\\d{4}\\b", description: "US phone (XXX.XXX.XXXX)" },
+      { pattern: "\\b\\d{3}\\s\\d{3}\\s\\d{4}\\b", description: "US phone (XXX XXX XXXX)" },
+      { pattern: "\\b(?:4[0-9]{12}(?:[0-9]{3})?)\\b", description: "Visa card number" },
+      { pattern: "\\b(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}\\b", description: "Mastercard" },
     ],
   },
-] as const;
+];

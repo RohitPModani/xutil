@@ -17,6 +17,9 @@ interface Sets {
   lower: boolean;
 }
 
+const poolsOf = (sets: Sets) =>
+  [sets.numbers && DIGITS, sets.special && PUNCTUATION, sets.lower && LOWER, sets.upper && UPPER].filter((p): p is string => Boolean(p));
+
 // Uniform integer in [0, max) by rejection sampling; `random % max` would
 // bias the pool and the shuffle.
 function randomInt(max: number): number {
@@ -28,12 +31,7 @@ function randomInt(max: number): number {
 }
 
 function generatePassword(length: number, sets: Sets): string {
-  const pools = [
-    sets.numbers && DIGITS,
-    sets.special && PUNCTUATION,
-    sets.lower && LOWER,
-    sets.upper && UPPER,
-  ].filter((p): p is string => Boolean(p));
+  const pools = poolsOf(sets);
   if (pools.length === 0) throw new Error('Pick at least one character set.');
 
   const all = pools.join('');
@@ -47,26 +45,16 @@ function generatePassword(length: number, sets: Sets): string {
   return chars.join('');
 }
 
-type Strength = { label: string; level: 1 | 2 | 3 | 4 };
+type Strength = { label: string; level: 1 | 2 | 3 | 4; bits: number };
 
-function strengthOf(password: string, sets: Sets): Strength {
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-  if (password.length >= 16) score++;
-  if (password.length >= 20) score++;
-  const hasLower = /[a-z]/.test(password);
-  const hasUpper = /[A-Z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const hasSpecial = /[^a-zA-Z0-9]/.test(password);
-  if (hasLower && hasUpper) score++;
-  if (hasNumber) score++;
-  if (hasSpecial) score++;
-  score += [sets.lower && hasLower, sets.upper && hasUpper, sets.numbers && hasNumber, sets.special && hasSpecial].filter(Boolean).length;
-  if (score >= 8) return { label: 'Very strong', level: 4 };
-  if (score >= 6) return { label: 'Strong', level: 3 };
-  if (score >= 4) return { label: 'Medium', level: 2 };
-  return { label: 'Weak', level: 1 };
+// Entropy of a uniformly random password: length · log2(pool size).
+function strengthOf(length: number, sets: Sets): Strength {
+  const pool = poolsOf(sets).join('').length;
+  const bits = Math.round(length * Math.log2(pool));
+  if (bits >= 80) return { label: 'Very strong', level: 4, bits };
+  if (bits >= 60) return { label: 'Strong', level: 3, bits };
+  if (bits >= 40) return { label: 'Medium', level: 2, bits };
+  return { label: 'Weak', level: 1, bits };
 }
 
 export default function PasswordGenerator() {
@@ -90,7 +78,7 @@ export default function PasswordGenerator() {
   // A fresh password on load and whenever an option changes.
   useEffect(regenerate, [regenerate]);
 
-  const strength = useMemo(() => (password ? strengthOf(password, sets) : null), [password, sets]);
+  const strength = useMemo(() => (password ? strengthOf(password.length, sets) : null), [password, sets]);
   const toggle = (key: keyof Sets) => (e: React.ChangeEvent<HTMLInputElement>) => setSets((s) => ({ ...s, [key]: e.target.checked }));
 
   return (
@@ -110,7 +98,9 @@ export default function PasswordGenerator() {
           <div className="mt-3">
             <div className="flex items-center justify-between text-xs text-muted">
               <span>Strength</span>
-              <span className="text-ink">{strength.label}</span>
+              <span className="text-ink">
+                {strength.label} · {strength.bits} bits
+              </span>
             </div>
             <div
               className="mt-1 h-1.5 w-full rounded-full bg-surface"
@@ -119,7 +109,7 @@ export default function PasswordGenerator() {
               aria-valuemin={1}
               aria-valuemax={4}
               aria-valuenow={strength.level}
-              aria-valuetext={strength.label}
+              aria-valuetext={`${strength.label}, ${strength.bits} bits`}
             >
               <div
                 className={cn('h-1.5 rounded-full', strength.level === 1 ? 'bg-danger' : strength.level === 2 ? 'bg-control' : 'bg-success')}

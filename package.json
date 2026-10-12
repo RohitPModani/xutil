@@ -32,8 +32,7 @@
     "react-select": "^5.10.1",
     "tailwind-scrollbar": "^3.1.0",
     "ulid": "^3.0.0",
-    "uuid": "^11.1.0",
-    "xml2js": "^0.6.2"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
@@ -45,7 +44,6 @@
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
-    "@types/xml2js": "^0.4.14",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.22.0",

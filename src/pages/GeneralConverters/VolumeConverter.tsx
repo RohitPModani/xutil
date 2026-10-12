@@ -1,4 +1,5 @@
 import UnitConverter from './UnitConverter';
+import { linearConvert } from '../../utils/units';
 
 type VolumeUnit = 'm3' | 'cm3' | 'l' | 'ml' | 'ft3' | 'in3' | 'gal' | 'qt' | 'pt' | 'fl_oz';
 
@@ -15,6 +16,7 @@ const UNITS: { value: VolumeUnit; label: string }[] = [
   { value: 'fl_oz', label: 'US Fluid Ounces (fl oz)' },
 ];
 
+// US liquid gallon = 231 in³ = 3.785411784 L exactly.
 const UNIT_TO_LITERS: Record<VolumeUnit, number> = {
   m3: 1000,
   cm3: 0.001,
@@ -28,13 +30,6 @@ const UNIT_TO_LITERS: Record<VolumeUnit, number> = {
   fl_oz: 0.0295735295625,
 };
 
-function convert(value: number, unit: string): Record<string, number> {
-  if (!(unit in UNIT_TO_LITERS)) throw new Error(`Unknown unit: ${unit}`);
-  const liters = value * UNIT_TO_LITERS[unit as VolumeUnit];
-  if (!Number.isFinite(liters)) throw new Error('The value is too large to convert.');
-  return Object.fromEntries(Object.entries(UNIT_TO_LITERS).map(([k, f]) => [k, Number((liters / f).toFixed(8))]));
-}
-
 export default function VolumeConverter() {
-  return <UnitConverter id="volume" defaultValue="1" defaultUnit="l" units={UNITS} validationMessage="Volume must be greater than zero." convert={convert} />;
+  return <UnitConverter id="volume" defaultValue="1" defaultUnit="l" units={UNITS} validationMessage="Volume must be greater than zero." convert={linearConvert(UNIT_TO_LITERS)} />;
 }

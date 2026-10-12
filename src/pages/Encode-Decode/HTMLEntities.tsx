@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
 import { ClearButton, Field, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
 
 type Direction = 'encode' | 'decode';
 
+// codec:start
 const encodeMap: Record<string, string> = {
   '<': '&lt;',
   '>': '&gt;',
@@ -18,32 +19,26 @@ const encodeMap: Record<string, string> = {
   '¢': '&cent;',
 };
 
-const decodeMap: Record<string, string> = {
-  ...Object.fromEntries(Object.entries(encodeMap).map(([ch, ent]) => [ent, ch])),
-  '&amp;lt;': '<',
-  '&amp;gt;': '>',
-  '&amp;amp;': '&',
-  '&amp;quot;': '"',
-  '&amp;apos;': "'",
-};
-
 const htmlEncode = (text: string) => text.replace(/[&<>"'©®€£¥¢]/g, (ch) => encodeMap[ch]);
 
-const htmlDecode = (text: string) =>
-  text.replace(/&(?:amp;)?(?:[a-z]+|#\d+|#x[\da-f]+);/gi, (match) => {
-    const named = decodeMap[match.toLowerCase()];
-    if (named) return named;
-    const num = match.match(/&#(x[\da-f]+|\d+);/i);
-    if (!num) return match;
-    const code = num[1].startsWith('x') ? parseInt(num[1].slice(1), 16) : parseInt(num[1], 10);
-    return code <= 0x10ffff ? String.fromCodePoint(code) : match;
-  });
+// The browser's own parser knows every named entity, decodes exactly one
+// level, and never runs anything: a textarea's content is text, not markup.
+function htmlDecode(text: string): string {
+  const ta = document.createElement('textarea');
+  ta.innerHTML = text;
+  return ta.value;
+}
+// codec:end
 
 export default function HTMLEntities() {
   const [input, setInput] = useState('');
   const [direction, setDirection] = useState<Direction>('encode');
+  const deferred = useDeferredValue(input);
 
-  const out = useMemo(() => (input ? (direction === 'encode' ? htmlEncode(input) : htmlDecode(input)) : ''), [input, direction]);
+  const out = useMemo(
+    () => (deferred ? (direction === 'encode' ? htmlEncode(deferred) : htmlDecode(deferred)) : ''),
+    [deferred, direction]
+  );
 
   return (
     <ToolPage id="html">
@@ -69,7 +64,7 @@ export default function HTMLEntities() {
           <Field
             label={direction === 'encode' ? 'Text' : 'HTML'}
             htmlFor="html-input"
-            hint={direction === 'encode' ? 'Escapes & < > " \' and a few symbols.' : 'Named, decimal and hex entities are unescaped.'}
+            hint={direction === 'encode' ? 'Escapes & < > " \' and a few symbols.' : 'Every named, decimal and hex entity is unescaped, one level at a time.'}
           >
             <TextArea
               id="html-input"
@@ -79,6 +74,7 @@ export default function HTMLEntities() {
               rows={10}
               stats
               autoFocus
+              autoSize={input.length < 200_000}
             />
           </Field>
           <Output label={direction === 'encode' ? 'HTML' : 'Text'} value={out} rows={10} />

@@ -1,5 +1,5 @@
 import { Input } from './Form';
-import { cleanHex, isHex } from '../utils/color';
+import { cleanHex, expandHex, isHex } from '../utils/color';
 import { cn } from './cn';
 
 export interface ColorInputProps {
@@ -14,13 +14,15 @@ export interface ColorInputProps {
   placeholder?: string;
   autoFocus?: boolean;
   className?: string;
+  /** Set by `Field` so the hex field is linked to its hint or error. */
+  'aria-describedby'?: string;
 }
 
 /**
  * Native colour swatch plus an editable hex field, kept in sync. The field
  * is marked invalid until the text is a complete hex colour.
  */
-export function ColorInput({ id, label, value, onChange, alpha, placeholder, autoFocus, className }: ColorInputProps) {
+export function ColorInput({ id, label, value, onChange, alpha, placeholder, autoFocus, className, ...aria }: ColorInputProps) {
   const valid = isHex(value, alpha);
   const max = alpha ? 9 : 7;
   return (
@@ -40,10 +42,15 @@ export function ColorInput({ id, label, value, onChange, alpha, placeholder, aut
         aria-label={id ? undefined : `${label} hex`}
         value={value}
         onChange={(e) => onChange(cleanHex(e.target.value, max))}
+        onBlur={() => {
+          const expanded = expandHex(value);
+          if (expanded !== value) onChange(expanded);
+        }}
         placeholder={placeholder}
         maxLength={max}
         autoFocus={autoFocus}
         aria-invalid={!valid || undefined}
+        aria-describedby={aria['aria-describedby']}
         className="flex-1"
       />
     </div>

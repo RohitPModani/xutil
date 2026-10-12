@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, Field, Input, Output, Panel, Segmented, TwoPane } from '../../ui';
+import { ClearButton, Field, Input, Output, Panel, Segmented, TwoPane } from '../../ui';
 import { getErrorMessage } from '../../utils/errors';
 
 type Mode = 'auto' | 'toRoman' | 'toNumber';
@@ -48,7 +48,7 @@ export default function RomanNumeralConverter() {
   const result = useMemo(() => {
     const raw = input.trim();
     if (!raw) return null;
-    const dir: Exclude<Mode, 'auto'> = mode === 'auto' ? (/^\d+$/.test(raw) ? 'toRoman' : 'toNumber') : mode;
+    const dir: Exclude<Mode, 'auto'> = mode === 'auto' ? (/^[-+]?\d/.test(raw) ? 'toRoman' : 'toNumber') : mode;
     try {
       return { out: dir === 'toRoman' ? toRoman(raw) : toNumber(raw), dir, error: '' };
     } catch (e) {
@@ -80,7 +80,12 @@ export default function RomanNumeralConverter() {
         }
       >
         <TwoPane>
-          <Field label="Input" htmlFor="roman-input" hint={dir ? (dir === 'toRoman' ? 'Converting a number to Roman.' : 'Converting Roman to a number.') : `A number from ${MIN} to ${MAX}, or a Roman numeral.`}>
+          <Field
+            label="Input"
+            htmlFor="roman-input"
+            hint={dir ? (dir === 'toRoman' ? 'Converting a number to Roman.' : 'Converting Roman to a number.') : `A number from ${MIN} to ${MAX}, or a Roman numeral.`}
+            error={result?.error}
+          >
             <Input
               id="roman-input"
               value={input}
@@ -88,16 +93,10 @@ export default function RomanNumeralConverter() {
               placeholder="1984 or MCMLXXXIV"
               autoFocus
               maxLength={16}
-              aria-invalid={Boolean(result?.error) || undefined}
             />
           </Field>
           <Output label={dir === 'toNumber' ? 'Number' : 'Roman numeral'} value={result?.out ?? ''} rows={1} />
         </TwoPane>
-        {result?.error && (
-          <Callout tone="error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
       </Panel>
     </ToolPage>
   );

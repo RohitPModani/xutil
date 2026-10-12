@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import ToolPage from '../../components/ToolPage';
-import { Callout, ClearButton, Field, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
+import { ClearButton, Field, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
 import { getErrorMessage } from '../../utils/errors';
 
 type Mode = 'auto' | 'encode' | 'decode';
 
+// ICAO spellings (Alfa, Juliett); the common Alpha and Juliet decode too.
 const NATO: Record<string, string> = {
-  A: 'Alpha', B: 'Bravo', C: 'Charlie', D: 'Delta', E: 'Echo', F: 'Foxtrot', G: 'Golf', H: 'Hotel',
-  I: 'India', J: 'Juliet', K: 'Kilo', L: 'Lima', M: 'Mike', N: 'November', O: 'Oscar', P: 'Papa',
+  A: 'Alfa', B: 'Bravo', C: 'Charlie', D: 'Delta', E: 'Echo', F: 'Foxtrot', G: 'Golf', H: 'Hotel',
+  I: 'India', J: 'Juliett', K: 'Kilo', L: 'Lima', M: 'Mike', N: 'November', O: 'Oscar', P: 'Papa',
   Q: 'Quebec', R: 'Romeo', S: 'Sierra', T: 'Tango', U: 'Uniform', V: 'Victor', W: 'Whiskey',
   X: 'X-ray', Y: 'Yankee', Z: 'Zulu',
   '0': 'Zero', '1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six',
@@ -17,12 +18,12 @@ const NATO: Record<string, string> = {
 const WORD_TO_CHAR: Record<string, string> = Object.fromEntries(
   Object.entries(NATO).map(([c, w]) => [w.toLowerCase(), c])
 );
-// Common spelling variants.
-Object.assign(WORD_TO_CHAR, { alfa: 'A', juliett: 'J', xray: 'X', space: ' ' });
+Object.assign(WORD_TO_CHAR, { alpha: 'A', juliet: 'J', xray: 'X', space: ' ' });
 
 function encode(text: string): string {
   return [...text.toUpperCase()]
     .map((c) => {
+      if (/\s/.test(c)) return NATO[' '];
       if (!(c in NATO)) throw new Error(`Only letters, digits and spaces can be spelled out (found "${c}").`);
       return NATO[c];
     })
@@ -85,25 +86,16 @@ export default function NATOPhonetic() {
         }
       >
         <TwoPane>
-          <Field label="Input" htmlFor="nato-input" hint={dir ? (dir === 'encode' ? 'Spelling out as code words.' : 'Reading code words back to text.') : 'Letters, digits and spaces, or a list of code words.'}>
-            <TextArea
-              id="nato-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="XUTIL or X-ray Uniform Tango India Lima"
-              rows={6}
-              autoFocus
-              mono={false}
-              aria-invalid={Boolean(result?.error) || undefined}
-            />
+          <Field
+            label="Input"
+            htmlFor="nato-input"
+            hint={dir ? (dir === 'encode' ? 'Spelling out as code words.' : 'Reading code words back to text.') : 'Letters, digits and spaces, or a list of code words.'}
+            error={result?.error}
+          >
+            <TextArea id="nato-input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="XUTIL or X-ray Uniform Tango India Lima" rows={6} autoFocus mono={false} />
           </Field>
           <Output label={dir === 'decode' ? 'Text' : 'Code words'} value={result?.out ?? ''} rows={6} mono={false} />
         </TwoPane>
-        {result?.error && (
-          <Callout tone="error" className="mt-4">
-            {result.error}
-          </Callout>
-        )}
       </Panel>
     </ToolPage>
   );
