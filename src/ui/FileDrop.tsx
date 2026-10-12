@@ -13,6 +13,8 @@ export interface FileDropProps {
   /** Controlled value. Pass `null` to clear the chip from outside. */
   file?: File | null;
   label?: string;
+  /** Replaces the generated list of accepted types in the hint, e.g. "text and code files". */
+  hint?: string;
   /** Files above this size are rejected before they can lock up the tab. */
   maxSizeMB?: number;
   disabled?: boolean;
@@ -31,7 +33,7 @@ const describeAccept = (accept: string) =>
  * Click or drop. Shows the chosen file's name and size, and a way to clear it.
  * Dropped files are checked against `accept` the same way picked ones are.
  */
-export function FileDrop({ accept, onFile, onClear, file: controlled, label = 'Choose a file', maxSizeMB = 5, disabled, className }: FileDropProps) {
+export function FileDrop({ accept, onFile, onClear, file: controlled, label = 'Choose a file', hint, maxSizeMB = 5, disabled, className }: FileDropProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [internal, setInternal] = useState<File | null>(null);
   const file = controlled === undefined ? internal : controlled;
@@ -122,7 +124,7 @@ export function FileDrop({ accept, onFile, onClear, file: controlled, label = 'C
               {label}
             </Button>
             <span className="text-xs text-muted">
-              or drop it here · {accept ? `${accept.replace(/\./g, '').replace(/,/g, ', ')} · ` : ''}up to {maxSizeMB} MB
+              or drop it here · {hint ? `${hint} · ` : accept ? `${accept.replace(/\./g, '').replace(/,/g, ', ')} · ` : ''}up to {maxSizeMB} MB
             </span>
           </>
         )}

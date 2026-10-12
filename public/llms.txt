@@ -52,7 +52,7 @@ Every tool is a single page. Paste or type on the left, the result appears on th
 
 - [Lorem Ipsum Generator](https://xutil.in/lorem): Placeholder paragraphs, sentences or words.
 - [Slug Generator](https://xutil.in/slug): Turn a title into a URL-safe slug.
-- [Text Compare](https://xutil.in/text_compare): Line-by-line diff of two texts.
+- [Text Compare](https://xutil.in/text_compare): Diff by line, word or character, unified or side by side.
 - [URL Parser](https://xutil.in/url_parser): Break a URL into host, path, query and fragment.
 - [JSON Formatter & Validator](https://xutil.in/json_validator): Validate, pretty-print or minify JSON.
 - [Text Case Converter](https://xutil.in/text_case): camelCase, snake_case, kebab-case, Title Case and more.

@@ -101,22 +101,24 @@ The slug is built in the browser. No request is made, and nothing is stored.`,
   },
   textCompare: {
     title: 'Text Compare',
-    seo: 'Text Compare: Line-by-Line Diff of Two Texts | XUtil',
-    body: `A text compare tool shows the line-by-line diff of two texts, marking added and removed lines, with ignore-whitespace and ignore-case options.
+    seo: 'Text Compare: Diff Two Texts Side by Side | XUtil',
+    body: `A text compare tool shows the differences between two texts as you type, by line, word or character, unified or side by side, with changed words highlighted.
 
 ## How to use
 
-1. Paste the original text on the left and the changed text on the right. The diff appears as you type.
-2. Tick "Ignore whitespace" to treat lines that differ only in spacing as equal, or "Ignore case" to ignore letter case.
-3. Read the counts of added and removed lines, then the diff: removed lines are marked with − on a red background, added lines with + on green, unchanged lines in between.
-4. Copy the result or Download it as \`diff.patch\`. Both give the unified diff, not the coloured view.
+1. Paste or load the original text on the left and the changed text on the right. The diff appears as you type; the swap button exchanges the two sides.
+2. Pick the granularity: **Lines** for code and config, **Words** or **Characters** for prose. Tick "Ignore whitespace" or "Ignore case" to hide those differences.
+3. In line mode, choose **Unified** (one column, with old and new line numbers) or **Side by side**. Unchanged runs are folded to three lines of context around each change; click a fold to expand it, or tick "Show unchanged lines".
+4. Step through changes with the up and down arrows next to the change count. Copy or download the result as a unified \`diff.patch\`.
 
 ## What it supports
 
-- Compares whole lines, using the same algorithm as the \`diff\` npm package. A changed line shows as one removal plus one addition; characters within a line are not highlighted.
-- Each text can be at most 10,000 lines; longer input shows an error instead of a diff.
-- The copied and downloaded output is a unified diff with the headers \`--- original\` and \`+++ changed\`, which \`git apply\` and \`patch\` understand.
-- There is no side-by-side view and no word-level diff.
+- Line mode uses the Myers algorithm from the \`diff\` package and runs in a Web Worker, so a large comparison never freezes the page; one over 5 seconds is stopped and reported.
+- A removed line followed by an added line is treated as a change: the words that differ are highlighted within the pair, so a one-word edit does not read as a whole-line rewrite.
+- Word and character modes show one merged text with removed segments struck through in red and added segments in green.
+- Limits: 10,000 lines per side in line mode, 100,000 characters per side in word and character modes, 2 MB per loaded file.
+- The copied and downloaded patch is a unified diff named after the loaded files (or \`original\` and \`changed\`), which \`git apply\` and \`patch\` understand.
+- Identical texts are reported as identical, taking the ignore options into account.
 
 ## Example
 
@@ -124,13 +126,13 @@ The slug is built in the browser. No request is made, and nothing is stored.`,
 Original          Changed
 alpha             alpha
 beta              beta
-gamma             delta
+gamma ray         gamma burst
 
-→  alpha
-   beta
-−  gamma
-+  delta
-Added 1 · Removed 1
+ 1  1   alpha
+ 2  2   beta
+ 3     - gamma [ray]
+    3  + gamma [burst]
+1 change · 1 line added · 1 line removed
 \`\`\`
 
 ## Privacy
@@ -139,15 +141,15 @@ The comparison runs in the browser. No request is made, and nothing is stored.`,
     faq: [
       {
         q: 'What is a unified diff?',
-        a: 'A text format for describing changes between two files: a header naming the files, then hunks starting with @@ that list context lines, removed lines prefixed with − and added lines prefixed with +. It is the format produced by git diff and consumed by patch.',
+        a: 'A text format for describing changes between two files: a header naming the files, then hunks starting with @@ that list context lines, removed lines prefixed with - and added lines prefixed with +. It is the format produced by git diff and consumed by patch.',
       },
       {
-        q: 'Why does a diff show a whole line as changed when only one word differs?',
-        a: 'A line diff compares lines as units, so any change makes the old line a removal and the new line an addition. Tools that highlight individual words run a second, character-level diff inside each changed pair.',
+        q: 'What is the difference between a line diff and a word diff?',
+        a: 'A line diff treats each line as a unit, which suits code and configuration where lines are the natural unit of change. A word diff compares the running text, which suits prose, where a reflowed paragraph would otherwise show every line as changed.',
       },
       {
         q: 'How do I compare two texts while ignoring spaces?',
-        a: 'Enable the "Ignore whitespace" option. Lines that differ only in spaces or tabs are then treated as identical, which hides indentation-only changes.',
+        a: 'Enable the "Ignore whitespace" option. Lines that differ only in spaces or tabs are then treated as identical, which hides indentation-only changes; in word mode, whitespace between words is ignored.',
       },
       {
         q: 'How do I apply a .patch file?',
