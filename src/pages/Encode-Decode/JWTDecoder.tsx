@@ -1,154 +1,149 @@
-import { useState } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import LoadingButton from "../../components/LoadingButton";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import { getErrorMessage } from "../../utils/errors";
-import type { JsonValue } from "../../types/json";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, Field, KeyValueList, Output, Panel, TextArea, TwoPane } from '../../ui';
+import type { JsonValue } from '../../types/json';
+import { getErrorMessage } from '../../utils/errors';
 
-interface JWTDecodedData {
-  headers: { [key: string]: JsonValue };
-  payload: { [key: string]: JsonValue };
+interface Decoded {
+  header: Record<string, JsonValue>;
+  payload: Record<string, JsonValue>;
   signature: string;
 }
 
 function base64UrlDecode(str: string): string {
-  let output = str.replace(/-/g, "+").replace(/_/g, "/");
-
-  switch (output.length % 4) {
+  let out = str.replace(/-/g, '+').replace(/_/g, '/');
+  switch (out.length % 4) {
     case 0:
       break;
     case 2:
-      output += "==";
+      out += '==';
       break;
     case 3:
-      output += "=";
+      out += '=';
       break;
     default:
-      throw new Error("Illegal base64url string");
+      throw new Error('Illegal base64url string');
   }
-
+  const bin = atob(out);
   try {
-    return decodeURIComponent(escape(atob(output)));
+    return new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
   } catch {
-    return atob(output);
+    return bin;
   }
 }
 
-function JWTDecoder() {
-  const seo = seoDescriptions.jwtDecoder;
-  const [decodeToken, setDecodeToken] = useState<string>("");
-  const [decodedData, setDecodedData] = useState<JWTDecodedData | null>(null);
-  const [decodeError, setDecodeError] = useState<string>("");
-  const [isDecodeLoading, setIsDecodeLoading] = useState<boolean>(false);
+function decode(token: string): Decoded {
+  const parts = token.trim().split('.');
+  if (parts.length !== 3) throw new Error('A JWT has three dot-separated parts: header.payload.signature.');
+  let header: Record<string, JsonValue>;
+  let payload: Record<string, JsonValue>;
+  try {
+    header = JSON.parse(base64UrlDecode(parts[0]));
+    payload = JSON.parse(base64UrlDecode(parts[1]));
+  } catch {
+    throw new Error('The header or payload is not valid base64url-encoded JSON.');
+  }
+  return { header, payload, signature: parts[2] };
+}
 
-  const decodeJWT = () => {
-    setIsDecodeLoading(true);
-    setDecodeError("");
+const CLAIM_LABELS: Record<string, string> = {
+  iss: 'Issuer (iss)',
+  sub: 'Subject (sub)',
+  aud: 'Audience (aud)',
+  exp: 'Expires (exp)',
+  nbf: 'Not before (nbf)',
+  iat: 'Issued at (iat)',
+  jti: 'Token id (jti)',
+};
+
+const formatTime = (v: JsonValue) =>
+  typeof v === 'number'
+    ? `${new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'long' }).format(new Date(v * 1000))} · ${v}`
+    : String(v);
+
+export default function JWTDecoder() {
+  const [token, setToken] = useState('');
+
+  const result = useMemo(() => {
+    if (!token.trim()) return null;
     try {
-      if (!decodeToken.trim()) throw new Error("Token cannot be empty");
-
-      const parts = decodeToken.split(".");
-      if (parts.length !== 3) {
-        throw new Error(
-          "Invalid JWT format. A valid JWT should contain three parts separated by dots."
-        );
-      }
-
-      try {
-        const headers = JSON.parse(base64UrlDecode(parts[0]));
-        const payload = JSON.parse(base64UrlDecode(parts[1]));
-        const signature = parts[2];
-
-        setDecodedData({
-          headers,
-          payload,
-          signature,
-        });
-      } catch {
-        throw new Error("Invalid JWT - failed to decode parts");
-      }
-    } catch (err) {
-      setDecodeError(getErrorMessage(err, "Failed to decode JWT"));
-      setDecodedData(null);
-    } finally {
-      setIsDecodeLoading(false);
-      if (!decodeError) {
-        updateToolUsage("jwt-decoder");
-      }
+      return { data: decode(token), error: '' };
+    } catch (e) {
+      return { data: null, error: getErrorMessage(e, 'Could not decode this token.') };
     }
-  };
+  }, [token]);
 
-  const handleClearDecode = () => {
-    setDecodeToken("");
-    setDecodedData(null);
-    setDecodeError("");
-  };
+  const data = result?.data ?? null;
+  const exp = typeof data?.payload.exp === 'number' ? data.payload.exp : null;
+  const expired = exp !== null && exp * 1000 < Date.now();
+
+  const claims = data
+    ? Object.entries(data.payload)
+        .filter(([k]) => k in CLAIM_LABELS)
+        .map(([k, v]) => ({
+          label: CLAIM_LABELS[k],
+          value: ['exp', 'nbf', 'iat'].includes(k) ? formatTime(v) : String(v),
+          copy: String(v),
+        }))
+    : [];
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6">
-        <ToolHeader title={seo.title} />
-
-        {/* Decode Section */}
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Decode JWT</h3>
-            <ClearButton onClick={handleClearDecode} disabled={!decodeToken} />
-          </div>
-          <hr className="line-break" />
-          <div className="flex-1 space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="form-label" htmlFor="jwt-input">
-                JWT Token:
-              </label>
-            </div>
-            <AutoTextarea
+    <ToolPage id="jwt">
+      <Panel title="Decode" actions={<ClearButton onClick={() => setToken('')} disabled={!token} />}>
+        <TwoPane>
+          <Field label="Token" htmlFor="jwt-input" hint="Decoded locally. The signature is shown but not verified.">
+            <TextArea
               id="jwt-input"
-              value={decodeToken}
-              onChange={(e) => setDecodeToken(e.target.value)}
-              className="input-field w-full"
-              disabled={isDecodeLoading}
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
               placeholder="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0In0.dBjftJeZ4CVP"
-              aria-describedby={decodeError ? "jwt-decode-error" : undefined}
+              rows={8}
+              autoFocus
+              aria-invalid={Boolean(result?.error) || undefined}
+              aria-describedby={result?.error ? 'jwt-error' : undefined}
             />
-            <div className="flex space-x-2">
-              <LoadingButton onClick={decodeJWT} isLoading={isDecodeLoading}>
-                Decode
-              </LoadingButton>
-            </div>
+          </Field>
+          <div className="space-y-4">
+            <Output
+              label="Header"
+              value={data ? JSON.stringify(data.header, null, 2) : ''}
+              placeholder="Algorithm and token type"
+              rows={4}
+            />
+            <Output
+              label="Payload"
+              value={data ? JSON.stringify(data.payload, null, 2) : ''}
+              placeholder="Claims"
+              rows={8}
+              fileName="payload.json"
+              mime="application/json"
+            />
           </div>
+        </TwoPane>
 
-          {decodeError && (
-            <ErrorBox message={decodeError} id="jwt-decode-error" />
-          )}
+        {result?.error && (
+          <Callout tone="error" id="jwt-error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
 
-          {decodedData && (
-            <div className="result-box mt-4">
-              <div className="flex justify-between items-center mb-2">
-                <label className="form-label">Decoded JWT Data</label>
-                <CopyButton text={JSON.stringify(decodedData, null, 2)} />
-              </div>
-              <div className="inner-result">
-                <pre className="mono-output">
-                  {JSON.stringify(decodedData, null, 2)}
-                </pre>
-              </div>
-            </div>
-          )}
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+        {data && (
+          <div className="mt-4 space-y-3">
+            {exp !== null && (
+              <Callout tone={expired ? 'error' : 'success'}>
+                {expired ? 'This token expired ' : 'This token is valid until '}
+                {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(exp * 1000))}.
+              </Callout>
+            )}
+            {claims.length > 0 && (
+              <Output label="Registered claims" copyText={claims.map((c) => `${c.label}: ${c.value}`).join('\n')}>
+                <KeyValueList items={claims} />
+              </Output>
+            )}
+            <Output label="Signature" value={data.signature} rows={2} />
+          </div>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default JWTDecoder;

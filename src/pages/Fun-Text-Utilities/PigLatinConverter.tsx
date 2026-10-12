@@ -1,191 +1,92 @@
-import { useState, useRef, useEffect } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import { getErrorMessage } from "../../utils/errors";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { ClearButton, Field, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
+
+type Mode = 'auto' | 'encode' | 'decode';
+
+const isVowel = (c: string) => 'aeiou'.includes(c.toLowerCase());
+
+const matchCase = (word: string, like: string) =>
+  like[0] === like[0].toUpperCase() && like[0] !== like[0].toLowerCase()
+    ? word[0].toUpperCase() + word.slice(1).toLowerCase()
+    : word.toLowerCase();
+
+function encodeWord(word: string): string {
+  let i = 0;
+  while (i < word.length && !isVowel(word[i])) i++;
+  if (i === 0) return word + 'way';
+  if (i === word.length) return word + 'ay';
+  return matchCase(word.slice(i) + word.slice(0, i), word) + 'ay';
+}
+
+// ponytail: Pig Latin is lossy ("water" and "atwer" both give "aterway"); this
+// strips "way" after a vowel, otherwise moves the trailing consonants back.
+function decodeWord(word: string): string {
+  const lower = word.toLowerCase();
+  if (lower.endsWith('way') && lower.length > 3 && isVowel(lower[lower.length - 4])) return word.slice(0, -3);
+  if (!lower.endsWith('ay') || lower.length < 3) return word;
+  const stem = word.slice(0, -2);
+  let i = stem.length;
+  while (i > 0 && !isVowel(stem[i - 1])) i--;
+  if (i === stem.length || i === 0) return matchCase(stem, word);
+  return matchCase(stem.slice(i) + stem.slice(0, i), word);
+}
+
+const mapWords = (text: string, fn: (w: string) => string) =>
+  text
+    .split(/(\s+)/)
+    .map((token) => {
+      if (!token.trim()) return token;
+      const m = token.match(/^(\W*)([A-Za-z]+)(\W*)$/);
+      return m ? m[1] + fn(m[2]) + m[3] : token;
+    })
+    .join('');
+
+const looksLikePigLatin = (text: string) => {
+  const words = text.match(/[A-Za-z]+/g) ?? [];
+  return words.length > 0 && words.filter((w) => /ay$/i.test(w)).length / words.length >= 0.6;
+};
 
 export default function PigLatinConverter() {
-  const seo = seoDescriptions.pigLatin;
+  const [input, setInput] = useState('');
+  const [mode, setMode] = useState<Mode>('auto');
 
-  const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
-  const [error, setError] = useState("");
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const result = useMemo(() => {
+    if (!input.trim()) return null;
+    const dir: Exclude<Mode, 'auto'> = mode === 'auto' ? (looksLikePigLatin(input) ? 'decode' : 'encode') : mode;
+    return { out: mapWords(input, dir === 'encode' ? encodeWord : decodeWord), dir };
+  }, [input, mode]);
 
-  useEffect(() => {
-    updateToolUsage("pig_latin");
-  }, []);
-
-  useEffect(() => {
-    if (input.trim()) {
-      convertToPigLatin();
-    } else {
-      setOutput("");
-      setError("");
-    }
-  }, [input]);
-
-  const convertToPigLatin = () => {
-    try {
-      const result = input
-        .split(/(\s+)/)
-        .map((word) => {
-          // Handle whitespace
-          if (word.trim() === "") return word;
-
-          // Handle punctuation and special characters
-          const punctuationMatch = word.match(/^(\W+)(.*?)(\W*)$/);
-          if (punctuationMatch) {
-            const [_, leadingPunct, mainWord, trailingPunct] = punctuationMatch;
-            if (mainWord === "") return word;
-            return leadingPunct + convertWord(mainWord) + trailingPunct;
-          }
-
-          return convertWord(word);
-        })
-        .join("");
-
-      setOutput(result);
-      setError("");
-    } catch (err) {
-      setError(getErrorMessage(err, "Error converting to Pig Latin"));
-      setOutput("");
-    }
-  };
-
-  const convertWord = (word: string) => {
-    const vowels = ["a", "e", "i", "o", "u"];
-    const lowerWord = word.toLowerCase();
-
-    // Find the first vowel index
-    let firstVowelIndex = 0;
-    while (
-      firstVowelIndex < word.length &&
-      !vowels.includes(lowerWord[firstVowelIndex])
-    ) {
-      firstVowelIndex++;
-    }
-
-    // Handle words starting with vowels
-    if (firstVowelIndex === 0) {
-      return word + "way";
-    }
-
-    // Handle words starting with consonant clusters
-    const beginning = word.slice(0, firstVowelIndex);
-    const remaining = word.slice(firstVowelIndex);
-
-    // Preserve capitalization
-    if (word[0] === word[0].toUpperCase()) {
-      return (
-        remaining[0].toUpperCase() +
-        remaining.slice(1) +
-        beginning.toLowerCase() +
-        "ay"
-      );
-    }
-
-    return remaining + beginning + "ay";
-  };
-
-  const handleClear = () => {
-    setInput("");
-    setOutput("");
-    setError("");
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
+  const dir = result?.dir;
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Pig Latin Converter</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={input === "" && output === "" && error === ""}
+    <ToolPage id="pig_latin">
+      <Panel
+        title="Translate"
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Direction"
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: 'auto', label: 'Auto' },
+                { value: 'encode', label: 'English → Pig Latin' },
+                { value: 'decode', label: 'Pig Latin → English' },
+              ]}
             />
-          </div>
-          <hr className="line-break" />
-          <div className="space-y-4 mb-4">
-            <div>
-              <label className="form-label" htmlFor="pig-latin-input">
-                English Text:
-              </label>
-              <AutoTextarea
-                id="pig-latin-input"
-                value={input}
-                onChange={handleInputChange}
-                ref={inputRef}
-                className="input-field w-full"
-                placeholder="Enter English text to convert to Pig Latin"
-                aria-describedby={error ? "pig-latin-error" : undefined}
-                aria-label="Text input for Pig Latin conversion"
-              />
-            </div>
-          </div>
-          {output && (
-            <div className="result-box">
-              <div className="flex justify-between items-center mb-2">
-                <label className="form-label">Pig Latin Translation</label>
-                <CopyButton text={output} />
-              </div>
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div
-                    className="w-full mono-output"
-                    aria-label="Pig Latin translation"
-                  >
-                    {output}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <ErrorBox
-            message={error}
-            id={error ? "pig-latin-error" : undefined}
-          />
-        </SectionCard>
-
-        <SectionCard className="mt-6">
-          <h3 className="section-title mb-4">Pig Latin Rules</h3>
-          <hr className="line-break" />
-          <div className="prose">
-            <ul className="text-ink pl-5 space-y-2">
-              <li>
-                For words beginning with vowel sounds, add "way" to the end
-              </li>
-              <li>
-                For words beginning with consonant sounds, move all consonants
-                before the first vowel to the end and add "ay"
-              </li>
-              <li>Preserves capitalization and punctuation</li>
-              <li>
-                Example: "hello" becomes "ellohay", "apple" becomes "appleway"
-              </li>
-            </ul>
-          </div>
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+            <ClearButton onClick={() => setInput('')} disabled={!input} />
+          </>
+        }
+      >
+        <TwoPane>
+          <Field label="Input" htmlFor="pig-input" hint={dir ? (dir === 'encode' ? 'Translating to Pig Latin.' : 'Translating back to English. Some words are ambiguous.') : 'Capitalisation and punctuation are kept.'}>
+            <TextArea id="pig-input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Hello, world" rows={6} autoFocus mono={false} />
+          </Field>
+          <Output label={dir === 'decode' ? 'English' : 'Pig Latin'} value={result?.out ?? ''} rows={6} mono={false} />
+        </TwoPane>
+      </Panel>
+    </ToolPage>
   );
 }

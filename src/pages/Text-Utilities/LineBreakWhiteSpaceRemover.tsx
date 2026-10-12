@@ -1,128 +1,52 @@
-import { useEffect, useState, useRef } from "react";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import CopyButton from "../../components/CopyButton";
-import DownloadButton from "../../components/DownloadButton";
-import ErrorBox from "../../components/ErrorBox";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Checkbox, ClearButton, Field, Output, Panel, Stat, TextArea, Toolbar, TwoPane } from '../../ui';
 
-function LineBreakWhiteSpaceRemover() {
-  const seo = seoDescriptions.lineBreakWhitespaceRemover;
-  const [textInput, setTextInput] = useState<string>("");
-  const [resultOutput, setResultOutput] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+export default function LineBreakWhiteSpaceRemover() {
+  const [input, setInput] = useState('');
+  const [joinLines, setJoinLines] = useState(true);
+  const [collapse, setCollapse] = useState(true);
+  const [trim, setTrim] = useState(true);
 
-  useEffect(() => {
-    updateToolUsage("line_break_whitespace_remover");
-  }, []);
-
-  // Auto-resize textarea
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  }, [textInput]);
-
-  // Real-time line break and whitespace removal
-  useEffect(() => {
-    if (textInput) {
-      try {
-        const cleanedText = textInput
-          .replace(/[\r\n]+/g, " ") // Replace line breaks with a single space
-          .replace(/\s+/g, " ") // Replace multiple whitespace with a single space
-          .trim(); // Remove leading/trailing spaces
-        setResultOutput(cleanedText);
-        setError(null);
-      } catch {
-        setError("Error processing text. Please check your input.");
-        setResultOutput("");
-      }
-    } else {
-      setResultOutput("");
-      setError(null);
-    }
-  }, [textInput]);
-
-  const handleClear = () => {
-    setTextInput("");
-    setResultOutput("");
-    setError(null);
-  };
-
-  const getResultsText = () => resultOutput;
+  const result = useMemo(() => {
+    if (!input) return null;
+    let out = input;
+    if (joinLines) out = out.replace(/[\r\n]+/g, ' ');
+    if (collapse) out = joinLines ? out.replace(/\s+/g, ' ') : out.replace(/[^\S\r\n]+/g, ' ');
+    if (trim) out = joinLines ? out.trim() : out.split('\n').map((l) => l.trim()).join('\n');
+    return { out, before: input.split('\n').length, after: out.split('\n').length };
+  }, [input, joinLines, collapse, trim]);
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="section-title">
-              Line Break & Whitespace Remover
-            </h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={!textInput && !resultOutput && !error}
+    <ToolPage id="line_break_whitespace_remover">
+      <Panel title="Clean" actions={<ClearButton onClick={() => setInput('')} disabled={!input} />}>
+        <TwoPane>
+          <Field label="Text" htmlFor="ws-input">
+            <TextArea
+              id="ws-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={'First line\n\n   second   line\t with tabs'}
+              rows={12}
+              autoFocus
             />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1 space-y-4">
-              <label htmlFor="textInput" className="form-label">
-                Text Input
-              </label>
-              <AutoTextarea
-                id="textInput"
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                placeholder="e.g. Line 1\n\n  Line 2\t  Line 3"
-                className="input-field w-full h-64"
-              />
-            </div>
+          </Field>
+          <Output label="Cleaned" value={result?.out ?? ''} rows={12} fileName="cleaned.txt" />
+        </TwoPane>
 
-            <div className="flex-1 space-y-4">
-              <div className="flex justify-between items-center">
-                <label className="form-label">Cleaned Text</label>
-                <div className="flex items-center gap-2">
-                  <CopyButton text={getResultsText()} />
-                  <DownloadButton
-                    content={resultOutput}
-                    fileName="cleaned_text.txt"
-                    fileType="text"
-                    disabled={!resultOutput}
-                  />
-                </div>
-              </div>
-              <AutoTextarea
-                id="textOutput"
-                value={resultOutput}
-                readOnly
-                placeholder="e.g. Line 1 Line 2 Line 3"
-                className="input-field w-full h-64"
-              />
-            </div>
-          </div>
+        <Toolbar className="mt-4 gap-x-5">
+          <Checkbox label="Remove line breaks" checked={joinLines} onChange={(e) => setJoinLines(e.target.checked)} />
+          <Checkbox label="Collapse repeated spaces" checked={collapse} onChange={(e) => setCollapse(e.target.checked)} />
+          <Checkbox label="Trim leading and trailing spaces" checked={trim} onChange={(e) => setTrim(e.target.checked)} />
+        </Toolbar>
 
-          {error && (
-            <div aria-live="polite" className="mt-4">
-              <ErrorBox message={error} />
-            </div>
-          )}
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+        {result && (
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:max-w-xs">
+            <Stat label="Lines in" value={result.before.toLocaleString()} />
+            <Stat label="Lines out" value={result.after.toLocaleString()} />
+          </div>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default LineBreakWhiteSpaceRemover;

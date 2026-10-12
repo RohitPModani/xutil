@@ -1,170 +1,110 @@
-import { useState, useRef, useEffect } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import { getErrorMessage } from "../../utils/errors";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, Field, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
+import { getErrorMessage } from '../../utils/errors';
 
-const NATO_PHONETIC_ALPHABET: { [key: string]: string } = {
-  A: "Alpha",
-  B: "Bravo",
-  C: "Charlie",
-  D: "Delta",
-  E: "Echo",
-  F: "Foxtrot",
-  G: "Golf",
-  H: "Hotel",
-  I: "India",
-  J: "Juliet",
-  K: "Kilo",
-  L: "Lima",
-  M: "Mike",
-  N: "November",
-  O: "Oscar",
-  P: "Papa",
-  Q: "Quebec",
-  R: "Romeo",
-  S: "Sierra",
-  T: "Tango",
-  U: "Uniform",
-  V: "Victor",
-  W: "Whiskey",
-  X: "X-ray",
-  Y: "Yankee",
-  Z: "Zulu",
-  "0": "Zero",
-  "1": "One",
-  "2": "Two",
-  "3": "Three",
-  "4": "Four",
-  "5": "Five",
-  "6": "Six",
-  "7": "Seven",
-  "8": "Eight",
-  "9": "Nine",
-  " ": "(Space)",
+type Mode = 'auto' | 'encode' | 'decode';
+
+const NATO: Record<string, string> = {
+  A: 'Alpha', B: 'Bravo', C: 'Charlie', D: 'Delta', E: 'Echo', F: 'Foxtrot', G: 'Golf', H: 'Hotel',
+  I: 'India', J: 'Juliet', K: 'Kilo', L: 'Lima', M: 'Mike', N: 'November', O: 'Oscar', P: 'Papa',
+  Q: 'Quebec', R: 'Romeo', S: 'Sierra', T: 'Tango', U: 'Uniform', V: 'Victor', W: 'Whiskey',
+  X: 'X-ray', Y: 'Yankee', Z: 'Zulu',
+  '0': 'Zero', '1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six',
+  '7': 'Seven', '8': 'Eight', '9': 'Nine', ' ': '(Space)',
 };
 
-export default function NATOPhoneticAlphabetConverter() {
-  const seo = seoDescriptions.natoPhonetic;
+const WORD_TO_CHAR: Record<string, string> = Object.fromEntries(
+  Object.entries(NATO).map(([c, w]) => [w.toLowerCase(), c])
+);
+// Common spelling variants.
+Object.assign(WORD_TO_CHAR, { alfa: 'A', juliett: 'J', xray: 'X', space: ' ' });
 
-  const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
-  const [error, setError] = useState("");
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+function encode(text: string): string {
+  return [...text.toUpperCase()]
+    .map((c) => {
+      if (!(c in NATO)) throw new Error(`Only letters, digits and spaces can be spelled out (found "${c}").`);
+      return NATO[c];
+    })
+    .join(' ');
+}
 
-  useEffect(() => {
-    updateToolUsage("nato_phonetic");
-  }, []);
+function decode(text: string): string {
+  return text
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => {
+      const c = WORD_TO_CHAR[w.toLowerCase()];
+      if (c === undefined) throw new Error(`"${w}" is not a NATO code word.`);
+      return c;
+    })
+    .join('');
+}
 
-  useEffect(() => {
-    if (input.trim()) {
-      convertToPhonetic();
-    } else {
-      setOutput("");
-      setError("");
-    }
-  }, [input]);
+const looksLikeNato = (text: string) => {
+  const words = text.split(/\s+/).filter(Boolean);
+  return words.length > 0 && words.every((w) => w.toLowerCase() in WORD_TO_CHAR);
+};
 
-  const convertToPhonetic = () => {
+export default function NATOPhonetic() {
+  const [input, setInput] = useState('');
+  const [mode, setMode] = useState<Mode>('auto');
+
+  const result = useMemo(() => {
+    const raw = input.trim();
+    if (!raw) return null;
+    const dir: Exclude<Mode, 'auto'> = mode === 'auto' ? (looksLikeNato(raw) ? 'decode' : 'encode') : mode;
     try {
-      const result = input
-        .toUpperCase()
-        .split("")
-        .map((char) => {
-          const phonetic = NATO_PHONETIC_ALPHABET[char];
-          if (!phonetic && char !== " ") {
-            throw new Error(`Invalid character: ${char}`);
-          }
-          return phonetic || "";
-        })
-        .filter(Boolean)
-        .join(" ");
-
-      setOutput(result);
-      setError("");
-    } catch (err) {
-      setError(getErrorMessage(err, "Invalid input"));
-      setOutput("");
+      return { out: dir === 'encode' ? encode(raw) : decode(raw), dir, error: '' };
+    } catch (e) {
+      return { out: '', dir, error: getErrorMessage(e, 'Could not convert.') };
     }
-  };
+  }, [input, mode]);
 
-  const handleClear = () => {
-    setInput("");
-    setOutput("");
-    setError("");
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
+  const dir = result?.dir;
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">
-              Phonetic Alphabet Converter
-            </h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={input === "" && output === "" && error === ""}
+    <ToolPage id="nato_phonetic">
+      <Panel
+        title="Spell"
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Direction"
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: 'auto', label: 'Auto' },
+                { value: 'encode', label: 'Text → NATO' },
+                { value: 'decode', label: 'NATO → Text' },
+              ]}
             />
-          </div>
-          <hr className="line-break" />
-          <div className="space-y-4 mb-4">
-            <div>
-              <label className="form-label" htmlFor="string-input">
-                Input Text:
-              </label>
-              <AutoTextarea
-                id="nato-input"
-                value={input}
-                onChange={handleInputChange}
-                ref={inputRef}
-                className="input-field w-full"
-                placeholder="Enter letters or numbers (A-Z, 0-9)"
-                aria-describedby={error ? "nato-error" : undefined}
-                aria-label="Text input for NATO phonetic conversion"
-              />
-            </div>
-          </div>
-          {output && (
-            <div className="result-box">
-              <div className="flex justify-between items-center mb-2">
-                <label className="form-label">Phonetic Equivalent</label>
-                <CopyButton text={output} />
-              </div>
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div
-                    className="w-full mono-output"
-                    aria-label="Phonetic equivalent"
-                  >
-                    {output}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <ErrorBox message={error} id={error ? "nato-error" : undefined} />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+            <ClearButton onClick={() => setInput('')} disabled={!input} />
+          </>
+        }
+      >
+        <TwoPane>
+          <Field label="Input" htmlFor="nato-input" hint={dir ? (dir === 'encode' ? 'Spelling out as code words.' : 'Reading code words back to text.') : 'Letters, digits and spaces, or a list of code words.'}>
+            <TextArea
+              id="nato-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="XUTIL or X-ray Uniform Tango India Lima"
+              rows={6}
+              autoFocus
+              mono={false}
+              aria-invalid={Boolean(result?.error) || undefined}
+            />
+          </Field>
+          <Output label={dir === 'decode' ? 'Text' : 'Code words'} value={result?.out ?? ''} rows={6} mono={false} />
+        </TwoPane>
+        {result?.error && (
+          <Callout tone="error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }

@@ -1,28 +1,23 @@
-# robots.txt for https://xutil.in
-
-# Allow all crawlers full access
+# https://xutil.in — every page is a public, static tool page.
 User-agent: *
-Disallow: /api/                 # Block internal API routes (backend-only)
-Disallow: /admin/               # Block admin routes if any
-Disallow: /private/             # Block any private areas or pages
-Disallow: /node_modules/        # If deployed statically with such folders
-Disallow: /static/js/runtime*  # Avoid crawling hashed runtime files
-Disallow: /__vite_ping          # Vite-related dev-only route
-Disallow: /temp/                # Temporary files or test routes
 Allow: /
 
-# Delay crawl rate to avoid server overload (optional)
-# Crawl-delay: 10
+# AI crawlers are welcome; the pages are documentation as much as tools.
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: CCBot
+Allow: /
 
-# Sitemap location
 Sitemap: https://xutil.in/sitemap.xml
-
-# Additional guidance
-# Googlebot specific rules (if needed)
-User-agent: Googlebot
-Allow: /                        # Explicitly allow access
-Disallow: /experimental/       # Maybe a beta route not meant for SEO
-
-# Bingbot rules (optional)
-User-agent: Bingbot
-Allow: /

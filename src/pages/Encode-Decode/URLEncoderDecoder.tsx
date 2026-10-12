@@ -1,168 +1,87 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import ErrorBox from '../../components/ErrorBox';
-import SectionCard from '../../components/SectionCard';
-import CopyButton from '../../components/CopyButton';
-import ClearButton from '../../components/ClearButton';
-import AutoTextarea from '../../hooks/useAutoSizeTextArea';
-import SEODescription from '../../components/SEODescription';
-import seoDescriptions from '../../data/seoDescriptions';
-import { PageSEO } from '../../components/PageSEO';
-import { updateToolUsage } from '../../utils/toolUsage';
-import ToggleSwitch from '../../components/ToggleSwitch';
-import { ArrowDownUp } from 'lucide-react';
-import { getErrorMessage } from "../../utils/errors";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import { ArrowLeftRight } from 'lucide-react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, Field, IconButton, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
 
-function URLEncoderDecoder() {
-  const seo = seoDescriptions.urlEncoder;
-  const [inputText, setInputText] = useState('');
-  const [outputText, setOutputText] = useState('');
-  const [error, setError] = useState('');
-  const [mode, setMode] = useState<'encode' | 'decode'>('encode');
-  const textRef = useRef<HTMLTextAreaElement>(null);
+type Direction = 'encode' | 'decode';
 
-  useEffect(() => {
-    updateToolUsage('eurl');
-  }, []);
+export default function URLEncoderDecoder() {
+  const [input, setInput] = useState('');
+  const [direction, setDirection] = useState<Direction>('encode');
 
-  // Auto-process text when input changes or mode changes
-  useEffect(() => {
-    if (inputText.trim()) {
-      processText();
-    } else {
-      setOutputText('');
-      setError('');
-    }
-  }, [inputText, mode]);
-
-  const processText = useCallback(() => {
-    if (!inputText.trim()) {
-      setError(`Please enter text to ${mode === 'encode' ? 'encode' : 'decode'}`);
-      setOutputText('');
-      return;
-    }
-    
+  const result = useMemo(() => {
+    if (!input) return null;
     try {
-      const result = mode === 'encode' 
-        ? encodeURIComponent(inputText)
-        : decodeURIComponent(inputText);
-      setOutputText(result);
-      setError('');
-    } catch (err) {
-      setError(
-        getErrorMessage(
-          err,
-          mode === 'encode'
-            ? 'Failed to encode text'
-            : 'Failed to decode text. Ensure the input is a valid URL-encoded string.'
-        )
-      );
-      setOutputText('');
+      return { out: direction === 'encode' ? encodeURIComponent(input) : decodeURIComponent(input), error: '' };
+    } catch {
+      return { out: '', error: 'Not valid percent-encoding: every % must be followed by two hex digits.' };
     }
-  }, [inputText, mode]);
+  }, [input, direction]);
 
-  const handleClear = useCallback(() => {
-    setInputText('');
-    setOutputText('');
-    setError('');
-  }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(e.target.value);
-    if (textRef.current) {
-      textRef.current.focus();
-    }
-  };
-
-  const handleModeChange = (newMode: string) => {
-    setMode(newMode as 'encode' | 'decode');
-  };
-
-  const handleSwapTexts = () => {
-    setInputText(outputText);
-    setOutputText(inputText);
-  };
+  const out = result?.out ?? '';
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <h3 className="section-title">
-                {mode === 'encode' ? 'URL Encoder' : 'URL Decoder'}
-              </h3>
-              <ToggleSwitch
-                options={[
-                  { value: 'encode', label: 'Encode' },
-                  { value: 'decode', label: 'Decode' },
-                ]}
-                selected={mode}
-                onChange={handleModeChange}
-              />
-            </div>
-            <ClearButton 
-              onClick={handleClear} 
-              disabled={inputText === '' && outputText === '' && error === ''} 
+    <ToolPage id="eurl">
+      <Panel
+        title="Convert"
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Direction"
+              value={direction}
+              onChange={setDirection}
+              options={[
+                { value: 'encode', label: 'Encode' },
+                { value: 'decode', label: 'Decode' },
+              ]}
             />
-          </div>
-          <hr className='line-break' />
-          <div className="space-y-4">
-            <div>
-              <label className="form-label" htmlFor="input-text">
-                {mode === 'encode' ? 'Text to Encode' : 'Encoded URL to Decode'}
-              </label>
-              <AutoTextarea
-                id="input-text"
-                value={inputText}
-                onChange={handleInputChange}
-                className="input-field w-full"
-                placeholder={mode === 'encode' ? 'Enter text to encode' : 'Enter encoded URL to decode'}
-                ref={textRef}
-                aria-describedby={error ? 'url-error' : undefined}
-                aria-label={mode === 'encode' ? 'Text to encode' : 'Text to decode'}
-              />
-            </div>
-
-            {outputText && (
-              <div className="flex justify-center my-2">
-                <button
-                  onClick={handleSwapTexts}
-                  className="button-quiet !px-2 !py-1"
-                  aria-label="Swap input and output"
-                  title="Swap input and output"
-                >
-                  <ArrowDownUp className="w-5 h-5 text-dim" />
-                </button>
-              </div>
-            )}
-
-            {outputText && (
-              <div className="result-box">
-                <div className="flex justify-between items-center mb-2">
-                  <label className="form-label">
-                    {mode === 'encode' ? 'Encoded URL' : 'Decoded Text'}
-                  </label>
-                  <CopyButton text={outputText} />
-                </div>
-                <div className="inner-result scrollbox max-h-[30rem]">
-                  <div className="flex-1 mono-output" aria-label="Result">
-                    {outputText}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <ErrorBox message={error} id={error ? 'url-error' : undefined} />
-          </div>
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+            <ClearButton onClick={() => setInput('')} disabled={!input} />
+          </>
+        }
+      >
+        <TwoPane>
+          <Field
+            label={direction === 'encode' ? 'Text' : 'Encoded'}
+            htmlFor="url-input"
+            hint={direction === 'encode' ? 'Encodes everything except A–Z a–z 0–9 - _ . ! ~ * \' ( )' : undefined}
+          >
+            <TextArea
+              id="url-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={direction === 'encode' ? 'q=hello world&lang=en' : 'q%3Dhello%20world%26lang%3Den'}
+              rows={10}
+              stats
+              autoFocus
+              aria-invalid={Boolean(result?.error) || undefined}
+            />
+          </Field>
+          <Output
+            label={direction === 'encode' ? 'Encoded' : 'Text'}
+            value={out}
+            rows={10}
+            actions={
+              <IconButton
+                label="Use result as input"
+                size="sm"
+                disabled={!out}
+                onClick={() => {
+                  setInput(out);
+                  setDirection(direction === 'encode' ? 'decode' : 'encode');
+                }}
+              >
+                <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </IconButton>
+            }
+          />
+        </TwoPane>
+        {result?.error && (
+          <Callout tone="error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default URLEncoderDecoder;

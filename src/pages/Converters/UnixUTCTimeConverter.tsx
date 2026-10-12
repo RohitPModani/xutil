@@ -1,222 +1,158 @@
-import { useEffect, useState } from "react";
-import { DateTime } from "luxon";
-import SectionCard from "../../components/SectionCard";
-import ErrorBox from "../../components/ErrorBox";
-import ClearButton from "../../components/ClearButton";
-import CopyButton from "../../components/CopyButton";
-import { PageSEO } from "../../components/PageSEO";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Button, Callout, ClearButton, EmptyState, Field, Input, KeyValueList, Output, Panel, TwoPane } from '../../ui';
 
-function UnixUtcConverter() {
-  const seo = seoDescriptions.unixUtc;
-  const [unixInput, setUnixInput] = useState("");
-  const [utcInput, setUtcInput] = useState("");
-  const [unixToUtcResult, setUnixToUtcResult] = useState<string>("");
-  const [utcToUnixResult, setUtcToUnixResult] = useState<string>("");
-  const [errorUnix, setUnixError] = useState<string | null>(null);
-  const [errorUTC, setUtcError] = useState<string | null>(null);
+const utcFmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'full', timeStyle: 'long', timeZone: 'UTC' });
+const localFmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'full', timeStyle: 'long' });
+const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
 
-  const getDefaultValues = () => {
-    const now = DateTime.utc();
-    const utcStr = now.toFormat("yyyy-MM-dd HH:mm:ss");
-    const unixStr = now.toUnixInteger().toString();
-    return { utcStr, unixStr };
-  };
+const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
+  ['year', 31_536_000],
+  ['month', 2_592_000],
+  ['day', 86_400],
+  ['hour', 3_600],
+  ['minute', 60],
+  ['second', 1],
+];
 
-  useEffect(() => {
-    const { utcStr, unixStr } = getDefaultValues();
-    setUnixInput(unixStr);
-    setUtcInput(utcStr);
-    setUnixToUtcResult(utcStr);
-    setUtcToUnixResult(unixStr);
-  }, []);
-
-  useEffect(() => {
-    updateToolUsage("unix_utc");
-  }, []);
-
-  const isValidUnix = (input_unix: string) => /^\d+$/.test(input_unix.trim());
-
-  const isValidUtc = (input_utc: string) =>
-    /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(input_utc.trim());
-
-  const convertUnixToUtc = (input: string): string => {
-    if (!input.trim()) {
-      setUnixError("Please enter a Unix timestamp.");
-      return "";
-    }
-    if (!isValidUnix(input)) {
-      setUnixError("Invalid Unix timestamp. Must be a positive integer.");
-      return "";
-    }
-    try {
-      const timestamp = parseInt(input, 10);
-      const dt = DateTime.fromSeconds(timestamp, { zone: "utc" });
-      if (!dt.isValid) {
-        setUnixError("Invalid Unix timestamp.");
-        return "";
-      }
-      setUnixError(null);
-      return dt.toFormat("yyyy-MM-dd HH:mm:ss");
-    } catch {
-      setUnixError("Conversion failed.");
-      return "";
-    }
-  };
-
-  const convertUtcToUnix = (input: string): string => {
-    if (!input.trim()) {
-      setUtcError("Please enter a UTC datetime.");
-      return "";
-    }
-    if (!isValidUtc(input)) {
-      setUtcError("Invalid UTC datetime. Use format YYYY-MM-DD HH:mm:ss");
-      return "";
-    }
-    try {
-      const dt = DateTime.fromFormat(input, "yyyy-MM-dd HH:mm:ss", {
-        zone: "utc",
-      });
-      if (!dt.isValid) {
-        setUtcError("Invalid UTC datetime.");
-        return "";
-      }
-      setUtcError(null);
-      return dt.toUnixInteger().toString();
-    } catch {
-      setUtcError("Conversion failed.");
-      return "";
-    }
-  };
-
-  useEffect(() => {
-    const result = convertUnixToUtc(unixInput);
-    setUnixToUtcResult(result);
-  }, [unixInput]);
-
-  useEffect(() => {
-    const result = convertUtcToUnix(utcInput);
-    setUtcToUnixResult(result);
-  }, [utcInput]);
-
-  const clearUnixToUtc = () => {
-    const { unixStr, utcStr } = getDefaultValues();
-    setUnixInput(unixStr);
-    setUnixToUtcResult(utcStr);
-    setUnixError(null);
-  };
-
-  const clearUtcToUnix = () => {
-    const { utcStr, unixStr } = getDefaultValues();
-    setUtcInput(utcStr);
-    setUtcToUnixResult(unixStr);
-    setUtcError(null);
-  };
-
-  return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard className="mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Unix ➔ UTC Conversion</h3>
-            <ClearButton
-              onClick={clearUnixToUtc}
-              disabled={!unixInput && !unixToUtcResult && !errorUnix}
-              aria-label="Clear Unix to UTC input and result"
-            />
-          </div>
-          <hr className="line-break" />
-          <div className="flex-1 space-y-4">
-            <label htmlFor="unix_input" className="form-label">
-              Unix Timestamp:
-            </label>
-            <input
-              id="unix_input"
-              type="text"
-              maxLength={100}
-              value={unixInput}
-              onChange={(e) => setUnixInput(e.target.value)}
-              className="input-field"
-              placeholder="e.g., 1714583820"
-              aria-label="Input Unix timestamp"
-            />
-          </div>
-          <div className="result-box mt-4">
-            <div className="flex justify-between items-center mb-2">
-              <label className="form-label">UTC Datetime</label>
-              <CopyButton
-                text={unixToUtcResult}
-                aria-label="Copy UTC datetime result"
-              />
-            </div>
-            {unixToUtcResult && (
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div className="w-full mono-output break-all">
-                    {unixToUtcResult}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          <ErrorBox message={errorUnix} aria-live="polite" />
-        </SectionCard>
-
-        <SectionCard className="mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">UTC ➔ Unix Conversion</h3>
-            <ClearButton
-              onClick={clearUtcToUnix}
-              disabled={!utcInput && !utcToUnixResult && !errorUTC}
-              aria-label="Clear UTC to Unix input and result"
-            />
-          </div>
-          <hr className="line-break" />
-          <div className="flex-1 space-y-4">
-            <label htmlFor="utc_input" className="form-label">
-              UTC Datetime:
-            </label>
-            <input
-              id="utc_input"
-              type="text"
-              maxLength={19}
-              value={utcInput}
-              onChange={(e) => setUtcInput(e.target.value)}
-              className="input-field"
-              placeholder="e.g., 2025-05-01 13:57:00"
-              aria-label="Input UTC datetime"
-            />
-          </div>
-          <div className="result-box mt-4">
-            <div className="flex justify-between items-center mb-2">
-              <label className="form-label">Unix Timestamp</label>
-              <CopyButton
-                text={utcToUnixResult}
-                aria-label="Copy Unix timestamp result"
-              />
-            </div>
-            {utcToUnixResult && (
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div className="w-full mono-output break-all">
-                    {utcToUnixResult}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          <ErrorBox message={errorUTC} aria-live="polite" />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
-  );
+function relative(date: Date): string {
+  const diff = (date.getTime() - Date.now()) / 1000;
+  const [unit, secs] = UNITS.find(([, s]) => Math.abs(diff) >= s) ?? UNITS[UNITS.length - 1];
+  return rtf.format(Math.round(diff / secs), unit);
 }
 
-export default UnixUtcConverter;
+/** Treat "YYYY-MM-DD HH:mm:ss" and zone-less ISO strings as UTC. */
+function parseDate(s: string): Date | null {
+  const iso = s.trim().replace(' ', 'T');
+  const zoneless = /^\d{4}-\d{2}-\d{2}(T[\d:.]+)?$/.test(iso);
+  const ms = Date.parse(zoneless ? `${iso}Z` : iso);
+  return Number.isNaN(ms) ? null : new Date(ms);
+}
+
+const isoUtc = (d: Date) => d.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '');
+const nowEpoch = () => String(Math.floor(Date.now() / 1000));
+
+function dateRows(d: Date) {
+  return [
+    { label: 'ISO 8601', value: d.toISOString() },
+    { label: 'UTC', value: utcFmt.format(d), mono: false },
+    { label: 'Local', value: localFmt.format(d), mono: false },
+    { label: 'Relative', value: relative(d), mono: false },
+  ];
+}
+
+export default function UnixUTCTimeConverter() {
+  const [epoch, setEpoch] = useState(nowEpoch);
+  const [dateText, setDateText] = useState(() => isoUtc(new Date()));
+
+  const fromEpoch = useMemo(() => {
+    const raw = epoch.trim();
+    if (!raw) return null;
+    const n = Number(raw);
+    if (!/^-?\d+(\.\d+)?$/.test(raw) || !Number.isFinite(n)) return { date: null, unit: '', error: 'Enter a whole number of seconds or milliseconds.' };
+    // 1e11 seconds is the year 5138; anything bigger must be milliseconds.
+    const isMs = Math.abs(n) >= 1e11;
+    const date = new Date(isMs ? n : n * 1000);
+    if (Number.isNaN(date.getTime())) return { date: null, unit: '', error: 'That value is outside the range a date can hold.' };
+    return { date, unit: isMs ? 'milliseconds' : 'seconds', error: '' };
+  }, [epoch]);
+
+  const fromDate = useMemo(() => {
+    if (!dateText.trim()) return null;
+    const date = parseDate(dateText);
+    return date ? { date, error: '' } : { date: null, error: 'Could not read that date. Use ISO 8601, e.g. 2025-05-01 13:57:00.' };
+  }, [dateText]);
+
+  const epochRows = fromEpoch?.date
+    ? [
+        { label: 'Seconds', value: String(Math.floor(fromEpoch.date.getTime() / 1000)) },
+        { label: 'Milliseconds', value: String(fromEpoch.date.getTime()) },
+        ...dateRows(fromEpoch.date),
+      ]
+    : [];
+  const dateRowsOut = fromDate?.date
+    ? [
+        { label: 'Seconds', value: String(Math.floor(fromDate.date.getTime() / 1000)) },
+        { label: 'Milliseconds', value: String(fromDate.date.getTime()) },
+        ...dateRows(fromDate.date),
+      ]
+    : [];
+
+  const copyRows = (rows: { label: string; value: string }[]) => rows.map((r) => `${r.label}: ${r.value}`).join('\n');
+
+  return (
+    <ToolPage id="unix_utc">
+      <Panel
+        title="Epoch to date"
+        actions={
+          <>
+            <Button size="sm" onClick={() => setEpoch(nowEpoch())}>
+              Now
+            </Button>
+            <ClearButton onClick={() => setEpoch('')} disabled={!epoch} />
+          </>
+        }
+      >
+        <TwoPane>
+          <Field
+            label="Epoch"
+            htmlFor="ue-epoch"
+            hint={fromEpoch?.unit ? `Read as ${fromEpoch.unit}.` : 'Seconds or milliseconds; the unit is detected from the size.'}
+          >
+            <Input
+              id="ue-epoch"
+              inputMode="numeric"
+              value={epoch}
+              onChange={(e) => setEpoch(e.target.value)}
+              placeholder="1714583820"
+              maxLength={20}
+              autoFocus
+              aria-invalid={Boolean(fromEpoch?.error) || undefined}
+            />
+          </Field>
+          <Output label="Date" copyText={copyRows(epochRows)}>
+            {epochRows.length > 0 ? <KeyValueList items={epochRows} /> : <EmptyState>Enter a timestamp</EmptyState>}
+          </Output>
+        </TwoPane>
+        {fromEpoch?.error && (
+          <Callout tone="error" className="mt-4">
+            {fromEpoch.error}
+          </Callout>
+        )}
+      </Panel>
+
+      <Panel
+        title="Date to epoch"
+        actions={
+          <>
+            <Button size="sm" onClick={() => setDateText(isoUtc(new Date()))}>
+              Now
+            </Button>
+            <ClearButton onClick={() => setDateText('')} disabled={!dateText} />
+          </>
+        }
+      >
+        <TwoPane>
+          <Field label="Date" htmlFor="ue-date" hint="ISO 8601 or YYYY-MM-DD HH:mm:ss. Treated as UTC unless a zone is given.">
+            <Input
+              id="ue-date"
+              value={dateText}
+              onChange={(e) => setDateText(e.target.value)}
+              placeholder="2025-05-01 13:57:00"
+              maxLength={40}
+              aria-invalid={Boolean(fromDate?.error) || undefined}
+            />
+          </Field>
+          <Output label="Epoch" copyText={copyRows(dateRowsOut)}>
+            {dateRowsOut.length > 0 ? <KeyValueList items={dateRowsOut} /> : <EmptyState>Enter a date</EmptyState>}
+          </Output>
+        </TwoPane>
+        {fromDate?.error && (
+          <Callout tone="error" className="mt-4">
+            {fromDate.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
+  );
+}

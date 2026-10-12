@@ -1,190 +1,59 @@
-import { useState, useRef, useEffect, ChangeEvent } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Checkbox, ClearButton, EmptyState, Field, KeyValueList, Output, Panel, Stat, TextArea, Toolbar, TwoPane } from '../../ui';
 
-// Define interface for word frequency data
-interface WordFrequency {
-  word: string;
-  count: number;
-}
+const STOP_WORDS = new Set(
+  'a an and are as at be but by for from has he in is it its of on or that the this to was were will with you your i we they not no so if then than there their'.split(' ')
+);
 
-const WordFrequencyCounter: React.FC = () => {
-  const seo = seoDescriptions.wordFrequencyCounter;
+const format = (n: number) => new Intl.NumberFormat().format(n);
 
-  const [input, setInput] = useState<string>("");
-  const [output, setOutput] = useState<WordFrequency[]>([]);
-  const [error, setError] = useState<string>("");
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+export default function WordFrequencyCounter() {
+  const [input, setInput] = useState('');
+  const [ignoreCase, setIgnoreCase] = useState(true);
+  const [skipStopWords, setSkipStopWords] = useState(false);
 
-  useEffect(() => {
-    updateToolUsage("word_frequency_counter");
-  }, []);
-
-  useEffect(() => {
-    if (input.trim()) {
-      calculateFrequencies();
-    } else {
-      setOutput([]);
-      setError("");
+  const result = useMemo(() => {
+    const words = (ignoreCase ? input.toLowerCase() : input).match(/\b\w+\b/g) ?? [];
+    const counts = new Map<string, number>();
+    for (const w of words) {
+      if (skipStopWords && STOP_WORDS.has(w.toLowerCase())) continue;
+      counts.set(w, (counts.get(w) ?? 0) + 1);
     }
-  }, [input]);
+    const rows = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    return { total: rows.reduce((n, [, c]) => n + c, 0), rows };
+  }, [input, ignoreCase, skipStopWords]);
 
-  const calculateFrequencies = (): void => {
-    try {
-      // Split input into words, remove punctuation, convert to lowercase
-      const words: string[] = input.toLowerCase().match(/\b\w+\b/g) || [];
-
-      // Count frequencies
-      const freqMap: { [key: string]: number } = {};
-      words.forEach((word: string) => {
-        freqMap[word] = (freqMap[word] || 0) + 1;
-      });
-
-      // Convert to array and sort: by frequency (descending), then alphabetically
-      const freqArray: WordFrequency[] = Object.entries(freqMap)
-        .map(([word, count]: [string, number]) => ({ word, count }))
-        .sort(
-          (a: WordFrequency, b: WordFrequency) =>
-            b.count - a.count || a.word.localeCompare(b.word)
-        );
-
-      setOutput(freqArray);
-      setError("");
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Error calculating word frequencies"
-      );
-      setOutput([]);
-    }
-  };
-
-  const handleClear = (): void => {
-    setInput("");
-    setOutput([]);
-    setError("");
-  };
-
-  const handleInputChange = (e: ChangeEvent<HTMLTextAreaElement>): void => {
-    setInput(e.target.value);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  // Format output for copying
-  const getCopyableText = (): string => {
-    if (!output.length) return "";
-    const header: string = "Word\tFrequency\n";
-    const rows: string = output
-      .map(({ word, count }: WordFrequency) => `${word}\t${count}`)
-      .join("\n");
-    return header + rows;
-  };
+  const tsv = result.rows.map(([w, c]) => `${w}\t${c}`).join('\n');
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Word Frequency Counter</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={input === "" && output.length === 0 && error === ""}
-            />
+    <ToolPage id="word_frequency_counter">
+      <Panel title="Count" actions={<ClearButton onClick={() => setInput('')} disabled={!input} />}>
+        <TwoPane>
+          <div className="space-y-4">
+            <Field label="Text" htmlFor="wf-input">
+              <TextArea id="wf-input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="This is fun, this is great" rows={10} stats autoFocus mono={false} />
+            </Field>
+            <Toolbar className="gap-x-5">
+              <Checkbox label="Ignore case" checked={ignoreCase} onChange={(e) => setIgnoreCase(e.target.checked)} />
+              <Checkbox label="Ignore common words" checked={skipStopWords} onChange={(e) => setSkipStopWords(e.target.checked)} />
+            </Toolbar>
           </div>
-          <hr className="line-break" />
-          <div className="space-y-4 mb-4">
-            <div>
-              <label className="form-label" htmlFor="frequency-input">
-                Input Text:
-              </label>
-              <AutoTextarea
-                id="frequency-input"
-                value={input}
-                onChange={handleInputChange}
-                ref={inputRef}
-                className="input-field w-full"
-                placeholder="Enter text to count word frequencies (e.g., This is fun, this is great!)"
-                aria-describedby={error ? "frequency-error" : undefined}
-                aria-label="Text input for word frequency counting"
-              />
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Stat label="Words" value={format(result.total)} />
+              <Stat label="Unique" value={format(result.rows.length)} />
             </div>
+            <Output label="Frequency" copyText={tsv} fileName="word-frequency.tsv" mime="text/tab-separated-values">
+              {result.rows.length ? (
+                <KeyValueList items={result.rows.map(([w, c]) => ({ label: w, value: format(c), copy: w }))} />
+              ) : (
+                <EmptyState>Counts appear here</EmptyState>
+              )}
+            </Output>
           </div>
-          {output.length > 0 && (
-            <div className="result-box">
-              <div className="flex justify-between items-center mb-2">
-                <label className="form-label">Word Frequencies</label>
-                <CopyButton text={getCopyableText()} />
-              </div>
-              <div className="scrollbox mt-2">
-                <div className="inner-result scrollbar overflow-x-auto">
-                  <table aria-label="Word frequency table">
-                    <thead>
-                      <tr>
-                        <th className="text-left pr-4">Word</th>
-                        <th className="text-left">Frequency</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {output.map(
-                        ({ word, count }: WordFrequency, index: number) => (
-                          <tr key={index}>
-                            <td className="pr-4">{word}</td>
-                            <td>{count}</td>
-                          </tr>
-                        )
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <ErrorBox
-            message={error}
-            id={error ? "frequency-error" : undefined}
-          />
-        </SectionCard>
-
-        <SectionCard className="mt-6">
-          <h3 className="section-title mb-4">
-            About Word Frequency Counter
-          </h3>
-          <hr className="line-break" />
-          <div className="prose">
-            <ul className="text-ink pl-5 space-y-2">
-              <li>Counts the frequency of each word in your text</li>
-              <li>Case-insensitive and ignores punctuation</li>
-              <li>
-                Sorts results by frequency (highest to lowest), then
-                alphabetically
-              </li>
-              <li>
-                Example: "This is fun, this is great!" shows "this: 2, is: 2,
-                fun: 1, great: 1"
-              </li>
-              <li>Useful for text analysis, writing, and SEO optimization</li>
-            </ul>
-          </div>
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+        </TwoPane>
+      </Panel>
+    </ToolPage>
   );
-};
-
-export default WordFrequencyCounter;
+}

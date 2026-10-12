@@ -14,8 +14,8 @@ export default defineConfig({
         name: 'XUtil - Developer Tools',
         short_name: 'XUtil',
         description: 'Offline-first dev tools for everyone',
-        theme_color: '#14161a',
-        background_color: '#14161a',
+        theme_color: '#0e1518',
+        background_color: '#0e1518',
         display: 'standalone',
         start_url: '/',
         icons: [

@@ -1,133 +1,33 @@
-import { useEffect, useState, useRef } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { getErrorMessage } from "../../utils/errors";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, Field, Output, Panel, TextArea, TwoPane } from '../../ui';
 
-function isPalindrome(str: string): boolean {
-  const normalized = str.toLowerCase().replace(/[^a-z0-9]/g, "");
-  return normalized === normalized.split("").reverse().join("");
-}
+const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 export default function PalindromeChecker() {
-  const seo = seoDescriptions.palindromeChecker || {
-    title: "Palindrome Checker",
-    body: "Check if a string is a palindrome by comparing it to its reverse.",
-  };
-  const [input, setInput] = useState("");
-  const [result, setResult] = useState("");
-  const [error, setError] = useState("");
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [input, setInput] = useState('');
 
-  useEffect(() => {
-    updateToolUsage("palindrome");
-  }, []);
-
-  // Auto-check palindrome when input changes
-  useEffect(() => {
-    if (input.trim()) {
-      handleCheck();
-    } else {
-      setResult("");
-      setError("");
-    }
+  const result = useMemo(() => {
+    const normalised = normalise(input);
+    if (!normalised) return null;
+    return { normalised, palindrome: normalised === [...normalised].reverse().join('') };
   }, [input]);
 
-  const handleCheck = () => {
-    if (!input.trim()) {
-      setError("Input text cannot be empty");
-      setResult("");
-      return;
-    }
-    try {
-      const isPal = isPalindrome(input);
-      setResult(`The string '${input}' is ${isPal ? "" : "not "}a palindrome`);
-      setError("");
-    } catch (err) {
-      setError(getErrorMessage(err, "Failed to check palindrome"));
-      setResult("");
-    }
-  };
-
-  const handleClear = () => {
-    setInput("");
-    setResult("");
-    setError("");
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Palindrome Checker</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={input === "" && result === "" && error === ""}
-            />
-          </div>
-          <hr className="line-break" />
-          <div className="space-y-4 mb-4">
-            <div>
-              <label className="form-label" htmlFor="palindrome-input">
-                Input Text:
-              </label>
-              <AutoTextarea
-                id="palindrome-input"
-                value={input}
-                onChange={handleInputChange}
-                className="input-field w-full"
-                placeholder="Enter text to check if it's a palindrome"
-                ref={inputRef}
-                aria-describedby={error ? "palindrome-error" : undefined}
-                aria-label="Text to check for palindrome"
-              />
-            </div>
-          </div>
-
-          {result && (
-            <div className="result-box">
-              <div className="flex justify-between items-center mb-2">
-                <label className="form-label">Result</label>
-                <CopyButton text={result} />
-              </div>
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div
-                    className="w-full mono-output"
-                    aria-label="Palindrome check result"
-                  >
-                    {result}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <ErrorBox
-            message={error}
-            id={error ? "palindrome-error" : undefined}
-          />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+    <ToolPage id="palindrome">
+      <Panel title="Check" actions={<ClearButton onClick={() => setInput('')} disabled={!input} />}>
+        <TwoPane>
+          <Field label="Text" htmlFor="pal-input" hint="Case, spaces and punctuation are ignored.">
+            <TextArea id="pal-input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="A man, a plan, a canal: Panama" rows={6} autoFocus mono={false} />
+          </Field>
+          <Output label="Normalised" value={result?.normalised ?? ''} placeholder="Letters and digits only" rows={6} />
+        </TwoPane>
+        {result && (
+          <Callout tone={result.palindrome ? 'success' : 'info'} className="mt-4">
+            {result.palindrome ? 'Yes, this is a palindrome.' : 'No, this is not a palindrome.'}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }

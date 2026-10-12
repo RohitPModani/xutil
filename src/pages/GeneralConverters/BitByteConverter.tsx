@@ -1,28 +1,7 @@
-import React from "react";
-import UnitConverter from "./UnitConverter";
-import seoDescriptions from "../../data/seoDescriptions";
+import UnitConverter from './UnitConverter';
 
-// Define types for better type safety
-type BitByteUnit =
-  | "Bit"
-  | "Byte"
-  | "Kb"
-  | "KB"
-  | "Mb"
-  | "MB"
-  | "Gb"
-  | "GB"
-  | "Tb"
-  | "TB"
-  | "Pb"
-  | "PB";
+type BitByteUnit = 'Bit' | 'Byte' | 'Kb' | 'KB' | 'Mb' | 'MB' | 'Gb' | 'GB' | 'Tb' | 'TB' | 'Pb' | 'PB';
 
-interface UnitDefinition {
-  value: BitByteUnit;
-  label: string;
-}
-
-// Constants defined outside component to prevent recreation on each render
 const UNIT_TO_BITS: Record<BitByteUnit, number> = {
   Bit: 1,
   Byte: 8,
@@ -38,68 +17,28 @@ const UNIT_TO_BITS: Record<BitByteUnit, number> = {
   PB: 8e15,
 };
 
-const UNITS: UnitDefinition[] = [
-  { value: "Bit", label: "Bits (bit)" },
-  { value: "Byte", label: "Bytes (byte)" },
-  { value: "Kb", label: "Kilobits (Kb)" },
-  { value: "KB", label: "Kilobytes (KB)" },
-  { value: "Mb", label: "Megabits (Mb)" },
-  { value: "MB", label: "Megabytes (MB)" },
-  { value: "Gb", label: "Gigabits (Gb)" },
-  { value: "GB", label: "Gigabytes (GB)" },
-  { value: "Tb", label: "Terabits (Tb)" },
-  { value: "TB", label: "Terabytes (TB)" },
-  { value: "Pb", label: "Petabits (Pb)" },
-  { value: "PB", label: "Petabytes (PB)" },
+const UNITS: { value: BitByteUnit; label: string }[] = [
+  { value: 'Bit', label: 'Bits (bit)' },
+  { value: 'Byte', label: 'Bytes (byte)' },
+  { value: 'Kb', label: 'Kilobits (Kb)' },
+  { value: 'KB', label: 'Kilobytes (KB)' },
+  { value: 'Mb', label: 'Megabits (Mb)' },
+  { value: 'MB', label: 'Megabytes (MB)' },
+  { value: 'Gb', label: 'Gigabits (Gb)' },
+  { value: 'GB', label: 'Gigabytes (GB)' },
+  { value: 'Tb', label: 'Terabits (Tb)' },
+  { value: 'TB', label: 'Terabytes (TB)' },
+  { value: 'Pb', label: 'Petabits (Pb)' },
+  { value: 'PB', label: 'Petabytes (PB)' },
 ];
 
-function BitByteConverter() {
-  const { bitByte: seo } = seoDescriptions;
-
-  const convertBitByte = (
-    value: number,
-    unit: string
-  ): Record<BitByteUnit, number> => {
-    // Convert to intermediate unit (bits)
-    if (!Object.keys(UNIT_TO_BITS).includes(unit)) {
-      throw new Error(
-        `Invalid unit: ${unit}. Supported units: ${Object.keys(
-          UNIT_TO_BITS
-        ).join(", ")}`
-      );
-    }
-    const bitByteUnit = unit as BitByteUnit;
-    // Type assertion to ensure unit is a valid BitByteUnit
-    const intermediateValue = value * UNIT_TO_BITS[bitByteUnit];
-
-    if (!Number.isFinite(intermediateValue)) {
-      throw new Error(
-        "Conversion resulted in non-finite value (possible overflow)"
-      );
-    }
-
-    // Convert from bits to all units
-    return (Object.entries(UNIT_TO_BITS) as [BitByteUnit, number][]).reduce(
-      (acc, [key, factor]) => {
-        acc[key] = Number((intermediateValue / factor).toFixed(8));
-        return acc;
-      },
-      {} as Record<BitByteUnit, number>
-    );
-  };
-
-  return (
-    <UnitConverter
-      seo={seo}
-      defaultValue="1"
-      defaultUnit="Gb"
-      units={UNITS}
-      converterName="Bit ↔ Byte Converter"
-      validationMessage="Value must be greater than zero."
-      convertFunction={convertBitByte}
-      toolName="bit_byte"
-    />
-  );
+function convert(value: number, unit: string): Record<string, number> {
+  if (!(unit in UNIT_TO_BITS)) throw new Error(`Unknown unit: ${unit}`);
+  const bits = value * UNIT_TO_BITS[unit as BitByteUnit];
+  if (!Number.isFinite(bits)) throw new Error('The value is too large to convert.');
+  return Object.fromEntries(Object.entries(UNIT_TO_BITS).map(([k, f]) => [k, Number((bits / f).toFixed(8))]));
 }
 
-export default React.memo(BitByteConverter);
+export default function BitByteConverter() {
+  return <UnitConverter id="bit_byte" defaultValue="1" defaultUnit="Gb" units={UNITS} validationMessage="Value must be greater than zero." convert={convert} />;
+}

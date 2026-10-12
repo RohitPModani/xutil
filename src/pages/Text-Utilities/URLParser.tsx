@@ -1,143 +1,67 @@
-import { useEffect, useState } from "react";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import ErrorBox from "../../components/ErrorBox";
-import CopyButton from "../../components/CopyButton";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, EmptyState, Field, Input, KeyValueList, Output, Panel, TwoPane } from '../../ui';
 
-function URLParser() {
-  const seo = seoDescriptions.urlParser;
-  const [urlInput, setUrlInput] = useState<string>("");
-  const [result, setResult] = useState<{
-    href: string;
-    origin: string;
-    protocol: string;
-    username: string;
-    password: string;
-    host: string;
-    hostname: string;
-    port: string;
-    pathname: string;
-    search: string;
-    searchParams: Record<string, string>;
-    hash: string;
-  } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [jsonOutput, setJsonOutput] = useState<string>("");
+export default function URLParser() {
+  const [input, setInput] = useState('');
 
-  useEffect(() => {
-    updateToolUsage("url_parser");
-  }, []);
-
-  useEffect(() => {
-    if (urlInput) {
-      try {
-        const url = new URL(urlInput);
-        const searchParams: Record<string, string> = {};
-        url.searchParams.forEach((value, key) => {
-          searchParams[key] = value;
-        });
-
-        const parsedResult = {
-          href: url.href,
-          origin: url.origin,
-          protocol: url.protocol,
-          username: url.username,
-          password: url.password,
-          host: url.host,
-          hostname: url.hostname,
-          port: url.port,
-          pathname: url.pathname,
-          search: url.search,
-          searchParams,
-          hash: url.hash,
-        };
-
-        setResult(parsedResult);
-        setJsonOutput(JSON.stringify(parsedResult, null, 2));
-        setError(null);
-      } catch {
-        setError(
-          "Invalid URL. Please enter a valid URL including protocol (http/https)."
-        );
-        setResult(null);
-        setJsonOutput("");
-      }
-    } else {
-      setResult(null);
-      setJsonOutput("");
-      setError(null);
+  const result = useMemo(() => {
+    if (!input.trim()) return null;
+    try {
+      const url = new URL(input.trim());
+      const parts = [
+        { label: 'Protocol', value: url.protocol },
+        { label: 'Origin', value: url.origin },
+        { label: 'Hostname', value: url.hostname },
+        { label: 'Port', value: url.port },
+        { label: 'Path', value: url.pathname },
+        { label: 'Query', value: url.search },
+        { label: 'Fragment', value: url.hash },
+        ...(url.username ? [{ label: 'Username', value: url.username }] : []),
+        ...(url.password ? [{ label: 'Password', value: url.password }] : []),
+      ];
+      const params = [...url.searchParams].map(([k, v]) => ({ label: k, value: v }));
+      return { parts, params, error: '' };
+    } catch {
+      return { parts: [], params: [], error: 'Not a valid URL. Include the scheme, for example https://.' };
     }
-  }, [urlInput]);
+  }, [input]);
 
-  const handleClear = () => {
-    setUrlInput("");
-    setResult(null);
-    setJsonOutput("");
-    setError(null);
-  };
+  const asText = (items: { label: string; value: string }[]) => items.map((i) => `${i.label}: ${i.value}`).join('\n');
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
+    <ToolPage id="url_parser">
+      <Panel title="Parse" actions={<ClearButton onClick={() => setInput('')} disabled={!input} />}>
+        <Field label="URL" htmlFor="url-input">
+          <Input
+            id="url-input"
+            type="url"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="https://example.com:8080/path/to/page?q=search&page=2#top"
+            autoFocus
+            aria-invalid={Boolean(result?.error) || undefined}
+            aria-describedby={result?.error ? 'url-error' : undefined}
+          />
+        </Field>
 
-        <SectionCard>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="section-title">
-              URL Parser
-            </h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={!urlInput && !result && !error}
-            />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <label className="form-label">URL</label>
-                <AutoTextarea
-                  id="urlInput"
-                  value={urlInput}
-                  onChange={(e) => setUrlInput(e.target.value)}
-                  placeholder="e.g. https://example.com:8080/path/to/page?param1=value1&param2=value2#section"
-                  className="input-field w-full h-24"
-                />
-              </div>
-            </div>
+        {result?.error && (
+          <Callout tone="error" id="url-error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
 
-            <div className="result-box mt-1">
-              <div className="flex justify-between items-center">
-                <label className="form-label">
-                  Parsed URL (JSON)
-                </label>
-                {result && <CopyButton text={jsonOutput} />}
-              </div>
-              {result && (
-                <div className="scrollbox inner-result mt-2">
-                  <pre>{jsonOutput}</pre>
-                </div>
-              )}
-            </div>
-
-            {error && (
-              <div aria-live="polite">
-                <ErrorBox message={error} />
-              </div>
-            )}
-          </div>
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+        {result && !result.error && (
+          <TwoPane className="mt-4">
+            <Output label="Parts" copyText={asText(result.parts)}>
+              <KeyValueList items={result.parts} />
+            </Output>
+            <Output label={`Query parameters · ${result.params.length}`} copyText={asText(result.params)}>
+              {result.params.length > 0 ? <KeyValueList items={result.params} /> : <EmptyState>No query parameters</EmptyState>}
+            </Output>
+          </TwoPane>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default URLParser;

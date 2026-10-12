@@ -1,239 +1,83 @@
-import { useEffect, useState, useCallback } from "react";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import ErrorBox from "../../components/ErrorBox";
-import CopyButton from "../../components/CopyButton";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, Field, Output, Panel, Segmented, Select, TextArea } from '../../ui';
 
-// Constants
-const MAX_INPUT_LENGTH = 1000;
-const PRESETS = [
-  {
-    name: "URL Slug",
-    separator: "-",
-    caseType: "lowercase",
-    description: "Standard URL format (hyphen-separated, lowercase)",
-  },
-  {
-    name: "Filename",
-    separator: "_",
-    caseType: "lowercase",
-    description: "Filesystem-friendly format (underscore-separated)",
-  },
-  {
-    name: "Constant Case",
-    separator: "_",
-    caseType: "uppercase",
-    description: "CONSTANT_CASE format (uppercase with underscores)",
-  },
-] as const;
+type Case = 'lower' | 'upper' | 'preserve';
 
 const SEPARATORS = [
-  { value: "-", label: "Hyphen (-)" },
-  { value: "_", label: "Underscore (_)" },
-  { value: ".", label: "Dot (.)" },
-  { value: "", label: "None (concatenated)" },
-] as const;
+  { value: '-', label: 'Hyphen (-)' },
+  { value: '_', label: 'Underscore (_)' },
+  { value: '.', label: 'Dot (.)' },
+  { value: '', label: 'None' },
+];
 
-const CASES = [
-  { value: "lowercase", label: "Lowercase" },
-  { value: "uppercase", label: "Uppercase" },
-  { value: "preserve", label: "Preserve Original" },
-] as const;
-
-function SlugGenerator() {
-  const seo = seoDescriptions.slug;
-  const [text, setText] = useState("");
-  const [separator, setSeparator] =
-    useState<(typeof SEPARATORS)[number]["value"]>("-");
-  const [caseType, setCaseType] =
-    useState<(typeof CASES)[number]["value"]>("lowercase");
-  const [result, setResult] = useState("");
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    updateToolUsage("slug");
-  }, []);
-
-  const generateSlug = useCallback(
-    (text: string, separator: string, caseType: string): string => {
-      if (!text.trim()) return "";
-
-      try {
-        const slug = text
-          .normalize("NFKD") // Normalize Unicode
-          .replace(/[^\w\s~-]/g, "") // Remove non-alphanumeric (except spaces, ~, -)
-          .trim()
-          .replace(/[-\s]+/g, separator) // Replace spaces and hyphens with separator
-          .replace(new RegExp(`\\${separator}{2,}`, "g"), separator) // Replace multiple separators
-          .replace(new RegExp(`^\\${separator}|\\${separator}$`, "g"), ""); // Trim separators
-
-        if (!slug) {
-          setError(
-            "Input text produced an empty slug. Please use alphanumeric characters."
-          );
-          return "";
-        }
-
-        switch (caseType) {
-          case "uppercase":
-            return slug.toUpperCase();
-          case "lowercase":
-            return slug.toLowerCase();
-          default:
-            return slug;
-        }
-      } catch {
-        setError("Slug generation failed. Please check your inputs.");
-        return "";
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    setError(null);
-    const generated = generateSlug(text, separator, caseType);
-    setResult(generated);
-  }, [text, separator, caseType, generateSlug]);
-
-  const handleClear = () => {
-    setText("");
-    setSeparator("-");
-    setCaseType("lowercase");
-    setResult("");
-    setError(null);
-  };
-
-  const applyPreset = (preset: (typeof PRESETS)[number]) => {
-    setSeparator(preset.separator);
-    setCaseType(preset.caseType);
-  };
-
-  return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard className="mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Slug Generator</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={!text && !result && !error}
-              aria-label="Clear all inputs and results"
-            />
-          </div>
-          <hr className="line-break" />
-          <div className="mb-4">
-            <label htmlFor="text" className="form-label">
-              Text ({text.length}/{MAX_INPUT_LENGTH} characters):
-            </label>
-            <AutoTextarea
-              id="text"
-              className="input-field"
-              placeholder="e.g., Hello World! This is a Test"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              maxLength={MAX_INPUT_LENGTH}
-              aria-label="Input text for slug generation"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label htmlFor="separator" className="form-label">
-                Separator:
-              </label>
-              <select
-                id="separator"
-                value={separator}
-                onChange={(e) =>
-                  setSeparator(
-                    e.target.value as (typeof SEPARATORS)[number]["value"]
-                  )
-                }
-                className="input-field"
-                aria-label="Select separator"
-              >
-                {SEPARATORS.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="case" className="form-label">
-                Case:
-              </label>
-              <select
-                id="case"
-                value={caseType}
-                onChange={(e) =>
-                  setCaseType(e.target.value as (typeof CASES)[number]["value"])
-                }
-                className="input-field"
-                aria-label="Select case type"
-              >
-                {CASES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="form-label">Quick Presets:</label>
-              <select
-                onChange={(e) => {
-                  const preset = PRESETS.find((p) => p.name === e.target.value);
-                  if (preset) applyPreset(preset);
-                }}
-                className="input-field"
-                aria-label="Select preset"
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Select a preset...
-                </option>
-                {PRESETS.map((p) => (
-                  <option key={p.name} value={p.name}>
-                    {p.name} - {p.description}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="result-box mt-4">
-            <div className="flex justify-between items-center mb-2">
-              <label className="form-label">Generated Slug</label>
-              <div className="flex items-center gap-2">
-                <CopyButton text={result} aria-label="Copy generated slug" />
-              </div>
-            </div>
-            {result && (
-              <div className="scrollbox mt-2">
-                <div className="inner-result whitespace-pre-wrap break-all">
-                  {result}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <ErrorBox message={error} aria-live="polite" />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
-  );
+function slugify(text: string, separator: string, kase: Case): string {
+  const parts = text
+    .normalize('NFKD')
+    .replace(/[^\w\s~-]/g, '')
+    .split(/[-\s]+/)
+    .filter(Boolean);
+  const slug = parts.join(separator);
+  return kase === 'upper' ? slug.toUpperCase() : kase === 'lower' ? slug.toLowerCase() : slug;
 }
 
-export default SlugGenerator;
+export default function SlugGenerator() {
+  const [text, setText] = useState('');
+  const [separator, setSeparator] = useState('-');
+  const [kase, setKase] = useState<Case>('lower');
+
+  const slug = useMemo(() => slugify(text, separator, kase), [text, separator, kase]);
+  const empty = text.trim() !== '' && slug === '';
+
+  return (
+    <ToolPage id="slug">
+      <Panel title="Slug" actions={<ClearButton onClick={() => setText('')} disabled={!text} />}>
+        <Field label="Text" htmlFor="slug-input" hint="Accents are stripped; punctuation is dropped.">
+          <TextArea
+            id="slug-input"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Hello World, this is a test"
+            rows={3}
+            mono={false}
+            maxLength={1000}
+            autoFocus
+            aria-invalid={empty || undefined}
+          />
+        </Field>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-[12rem_auto]">
+          <Field label="Separator" htmlFor="slug-separator">
+            <Select id="slug-separator" value={separator} onChange={(e) => setSeparator(e.target.value)}>
+              {SEPARATORS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Case">
+            <Segmented
+              label="Case"
+              value={kase}
+              onChange={setKase}
+              options={[
+                { value: 'lower', label: 'lowercase' },
+                { value: 'upper', label: 'UPPERCASE' },
+                { value: 'preserve', label: 'Keep' },
+              ]}
+            />
+          </Field>
+        </div>
+
+        <Output className="mt-4" label="Slug" value={slug} rows={2} />
+
+        {empty && (
+          <Callout tone="error" className="mt-4">
+            Nothing is left after removing punctuation. Use letters or digits.
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
+  );
+}

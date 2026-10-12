@@ -1,348 +1,104 @@
-import { useEffect, useState, useRef, useCallback } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { getErrorMessage } from "../../utils/errors";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, Field, Input, Output, Panel, Segmented, TwoPane } from '../../ui';
+import { getErrorMessage } from '../../utils/errors';
 
-// Constants
-const ROMAN_NUMERAL_REGEX = /^[IVXLCDM]*$/i;
-const NUMERIC_REGEX = /^\d*$/;
-const MAX_ROMAN_VALUE = 3999;
-const MIN_ROMAN_VALUE = 1;
+type Mode = 'auto' | 'toRoman' | 'toNumber';
 
-// Type for valid Roman numeral characters
-type RomanNumeral = "I" | "V" | "X" | "L" | "C" | "D" | "M";
+const MIN = 1;
+const MAX = 3999;
+const ROMAN_PATTERN = /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+const VALUES: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+const TABLE: [number, string][] = [
+  [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'],
+  [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I'],
+];
 
-const romanToArabicMap: { [key in RomanNumeral]: number } = {
-  I: 1,
-  V: 5,
-  X: 10,
-  L: 50,
-  C: 100,
-  D: 500,
-  M: 1000,
-};
+function toRoman(input: string): string {
+  const n = Number(input);
+  if (!/^\d+$/.test(input) || n < MIN || n > MAX) throw new Error(`Enter a whole number between ${MIN} and ${MAX}.`);
+  let num = n;
+  let out = '';
+  for (const [value, numeral] of TABLE) {
+    while (num >= value) {
+      out += numeral;
+      num -= value;
+    }
+  }
+  return out;
+}
 
-const isValidRomanNumeral = (roman: string): boolean => {
-  if (!/^[IVXLCDM]+$/i.test(roman)) return false;
-  const validPattern =
-    /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/i;
-  return validPattern.test(roman.toUpperCase());
-};
+function toNumber(input: string): string {
+  const roman = input.toUpperCase();
+  if (!roman || !ROMAN_PATTERN.test(roman)) throw new Error('Not a valid Roman numeral. Use I, V, X, L, C, D and M.');
+  let total = 0;
+  let prev = 0;
+  for (let i = roman.length - 1; i >= 0; i--) {
+    const v = VALUES[roman[i]];
+    total += v >= prev ? v : -v;
+    prev = v;
+  }
+  return String(total);
+}
 
 export default function RomanNumeralConverter() {
-  const seo = seoDescriptions.romanNumeral;
+  const [input, setInput] = useState('');
+  const [mode, setMode] = useState<Mode>('auto');
 
-  // State management
-  const [state, setState] = useState({
-    romanInput: "",
-    arabicInput: "",
-    romanResult: "",
-    arabicResult: "",
-    errorRoman: "",
-    errorArabic: "",
-  });
-
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  // Conversion functions
-  const romanToArabic = useCallback((roman: string): number => {
-    if (!roman) return 0;
-
-    const upperRoman = roman.toUpperCase();
-    if (!isValidRomanNumeral(upperRoman)) {
-      throw new Error("Invalid Roman numeral format");
-    }
-
-    let result = 0;
-    let prevValue = 0;
-
-    for (let i = upperRoman.length - 1; i >= 0; i--) {
-      const char = upperRoman[i] as RomanNumeral;
-      const value = romanToArabicMap[char];
-      result += value >= prevValue ? value : -value;
-      prevValue = value;
-    }
-
-    return result;
-  }, []);
-
-  const arabicToRoman = useCallback((num: number): string => {
-    if (num < MIN_ROMAN_VALUE || num > MAX_ROMAN_VALUE) {
-      throw new Error(
-        `Number must be between ${MIN_ROMAN_VALUE} and ${MAX_ROMAN_VALUE}`
-      );
-    }
-
-    const romanValues = [
-      { value: 1000, numeral: "M" },
-      { value: 900, numeral: "CM" },
-      { value: 500, numeral: "D" },
-      { value: 400, numeral: "CD" },
-      { value: 100, numeral: "C" },
-      { value: 90, numeral: "XC" },
-      { value: 50, numeral: "L" },
-      { value: 40, numeral: "XL" },
-      { value: 10, numeral: "X" },
-      { value: 9, numeral: "IX" },
-      { value: 5, numeral: "V" },
-      { value: 4, numeral: "IV" },
-      { value: 1, numeral: "I" },
-    ];
-
-    let result = "";
-    for (const { value, numeral } of romanValues) {
-      while (num >= value) {
-        result += numeral;
-        num -= value;
-      }
-    }
-    return result;
-  }, []);
-
-  // Track tool usage
-  useEffect(() => {
-    updateToolUsage("roman_numeral");
-  }, []);
-
-  // Auto-convert Roman to Arabic
-  useEffect(() => {
-    if (state.romanInput.trim()) {
-      handleRomanToArabic();
-    } else {
-      setState((prev) => ({ ...prev, arabicResult: "", errorRoman: "" }));
-    }
-  }, [state.romanInput]);
-
-  // Auto-convert Arabic to Roman
-  useEffect(() => {
-    if (state.arabicInput.trim()) {
-      handleArabicToRoman();
-    } else {
-      setState((prev) => ({ ...prev, romanResult: "", errorArabic: "" }));
-    }
-  }, [state.arabicInput]);
-
-  const handleRomanToArabic = useCallback(() => {
-    if (!state.romanInput.trim()) {
-      setState((prev) => ({
-        ...prev,
-        errorRoman: "Roman numeral input cannot be empty",
-        arabicResult: "",
-      }));
-      return;
-    }
-
+  const result = useMemo(() => {
+    const raw = input.trim();
+    if (!raw) return null;
+    const dir: Exclude<Mode, 'auto'> = mode === 'auto' ? (/^\d+$/.test(raw) ? 'toRoman' : 'toNumber') : mode;
     try {
-      const result = romanToArabic(state.romanInput);
-      if (result < MIN_ROMAN_VALUE || result > MAX_ROMAN_VALUE) {
-        throw new Error(
-          `Result must be between ${MIN_ROMAN_VALUE} and ${MAX_ROMAN_VALUE}`
-        );
-      }
-      setState((prev) => ({
-        ...prev,
-        arabicResult: result.toString(),
-        errorRoman: "",
-      }));
-    } catch (err) {
-      setState((prev) => ({
-        ...prev,
-        errorRoman: getErrorMessage(err, "Invalid Roman numeral"),
-        arabicResult: "",
-      }));
+      return { out: dir === 'toRoman' ? toRoman(raw) : toNumber(raw), dir, error: '' };
+    } catch (e) {
+      return { out: '', dir, error: getErrorMessage(e, 'Could not convert.') };
     }
-  }, [state.romanInput, romanToArabic]);
+  }, [input, mode]);
 
-  const handleArabicToRoman = useCallback(() => {
-    if (!state.arabicInput.trim()) {
-      setState((prev) => ({
-        ...prev,
-        errorArabic: "Number input cannot be empty",
-        romanResult: "",
-      }));
-      return;
-    }
-
-    const num = Number(state.arabicInput);
-    if (
-      !Number.isInteger(num) ||
-      num < MIN_ROMAN_VALUE ||
-      num > MAX_ROMAN_VALUE
-    ) {
-      setState((prev) => ({
-        ...prev,
-        errorArabic: `Number must be an integer between ${MIN_ROMAN_VALUE} and ${MAX_ROMAN_VALUE}`,
-        romanResult: "",
-      }));
-      return;
-    }
-
-    try {
-      const result = arabicToRoman(num);
-      setState((prev) => ({ ...prev, romanResult: result, errorArabic: "" }));
-    } catch (err) {
-      setState((prev) => ({
-        ...prev,
-        errorArabic: getErrorMessage(err, "Failed to convert to Roman numeral"),
-        romanResult: "",
-      }));
-    }
-  }, [state.arabicInput, arabicToRoman]);
-
-  const handleClearRoman = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      romanInput: "",
-      arabicResult: "",
-      errorRoman: "",
-    }));
-  }, []);
-
-  const handleClearArabic = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      arabicInput: "",
-      romanResult: "",
-      errorArabic: "",
-    }));
-  }, []);
-
-  const handleRomanInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value.toUpperCase();
-      if (ROMAN_NUMERAL_REGEX.test(value) || value === "") {
-        setState((prev) => ({ ...prev, romanInput: value }));
-      }
-      inputRef.current?.focus();
-    },
-    []
-  );
-
-  const handleArabicInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      if (NUMERIC_REGEX.test(value) || value === "") {
-        setState((prev) => ({ ...prev, arabicInput: value }));
-      }
-      inputRef.current?.focus();
-    },
-    []
-  );
-
-  // Destructure state for cleaner template
-  const {
-    romanInput,
-    arabicInput,
-    romanResult,
-    arabicResult,
-    errorRoman,
-    errorArabic,
-  } = state;
+  const dir = result?.dir;
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        {/* Roman to Arabic Section */}
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Roman to Arabic</h3>
-            <ClearButton
-              onClick={handleClearRoman}
-              disabled={!romanInput && !arabicResult && !errorRoman}
+    <ToolPage id="roman_numeral">
+      <Panel
+        title="Convert"
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Direction"
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: 'auto', label: 'Auto' },
+                { value: 'toRoman', label: 'Number → Roman' },
+                { value: 'toNumber', label: 'Roman → Number' },
+              ]}
             />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col sm:flex-row gap-4 mb-4">
-            <div className="flex-1">
-              <label className="form-label" htmlFor="roman-input">
-                Roman Numeral:
-              </label>
-              <input
-                id="roman-input"
-                value={romanInput}
-                onChange={handleRomanInputChange}
-                className="input-field w-full  min-h-[44px]"
-                placeholder="Enter Roman numeral (I, V, X, L, C, D, M)"
-                aria-describedby={errorRoman ? "roman-error" : undefined}
-                aria-label="Roman numeral input"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="form-label">Arabic Number:</label>
-              <div className="relative">
-                <div className="input-field min-h-[44px]">
-                  {arabicResult || " "}
-                </div>
-                {arabicResult && (
-                  <div className="absolute right-2 top-2">
-                    <CopyButton text={arabicResult} />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <ErrorBox
-            message={errorRoman}
-            id={errorRoman ? "roman-error" : undefined}
-          />
-        </SectionCard>
-
-        {/* Arabic to Roman Section */}
-        <SectionCard className="mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Arabic to Roman</h3>
-            <ClearButton
-              onClick={handleClearArabic}
-              disabled={!arabicInput && !romanResult && !errorArabic}
+            <ClearButton onClick={() => setInput('')} disabled={!input} />
+          </>
+        }
+      >
+        <TwoPane>
+          <Field label="Input" htmlFor="roman-input" hint={dir ? (dir === 'toRoman' ? 'Converting a number to Roman.' : 'Converting Roman to a number.') : `A number from ${MIN} to ${MAX}, or a Roman numeral.`}>
+            <Input
+              id="roman-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="1984 or MCMLXXXIV"
+              autoFocus
+              maxLength={16}
+              aria-invalid={Boolean(result?.error) || undefined}
             />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col sm:flex-row gap-4 mb-4">
-            <div className="flex-1">
-              <label className="form-label" htmlFor="arabic-input">
-                Arabic Number (1-3999):
-              </label>
-              <input
-                id="arabic-input"
-                value={arabicInput}
-                onChange={handleArabicInputChange}
-                className="input-field w-full  min-h-[44px]"
-                placeholder="Enter number (1-3999)"
-                aria-describedby={errorArabic ? "arabic-error" : undefined}
-                aria-label="Arabic number input"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="form-label">Roman Numeral:</label>
-              <div className="relative">
-                <div className="input-field w-full mono-output bg-gray-100 p-2 min-h-[44px]">
-                  {romanResult || " "}
-                </div>
-                {romanResult && (
-                  <div className="absolute right-2 top-2">
-                    <CopyButton text={romanResult} />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <ErrorBox
-            message={errorArabic}
-            id={errorArabic ? "arabic-error" : undefined}
-          />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+          </Field>
+          <Output label={dir === 'toNumber' ? 'Number' : 'Roman numeral'} value={result?.out ?? ''} rows={1} />
+        </TwoPane>
+        {result?.error && (
+          <Callout tone="error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }

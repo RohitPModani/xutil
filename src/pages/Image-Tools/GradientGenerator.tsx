@@ -1,359 +1,140 @@
-import { useEffect, useState, useCallback } from "react";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import ErrorBox from "../../components/ErrorBox";
-import CopyButton from "../../components/CopyButton";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { Paintbrush, Trash2 } from "lucide-react";
-import ToolHeader from "../../components/ToolHeader";
+import { useState } from 'react';
+import { Plus, X } from 'lucide-react';
+import ToolPage from '../../components/ToolPage';
+import { Button, Callout, ClearButton, ColorInput, Field, IconButton, Input, Output, Panel, Segmented, Select, TwoPane } from '../../ui';
+import { isHex } from '../../utils/color';
 
-interface ColorStop {
+type Kind = 'linear' | 'radial';
+interface Stop {
   color: string;
-  position: number; // 0 to 100
+  position: number;
 }
 
-interface Gradient {
-  type: "linear" | "radial";
-  direction: string; // e.g., 'to right', 'center'
-  colorStops: ColorStop[];
-}
+const DIRECTIONS: Record<Kind, { value: string; label: string }[]> = {
+  linear: [
+    { value: 'to right', label: 'To right' },
+    { value: 'to left', label: 'To left' },
+    { value: 'to bottom', label: 'To bottom' },
+    { value: 'to top', label: 'To top' },
+    { value: 'to bottom right', label: 'To bottom right' },
+    { value: '45deg', label: '45°' },
+    { value: '135deg', label: '135°' },
+  ],
+  radial: [
+    { value: 'center', label: 'Centre' },
+    { value: 'top', label: 'Top' },
+    { value: 'bottom', label: 'Bottom' },
+    { value: 'left', label: 'Left' },
+    { value: 'right', label: 'Right' },
+  ],
+};
 
-function GradientGenerator() {
-  const seo = seoDescriptions.gradientGenerator;
+const DEFAULT_STOPS: Stop[] = [
+  { color: '#FF0000', position: 0 },
+  { color: '#0000FF', position: 100 },
+];
 
-  const [gradient, setGradient] = useState<Gradient>({
-    type: "linear",
-    direction: "to right",
-    colorStops: [
-      { color: "#FF0000", position: 0 },
-      { color: "#0000FF", position: 100 },
-    ],
-  });
-  const [error, setError] = useState<string | null>(null);
+export default function GradientGenerator() {
+  const [kind, setKind] = useState<Kind>('linear');
+  const [direction, setDirection] = useState('to right');
+  const [stops, setStops] = useState<Stop[]>(DEFAULT_STOPS);
 
-  useEffect(() => {
-    updateToolUsage("gradient_generator");
-  }, []);
-
-  const validateHex = (hex: string): boolean => {
-    return /^#?([0-9A-Fa-f]{6})$/.test(hex);
+  const switchKind = (k: Kind) => {
+    setKind(k);
+    setDirection(k === 'linear' ? 'to right' : 'center');
+  };
+  const update = (i: number, patch: Partial<Stop>) => setStops((s) => s.map((st, j) => (j === i ? { ...st, ...patch } : st)));
+  const add = () =>
+    setStops((s) => [...s, { color: '#FFFFFF', position: Math.min(100, s[s.length - 1].position + 10) }]);
+  const remove = (i: number) => setStops((s) => s.filter((_, j) => j !== i));
+  const reset = () => {
+    setKind('linear');
+    setDirection('to right');
+    setStops(DEFAULT_STOPS);
   };
 
-  const generateCss = useCallback(() => {
-    const { type, direction, colorStops } = gradient;
-    const sortedStops = [...colorStops].sort((a, b) => a.position - b.position);
-    const stopsString = sortedStops
-      .map((stop) => `${stop.color} ${stop.position}%`)
-      .join(", ");
-
-    if (type === "linear") {
-      return `linear-gradient(${direction}, ${stopsString})`;
-    } else {
-      return `radial-gradient(circle at ${direction}, ${stopsString})`;
-    }
-  }, [gradient]);
-
-  const handleTypeChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const type = e.target.value as "linear" | "radial";
-      const direction = type === "linear" ? "to right" : "center";
-      setGradient((prev) => ({ ...prev, type, direction }));
-      setError(null);
-    },
-    []
-  );
-
-  const handleDirectionChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setGradient((prev) => ({ ...prev, direction: e.target.value }));
-      setError(null);
-    },
-    []
-  );
-
-  const handleColorChange = useCallback((index: number, value: string) => {
-    let cleanValue = value.toUpperCase().replace(/[^0-9A-F#]/g, "");
-    if (cleanValue.length > 0 && cleanValue[0] !== "#") {
-      cleanValue = "#" + cleanValue;
-    }
-    if (cleanValue.length > 7) {
-      cleanValue = cleanValue.slice(0, 7);
-    }
-
-    setGradient((prev) => {
-      const newColorStops = [...prev.colorStops];
-      newColorStops[index] = { ...newColorStops[index], color: cleanValue };
-      return { ...prev, colorStops: newColorStops };
-    });
-
-    const cleanHex = cleanValue.replace("#", "");
-    if (cleanHex.length === 6 && !validateHex(cleanHex)) {
-      setError("Invalid HEX color code (use 6 digits, 0-9 or A-F)");
-    } else if (cleanHex.length > 0 && cleanHex.length < 6) {
-      setError("HEX code must be 6 digits");
-    } else {
-      setError(null);
-    }
-  }, []);
-
-  const handleColorPickerChange = useCallback(
-    (index: number, value: string) => {
-      setGradient((prev) => {
-        const newColorStops = [...prev.colorStops];
-        newColorStops[index] = {
-          ...newColorStops[index],
-          color: value.toUpperCase(),
-        };
-        return { ...prev, colorStops: newColorStops };
-      });
-      setError(null);
-    },
-    []
-  );
-
-  const handlePositionChange = useCallback((index: number, value: string) => {
-    const numValue = parseInt(value, 10);
-    if (value === "" || (numValue >= 0 && numValue <= 100)) {
-      setGradient((prev) => {
-        const newColorStops = [...prev.colorStops];
-        newColorStops[index] = {
-          ...newColorStops[index],
-          position: value === "" ? 0 : numValue,
-        };
-        return { ...prev, colorStops: newColorStops };
-      });
-      setError(null);
-    } else {
-      setError("Position must be between 0 and 100");
-    }
-  }, []);
-
-  const addColorStop = useCallback(() => {
-    if (gradient.colorStops.length >= 10) {
-      setError("Maximum 10 color stops allowed");
-      return;
-    }
-    const lastPosition =
-      gradient.colorStops[gradient.colorStops.length - 1].position;
-    const newPosition = Math.min(100, lastPosition + 10);
-    setGradient((prev) => ({
-      ...prev,
-      colorStops: [
-        ...prev.colorStops,
-        { color: "#FFFFFF", position: newPosition },
-      ],
-    }));
-    setError(null);
-  }, [gradient.colorStops]);
-
-  const removeColorStop = useCallback(
-    (index: number) => {
-      if (gradient.colorStops.length <= 2) {
-        setError("Gradient must have at least 2 color stops");
-        return;
-      }
-      setGradient((prev) => ({
-        ...prev,
-        colorStops: prev.colorStops.filter((_, i) => i !== index),
-      }));
-      setError(null);
-    },
-    [gradient.colorStops.length]
-  );
-
-  const handleClear = useCallback(() => {
-    setGradient({
-      type: "linear",
-      direction: "to right",
-      colorStops: [
-        { color: "#FF0000", position: 0 },
-        { color: "#0000FF", position: 100 },
-      ],
-    });
-    setError(null);
-  }, []);
-
-  const renderColorStopBar = () => {
-    return (
-      <div className="relative w-full h-6 bg-raised rounded-full">
-        {gradient.colorStops.map((stop, index) => (
-          <div
-            key={index}
-            className="absolute w-4 h-6 rounded border-2 border-white shadow-sm"
-            style={{
-              left: `${stop.position}%`,
-              transform: "translateX(-50%)",
-              backgroundColor: stop.color,
-              zIndex: 10,
-            }}
-            aria-label={`Color stop at ${stop.position}%`}
-          />
-        ))}
-      </div>
-    );
-  };
+  const bad = stops.findIndex((s) => !isHex(s.color));
+  const stopList = [...stops]
+    .sort((a, b) => a.position - b.position)
+    .map((s) => `${s.color} ${s.position}%`)
+    .join(', ');
+  const gradient = kind === 'linear' ? `linear-gradient(${direction}, ${stopList})` : `radial-gradient(circle at ${direction}, ${stopList})`;
+  const css = bad === -1 ? `background: ${gradient};` : '';
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-3xl mx-auto py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard className="mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Gradient Generator</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={
-                gradient.colorStops.length === 2 &&
-                gradient.colorStops[0].color === "#FF0000" &&
-                gradient.colorStops[1].color === "#0000FF"
-              }
-              aria-label="Reset gradient"
+    <ToolPage id="gradient_generator">
+      <Panel
+        title="Build"
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Gradient type"
+              value={kind}
+              onChange={switchKind}
+              options={[
+                { value: 'linear', label: 'Linear' },
+                { value: 'radial', label: 'Radial' },
+              ]}
             />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col space-y-4 p-3">
-            <div className="space-y-3">
-              <div>
-                <label className="form-label mb-1">Gradient Type</label>
-                <select
-                  value={gradient.type}
-                  onChange={handleTypeChange}
-                  className="input-field"
-                >
-                  <option value="linear">Linear</option>
-                  <option value="radial">Radial</option>
-                </select>
-              </div>
-              <div>
-                <label className="form-label mb-1">
-                  {gradient.type === "linear" ? "Direction" : "Position"}
-                </label>
-                <select
-                  value={gradient.direction}
-                  onChange={handleDirectionChange}
-                  className="input-field"
-                >
-                  {gradient.type === "linear" ? (
-                    <>
-                      <option value="to right">To Right</option>
-                      <option value="to left">To Left</option>
-                      <option value="to bottom">To Bottom</option>
-                      <option value="to top">To Top</option>
-                      <option value="45deg">45°</option>
-                      <option value="135deg">135°</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="center">Center</option>
-                      <option value="top">Top</option>
-                      <option value="bottom">Bottom</option>
-                      <option value="left">Left</option>
-                      <option value="right">Right</option>
-                    </>
-                  )}
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="label">
-                  Color Stops
-                </label>
-                <button
-                  onClick={addColorStop}
-                  className="button-quiet"
-                  disabled={gradient.colorStops.length >= 10}
-                >
-                  <Paintbrush className="w-4 h-4 mr-1" />
-                  Add
-                </button>
-              </div>
-              {renderColorStopBar()}
-              {gradient.colorStops.map((stop, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col justify-between md:flex-row md:space-x-4 md:space-y-0 space-y-2 bg-raised p-3 rounded-lg shadow-sm"
-                >
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="color"
-                      value={stop.color}
-                      onChange={(e) =>
-                        handleColorPickerChange(index, e.target.value)
-                      }
-                      className="w-10 h-10 border-2 border-line rounded cursor-pointer z-10"
-                      style={{ display: "block", appearance: "auto" }}
-                      aria-label={`Color picker for stop ${index + 1}`}
-                    />
-                    <input
-                      type="text"
-                      value={stop.color}
-                      onChange={(e) => handleColorChange(index, e.target.value)}
-                      placeholder="#FF0000"
-                      className="input-field flex-1"
-                      maxLength={7}
-                      aria-label={`HEX color for stop ${index + 1}`}
-                    />
-                  </div>
-                  <div className="flex justify-between items-center space-x-2">
-                    <input
+            <ClearButton label="Reset" onClick={reset} />
+          </>
+        }
+      >
+        <TwoPane>
+          <div className="space-y-3">
+            <Field label={kind === 'linear' ? 'Direction' : 'Centre'} htmlFor="gg-direction">
+              <Select id="gg-direction" value={direction} onChange={(e) => setDirection(e.target.value)} autoFocus>
+                {DIRECTIONS[kind].map((d) => (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field
+              label="Colour stops"
+              hint="Two to ten stops. Position is a percentage along the gradient."
+              actions={
+                <Button size="sm" onClick={add} disabled={stops.length >= 10} icon={<Plus className="h-3.5 w-3.5" aria-hidden="true" />}>
+                  Add stop
+                </Button>
+              }
+            >
+              <ul className="space-y-2">
+                {stops.map((s, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <ColorInput label={`Stop ${i + 1}`} value={s.color} onChange={(v) => update(i, { color: v })} className="flex-1" />
+                    <Input
+                      aria-label={`Stop ${i + 1} position (%)`}
+                      className="w-20"
                       type="number"
-                      value={stop.position}
-                      onChange={(e) =>
-                        handlePositionChange(index, e.target.value)
-                      }
-                      placeholder="0"
-                      min="0"
-                      max="100"
-                      className="input-field flex-1"
-                      aria-label={`Position for stop ${index + 1}`}
+                      min={0}
+                      max={100}
+                      inputMode="numeric"
+                      value={s.position}
+                      onChange={(e) => update(i, { position: Math.min(100, Math.max(0, Number(e.target.value) || 0)) })}
                     />
-                    <button
-                      onClick={() => removeColorStop(index)}
-                      className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                      disabled={gradient.colorStops.length <= 2}
-                      aria-label={`Remove color stop ${index + 1}`}
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col items-center">
-              <div
-                className="w-full h-24 border-2 border-line rounded-lg shadow-inner"
-                style={{ background: generateCss() }}
-                aria-label="Gradient preview"
-              />
-            </div>
-
-            <div className="result-box">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="section-subtitle">
-                  Gradient CSS
-                </h4>
-                <CopyButton text={`background: ${generateCss()};`} />
-              </div>
-              <div className="inner-result scrollbar overflow-x-auto">
-                <pre className="font-mono">background: {generateCss()};</pre>
-              </div>
-            </div>
-
-            <ErrorBox message={error} aria-live="polite" />
+                    <IconButton label={`Remove stop ${i + 1}`} size="sm" onClick={() => remove(i)} disabled={stops.length <= 2}>
+                      <X className="h-4 w-4" aria-hidden="true" />
+                    </IconButton>
+                  </li>
+                ))}
+              </ul>
+            </Field>
           </div>
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+
+          <div className="space-y-3">
+            <div className="h-56 w-full rounded-md border border-line bg-surface" style={css ? { background: gradient } : undefined} role="img" aria-label="Gradient preview" />
+            <Output label="CSS" value={css} rows={3} placeholder="Fix the colour stops to see the rule" fileName="gradient.css" mime="text/css" />
+          </div>
+        </TwoPane>
+        {bad !== -1 && (
+          <Callout tone="error" className="mt-4">
+            Stop {bad + 1} needs a six-digit hex colour like #1A2B3C.
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default GradientGenerator;

@@ -1,225 +1,121 @@
-import { useEffect, useState } from "react";
-import SectionCard from "../../components/SectionCard";
-import ErrorBox from "../../components/ErrorBox";
-import ClearButton from "../../components/ClearButton";
-import CopyButton from "../../components/CopyButton";
-import { PageSEO } from "../../components/PageSEO";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import { updateToolUsage } from "../../utils/toolUsage";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, EmptyState, Field, KeyValueList, Output, Panel, Segmented, Select, TextArea, TwoPane } from '../../ui';
+import { getErrorMessage } from '../../utils/errors';
 
-const BASE_OPTIONS = [
-  { value: 2, label: "2 (Binary)" },
-  { value: 8, label: "8 (Octal)" },
-  { value: 10, label: "10 (Decimal)" },
-  { value: 16, label: "16 (Hexadecimal)" },
+type Mode = 'encode' | 'decode';
+
+const BASES = [
+  { value: 2, label: 'Binary' },
+  { value: 8, label: 'Octal' },
+  { value: 10, label: 'Decimal' },
+  { value: 16, label: 'Hexadecimal' },
 ];
 
-function TextBaseConverter() {
-  const seo = seoDescriptions.textBase;
-  const [inputText, setInputText] = useState("");
-  const [baseInput, setBaseInput] = useState("");
-  const [targetBase, setTargetBase] = useState("2");
-  const [sourceBase, setSourceBase] = useState("2");
-  const [convertedToBase, setConvertedToBase] = useState<string>("");
-  const [convertedToText, setConvertedToText] = useState<string>("");
-  const [textError, setTextError] = useState<string | null>(null);
-  const [baseError, setBaseError] = useState<string | null>(null);
+const DIGITS = '0123456789abcdef';
 
-  useEffect(() => {
-    updateToolUsage("text_base");
-  }, []);
+/** Each character's UTF-16 code unit in the given base, space separated. */
+const encode = (text: string, base: number) =>
+  Array.from(text, (ch) => ch.charCodeAt(0).toString(base).toUpperCase()).join(' ');
 
-  const isValidInput = (text: string) => /^[0-9a-zA-Z\s]*$/.test(text);
-
-  const textToBase = (text: string, base: number) => {
-    if (!text.trim()) {
-      setTextError(null);
-      return "";
-    }
-
-    if (!isValidInput(text)) {
-      setTextError("Only alphanumeric characters are allowed.");
-      return "";
-    }
-
-    setTextError(null);
-    try {
-      return text
-        .split("")
-        .map((char) => {
-          const code = char.charCodeAt(0);
-          return code.toString(base);
-        })
-        .join(" ");
-    } catch {
-      setTextError("Conversion failed");
-      return "";
-    }
-  };
-
-  const baseToText = (input: string, base: number) => {
-    if (!input.trim()) {
-      setBaseError(null);
-      return "";
-    }
-
-    if (!isValidInput(input)) {
-      setBaseError("Only alphanumeric characters and spaces are allowed.");
-      return "";
-    }
-
-    setBaseError(null);
-    try {
-      const numbers = input.split(/\s+/).filter(Boolean);
-      return numbers
-        .map((num) => {
-          const code = parseInt(num, base);
-          if (isNaN(code)) throw new Error("Invalid number for base");
-          return String.fromCharCode(code);
-        })
-        .join("");
-    } catch {
-      setBaseError("Invalid input for the selected base");
-      return "";
-    }
-  };
-
-  useEffect(() => {
-    const result = textToBase(inputText, parseInt(targetBase, 10));
-    setConvertedToBase(result);
-  }, [inputText, targetBase]);
-
-  useEffect(() => {
-    const result = baseToText(baseInput, parseInt(sourceBase, 10));
-    setConvertedToText(result);
-  }, [baseInput, sourceBase]);
-
-  const handleTextClear = () => {
-    setInputText("");
-    setConvertedToBase("");
-    setTextError(null);
-  };
-
-  const handleBaseClear = () => {
-    setBaseInput("");
-    setConvertedToText("");
-    setBaseError(null);
-  };
-
-  return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard className="mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Text ➔ Base Conversion</h3>
-            <ClearButton onClick={handleTextClear} disabled={!inputText} />
-          </div>
-          <hr className="line-break" />
-          <div className="flex-1 space-y-4">
-            <label className="form-label">Input Text:</label>
-            <input
-              type="text"
-              maxLength={100}
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              className="input-field"
-              placeholder="Enter text (max 100 characters)"
-            />
-          </div>
-          <div className="flex gap-2 mt-4 items-center">
-            <label className="form-label mr-2">
-              Target Base:
-            </label>
-            <select
-              value={targetBase}
-              onChange={(e) => setTargetBase(e.target.value)}
-              className="input-field flex-1"
-            >
-              {BASE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="result-box mt-4">
-            <div className="flex justify-between items-center mb-2">
-              <label className="form-label">Text to Base Result</label>
-              <CopyButton text={convertedToBase} />
-            </div>
-            {convertedToBase && (
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div className="w-full mono-output break-all">
-                    {convertedToBase}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          <ErrorBox message={textError} />
-        </SectionCard>
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Base ➔ Text Conversion</h3>
-            <ClearButton onClick={handleBaseClear} disabled={!baseInput} />
-          </div>
-          <hr className="line-break" />
-          <div className="flex-1 space-y-4">
-            <label className="form-label">Base Input:</label>
-            <AutoTextarea
-              value={baseInput}
-              onChange={(e) => setBaseInput(e.target.value)}
-              className="input-field"
-              placeholder="Enter text (max 100 characters)"
-            />
-          </div>
-          <div className="flex gap-2 mt-4 items-center">
-            <label className="form-label mr-2">
-              Source Base:
-            </label>
-            <select
-              value={sourceBase}
-              onChange={(e) => setSourceBase(e.target.value)}
-              className="input-field flex-1"
-            >
-              {BASE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="result-box mt-4">
-            <div className="flex justify-between items-center mb-2">
-              <label className="form-label">Base to Text Result</label>
-              <CopyButton text={convertedToText} />
-            </div>
-            {convertedToText && (
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div className="w-full mono-output break-all">
-                    {convertedToText}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          <ErrorBox message={baseError} />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
-  );
+function decode(input: string, base: number): string {
+  const valid = new RegExp(`^[${DIGITS.slice(0, base)}]+$`, 'i');
+  return input
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((token) => {
+      if (!valid.test(token)) throw new Error(`"${token}" is not a valid base-${base} number.`);
+      return String.fromCharCode(parseInt(token, base));
+    })
+    .join('');
 }
 
-export default TextBaseConverter;
+export default function TextBaseConverter() {
+  const [mode, setMode] = useState<Mode>('encode');
+  const [input, setInput] = useState('');
+  const [base, setBase] = useState('2');
+
+  const result = useMemo(() => {
+    if (!input.trim()) return null;
+    if (mode === 'encode') {
+      return { rows: BASES.map((b) => ({ label: b.label, value: encode(input, b.value) })), text: '', error: '' };
+    }
+    try {
+      return { rows: [], text: decode(input, Number(base)), error: '' };
+    } catch (e) {
+      return { rows: [], text: '', error: getErrorMessage(e, 'Could not decode the input.') };
+    }
+  }, [input, mode, base]);
+
+  const rows = result?.rows ?? [];
+
+  return (
+    <ToolPage id="text_base">
+      <Panel
+        title="Convert"
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Direction"
+              value={mode}
+              onChange={(m) => {
+                setMode(m);
+                setInput('');
+              }}
+              options={[
+                { value: 'encode', label: 'Text → bytes' },
+                { value: 'decode', label: 'Bytes → text' },
+              ]}
+            />
+            <ClearButton onClick={() => setInput('')} disabled={!input} />
+          </>
+        }
+      >
+        <TwoPane>
+          <div className="space-y-4">
+            {mode === 'decode' && (
+              <Field label="Input base" htmlFor="tb-base" className="max-w-xs">
+                <Select id="tb-base" value={base} onChange={(e) => setBase(e.target.value)}>
+                  {BASES.map((b) => (
+                    <option key={b.value} value={b.value}>
+                      {b.value} ({b.label})
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            )}
+            <Field
+              label={mode === 'encode' ? 'Text' : 'Numbers'}
+              htmlFor="tb-input"
+              hint={mode === 'encode' ? 'Each character becomes its character code.' : 'One number per character, separated by spaces.'}
+            >
+              <TextArea
+                id="tb-input"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={mode === 'encode' ? 'Hello' : '1001000 1100101 1101100 1101100 1101111'}
+                rows={6}
+                mono={mode === 'decode'}
+                autoFocus
+                aria-invalid={Boolean(result?.error) || undefined}
+              />
+            </Field>
+          </div>
+          {mode === 'encode' ? (
+            <Output label="Encoded" copyText={rows.map((r) => `${r.label}: ${r.value}`).join('\n')}>
+              {rows.length > 0 ? <KeyValueList items={rows} /> : <EmptyState>Enter some text</EmptyState>}
+            </Output>
+          ) : (
+            <Output label="Text" value={result?.text ?? ''} rows={6} mono={false} />
+          )}
+        </TwoPane>
+        {result?.error && (
+          <Callout tone="error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
+  );
+}

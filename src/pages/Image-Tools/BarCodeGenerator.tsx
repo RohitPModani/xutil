@@ -1,414 +1,132 @@
-import { useEffect, useState, useCallback } from "react";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import ErrorBox from "../../components/ErrorBox";
-import CopyButton from "../../components/CopyButton";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { Download } from "lucide-react";
-import JsBarcode from "jsbarcode";
-import LoadingButton from "../../components/LoadingButton";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import JsBarcode from 'jsbarcode';
+import { Download } from 'lucide-react';
+import ToolPage from '../../components/ToolPage';
+import { Button, Callout, Checkbox, ClearButton, ColorInput, EmptyState, Field, Input, Panel, PreviewBox, Select, Toolbar, TwoPane } from '../../ui';
+import { getErrorMessage } from '../../utils/errors';
+import { downloadBlob } from '../../utils/download';
+import { isHex } from '../../utils/color';
 
-type BarcodeOptions = {
-  text: string;
-  format: string;
-  width?: number;
-  height?: number;
-  displayValue?: boolean;
-  fontOptions?: string;
-  font?: string;
-  textAlign?: string;
-  textPosition?: string;
-  textMargin?: number;
-  fontSize?: number;
-  background?: string;
-  lineColor?: string;
-  margin?: number;
-  marginTop?: number;
-  marginBottom?: number;
-  marginLeft?: number;
-  marginRight?: number;
-};
-
-const DEFAULT_OPTIONS: BarcodeOptions = {
-  text: "",
-  format: "CODE128",
-  width: 2,
-  height: 100,
-  displayValue: true,
-  fontOptions: "",
-  font: "monospace",
-  textAlign: "center",
-  textPosition: "bottom",
-  textMargin: 2,
-  fontSize: 20,
-  background: "#ffffff",
-  lineColor: "#000000",
-  margin: 10,
-};
-
-const BARCODE_FORMATS = [
-  { value: "CODE128", label: "CODE128" },
-  { value: "CODE128A", label: "CODE128 A" },
-  { value: "CODE128B", label: "CODE128 B" },
-  { value: "CODE128C", label: "CODE128 C" },
-  { value: "EAN13", label: "EAN-13" },
-  { value: "EAN8", label: "EAN-8" },
-  { value: "UPC", label: "UPC" },
-  { value: "CODE39", label: "CODE39" },
-  { value: "ITF14", label: "ITF-14" },
-  { value: "MSI", label: "MSI" },
-  { value: "pharmacode", label: "Pharmacode" },
-  { value: "codabar", label: "Codabar" },
+const FORMATS = [
+  { value: 'CODE128', label: 'Code 128', hint: 'Any ASCII text' },
+  { value: 'CODE128A', label: 'Code 128 A', hint: 'Uppercase letters, digits and control characters' },
+  { value: 'CODE128B', label: 'Code 128 B', hint: 'Any printable ASCII text' },
+  { value: 'CODE128C', label: 'Code 128 C', hint: 'An even number of digits' },
+  { value: 'EAN13', label: 'EAN-13', hint: '12 digits; the check digit is added for you' },
+  { value: 'EAN8', label: 'EAN-8', hint: '7 digits; the check digit is added for you' },
+  { value: 'UPC', label: 'UPC-A', hint: '11 digits; the check digit is added for you' },
+  { value: 'CODE39', label: 'Code 39', hint: 'Uppercase letters, digits and - . $ / + % space' },
+  { value: 'ITF14', label: 'ITF-14', hint: '13 digits; the check digit is added for you' },
+  { value: 'MSI', label: 'MSI', hint: 'Digits only' },
+  { value: 'pharmacode', label: 'Pharmacode', hint: 'A number from 3 to 131070' },
+  { value: 'codabar', label: 'Codabar', hint: 'Digits and - $ : / . +, optionally wrapped in A to D' },
 ];
 
-function BarcodeGenerator() {
-  const seo = seoDescriptions.barcodeGenerator;
+const DEFAULTS = { text: '', format: 'CODE128', width: '2', height: '100', fontSize: '20', margin: '10', lineColor: '#000000', background: '#ffffff', displayValue: true };
 
-  const [options, setOptions] = useState<BarcodeOptions>(DEFAULT_OPTIONS);
-  const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+export default function BarCodeGenerator() {
+  const [o, setO] = useState(DEFAULTS);
+  const set = <K extends keyof typeof DEFAULTS>(k: K, v: (typeof DEFAULTS)[K]) => setO((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    updateToolUsage("barcode_generator");
-  }, []);
+  const jsOptions = useMemo(
+    () => ({
+      format: o.format,
+      width: Number(o.width) || 2,
+      height: Number(o.height) || 100,
+      fontSize: Number(o.fontSize) || 20,
+      margin: Number(o.margin) || 0,
+      lineColor: isHex(o.lineColor) ? o.lineColor : '#000000',
+      background: isHex(o.background) ? o.background : '#ffffff',
+      displayValue: o.displayValue,
+      font: 'monospace',
+    }),
+    [o]
+  );
 
-  const generateBarcode = useCallback(async () => {
+  // Live SVG. JsBarcode throws on input that is not valid for the format.
+  const result = useMemo(() => {
+    if (!o.text) return { svg: '', error: '' };
     try {
-      setIsGenerating(true);
-      setError(null);
-
-      if (!options.text) {
-        throw new Error("Please enter text to generate barcode");
-      }
-
-      // Create a canvas element
-      const canvas = document.createElement("canvas");
-
-      // Generate barcode on the canvas
-      JsBarcode(canvas, options.text, {
-        format: options.format,
-        width: options.width,
-        height: options.height,
-        displayValue: options.displayValue,
-        fontOptions: options.fontOptions,
-        font: options.font,
-        textAlign: options.textAlign,
-        textPosition: options.textPosition,
-        textMargin: options.textMargin,
-        fontSize: options.fontSize,
-        background: options.background,
-        lineColor: options.lineColor,
-        margin: options.margin,
-        marginTop: options.marginTop,
-        marginBottom: options.marginBottom,
-        marginLeft: options.marginLeft,
-        marginRight: options.marginRight,
-      });
-
-      // Convert canvas to data URL
-      const dataUrl = canvas.toDataURL("image/png");
-      setBarcodeDataUrl(dataUrl);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to generate barcode"
-      );
-      console.error("Barcode generation error:", err);
-    } finally {
-      setIsGenerating(false);
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      JsBarcode(el, o.text, jsOptions);
+      return { svg: el.outerHTML, error: '' };
+    } catch (e) {
+      return { svg: '', error: getErrorMessage(e, 'Could not render this barcode.') };
     }
-  }, [options]);
+  }, [o.text, jsOptions]);
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { name, value, type } = e.target;
-      const checked =
-        type === "checkbox"
-          ? (e.target as HTMLInputElement).checked
-          : undefined;
+  const downloadPng = () => {
+    const canvas = document.createElement('canvas');
+    JsBarcode(canvas, o.text, jsOptions);
+    canvas.toBlob((b) => b && downloadBlob(b, `barcode-${o.format}.png`), 'image/png');
+  };
 
-      setOptions((prev) => ({
-        ...prev,
-        [name]: type === "checkbox" ? checked : value,
-      }));
-    },
-    []
+  const format = FORMATS.find((f) => f.value === o.format);
+
+  const colour = (k: 'lineColor' | 'background', label: string) => (
+    <Field label={label} htmlFor={`bc-${k}`}>
+      <ColorInput id={`bc-${k}`} label={label} value={o[k]} onChange={(v) => set(k, v)} />
+    </Field>
   );
-
-  const handleNumberInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setOptions((prev) => ({
-        ...prev,
-        [name]: value === "" ? undefined : Number(value),
-      }));
-    },
-    []
+  const num = (k: 'width' | 'height' | 'fontSize' | 'margin', label: string, min: number, max: number, step = 1) => (
+    <Field label={label} htmlFor={`bc-${k}`}>
+      <Input id={`bc-${k}`} type="number" min={min} max={max} step={step} inputMode="decimal" value={o[k]} onChange={(e) => set(k, e.target.value)} />
+    </Field>
   );
-
-  const handleSelectChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      setOptions((prev) => ({ ...prev, [name]: value }));
-    },
-    []
-  );
-
-  const handleColorChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setOptions((prev) => ({ ...prev, [name]: value }));
-    },
-    []
-  );
-
-  const handleClear = useCallback(() => {
-    setOptions(DEFAULT_OPTIONS);
-    setBarcodeDataUrl("");
-    setError(null);
-  }, []);
-
-  const downloadBarcode = useCallback(() => {
-    if (!barcodeDataUrl) return;
-
-    const link = document.createElement("a");
-    link.href = barcodeDataUrl;
-    link.download = `barcode-${options.format}-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, [barcodeDataUrl, options.format]);
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard className="mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Barcode Generator</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={!options.text && !barcodeDataUrl}
-              aria-label="Clear inputs"
-            />
-          </div>
-          <hr className="line-break" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="text" className="form-label">
-                  Barcode Content:
-                </label>
-                <input
-                  id="text"
-                  name="text"
-                  type="text"
-                  className="input-field"
-                  value={options.text}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="format" className="form-label">
-                  Barcode Format:
-                </label>
-                <select
-                  id="format"
-                  name="format"
-                  className="input-field"
-                  value={options.format}
-                  onChange={handleSelectChange}
-                >
-                  {BARCODE_FORMATS.map((format) => (
-                    <option key={format.value} value={format.value}>
-                      {format.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="width" className="form-label">
-                    Line Width:
-                  </label>
-                  <input
-                    id="width"
-                    name="width"
-                    type="number"
-                    min="1"
-                    max="10"
-                    step="0.1"
-                    className="input-field"
-                    value={options.width}
-                    onChange={handleNumberInputChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="height" className="form-label">
-                    Line Height:
-                  </label>
-                  <input
-                    id="height"
-                    name="height"
-                    type="number"
-                    min="10"
-                    max="500"
-                    className="input-field"
-                    value={options.height}
-                    onChange={handleNumberInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="fontSize" className="form-label">
-                    Text Size:
-                  </label>
-                  <input
-                    id="fontSize"
-                    name="fontSize"
-                    type="number"
-                    min="8"
-                    max="72"
-                    className="input-field"
-                    value={options.fontSize}
-                    onChange={handleNumberInputChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="margin" className="form-label">
-                    Margin:
-                  </label>
-                  <input
-                    id="margin"
-                    name="margin"
-                    type="number"
-                    min="0"
-                    max="50"
-                    className="input-field"
-                    value={options.margin}
-                    onChange={handleNumberInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="lineColor" className="form-label">
-                    Line Color:
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="lineColor"
-                      name="lineColor"
-                      type="color"
-                      className="h-10 w-10 cursor-pointer"
-                      value={options.lineColor}
-                      onChange={handleColorChange}
-                    />
-                    <input
-                      type="text"
-                      className="input-field flex-1"
-                      value={options.lineColor}
-                      onChange={handleInputChange}
-                      name="lineColor"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="background" className="form-label">
-                    Background:
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="background"
-                      name="background"
-                      type="color"
-                      className="h-10 w-10 cursor-pointer"
-                      value={options.background}
-                      onChange={handleColorChange}
-                    />
-                    <input
-                      type="text"
-                      className="input-field flex-1"
-                      value={options.background}
-                      onChange={handleInputChange}
-                      name="background"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  id="displayValue"
-                  name="displayValue"
-                  type="checkbox"
-                  className="checkbox-primary"
-                  checked={options.displayValue || false}
-                  onChange={handleInputChange}
-                />
-                <label
-                  htmlFor="displayValue"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Display Text
-                </label>
-              </div>
-
-              <div className="flex justify-center item-center">
-                <LoadingButton
-                  onClick={generateBarcode}
-                  disabled={isGenerating}
-                  isLoading={isGenerating}
-                >
-                  Generate Barcode
-                </LoadingButton>
-              </div>
+    <ToolPage id="barcode_generator">
+      <Panel title="Generate" actions={<ClearButton onClick={() => setO(DEFAULTS)} disabled={o === DEFAULTS} />}>
+        <TwoPane>
+          <div className="space-y-3">
+            <Field label="Format" htmlFor="bc-format">
+              <Select id="bc-format" value={o.format} onChange={(e) => set('format', e.target.value)}>
+                {FORMATS.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Value" htmlFor="bc-text" hint={format?.hint}>
+              <Input id="bc-text" value={o.text} onChange={(e) => set('text', e.target.value)} placeholder="Example 1234" autoFocus aria-invalid={Boolean(result.error) || undefined} />
+            </Field>
+            <div className="grid grid-cols-2 gap-3 border-t border-line pt-3">
+              {num('width', 'Bar width', 1, 10, 0.5)}
+              {num('height', 'Height', 10, 500)}
+              {num('fontSize', 'Text size', 8, 72)}
+              {num('margin', 'Margin', 0, 50)}
+              {colour('lineColor', 'Bars')}
+              {colour('background', 'Background')}
             </div>
+            <Checkbox label="Show the value under the bars" checked={o.displayValue} onChange={(e) => set('displayValue', e.target.checked)} />
+          </div>
 
-            <div className="flex flex-col items-center justify-center">
-              {barcodeDataUrl ? (
-                <>
-                  <img
-                    src={barcodeDataUrl}
-                    alt="Generated Barcode"
-                    className="mb-4 border rounded p-2 bg-raised max-w-full"
-                  />
-                  <div className="flex justify-center item center gap-4">
-                    <CopyButton text={barcodeDataUrl} />
-                    <button onClick={downloadBarcode} className="btn-secondary">
-                      <Download className="sm:w-6 sm:h-6 w-5 h-5 text-faint hover:text-ink transition-colors duration-100" />
-                    </button>
-                  </div>
-                </>
+          <div>
+            <PreviewBox height="min-h-48">
+              {result.svg ? (
+                <img src={`data:image/svg+xml;utf8,${encodeURIComponent(result.svg)}`} alt={`${format?.label ?? o.format} barcode for ${o.text}`} className="h-auto max-w-full" />
               ) : (
-                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-faint">
-                  Barcode will appear here
-                </div>
+                <EmptyState>The barcode appears here as you type</EmptyState>
               )}
-            </div>
+            </PreviewBox>
+            <Toolbar className="mt-3">
+              <Button variant="primary" disabled={!result.svg} icon={<Download className="h-4 w-4" aria-hidden="true" />} onClick={() => downloadBlob(result.svg, `barcode-${o.format}.svg`, 'image/svg+xml')}>
+                Download SVG
+              </Button>
+              <Button disabled={!result.svg} icon={<Download className="h-4 w-4" aria-hidden="true" />} onClick={downloadPng}>
+                Download PNG
+              </Button>
+            </Toolbar>
           </div>
+        </TwoPane>
 
-          <ErrorBox message={error} aria-live="polite" />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+        {result.error && (
+          <Callout tone="error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default BarcodeGenerator;

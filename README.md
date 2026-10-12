@@ -29,10 +29,17 @@ Whether you're debugging JSON at 2AM or whipping up a UUID between meetings, XUt
 
 ## 🧰 Tech Stack
 
-- **Frontend:** React + TypeScript  
-- **Styling:** Tailwind CSS  
-- **Hosting:** Cloudflare pages
-- **Deployment tool:** Railway
+- **Frontend:** React + TypeScript + Vite  
+- **Styling:** Tailwind CSS, tokens in `src/index.css`  
+- **Hosting:** Vercel (analytics were added for it; no host config lives in the repo)
+
+## 🗂️ How the frontend is organised
+
+- `src/data/tools.ts` — the registry. Every tool is one entry (id, name, category, signature, blurb, SEO key, lazy import). The sidebar, index, command palette, router, breadcrumb and sitemap all read from it, so adding a tool is one entry plus one page file.
+- `src/ui/` — the primitives every page is built from: `Panel`, `TwoPane`, `Field`, `Input`, `TextArea`, `Select`, `Segmented`, `Output` (read-only result with Copy/Download built in), `KeyValueList`, `Callout`, `Stat`, `FileDrop`, `Dialog`, `Button`.
+- `src/components/` — the shell: `Layout` (sidebar + topbar + content), `Sidebar`, `Topbar`, `CommandPalette` (⌘K / Ctrl K from anywhere), `ToolPage` (the frame every tool renders inside: title, signature, related tools, explainer).
+- `src/pages/<category>/` — one file per tool. Pages render `<ToolPage id="…">` and compose primitives; synchronous tools compute as you type, so there are no Convert buttons.
+- `.tastemaker/` — the design lock (palette, type, spacing, motion) and decision log for the current look.
 
 ---
 

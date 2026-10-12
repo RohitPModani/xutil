@@ -1,126 +1,60 @@
-import { useEffect, useState, useRef } from "react";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import CopyButton from "../../components/CopyButton";
-import DownloadButton from "../../components/DownloadButton";
-import ErrorBox from "../../components/ErrorBox";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Checkbox, ClearButton, Field, Output, Panel, Stat, TextArea, Toolbar, TwoPane } from '../../ui';
 
-function DuplicateLineRemover() {
-  const seo = seoDescriptions.duplicateLineRemover;
-  const [textInput, setTextInput] = useState<string>("");
-  const [resultOutput, setResultOutput] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+export default function DuplicateLineRemover() {
+  const [input, setInput] = useState('');
+  const [ignoreCase, setIgnoreCase] = useState(false);
+  const [trim, setTrim] = useState(true);
+  const [keepBlank, setKeepBlank] = useState(false);
 
-  useEffect(() => {
-    updateToolUsage("duplicate_line_remover");
-  }, []);
-
-  // Auto-resize textarea
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
+  const result = useMemo(() => {
+    if (!input) return null;
+    const lines = input.split('\n');
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const line of lines) {
+      if (!keepBlank && line.trim() === '') continue;
+      let key = trim ? line.trim() : line;
+      if (ignoreCase) key = key.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(line);
     }
-  }, [textInput]);
-
-  // Real-time duplicate line removal
-  useEffect(() => {
-    if (textInput) {
-      try {
-        const lines = textInput
-          .split("\n")
-          .filter((line) => line.trim() !== "");
-        const uniqueLines = [...new Set(lines)];
-        setResultOutput(uniqueLines.join("\n"));
-        setError(null);
-      } catch {
-        setError("Error processing text. Please check your input.");
-        setResultOutput("");
-      }
-    } else {
-      setResultOutput("");
-      setError(null);
-    }
-  }, [textInput]);
-
-  const handleClear = () => {
-    setTextInput("");
-    setResultOutput("");
-    setError(null);
-  };
-
-  const getResultsText = () => resultOutput;
+    return { out: out.join('\n'), before: lines.length, after: out.length };
+  }, [input, ignoreCase, trim, keepBlank]);
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="section-title">Duplicate Line Remover</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={!textInput && !resultOutput && !error}
+    <ToolPage id="duplicate_line_remover">
+      <Panel title="Remove duplicates" actions={<ClearButton onClick={() => setInput('')} disabled={!input} />}>
+        <TwoPane>
+          <Field label="Lines" htmlFor="dedupe-input">
+            <TextArea
+              id="dedupe-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={'apple\nbanana\napple\ncherry'}
+              rows={12}
+              autoFocus
             />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1 space-y-4">
-              <label htmlFor="textInput" className="form-label">
-                Text Input
-              </label>
-              <AutoTextarea
-                id="textInput"
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                placeholder="e.g. Line 1\nLine 2\nLine 1\nLine 3"
-                className="input-field w-full h-64"
-              />
-            </div>
+          </Field>
+          <Output label="Unique lines" value={result?.out ?? ''} rows={12} fileName="unique-lines.txt" />
+        </TwoPane>
 
-            <div className="flex-1 space-y-4">
-              <div className="flex justify-between items-center">
-                <label className="form-label">Unique Lines</label>
-                <div className="flex items-center gap-2">
-                  <CopyButton text={getResultsText()} />
-                  <DownloadButton
-                    content={resultOutput}
-                    fileName="unique_lines.txt"
-                    fileType="text"
-                    disabled={!resultOutput}
-                  />
-                </div>
-              </div>
-              <AutoTextarea
-                id="textOutput"
-                value={resultOutput}
-                readOnly
-                placeholder="e.g. Line 1\nLine 2\nLine 3"
-                className="input-field w-full h-64"
-              />
-            </div>
-          </div>
+        <Toolbar className="mt-4 gap-x-5">
+          <Checkbox label="Ignore case" checked={ignoreCase} onChange={(e) => setIgnoreCase(e.target.checked)} />
+          <Checkbox label="Ignore leading and trailing spaces" checked={trim} onChange={(e) => setTrim(e.target.checked)} />
+          <Checkbox label="Keep blank lines" checked={keepBlank} onChange={(e) => setKeepBlank(e.target.checked)} />
+        </Toolbar>
 
-          {error && (
-            <div aria-live="polite" className="mt-4">
-              <ErrorBox message={error} />
-            </div>
-          )}
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+        {result && (
+          <div className="mt-4 grid grid-cols-3 gap-3 sm:max-w-md">
+            <Stat label="Lines in" value={result.before.toLocaleString()} />
+            <Stat label="Lines out" value={result.after.toLocaleString()} />
+            <Stat label="Removed" value={(result.before - result.after).toLocaleString()} />
+          </div>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default DuplicateLineRemover;

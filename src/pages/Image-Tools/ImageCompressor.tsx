@@ -1,290 +1,136 @@
-import { useEffect, useState, useCallback } from "react";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import ErrorBox from "../../components/ErrorBox";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { Upload } from "lucide-react";
-import LoadingButton from "../../components/LoadingButton";
-import ToolHeader from "../../components/ToolHeader";
+import { useEffect, useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import useDebounce from '../../hooks/useDebounce';
+import { Callout, DownloadButton, EmptyState, Field, FileDrop, formatSize, Input, Panel, PreviewBox, RangeInput, Stat, TwoPane } from '../../ui';
+import { fileBaseName } from '../../utils/text';
 
-interface CompressionResult {
-  compressedUrl: string;
-  originalSize: number;
-  compressedSize: number;
+interface Result {
+  blob: Blob;
+  url: string;
+  width: number;
+  height: number;
 }
 
-function ImageCompressor() {
-  const seo = seoDescriptions.imageCompressor;
+const pct = new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 1 });
 
-  const [, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [compressionResult, setCompressionResult] =
-    useState<CompressionResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isCompressing, setIsCompressing] = useState(false);
-  const [quality, setQuality] = useState(0.8); // Default compression quality (0.1 to 1.0)
+export default function ImageCompressor() {
+  const [file, setFile] = useState<File | null>(null);
+  const [quality, setQuality] = useState('0.8');
+  const [maxSide, setMaxSide] = useState('1920');
+  const [result, setResult] = useState<Result | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
+  const original = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file]);
+  useEffect(() => () => URL.revokeObjectURL(original), [original]);
+  useEffect(() => () => URL.revokeObjectURL(result?.url ?? ''), [result]);
+
+  const q = Math.min(1, Math.max(0.1, Number(quality) || 0.8));
+  const side = Math.max(16, Number(maxSide) || 1920);
+  const wanted = useMemo(() => ({ file, q, side }), [file, q, side]);
+  const opts = useDebounce(wanted, 200);
+
+  // Recompress whenever the file or the settings change; the previous result
+  // stays on screen until the new one is ready.
   useEffect(() => {
-    updateToolUsage("image_compressor");
-  }, []);
-
-  const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setError(null);
-      setCompressionResult(null);
-      setImagePreview(null);
-
-      if (e.target.files && e.target.files.length > 0) {
-        const file = e.target.files[0];
-        if (!file.type.startsWith("image/")) {
-          setError("Please upload a valid image file (PNG, JPEG, etc.)");
-          return;
-        }
-        if (file.size > 10 * 1024 * 1024) {
-          setError("Image file size must be less than 10MB");
-          return;
-        }
-
-        setImageFile(file);
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          setImagePreview(event.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-      }
-    },
-    []
-  );
-
-  const compressImage = useCallback(async () => {
-    if (!imagePreview) {
-      setError("Please upload an image first");
+    if (!opts.file) {
+      setResult(null);
+      setError('');
       return;
     }
-
-    setIsCompressing(true);
-    setError(null);
-    setCompressionResult(null);
-
-    try {
-      const img = new Image();
-      img.src = imagePreview;
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        throw new Error("Canvas context not supported");
-      }
-
-      // Maintain aspect ratio, set max dimension to 1920px
-      const maxDimension = 1920;
+    let live = true;
+    setBusy(true);
+    const src = URL.createObjectURL(opts.file);
+    const img = new Image();
+    img.onload = () => {
       let { width, height } = img;
-      if (width > height) {
-        if (width > maxDimension) {
-          height = Math.round((height * maxDimension) / width);
-          width = maxDimension;
-        }
-      } else {
-        if (height > maxDimension) {
-          width = Math.round((width * maxDimension) / height);
-          height = maxDimension;
-        }
-      }
-
+      const scale = Math.min(1, opts.side / Math.max(width, height));
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+      const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setError('Canvas is not supported in this browser.');
+        setBusy(false);
+        return;
+      }
       ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!live) return;
+          if (!blob) setError('Could not encode the image.');
+          else {
+            setResult({ blob, url: URL.createObjectURL(blob), width, height });
+            setError('');
+          }
+          setBusy(false);
+        },
+        'image/jpeg',
+        opts.q
+      );
+    };
+    img.onerror = () => {
+      if (!live) return;
+      setError('That file could not be read as an image.');
+      setBusy(false);
+    };
+    img.src = src;
+    return () => {
+      live = false;
+      URL.revokeObjectURL(src);
+    };
+  }, [opts]);
 
-      // Compress as JPEG
-      const compressedUrl = canvas.toDataURL("image/jpeg", quality);
-
-      // Calculate file sizes
-      const originalSize = (await fetch(imagePreview).then((res) => res.blob()))
-        .size;
-      const compressedSize = (
-        await fetch(compressedUrl).then((res) => res.blob())
-      ).size;
-
-      setCompressionResult({
-        compressedUrl,
-        originalSize,
-        compressedSize,
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to compress image");
-      console.error("Image compression error:", err);
-    } finally {
-      setIsCompressing(false);
-    }
-  }, [imagePreview, quality]);
-
-  const handleQualityChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setQuality(parseFloat(e.target.value));
-    },
-    []
-  );
-
-  const handleClear = useCallback(() => {
-    setImageFile(null);
-    setImagePreview(null);
-    setCompressionResult(null);
-    setError(null);
-    setQuality(0.8);
-  }, []);
-
-  const downloadFile = (url: string, filename: string) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
+  const saved = file && result ? 1 - result.blob.size / file.size : 0;
+  const outName = file ? `${fileBaseName(file.name)}-compressed.jpg` : 'compressed.jpg';
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-3xl mx-auto py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard className="mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Image Compressor</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={!imagePreview && !compressionResult}
-              aria-label="Clear inputs"
-            />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col space-y-6">
-            <div className="flex flex-col space-y-2">
-              <label className="form-label">Upload Image:</label>
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-raised hover:bg-raised transition-colors">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="w-8 h-8 mb-2 text-faint" />
-                  <p className="text-sm text-faint">
-                    <span className="font-semibold">Click to upload</span> or
-                    drag and drop
-                  </p>
-                </div>
-                <input
-                  id="file-upload"
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </label>
+    <ToolPage id="image_compressor">
+      <Panel title="Compress">
+        <TwoPane>
+          <div className="space-y-3">
+            <FileDrop accept="image/*" label="Choose an image" maxSizeMB={10} onFile={setFile} onClear={() => setFile(null)} />
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={`Quality · ${Math.round(q * 100)}%`} htmlFor="ic-quality" hint="JPEG output. Lower is smaller.">
+                <RangeInput id="ic-quality" label="Quality" min={0.1} max={1} step={0.05} value={q} onChange={(v) => setQuality(String(v))} />
+              </Field>
+              <Field label="Longest side (px)" htmlFor="ic-side" hint="Larger images are scaled down to fit.">
+                <Input id="ic-side" type="number" min={16} step={1} inputMode="numeric" value={maxSide} onChange={(e) => setMaxSide(e.target.value)} onBlur={() => setMaxSide(String(side))} />
+              </Field>
             </div>
-
-            <div className="flex flex-col space-y-2">
-              <label className="form-label">
-                Compression Quality: {(quality * 100).toFixed(0)}%
-              </label>
-              <input
-                type="range"
-                min="0.1"
-                max="1.0"
-                step="0.1"
-                value={quality}
-                onChange={handleQualityChange}
-                className="w-full"
-              />
-            </div>
-
-            <div className="flex justify-center">
-              <LoadingButton
-                onClick={compressImage}
-                disabled={isCompressing || !imagePreview}
-                isLoading={isCompressing}
-              >
-                Compress Image
-              </LoadingButton>
-            </div>
-
-            <div className="flex flex-col items-center">
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Uploaded image for compression"
-                  className="mb-4 border rounded p-2 bg-raised w-full max-h-64 object-contain"
-                />
+            <PreviewBox>
+              {original ? (
+                <img src={original} alt={`Original image ${file?.name ?? ''}`} className="max-h-full max-w-full object-contain" />
               ) : (
-                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-faint">
-                  Original image will appear here
-                </div>
+                <EmptyState>The original appears here</EmptyState>
               )}
-            </div>
-
-            {compressionResult && (
-              <div className="result-box">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="section-subtitle">Compression Result:</h4>
-                </div>
-                <div className="inner-result space-y-2">
-                  <div className="w-full flex flex-col space-y-2">
-                    <img
-                      src={compressionResult.compressedUrl}
-                      alt="Compressed image"
-                      className="border rounded p-2 bg-raised w-full max-h-64 object-contain"
-                    />
-                    <div className="flex flex-col space-y-1">
-                      <span>
-                        Original Size:{" "}
-                        {formatFileSize(compressionResult.originalSize)}
-                      </span>
-                      <span>
-                        Compressed Size:{" "}
-                        {formatFileSize(compressionResult.compressedSize)}
-                      </span>
-                      <span>
-                        Reduction:{" "}
-                        {(
-                          (1 -
-                            compressionResult.compressedSize /
-                              compressionResult.originalSize) *
-                          100
-                        ).toFixed(1)}
-                        %
-                      </span>
-                    </div>
-                    <button
-                      onClick={() =>
-                        downloadFile(
-                          compressionResult.compressedUrl,
-                          "compressed-image.jpg"
-                        )
-                      }
-                      className="button-primary text-center"
-                    >
-                      Download Compressed Image
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <ErrorBox message={error} aria-live="polite" />
+            </PreviewBox>
           </div>
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+
+          <div className="space-y-3">
+            <div className="grid grid-cols-3 gap-2">
+              <Stat label="Original" value={file ? formatSize(file.size) : '—'} />
+              <Stat label="Compressed" value={result ? formatSize(result.blob.size) : '—'} />
+              <Stat label="Saved" value={result ? pct.format(saved) : '—'} />
+            </div>
+            <PreviewBox>
+              {result ? (
+                <img src={result.url} alt={`Compressed image, ${result.width} by ${result.height} pixels`} width={result.width} height={result.height} className="h-auto max-h-full w-auto max-w-full object-contain" />
+              ) : (
+                <EmptyState>{busy ? 'Compressing…' : 'The compressed image appears here'}</EmptyState>
+              )}
+            </PreviewBox>
+            <DownloadButton content={result?.blob ?? ''} fileName={outName} mime="image/jpeg" variant="primary" size="md" loading={busy} label={result ? `Download · ${result.width}×${result.height}` : 'Download'} />
+          </div>
+        </TwoPane>
+        {error && (
+          <Callout tone="error" className="mt-4">
+            {error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default ImageCompressor;

@@ -1,258 +1,100 @@
-import { useEffect, useState } from "react";
-import { ulid, decodeTime } from "ulid";
-import ErrorBox from "../../components/ErrorBox";
-import LoadingButton from "../../components/LoadingButton";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import ToolHeader from "../../components/ToolHeader";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { decodeTime, ulid } from 'ulid';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, CopyButton, Field, GenerateButton, Input, KeyValueList, Output, Panel, ValueBlock } from '../../ui';
+import { getErrorMessage } from '../../utils/errors';
 
-function ULIDGenerator() {
-  const seo = seoDescriptions.ulidGenerator;
-  const [singleUlid, setSingleUlid] = useState("");
-  const [bulkUlids, setBulkUlids] = useState<string[]>([]);
-  const [ulidInput, setUlidInput] = useState("");
-  const [timestamp, setTimestamp] = useState<string | null>(null);
-  const [count, setCount] = useState(5);
-  const [errorSingle, setErrorSingle] = useState("");
-  const [errorBulk, setErrorBulk] = useState("");
-  const [errorTimestamp, setErrorTimestamp] = useState("");
-  const [isLoadingSingle, setIsLoadingSingle] = useState(false);
-  const [isLoadingBulk, setIsLoadingBulk] = useState(false);
-  const [isLoadingTimestamp, setIsLoadingTimestamp] = useState(false);
+export default function ULIDGenerator() {
+  const [count, setCount] = useState('5');
+  const [single, setSingle] = useState('');
+  const [bulk, setBulk] = useState<string[]>([]);
+  const [lookup, setLookup] = useState('');
 
-  useEffect(() => {
-    updateToolUsage("ulid");
-    // Generate initial single ULID and bulk ULIDs on mount
-    fetchSingleUlid();
-    fetchBulkUlids();
-  }, []);
+  const n = Math.min(1000, Math.max(1, Number(count) || 1));
 
-  // Auto-generate bulk ULIDs when count changes
-  useEffect(() => {
-    fetchBulkUlids();
-  }, [count]);
+  const regenerate = useCallback(() => {
+    setSingle(ulid());
+    setBulk(Array.from({ length: n }, () => ulid()));
+  }, [n]);
 
-  const fetchSingleUlid = () => {
-    setIsLoadingSingle(true);
+  // A fresh value on load and whenever the count changes.
+  useEffect(regenerate, [regenerate]);
+
+  const decoded = useMemo(() => {
+    const id = lookup.trim().toUpperCase();
+    if (!id) return null;
     try {
-      const ulidStr = ulid();
-      setSingleUlid(ulidStr);
-      setErrorSingle("");
-    } catch {
-      setErrorSingle("Failed to generate ULID");
-    } finally {
-      setIsLoadingSingle(false);
+      if (id.length !== 26) throw new Error('A ULID is exactly 26 characters.');
+      const ms = decodeTime(id);
+      return { ms, error: '' };
+    } catch (e) {
+      return { ms: 0, error: getErrorMessage(e, 'Not a valid ULID.') };
     }
-  };
+  }, [lookup]);
 
-  const fetchBulkUlids = () => {
-    if (bulkUlids.length > 0) {
-      setBulkUlids([]);
-    }
-    if (!Number.isInteger(count) || count < 1 || count > 1000) {
-      setErrorBulk("Count must be an integer between 1 and 1000");
-      return;
-    }
-    setIsLoadingBulk(true);
-    try {
-      const ulids = Array.from({ length: count }, () => ulid());
-      setBulkUlids(ulids);
-      setErrorBulk("");
-    } catch {
-      setErrorBulk("Failed to generate bulk ULIDs");
-    } finally {
-      setIsLoadingBulk(false);
-    }
-  };
-
-  const fetchTimestamp = (input: string) => {
-    setIsLoadingTimestamp(true);
-    try {
-      if (!input || input.length !== 26) {
-        throw new Error("Invalid ULID: Must be 26 characters long");
-      }
-      const timestampMs = decodeTime(input);
-      const date = new Date(timestampMs);
-      setTimestamp(date.toISOString());
-      setErrorTimestamp("");
-    } catch (err) {
-      setErrorTimestamp(
-        err instanceof Error ? err.message : "Failed to extract timestamp"
-      );
-    } finally {
-      setIsLoadingTimestamp(false);
-    }
-  };
-
-  const handleClearTimestamp = () => {
-    setUlidInput("");
-    setTimestamp(null);
-    setErrorTimestamp("");
-  };
-
-  const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "" || /^[0-9]+$/.test(value)) {
-      const numValue = value === "" ? 0 : Number(value);
-      setCount(Math.max(0, Math.min(1000, numValue))); // Clamp between 0 and 1000
-    }
-  };
-
-  const incrementCount = () => {
-    setCount((prev) => Math.min(prev + 1, 1000));
-  };
-
-  const decrementCount = () => {
-    setCount((prev) => Math.max(prev - 1, 1));
-  };
+  const when = decoded && !decoded.error ? new Date(decoded.ms) : null;
+  const items = when
+    ? [
+        { label: 'Local time', value: new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'long' }).format(when) },
+        { label: 'ISO 8601', value: when.toISOString() },
+        { label: 'Unix ms', value: String(decoded?.ms) },
+      ]
+    : [];
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
+    <ToolPage id="ulid">
+      <Panel title="Generate">
+        <ValueBlock
+          value={single}
+          actions={
+            <>
+              <CopyButton text={single} size="md" variant="primary" />
+              <GenerateButton variant="secondary" label="New" onClick={regenerate} />
+            </>
+          }
+        />
+      </Panel>
 
-        {/* Single ULID */}
-        <SectionCard className="mb-6">
-          <h3 className="section-title mb-4">Generate Single ULID</h3>
-          <hr className="line-break" />
-          <LoadingButton onClick={fetchSingleUlid} isLoading={isLoadingSingle}>
-            Generate
-          </LoadingButton>
-          {singleUlid && (
-            <div className="result-box mt-4">
-              <div className="inner-result">
-                <span className="truncate">{singleUlid}</span>
-                <CopyButton text={singleUlid} />
-              </div>
-            </div>
-          )}
-          <ErrorBox
-            message={errorSingle}
-            id={errorSingle ? "single-error" : undefined}
-          />
-        </SectionCard>
-
-        {/* Bulk ULIDs */}
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Generate Bulk ULIDs</h3>
-          </div>
-          <hr className="line-break" />
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
-            <div className="flex items-center">
-              <label className="form-label mr-2" htmlFor="bulk-count">
-                Count (1-1000):
-              </label>
-              <div className="flex items-center">
-                <input
-                  type="text"
-                  value={count}
-                  onChange={handleCountChange}
-                  className="input-field w-20 text-right pr-2"
-                  disabled={isLoadingBulk}
-                  placeholder="1-1000"
-                  aria-describedby={errorBulk ? "bulk-error" : undefined}
-                />
-                <div className="flex flex-col ml-1">
-                  <button
-                    onClick={incrementCount}
-                    disabled={isLoadingBulk || count >= 1000}
-                    className="toggle-count"
-                    aria-label="Increment count"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={decrementCount}
-                    disabled={isLoadingBulk || count <= 1}
-                    className="toggle-count"
-                    aria-label="Decrement count"
-                  >
-                    −
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CopyButton text={bulkUlids.join("\n")} copyType="CopyAll" />
-            </div>
-          </div>
-
-          <div className="result-box min-h-[100px] max-h-96 overflow-y-auto scrollbox">
-            {isLoadingBulk ? (
-              <p className="text-muted">Loading ULIDs...</p>
-            ) : bulkUlids.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {bulkUlids.map((ulid, index) => (
-                  <div key={index} className="inner-result">
-                    <span className="font-mono text-ink truncate">
-                      {ulid}
-                    </span>
-                    <CopyButton text={ulid} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted">No ULIDs generated yet.</p>
-            )}
-          </div>
-
-          <ErrorBox
-            message={errorBulk}
-            id={errorBulk ? "bulk-error" : undefined}
-          />
-        </SectionCard>
-
-        {/* ULID Timestamp */}
-        <SectionCard className="mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Get Timestamp from ULID</h3>
-            <ClearButton onClick={handleClearTimestamp} disabled={!ulidInput} />
-          </div>
-          <hr className="line-break" />
-          <div className="flex gap-4 mb-4">
-            <input
-              type="text"
-              id="ulid-input"
-              placeholder="Enter ULID"
-              value={ulidInput}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                setUlidInput(newValue);
-                setTimestamp(null); // Clear result
-                setErrorTimestamp("");
-                fetchTimestamp(newValue);
-              }}
-              className="input-field w-full"
-              disabled={isLoadingTimestamp}
-              aria-describedby={errorTimestamp ? "timestamp-error" : undefined}
+      <Panel title="Bulk">
+        <div className="grid gap-4 md:grid-cols-[12rem_1fr]">
+          <Field label="How many" htmlFor="ulid-count" hint="1 to 1000">
+            <Input
+              id="ulid-count"
+              type="number"
+              min={1}
+              max={1000}
+              inputMode="numeric"
+              value={count}
+              onChange={(e) => setCount(e.target.value)}
+              onBlur={() => setCount(String(n))}
             />
-          </div>
+          </Field>
+          <Output label={`${bulk.length} ULIDs`} value={bulk.join('\n')} rows={10} fileName="ulids.txt" />
+        </div>
+      </Panel>
 
-          {timestamp && (
-            <div className="result-box mt-4">
-              <div className="inner-result">
-                <span className="truncate">DateTime: {timestamp}</span>
-                <CopyButton text={new Date(timestamp).toLocaleString()} />
-              </div>
-            </div>
-          )}
-
-          <ErrorBox
-            message={errorTimestamp}
-            id={errorTimestamp ? "timestamp-error" : undefined}
-          />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+      <Panel title="Decode timestamp" actions={<ClearButton onClick={() => setLookup('')} disabled={!lookup} />}>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="ULID" htmlFor="ulid-lookup" hint="The first 10 characters encode when it was made.">
+            <Input
+              id="ulid-lookup"
+              value={lookup}
+              onChange={(e) => setLookup(e.target.value)}
+              placeholder="01ARZ3NDEKTSV4RRFFQ69G5FAV"
+              maxLength={26}
+              aria-invalid={Boolean(decoded?.error) || undefined}
+            />
+          </Field>
+          <Output label="Created" copyText={items.map((i) => `${i.label}: ${i.value}`).join('\n')} placeholder="Paste a ULID to see its timestamp">
+            {items.length > 0 ? <KeyValueList items={items} /> : undefined}
+          </Output>
+        </div>
+        {decoded?.error && (
+          <Callout tone="error" className="mt-4">
+            {decoded.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default ULIDGenerator;

@@ -1,97 +1,38 @@
-import React from "react";
-import UnitConverter from "./UnitConverter";
-import seoDescriptions from "../../data/seoDescriptions";
+import UnitConverter from './UnitConverter';
 
-// Define types for better type safety
-type LengthUnit = "mm" | "cm" | "m" | "km" | "inch" | "ft" | "yd" | "mi" | "nm";
-type LengthConversionRates = Record<LengthUnit, number>;
+type LengthUnit = 'mm' | 'cm' | 'm' | 'km' | 'inch' | 'ft' | 'yd' | 'mi' | 'nm';
 
-// Memoize constant data outside component
 const UNITS: { value: LengthUnit; label: string }[] = [
-  { value: "mm", label: "Millimeters (mm)" },
-  { value: "cm", label: "Centimeters (cm)" },
-  { value: "m", label: "Meters (m)" },
-  { value: "km", label: "Kilometers (km)" },
-  { value: "inch", label: "Inches (in)" },
-  { value: "ft", label: "Feet (ft)" },
-  { value: "yd", label: "Yards (yd)" },
-  { value: "mi", label: "Miles (mi)" },
-  { value: "nm", label: "Nautical Miles (nm)" },
+  { value: 'mm', label: 'Millimeters (mm)' },
+  { value: 'cm', label: 'Centimeters (cm)' },
+  { value: 'm', label: 'Meters (m)' },
+  { value: 'km', label: 'Kilometers (km)' },
+  { value: 'inch', label: 'Inches (in)' },
+  { value: 'ft', label: 'Feet (ft)' },
+  { value: 'yd', label: 'Yards (yd)' },
+  { value: 'mi', label: 'Miles (mi)' },
+  { value: 'nm', label: 'Nautical Miles (nm)' },
 ];
 
-const UNIT_TO_METERS: LengthConversionRates = {
-  mm: 0.001, // Millimeters
-  cm: 0.01, // Centimeters
-  m: 1, // Meters
-  km: 1000, // Kilometers
-  inch: 0.0254, // Inches
-  ft: 0.3048, // Feet
-  yd: 0.9144, // Yards
-  mi: 1609.344, // Miles
-  nm: 1852, // Nautical Miles
+const UNIT_TO_METERS: Record<LengthUnit, number> = {
+  mm: 0.001,
+  cm: 0.01,
+  m: 1,
+  km: 1000,
+  inch: 0.0254,
+  ft: 0.3048,
+  yd: 0.9144,
+  mi: 1609.344,
+  nm: 1852,
 };
 
-const VALIDATION_MESSAGE = "Length must be greater than zero.";
-const CONVERTER_NAME = "Length Converter";
-const DEFAULT_VALUE = "1";
-const DEFAULT_UNIT: LengthUnit = "km";
-
-function LengthConverter() {
-  const seo = seoDescriptions.length;
-
-  const convertLength = (
-    value: number,
-    unit: string
-  ): LengthConversionRates => {
-    // Input validation
-    if (!Number.isFinite(value)) {
-      throw new Error("Value must be a finite number");
-    }
-
-    if (value <= 0) {
-      throw new Error(VALIDATION_MESSAGE);
-    }
-
-    if (!Object.keys(UNIT_TO_METERS).includes(unit)) {
-      throw new Error(
-        `Invalid unit: ${unit}. Supported units: ${Object.keys(
-          UNIT_TO_METERS
-        ).join(", ")}`
-      );
-    }
-
-    // Convert to intermediate unit (meters)
-    const lengthUnit = unit as LengthUnit;
-    const metersValue = value * UNIT_TO_METERS[lengthUnit];
-
-    if (!Number.isFinite(metersValue)) {
-      throw new Error(
-        "Conversion resulted in non-finite value (possible overflow)"
-      );
-    }
-
-    // Convert from meters to all units
-    return Object.entries(UNIT_TO_METERS).reduce((acc, [key, factor]) => {
-      acc[key as LengthUnit] = round(metersValue / factor);
-      return acc;
-    }, {} as LengthConversionRates);
-  };
-
-  // Helper function for consistent rounding
-  const round = (num: number): number => Number(num.toFixed(8));
-
-  return (
-    <UnitConverter
-      seo={seo}
-      defaultValue={DEFAULT_VALUE}
-      defaultUnit={DEFAULT_UNIT}
-      units={UNITS}
-      converterName={CONVERTER_NAME}
-      validationMessage={VALIDATION_MESSAGE}
-      convertFunction={convertLength}
-      toolName="length"
-    />
-  );
+function convert(value: number, unit: string): Record<string, number> {
+  if (!(unit in UNIT_TO_METERS)) throw new Error(`Unknown unit: ${unit}`);
+  const meters = value * UNIT_TO_METERS[unit as LengthUnit];
+  if (!Number.isFinite(meters)) throw new Error('The value is too large to convert.');
+  return Object.fromEntries(Object.entries(UNIT_TO_METERS).map(([k, f]) => [k, Number((meters / f).toFixed(8))]));
 }
 
-export default React.memo(LengthConverter);
+export default function LengthConverter() {
+  return <UnitConverter id="length" defaultValue="1" defaultUnit="km" units={UNITS} validationMessage="Length must be greater than zero." convert={convert} />;
+}

@@ -1,318 +1,82 @@
-import { useEffect, useState, useRef } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import LoadingButton from "../../components/LoadingButton";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { getErrorMessage } from "../../utils/errors";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, Field, Input, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
 
-function reverseString(str: string): string {
-  return str.split("").reverse().join("");
-}
+type Mode = 'reverse' | 'rotate';
 
-function rotateString(str: string, n: number): string {
-  const len = str.length;
-  const rotation = ((n % len) + len) % len;
-  return str.slice(rotation) + str.slice(0, rotation);
+const reverse = (s: string) => [...s].reverse().join('');
+
+function rotate(s: string, n: number): string {
+  const chars = [...s];
+  const len = chars.length;
+  if (!len) return s;
+  const k = ((n % len) + len) % len;
+  return [...chars.slice(k), ...chars.slice(0, k)].join('');
 }
 
 export default function StringReverserRotator() {
-  const seo = seoDescriptions.stringReverser;
-  const [reverseInput, setReverseInput] = useState("");
-  const [rotateInput, setRotateInput] = useState("");
-  const [reverseResult, setReverseResult] = useState("");
-  const [rotateResult, setRotateResult] = useState("");
-  const [rotateBy, setRotateBy] = useState(3);
-  const [errorReverse, setErrorReverse] = useState("");
-  const [errorRotate, setErrorRotate] = useState("");
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [input, setInput] = useState('');
+  const [mode, setMode] = useState<Mode>('reverse');
+  const [rotateBy, setRotateBy] = useState('3');
 
-  useEffect(() => {
-    updateToolUsage("string_reverser_rotator");
-  }, []);
-
-  // Auto-reverse when input changes
-  useEffect(() => {
-    if (reverseInput.trim()) {
-      handleReverse();
-    } else {
-      setReverseResult("");
-      setErrorReverse("");
-    }
-  }, [reverseInput]);
-
-  // Auto-rotate when input or rotateBy changes
-  useEffect(() => {
-    if (
-      rotateInput.trim() &&
-      Number.isInteger(rotateBy) &&
-      rotateBy >= -100 &&
-      rotateBy <= 100
-    ) {
-      handleRotate();
-    } else {
-      setRotateResult("");
-      setErrorRotate("");
-    }
-  }, [rotateInput, rotateBy]);
-
-  const handleReverse = () => {
-    if (!reverseInput.trim()) {
-      setErrorReverse("Input text cannot be empty");
-      setReverseResult("");
-      return;
-    }
-    try {
-      const result = reverseString(reverseInput);
-      setReverseResult(result);
-      setErrorReverse("");
-    } catch (err) {
-      setErrorReverse(getErrorMessage(err, "Failed to reverse string"));
-      setReverseResult("");
-    }
-  };
-
-  const handleRotate = () => {
-    if (!rotateInput.trim()) {
-      setErrorRotate("Input text cannot be empty");
-      setRotateResult("");
-      return;
-    }
-    if (!Number.isInteger(rotateBy) || rotateBy < -100 || rotateBy > 100) {
-      setErrorRotate("Rotation must be an integer between -100 and 100");
-      setRotateResult("");
-      return;
-    }
-    try {
-      const result = rotateString(rotateInput, rotateBy);
-      setRotateResult(result);
-      setErrorRotate("");
-    } catch (err) {
-      setErrorRotate(getErrorMessage(err, "Failed to rotate string"));
-      setRotateResult("");
-    }
-  };
-
-  const handleClearReverse = () => {
-    setReverseInput("");
-    setReverseResult("");
-    setErrorReverse("");
-  };
-
-  const handleClearRotate = () => {
-    setRotateInput("");
-    setRotateResult("");
-    setRotateBy(3);
-    setErrorRotate("");
-  };
-
-  const handleReverseInputChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setReverseInput(e.target.value);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  const handleRotateInputChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setRotateInput(e.target.value);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  const handleRotateByChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "" || /^-?\d*$/.test(value)) {
-      const numValue = value === "" ? 0 : Number(value);
-      setRotateBy(Math.max(-100, Math.min(100, numValue)));
-    }
-  };
-
-  const incrementRotateBy = () => {
-    setRotateBy((prev) => Math.min(prev + 1, 100));
-  };
-
-  const decrementRotateBy = () => {
-    setRotateBy((prev) => Math.max(prev - 1, -100));
-  };
+  const result = useMemo(() => {
+    if (!input) return null;
+    if (mode === 'reverse') return { out: reverse(input), error: '' };
+    const n = Number(rotateBy);
+    if (!Number.isInteger(n) || n < -100 || n > 100) return { out: '', error: 'Rotate by a whole number between -100 and 100.' };
+    return { out: rotate(input, n), error: '' };
+  }, [input, mode, rotateBy]);
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        {/* Reverse String Section */}
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Reverse String</h3>
-            <ClearButton
-              onClick={handleClearReverse}
-              disabled={
-                reverseInput === "" &&
-                reverseResult === "" &&
-                errorReverse === ""
-              }
+    <ToolPage id="string_reverser_rotator">
+      <Panel
+        title={mode === 'reverse' ? 'Reverse' : 'Rotate'}
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Operation"
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: 'reverse', label: 'Reverse' },
+                { value: 'rotate', label: 'Rotate' },
+              ]}
             />
-          </div>
-          <hr className="line-break" />
-          <div className="space-y-4 mb-4">
-            <div>
-              <label className="form-label" htmlFor="string-input">
-                Input Text:
-              </label>
-              <AutoTextarea
-                id="string-input"
-                value={reverseInput}
-                onChange={handleReverseInputChange}
-                className="input-field w-full"
-                placeholder="Enter text to reverse"
-                ref={inputRef}
-                aria-describedby={
-                  errorReverse ? "string-reverse-error" : undefined
-                }
-                aria-label="Text to reverse"
-              />
-            </div>
-          </div>
-
-          {reverseResult && (
-            <div className="result-box">
-              <div className="flex justify-between items-center mb-2">
-                <label className="form-label">Reversed Result</label>
-                <CopyButton text={reverseResult} />
-              </div>
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div
-                    className="w-full mono-output"
-                    aria-label="Reversed result"
-                  >
-                    {reverseResult}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <ErrorBox
-            message={errorReverse}
-            id={errorReverse ? "string-reverse-error" : undefined}
-          />
-        </SectionCard>
-
-        {/* Rotate String Section */}
-        <SectionCard className="mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Rotate String</h3>
-            <ClearButton
-              onClick={handleClearRotate}
-              disabled={
-                rotateInput === "" &&
-                rotateResult === "" &&
-                rotateBy === 0 &&
-                errorRotate === ""
-              }
-            />
-          </div>
-          <hr className="line-break" />
-          <div className="space-y-4 mb-4">
-            <div>
-              <label className="form-label" htmlFor="string-input-rotate">
-                Input Text:
-              </label>
-              <AutoTextarea
-                id="string-input-rotate"
-                value={rotateInput}
-                onChange={handleRotateInputChange}
-                className="input-field w-full"
-                placeholder="Enter text to rotate"
-                ref={inputRef}
-                aria-describedby={
-                  errorRotate ? "string-rotate-error" : undefined
-                }
-                aria-label="Text to rotate"
-              />
-            </div>
-            <div className="flex items-center gap-4 mt-4 mb-2">
-              <label className="form-label" htmlFor="rotate-by-input">
-                Rotate By (-100 to 100):
-              </label>
-              <div className="flex items-center">
-                <input
-                  id="rotate-by-input"
+            <ClearButton onClick={() => setInput('')} disabled={!input} />
+          </>
+        }
+      >
+        <TwoPane>
+          <div className="space-y-4">
+            <Field label="Text" htmlFor="srr-input">
+              <TextArea id="srr-input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="hello world" rows={6} autoFocus mono={false} />
+            </Field>
+            {mode === 'rotate' && (
+              <Field label="Rotate by" htmlFor="srr-rotate" hint="Characters moved from the start to the end. Negative rotates the other way.">
+                <Input
+                  id="srr-rotate"
                   type="number"
-                  min="-100"
-                  max="100"
+                  inputMode="numeric"
+                  min={-100}
+                  max={100}
+                  step={1}
                   value={rotateBy}
-                  onChange={handleRotateByChange}
-                  className="input-field w-20 text-right pr-2"
-                  placeholder="-100 to 100"
-                  aria-describedby={
-                    errorRotate ? "string-rotate-error" : undefined
-                  }
+                  onChange={(e) => setRotateBy(e.target.value)}
+                  className="w-32"
+                  aria-invalid={Boolean(result?.error) || undefined}
                 />
-                <div className="flex flex-col ml-1">
-                  <button
-                    onClick={incrementRotateBy}
-                    disabled={rotateBy >= 100}
-                    className="toggle-count"
-                    aria-label="Increment rotation"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={decrementRotateBy}
-                    disabled={rotateBy <= -100}
-                    className="toggle-count"
-                    aria-label="Decrement rotation"
-                  >
-                    −
-                  </button>
-                </div>
-              </div>
-            </div>
-            <LoadingButton onClick={handleRotate} isLoading={false}>
-              Rotate
-            </LoadingButton>
+              </Field>
+            )}
           </div>
-
-          {rotateResult && (
-            <div className="result-box">
-              <div className="flex justify-between items-center mb-2">
-                <label className="form-label">Rotated Result</label>
-                <CopyButton text={rotateResult} />
-              </div>
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div
-                    className="w-full mono-output"
-                    aria-label="Rotated result"
-                  >
-                    {rotateResult}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <ErrorBox
-            message={errorRotate}
-            id={errorRotate ? "string-rotate-error" : undefined}
-          />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+          <Output label={mode === 'reverse' ? 'Reversed' : 'Rotated'} value={result?.out ?? ''} rows={6} mono={false} />
+        </TwoPane>
+        {result?.error && (
+          <Callout tone="error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }

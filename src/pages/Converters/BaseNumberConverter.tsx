@@ -1,247 +1,109 @@
-import { useEffect, useState } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { useMediaQuery } from "../../hooks/useMediaQuery";
-import { ArrowLeftRight, ArrowUpDown } from "lucide-react";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, EmptyState, Field, Input, KeyValueList, Output, Panel, Select } from '../../ui';
 
-const BASES = [
-  { value: 2, name: "Binary" },
-  { value: 3, name: "Ternary" },
-  { value: 4, name: "Quaternary" },
-  { value: 5, name: "Quinary" },
-  { value: 6, name: "Senary" },
-  { value: 7, name: "Septenary" },
-  { value: 8, name: "Octal" },
-  { value: 9, name: "Nonary" },
-  { value: 10, name: "Decimal" },
-  { value: 11, name: "Undecimal" },
-  { value: 12, name: "Duodecimal" },
-  { value: 13, name: "Tridecimal" },
-  { value: 14, name: "Tetradecimal" },
-  { value: 15, name: "Pentadecimal" },
-  { value: 16, name: "Hexadecimal" },
-  { value: 17, name: "Heptadecimal" },
-  { value: 18, name: "Octodecimal" },
-  { value: 19, name: "Nonadecimal" },
-  { value: 20, name: "Vigesimal" },
-  { value: 21, name: "Unvigesimal" },
-  { value: 22, name: "Duovigesimal" },
-  { value: 23, name: "Trivigesimal" },
-  { value: 24, name: "Tetravigesimal" },
-  { value: 25, name: "Pentavigesimal" },
-  { value: 26, name: "Hexavigesimal" },
-  { value: 27, name: "Heptavigesimal" },
-  { value: 28, name: "Octovigesimal" },
-  { value: 29, name: "Nonavigesimal" },
-  { value: 30, name: "Trigesimal" },
-  { value: 31, name: "Untrigesimal" },
-  { value: 32, name: "Duotrigesimal" },
-  { value: 33, name: "Tritrigesimal" },
-  { value: 34, name: "Tetratrigesimal" },
-  { value: 35, name: "Pentatrigesimal" },
-  { value: 36, name: "Hexatrigesimal" },
+const BASE_NAMES = [
+  'Binary', 'Ternary', 'Quaternary', 'Quinary', 'Senary', 'Septenary', 'Octal', 'Nonary', 'Decimal',
+  'Undecimal', 'Duodecimal', 'Tridecimal', 'Tetradecimal', 'Pentadecimal', 'Hexadecimal', 'Heptadecimal',
+  'Octodecimal', 'Nonadecimal', 'Vigesimal', 'Unvigesimal', 'Duovigesimal', 'Trivigesimal', 'Tetravigesimal',
+  'Pentavigesimal', 'Hexavigesimal', 'Heptavigesimal', 'Octovigesimal', 'Nonavigesimal', 'Trigesimal',
+  'Untrigesimal', 'Duotrigesimal', 'Tritrigesimal', 'Tetratrigesimal', 'Pentatrigesimal', 'Hexatrigesimal',
 ];
+const BASES = BASE_NAMES.map((name, i) => ({ value: i + 2, name }));
+const baseName = (b: number) => `${b} (${BASES[b - 2].name})`;
+const COMMON = [2, 8, 10, 16];
 
-function BaseNumberConverter() {
-  const seo = seoDescriptions.baseNumber;
-  const [inputNumber, setInputNumber] = useState("");
-  const [sourceBase, setSourceBase] = useState("10");
-  const [targetBase, setTargetBase] = useState("2");
-  const [convertedNumber, setConvertedNumber] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const isMobile = useMediaQuery("(max-width: 640px)");
+const DIGITS = '0123456789abcdefghijklmnopqrstuvwxyz';
 
-  const validateNumber = (number: string, base: number): boolean => {
-    if (!number) return false;
-    const validDigits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-      .slice(0, base)
-      .toLowerCase();
-    return new RegExp(`^[${validDigits}]+$`, "i").test(number);
-  };
-
-  const convertBase = (
-    numStr: string,
-    fromBase: number,
-    toBase: number
-  ): string => {
-    if (!numStr.trim()) return "";
-
-    // First convert from source base to decimal
-    const decimal = parseInt(numStr, fromBase);
-    if (isNaN(decimal)) {
-      setError(`Invalid number for base ${fromBase}`);
-      return "";
-    }
-
-    // Then convert from decimal to target base
-    return decimal.toString(toBase).toUpperCase();
-  };
-
-  useEffect(() => {
-    updateToolUsage("base_number");
-  }, []);
-
-  useEffect(() => {
-    const sourceBaseNum = parseInt(sourceBase, 10);
-    const targetBaseNum = parseInt(targetBase, 10);
-
-    if (!inputNumber.trim()) {
-      setError(null);
-      setConvertedNumber("");
-      return;
-    }
-
-    if (!validateNumber(inputNumber, sourceBaseNum)) {
-      setError(`Number contains invalid digits for base ${sourceBaseNum}`);
-      setConvertedNumber("");
-      return;
-    }
-
-    setError(null);
-    try {
-      const result = convertBase(inputNumber, sourceBaseNum, targetBaseNum);
-      setConvertedNumber(result);
-    } catch {
-      setError("Conversion failed. Please check your input.");
-      setConvertedNumber("");
-    }
-  }, [inputNumber, sourceBase, targetBase]);
-
-  const handleSwap = () => {
-    setSourceBase(targetBase);
-    setTargetBase(sourceBase);
-  };
-
-  const handleClear = () => {
-    setInputNumber("");
-    setSourceBase("10");
-    setTargetBase("2");
-    setConvertedNumber("");
-    setError(null);
-  };
-
-  return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="section-title">
-              Base Number Converter
-            </h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={!inputNumber && !convertedNumber && !error}
-            />
-          </div>
-          <hr className="line-break" />
-
-          <div className="flex flex-col gap-6">
-            {/* Input and Result Section */}
-            <div className="flex flex-col gap-4">
-              <div>
-                <label htmlFor="number" className="form-label">
-                  Input Number
-                </label>
-                <AutoTextarea
-                  value={inputNumber}
-                  onChange={(e) => setInputNumber(e.target.value)}
-                  className="input-field"
-                  placeholder="Enter your number (e.g., 1010)"
-                  aria-label="Input number for conversion"
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <label htmlFor="source_base" className="form-label">
-                    Source Base
-                  </label>
-                  <select
-                    id="source_base"
-                    value={sourceBase}
-                    onChange={(e) => setSourceBase(e.target.value)}
-                    className="input-field"
-                    aria-label="Select source base"
-                  >
-                    {BASES.map((base) => (
-                      <option key={base.value} value={base.value}>
-                        {`${base.value} (${base.name})`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex items-center justify-center sm:mt-6">
-                  <button
-                    onClick={handleSwap}
-                    className="button-quiet !px-2 !py-1"
-                    title="Swap Source and Target Bases"
-                    aria-label="Swap source and target bases"
-                  >
-                    {isMobile ? (
-                      <ArrowUpDown size={15} />
-                    ) : (
-                      <ArrowLeftRight size={20} />
-                    )}
-                  </button>
-                </div>
-                <div className="flex-1">
-                  <label htmlFor="target_base" className="form-label">
-                    Target Base
-                  </label>
-                  <select
-                    id="target_base"
-                    value={targetBase}
-                    onChange={(e) => setTargetBase(e.target.value)}
-                    className="input-field"
-                    aria-label="Select target base"
-                  >
-                    {BASES.map((base) => (
-                      <option key={base.value} value={base.value}>
-                        {`${base.value} (${base.name})`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="result-box">
-                <div className="flex justify-between items-center mb-2">
-                  <label className="form-label">Converted Number</label>
-                  <CopyButton text={convertedNumber} />
-                </div>
-                {convertedNumber && (
-                  <div className="scrollbox mt-2">
-                    <div className="inner-result">
-                      <div className="mono-output">{convertedNumber}</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {error && (
-              <div aria-live="polite">
-                <ErrorBox message={error} />
-              </div>
-            )}
-          </div>
-        </SectionCard>
-
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
-  );
+/** Arbitrary-length parse; parseInt loses precision above 2^53. */
+function parseBig(s: string, base: number): bigint {
+  let n = 0n;
+  for (const ch of s.toLowerCase()) n = n * BigInt(base) + BigInt(DIGITS.indexOf(ch));
+  return n;
 }
 
-export default BaseNumberConverter;
+export default function BaseNumberConverter() {
+  const [value, setValue] = useState('');
+  const [from, setFrom] = useState('10');
+  const [to, setTo] = useState('2');
+
+  const fromBase = Number(from);
+  const toBase = Number(to);
+
+  const result = useMemo(() => {
+    const raw = value.trim();
+    if (!raw) return { n: null, error: '' };
+    if (!new RegExp(`^[${DIGITS.slice(0, fromBase)}]+$`, 'i').test(raw)) {
+      return { n: null, error: `Only the digits ${DIGITS.slice(0, fromBase).toUpperCase()} are valid in base ${fromBase}.` };
+    }
+    return { n: parseBig(raw, fromBase), error: '' };
+  }, [value, fromBase]);
+
+  const n = result.n;
+  const rows = n === null
+    ? []
+    : [...COMMON, ...(COMMON.includes(toBase) ? [] : [toBase])].map((b) => ({ label: baseName(b), value: n.toString(b).toUpperCase() }));
+  const copyAll = rows.map((r) => `${r.label}: ${r.value}`).join('\n');
+  const pristine = !value && from === '10' && to === '2';
+
+  return (
+    <ToolPage id="base_number">
+      <Panel
+        title="Convert"
+        actions={
+          <ClearButton
+            label="Reset"
+            onClick={() => {
+              setValue('');
+              setFrom('10');
+              setTo('2');
+            }}
+            disabled={pristine}
+          />
+        }
+      >
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
+            <Field label="Number" htmlFor="bn-value" className="sm:col-span-2 md:col-span-1" hint="Any length; digits are checked against the base you pick.">
+              <Input
+                id="bn-value"
+                inputMode={fromBase <= 10 ? 'numeric' : 'text'}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder="255"
+                autoFocus
+                aria-invalid={Boolean(result.error) || undefined}
+              />
+            </Field>
+            <Field label="From base" htmlFor="bn-from">
+              <Select id="bn-from" value={from} onChange={(e) => setFrom(e.target.value)}>
+                {BASES.map((b) => (
+                  <option key={b.value} value={b.value}>
+                    {baseName(b.value)}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Also show base" htmlFor="bn-to">
+              <Select id="bn-to" value={to} onChange={(e) => setTo(e.target.value)}>
+                {BASES.map((b) => (
+                  <option key={b.value} value={b.value}>
+                    {baseName(b.value)}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+          <Output label="Equals" copyText={copyAll}>
+            {rows.length > 0 ? <KeyValueList items={rows} /> : <EmptyState>Enter a number</EmptyState>}
+          </Output>
+        </div>
+        {result.error && (
+          <Callout tone="error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
+  );
+}

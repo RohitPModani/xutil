@@ -1,130 +1,39 @@
-import { useEffect, useState, useRef } from "react";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import CopyButton from "../../components/CopyButton";
-import DownloadButton from "../../components/DownloadButton";
-import ErrorBox from "../../components/ErrorBox";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { marked } from "marked";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+import ToolPage from '../../components/ToolPage';
+import { ClearButton, EmptyState, Field, Output, Panel, TextArea, TwoPane } from '../../ui';
 
-// Configure marked to render lists properly
-marked.setOptions({
-  gfm: true,
-  breaks: true,
-});
+marked.setOptions({ gfm: true, breaks: true });
 
-function MarkdownPreviewer() {
-  const seo = seoDescriptions.markdownPreviewer;
-  const [markdownInput, setMarkdownInput] = useState<string>("");
-  const [previewOutput, setPreviewOutput] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+export default function MarkdownPreviewer() {
+  const [input, setInput] = useState('');
 
-  useEffect(() => {
-    updateToolUsage("markdown");
-  }, []);
-
-  // Auto-resize textarea
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  }, [markdownInput]);
-
-  // Real-time Markdown preview
-  useEffect(() => {
-    if (markdownInput) {
-      try {
-        const html = marked.parse(markdownInput, { async: false }) as string;
-        setPreviewOutput(html);
-        setError(null);
-      } catch {
-        setError("Error rendering Markdown. Please check your syntax.");
-        setPreviewOutput("");
-      }
-    } else {
-      setPreviewOutput("");
-      setError(null);
-    }
-  }, [markdownInput]);
-
-  const handleClear = () => {
-    setMarkdownInput("");
-    setPreviewOutput("");
-    setError(null);
-  };
-
-  const getResultsText = () => previewOutput;
+  const html = useMemo(() => (input ? DOMPurify.sanitize(marked.parse(input, { async: false }) as string) : ''), [input]);
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="section-title">Markdown Previewer</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={!markdownInput && !previewOutput && !error}
+    <ToolPage id="markdown">
+      <Panel title="Preview" actions={<ClearButton onClick={() => setInput('')} disabled={!input} />}>
+        <TwoPane>
+          <Field label="Markdown" htmlFor="md-input">
+            <TextArea
+              id="md-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={'# Heading\n\nSome **bold** text and a [link](https://example.com).'}
+              rows={14}
+              autoFocus
             />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1 space-y-4">
-              <label htmlFor="markdownInput" className="form-label">
-                Markdown Input
-              </label>
-              <AutoTextarea
-                id="markdownInput"
-                value={markdownInput}
-                onChange={(e) => setMarkdownInput(e.target.value)}
-                placeholder="e.g. # Hello World\n\nThis is a **Markdown** previewer."
-                className="input-field w-full h-64"
-              />
-            </div>
-
-            <div className="flex-1 space-y-4">
-              <div className="flex justify-between items-center">
-                <label className="form-label">Preview</label>
-                <div className="flex items-center gap-2">
-                  <CopyButton text={getResultsText()} />
-                  <DownloadButton
-                    content={previewOutput}
-                    fileName="preview.html"
-                    fileType="html"
-                    disabled={!previewOutput}
-                  />
-                </div>
-              </div>
-              <AutoTextarea
-                id="markdownOutput"
-                value={previewOutput}
-                readOnly
-                placeholder="e.g. <h1>Hello World</h1><p>This is a <strong>Markdown</strong> previewer.</p>"
-                className="input-field w-full h-64"
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div aria-live="polite" className="mt-4">
-              <ErrorBox message={error} />
-            </div>
-          )}
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+          </Field>
+          <Output label="Preview" copyText={html} fileName="preview.html" mime="text/html">
+            {html ? (
+              <div className="prose-tool thin-scroll max-h-[40rem] overflow-auto px-4 py-3" dangerouslySetInnerHTML={{ __html: html }} />
+            ) : (
+              <EmptyState>Rendered Markdown appears here</EmptyState>
+            )}
+          </Output>
+        </TwoPane>
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default MarkdownPreviewer;

@@ -1,0 +1,90 @@
+# XUtil
+
+> 63 free developer tools that run entirely in the browser: encoders, decoders, converters, generators, formatters and image utilities. No ads, no accounts, no data leaves the page.
+
+Every tool is a single page. Paste or type on the left, the result appears on the right as you type, and every result has a Copy button. Each page ends with an explainer and FAQ about the format or conversion it handles.
+
+## Encode & decode
+
+- [GUID Generator](https://xutil.in/guid): One or many UUIDs, version 4 or 7.
+- [ULID Generator](https://xutil.in/ulid): Sortable 26-character IDs with a time prefix.
+- [Password Generator](https://xutil.in/password): Random passwords with length and character-set controls.
+- [Hash Generator](https://xutil.in/hash): SHA-1, SHA-256, SHA-384 and SHA-512 for any text.
+- [Base64 Encoder / Decoder](https://xutil.in/base): Base64, Base32 and Base58 in both directions.
+- [ROT13 / Caesar Cipher](https://xutil.in/cipher): Shift letters by any amount, or ROT13 in one click.
+- [JWT Decoder](https://xutil.in/jwt): Read a token’s header and payload without sending it anywhere.
+- [URL Encoder / Decoder](https://xutil.in/eurl): Percent-encode text for URLs, or decode it back.
+- [HTML Entities](https://xutil.in/html): Escape &, < and > for HTML, or unescape them.
+- [Morse Code Translator](https://xutil.in/morse): Text to dots and dashes, and back.
+
+## Data formats
+
+- [XML ⇄ JSON](https://xutil.in/xml_json): Convert between XML and JSON, from text or a file.
+- [YAML ⇄ JSON](https://xutil.in/yaml_json): Convert between YAML and JSON, from text or a file.
+- [CSV ⇄ JSON](https://xutil.in/csv_json): Convert between CSV and JSON, from text or a file.
+- [JSON to TypeScript](https://xutil.in/json_ts): Infer TypeScript interfaces from a JSON sample.
+- [JSON to Python Dataclass](https://xutil.in/json_python): Infer Python dataclasses from a JSON sample.
+- [JSON to Pydantic Model](https://xutil.in/json_pydantic): Infer Pydantic models from a JSON sample.
+- [Base Number Converter](https://xutil.in/base_number): Binary, octal, decimal, hex and any base up to 36.
+- [Text ⇄ Binary / Hex](https://xutil.in/text_base): Text to binary, hex, octal or decimal, and back.
+- [Unix ⇄ UTC](https://xutil.in/unix_utc): Epoch seconds or milliseconds to a readable date, and back.
+- [Timezone Converter](https://xutil.in/timezone): Convert a time between cities, with DST handled.
+- [Cron Converter](https://xutil.in/cron): Describe a schedule in words and get the cron expression.
+
+## Units & measures
+
+- [Angle](https://xutil.in/angle): Degrees, radians, gradians and turns.
+- [Area](https://xutil.in/area): Square metres, feet, acres and hectares.
+- [Bits / Bytes](https://xutil.in/bit_byte): Bits, bytes and every prefix up to petabytes.
+- [Energy](https://xutil.in/energy): Joules, calories, kilowatt-hours and BTU.
+- [Frequency](https://xutil.in/frequency): Hertz, kilohertz, megahertz and RPM.
+- [Fuel Economy](https://xutil.in/fuel_economy): Miles per gallon, km per litre and litres per 100 km.
+- [Length](https://xutil.in/length): Metres, feet, miles, inches and nautical miles.
+- [Power](https://xutil.in/power): Watts, kilowatts and horsepower.
+- [Pressure](https://xutil.in/pressure): Pascals, bar, PSI and atmospheres.
+- [Speed](https://xutil.in/speed): km/h, mph, knots and metres per second.
+- [Temperature](https://xutil.in/temperature): Celsius, Fahrenheit and Kelvin.
+- [Time Unit](https://xutil.in/time): Seconds, minutes, hours, days and beyond.
+- [Volume](https://xutil.in/volume): Litres, gallons, pints and cubic metres.
+- [Weight](https://xutil.in/weight): Kilograms, pounds, ounces and stone.
+
+## Text & code
+
+- [Lorem Ipsum Generator](https://xutil.in/lorem): Placeholder paragraphs, sentences or words.
+- [Slug Generator](https://xutil.in/slug): Turn a title into a URL-safe slug.
+- [Text Compare](https://xutil.in/text_compare): Line-by-line diff of two texts.
+- [URL Parser](https://xutil.in/url_parser): Break a URL into host, path, query and fragment.
+- [JSON Formatter & Validator](https://xutil.in/json_validator): Validate, pretty-print or minify JSON.
+- [Text Case Converter](https://xutil.in/text_case): camelCase, snake_case, kebab-case, Title Case and more.
+- [Markdown Previewer](https://xutil.in/markdown): Render Markdown as you type.
+- [Whitespace Remover](https://xutil.in/line_break_whitespace_remover): Strip line breaks, extra spaces or both.
+- [Duplicate Line Remover](https://xutil.in/duplicate_line_remover): Keep each line once.
+- [String Counter](https://xutil.in/string_counter): Characters, words, lines and bytes.
+- [Regex Tester](https://xutil.in/regex): Test a pattern against text with live matches.
+- [Regex Cheatsheet](https://xutil.in/regex_cheatsheet): Regular-expression syntax with examples.
+
+## Word play
+
+- [Palindrome Checker](https://xutil.in/palindrome): Does it read the same backwards?
+- [String Reverser / Rotator](https://xutil.in/string_reverser_rotator): Reverse a string or rotate it by n characters.
+- [Roman Numeral Converter](https://xutil.in/roman_numeral): 1984 ⇄ MCMLXXXIV.
+- [NATO Phonetic Alphabet](https://xutil.in/nato_phonetic): Spell text out as Alfa, Bravo, Charlie.
+- [Pig Latin Converter](https://xutil.in/pig_latin): English to Pig Latin and back.
+- [Numeronym Generator](https://xutil.in/numeronym): internationalization → i18n.
+- [Leetspeak Translator](https://xutil.in/leetspeak): Text to l33t and back.
+- [Word Frequency Counter](https://xutil.in/word_frequency_counter): Which words appear most, and how often.
+
+## Images & colour
+
+- [QR Code Generator](https://xutil.in/qr_code): QR codes for text, links, Wi-Fi and contacts.
+- [Barcode Generator](https://xutil.in/barcode_generator): EAN, UPC, Code 128 and more as SVG or PNG.
+- [Barcode / QR Reader](https://xutil.in/barcode_reader): Decode a barcode or QR code from an image.
+- [Color Picker](https://xutil.in/color_picker): Pick a colour and copy it in every format.
+- [Favicon Generator](https://xutil.in/favicon): Every favicon size from one image.
+- [Image Compressor](https://xutil.in/image_compressor): Shrink a JPEG, PNG or WebP in the browser.
+- [Gradient Generator](https://xutil.in/gradient_generator): Build a CSS gradient and copy the rule.
+- [Box Shadow Generator](https://xutil.in/box_shadow_generator): Tune a shadow and copy the CSS.
+
+## Optional
+
+- [Source on GitHub](https://github.com/RohitPModani/xutil): the full source code (React + TypeScript).

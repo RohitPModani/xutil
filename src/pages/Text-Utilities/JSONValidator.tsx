@@ -1,133 +1,109 @@
-import { useState, useEffect } from "react";
-import LoadingButton from "../../components/LoadingButton";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import DownloadButton from "../../components/DownloadButton";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import ClearButton from "../../components/ClearButton";
-import { updateToolUsage } from "../../utils/toolUsage";
-import seoDescriptions from "../../data/seoDescriptions";
-import { getErrorMessage } from "../../utils/errors";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, Field, FileDrop, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
+import { getErrorMessage } from '../../utils/errors';
+import { useSourceText } from '../../hooks/useSourceText';
 
-const JSONValidator: React.FC = () => {
-  const seo = seoDescriptions.jsonValidator;
-  const [jsonInput, setJsonInput] = useState<string>("");
-  const [jsonOutput, setJsonOutput] = useState<string>("");
-  const [isValid, setIsValid] = useState<boolean | null>(null);
-  const [error, setError] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+type Indent = '2' | '4' | 'min';
 
-  useEffect(() => {
-    updateToolUsage("json_validator");
-  }, []);
+/** Line number from a JSON.parse message, when the engine includes a position. */
+function lineOf(message: string, input: string): number | null {
+  const line = /line (\d+)/.exec(message);
+  if (line) return Number(line[1]);
+  const pos = /position (\d+)/.exec(message);
+  if (pos) return input.slice(0, Number(pos[1])).split('\n').length;
+  return null;
+}
 
-  const handleValidation = () => {
-    setIsLoading(true);
-    setError("");
-    setJsonOutput("");
-    try {
-      const parsed = JSON.parse(jsonInput);
-      const formatted = JSON.stringify(parsed, null, 2);
-      setJsonOutput(formatted);
-      setIsValid(true);
-    } catch (err) {
-      setIsValid(false);
-      setError(`Invalid JSON: ${getErrorMessage(err, "could not be parsed")}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleClear = () => {
-    setJsonInput("");
-    setJsonOutput("");
-    setIsValid(null);
-    setError("");
-  };
-
-  return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">
-              JSON Validator & Formatter
-            </h3>
-            <ClearButton onClick={handleClear} disabled={!jsonInput} />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Input Text Area */}
-            <div className="flex-1 space-y-4">
-              <label htmlFor="jsonInput" className="form-label">
-                Input JSON:
-              </label>
-              <AutoTextarea
-                id="jsonInput"
-                value={jsonInput}
-                onChange={(e) => setJsonInput(e.target.value)}
-                placeholder="Paste your JSON here..."
-                className="input-field w-full h-64"
-              />
-              <LoadingButton
-                onClick={handleValidation}
-                isLoading={isLoading}
-                disabled={!jsonInput}
-              >
-                Validate & Format
-              </LoadingButton>
-            </div>
-
-            {/* Output Text Area */}
-            <div className="flex-1 space-y-4">
-              <div className="flex justify-between items-center">
-                <label htmlFor="jsonOutput" className="form-label">
-                  Formatted JSON:
-                </label>
-                <div className="flex items-center gap-2">
-                  <CopyButton text={jsonOutput} />
-                  <DownloadButton
-                    content={jsonOutput}
-                    fileName="formatted.json"
-                    fileType="json"
-                    disabled={!jsonOutput}
-                  />
-                </div>
-              </div>
-              <AutoTextarea
-                id="jsonOutput"
-                value={jsonOutput}
-                readOnly
-                placeholder="Formatted JSON will appear here..."
-                className="input-field w-full h-64"
-              />
-            </div>
-          </div>
-
-          {isValid !== null && (
-            <div className="space-y-2 mt-4 ">
-              {isValid ? (
-                <div className="text-green-500 text-base font-semibold">
-                  Valid JSON
-                </div>
-              ) : (
-                <div className="text-red-500 text-base font-semibold">
-                  {error}
-                </div>
-              )}
-            </div>
-          )}
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
-  );
+const describe = (v: unknown) => {
+  if (Array.isArray(v)) return `${v.length.toLocaleString()} items`;
+  if (v && typeof v === 'object') return `${Object.keys(v).length.toLocaleString()} keys`;
+  return typeof v;
 };
 
-export default JSONValidator;
+export default function JSONValidator() {
+  const { text: input, setText: setInput, fileBase, loadFile, clear: clearSource } = useSourceText();
+  const [indent, setIndent] = useState<Indent>('2');
+
+  const result = useMemo(() => {
+    if (!input.trim()) return null;
+    try {
+      const parsed: unknown = JSON.parse(input);
+      const out = indent === 'min' ? JSON.stringify(parsed) : JSON.stringify(parsed, null, Number(indent));
+      return { out, summary: describe(parsed), error: '', line: null };
+    } catch (e) {
+      const message = getErrorMessage(e, 'Could not parse this JSON.');
+      return { out: '', summary: '', error: message, line: lineOf(message, input) };
+    }
+  }, [input, indent]);
+
+  return (
+    <ToolPage id="json_validator">
+      <Panel
+        title="Format"
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Indent"
+              value={indent}
+              onChange={setIndent}
+              options={[
+                { value: '2', label: '2 spaces' },
+                { value: '4', label: '4 spaces' },
+                { value: 'min', label: 'Minify' },
+              ]}
+            />
+            <ClearButton
+              onClick={clearSource}
+              disabled={!input}
+            />
+          </>
+        }
+      >
+        <TwoPane>
+          <Field label="JSON" htmlFor="json-input">
+            <TextArea
+              id="json-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={'{"name": "xutil", "tools": 42}'}
+              rows={12}
+              stats
+              autoFocus
+              aria-invalid={Boolean(result?.error) || undefined}
+              aria-describedby={result?.error ? 'json-error' : undefined}
+            />
+            <FileDrop
+              className="mt-3"
+              accept=".json,.txt"
+              label="Load a file"
+              onFile={loadFile}
+              onClear={clearSource}
+            />
+          </Field>
+          <Output
+            label={indent === 'min' ? 'Minified' : 'Formatted'}
+            value={result?.out ?? ''}
+            rows={12}
+            wrap={indent !== 'min'}
+            fileName={`${fileBase || 'formatted'}.json`}
+            mime="application/json"
+          />
+        </TwoPane>
+
+        {result?.error && (
+          <Callout tone="error" id="json-error" className="mt-4">
+            {result.line !== null && <span className="font-medium">Line {result.line}: </span>}
+            {result.error}
+          </Callout>
+        )}
+        {result && !result.error && (
+          <Callout tone="success" className="mt-4">
+            Valid JSON · {result.summary}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
+  );
+}

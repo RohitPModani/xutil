@@ -1,278 +1,89 @@
-import { useEffect, useRef, useReducer } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import ClearButton from "../../components/ClearButton";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import ToggleSwitch from "../../components/ToggleSwitch";
-import { getErrorMessage } from "../../utils/errors";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { ClearButton, Field, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
 
-type Mode = "encode" | "decode";
+type Direction = 'encode' | 'decode';
 
-interface HtmlResult {
-  input: string;
-  output: string;
-}
-
-// Expanded HTML entity encoding/decoding maps
 const encodeMap: Record<string, string> = {
-  "<": "&lt;",
-  ">": "&gt;",
-  "&": "&amp;",
-  '"': "&quot;",
-  "'": "&apos;",
-  "©": "&copy;",
-  "®": "&reg;",
-  "€": "&euro;",
-  "£": "&pound;",
-  "¥": "&yen;",
-  "¢": "&cent;",
+  '<': '&lt;',
+  '>': '&gt;',
+  '&': '&amp;',
+  '"': '&quot;',
+  "'": '&apos;',
+  '©': '&copy;',
+  '®': '&reg;',
+  '€': '&euro;',
+  '£': '&pound;',
+  '¥': '&yen;',
+  '¢': '&cent;',
 };
 
 const decodeMap: Record<string, string> = {
-  "&lt;": "<",
-  "&gt;": ">",
-  "&amp;": "&",
-  "&quot;": '"',
-  "&apos;": "'",
-  "&copy;": "©",
-  "&reg;": "®",
-  "&euro;": "€",
-  "&pound;": "£",
-  "&yen;": "¥",
-  "&cent;": "¢",
-  "&amp;lt;": "<",
-  "&amp;gt;": ">",
-  "&amp;amp;": "&",
-  "&amp;quot;": '"',
-  "&amp;apos;": "'",
+  ...Object.fromEntries(Object.entries(encodeMap).map(([ch, ent]) => [ent, ch])),
+  '&amp;lt;': '<',
+  '&amp;gt;': '>',
+  '&amp;amp;': '&',
+  '&amp;quot;': '"',
+  '&amp;apos;': "'",
 };
 
-type State = {
-  inputText: string;
-  result: HtmlResult | null;
-  error: string;
-  mode: Mode;
-  characterCount: number;
-  isLoading: boolean;
-};
+const htmlEncode = (text: string) => text.replace(/[&<>"'©®€£¥¢]/g, (ch) => encodeMap[ch]);
 
-type Action =
-  | { type: "SET_INPUT"; payload: string }
-  | { type: "SET_RESULT"; payload: HtmlResult | null }
-  | { type: "SET_ERROR"; payload: string }
-  | { type: "SET_MODE"; payload: Mode }
-  | { type: "SET_LOADING"; payload: boolean }
-  | { type: "RESET" };
+const htmlDecode = (text: string) =>
+  text.replace(/&(?:amp;)?(?:[a-z]+|#\d+|#x[\da-f]+);/gi, (match) => {
+    const named = decodeMap[match.toLowerCase()];
+    if (named) return named;
+    const num = match.match(/&#(x[\da-f]+|\d+);/i);
+    if (!num) return match;
+    const code = num[1].startsWith('x') ? parseInt(num[1].slice(1), 16) : parseInt(num[1], 10);
+    return code <= 0x10ffff ? String.fromCodePoint(code) : match;
+  });
 
-const initialState: State = {
-  inputText: "",
-  result: null,
-  error: "",
-  mode: "encode",
-  characterCount: 0,
-  isLoading: false,
-};
+export default function HTMLEntities() {
+  const [input, setInput] = useState('');
+  const [direction, setDirection] = useState<Direction>('encode');
 
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case "SET_INPUT":
-      return {
-        ...state,
-        inputText: action.payload,
-        characterCount: action.payload.length,
-        error: "",
-      };
-    case "SET_RESULT":
-      return { ...state, result: action.payload, error: "" };
-    case "SET_ERROR":
-      return { ...state, error: action.payload, result: null };
-    case "SET_MODE":
-      return { ...state, mode: action.payload };
-    case "SET_LOADING":
-      return { ...state, isLoading: action.payload };
-    case "RESET":
-      return initialState;
-    default:
-      return state;
-  }
-}
-
-function htmlEncode(text: string): string {
-  return text.replace(/[&<>"' ©®€£¥¢]/g, (char) => encodeMap[char] || char);
-}
-
-function htmlDecode(text: string): string {
-  try {
-    return text.replace(/&(?:amp;)?(?:[a-z]+|#\d+|#x[\da-f]+);/gi, (match) => {
-      const lowerMatch = match.toLowerCase();
-      if (decodeMap[lowerMatch]) return decodeMap[lowerMatch];
-
-      const numericMatch = match.match(/&#(x[\da-f]+|\d+);/i);
-      if (numericMatch) {
-        const code = numericMatch[1].startsWith("x")
-          ? parseInt(numericMatch[1].substring(1), 16)
-          : parseInt(numericMatch[1], 10);
-        return code <= 0x10ffff ? String.fromCharCode(code) : match;
-      }
-
-      return match;
-    });
-  } catch {
-    throw new Error("Invalid HTML entities in input");
-  }
-}
-
-function HtmlEntities() {
-  const seo = seoDescriptions.htmlEntities;
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    updateToolUsage("html");
-  }, []);
-
-  // Process input automatically when mode or input changes
-  useEffect(() => {
-    if (!state.inputText.trim()) {
-      dispatch({ type: "SET_RESULT", payload: null });
-      return;
-    }
-
-    dispatch({ type: "SET_LOADING", payload: true });
-
-    try {
-      const output =
-        state.mode === "encode"
-          ? htmlEncode(state.inputText)
-          : htmlDecode(state.inputText);
-
-      dispatch({
-        type: "SET_RESULT",
-        payload: {
-          input: state.inputText,
-          output,
-        },
-      });
-    } catch (err) {
-      dispatch({
-        type: "SET_ERROR",
-        payload: getErrorMessage(err, "").includes("Invalid HTML")
-          ? "Contains invalid HTML entities"
-          : "Processing failed. Please check your input.",
-      });
-    } finally {
-      dispatch({ type: "SET_LOADING", payload: false });
-    }
-  }, [state.inputText, state.mode]);
-
-  const handleClearAll = () => {
-    dispatch({ type: "RESET" });
-    textareaRef.current?.focus();
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    dispatch({ type: "SET_INPUT", payload: e.target.value });
-  };
-
-  const handleModeChange = (mode: string) => {
-    dispatch({ type: "SET_MODE", payload: mode as Mode });
-  };
+  const out = useMemo(() => (input ? (direction === 'encode' ? htmlEncode(input) : htmlDecode(input)) : ''), [input, direction]);
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">HTML Entities Converter</h3>
-            <ClearButton onClick={handleClearAll} disabled={!state.inputText} />
-          </div>
-          <hr className="line-break" />
-          <div className="mb-4 flex items-center justify-between">
-            <ToggleSwitch
+    <ToolPage id="html">
+      <Panel
+        title="Convert"
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Direction"
+              value={direction}
+              onChange={setDirection}
               options={[
-                { value: "encode", label: "Encode" },
-                { value: "decode", label: "Decode" },
+                { value: 'encode', label: 'Escape' },
+                { value: 'decode', label: 'Unescape' },
               ]}
-              selected={state.mode}
-              onChange={handleModeChange}
             />
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Input Section */}
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center justify-between">
-                <label htmlFor="html-input" className="form-label">
-                  {state.mode === "encode" ? "Original Text" : "Encoded HTML"}
-                </label>
-                <span className="text-sm text-faint">
-                  {state.characterCount} chars
-                </span>
-              </div>
-              <AutoTextarea
-                id="html-input"
-                ref={textareaRef}
-                value={state.inputText}
-                onChange={handleInputChange}
-                className="input-field w-full"
-                placeholder={
-                  state.mode === "encode"
-                    ? "Enter text to encode as HTML entities"
-                    : "Enter HTML entities to decode"
-                }
-                aria-describedby={state.error ? "html-error" : undefined}
-              />
-            </div>
-
-            {/* Output Section */}
-            <div className="flex-1 space-y-4 mt-1">
-              <div className="flex items-center justify-between">
-                <label className="form-label mb-1">
-                  {state.mode === "encode" ? "Encoded HTML" : "Decoded Text"}
-                </label>
-                {state.result && <CopyButton text={state.result.output} />}
-              </div>
-              <AutoTextarea
-                value={state.result?.output || ""}
-                readOnly
-                className="input-field w-full"
-                placeholder={
-                  state.isLoading
-                    ? "Processing..."
-                    : "Converted result will appear here"
-                }
-              />
-              {state.result && (
-                <div className="flex justify-between items-center">
-                  <p className="text-sm text-muted">
-                    {state.mode === "encode" ? "HTML Encoded" : "HTML Decoded"}
-                  </p>
-                  <span className="text-sm text-faint">
-                    {state.result.output.length} chars
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <ErrorBox
-            message={state.error}
-            id={state.error ? "html-error" : undefined}
-          />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+            <ClearButton onClick={() => setInput('')} disabled={!input} />
+          </>
+        }
+      >
+        <TwoPane>
+          <Field
+            label={direction === 'encode' ? 'Text' : 'HTML'}
+            htmlFor="html-input"
+            hint={direction === 'encode' ? 'Escapes & < > " \' and a few symbols.' : 'Named, decimal and hex entities are unescaped.'}
+          >
+            <TextArea
+              id="html-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={direction === 'encode' ? '<a href="/">Tom & Jerry</a>' : '&lt;a href=&quot;/&quot;&gt;Tom &amp; Jerry&lt;/a&gt;'}
+              rows={10}
+              stats
+              autoFocus
+            />
+          </Field>
+          <Output label={direction === 'encode' ? 'HTML' : 'Text'} value={out} rows={10} />
+        </TwoPane>
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default HtmlEntities;

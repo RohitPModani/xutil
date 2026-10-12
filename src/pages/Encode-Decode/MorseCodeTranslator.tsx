@@ -1,424 +1,165 @@
-import { useEffect, useState, useRef } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { AudioLines, Music } from "lucide-react";
-import useDebounce from "../../hooks/useDebounce";
-import { getErrorMessage } from "../../utils/errors";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import { Volume2 } from 'lucide-react';
+import ToolPage from '../../components/ToolPage';
+import { Button, Callout, ClearButton, Field, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
+import { getErrorMessage } from '../../utils/errors';
 
-// Extended Morse code mapping with punctuation and special characters
-const MORSE_CODE_MAP: { [key: string]: string } = {
-  A: ".-",
-  B: "-...",
-  C: "-.-.",
-  D: "-..",
-  E: ".",
-  F: "..-.",
-  G: "--.",
-  H: "....",
-  I: "..",
-  J: ".---",
-  K: "-.-",
-  L: ".-..",
-  M: "--",
-  N: "-.",
-  O: "---",
-  P: ".--.",
-  Q: "--.-",
-  R: ".-.",
-  S: "...",
-  T: "-",
-  U: "..-",
-  V: "...-",
-  W: ".--",
-  X: "-..-",
-  Y: "-.--",
-  Z: "--..",
-  "0": "-----",
-  "1": ".----",
-  "2": "..---",
-  "3": "...--",
-  "4": "....-",
-  "5": ".....",
-  "6": "-....",
-  "7": "--...",
-  "8": "---..",
-  "9": "----.",
-  ".": ".-.-.-",
-  ",": "--..--",
-  "?": "..--..",
-  "'": ".----.",
-  "!": "-.-.--",
-  "/": "-..-.",
-  "(": "-.--.",
-  ")": "-.--.-",
-  "&": ".-...",
-  ":": "---...",
-  ";": "-.-.-.",
-  "=": "-...-",
-  "+": ".-.-.",
-  "-": "-....-",
-  _: "..--.-",
-  '"': ".-..-.",
-  $: "...-..-",
-  "@": ".--.-.",
-  " ": "/",
+type Direction = 'encode' | 'decode';
+
+const MORSE: Record<string, string> = {
+  A: '.-', B: '-...', C: '-.-.', D: '-..', E: '.', F: '..-.', G: '--.', H: '....', I: '..', J: '.---',
+  K: '-.-', L: '.-..', M: '--', N: '-.', O: '---', P: '.--.', Q: '--.-', R: '.-.', S: '...', T: '-',
+  U: '..-', V: '...-', W: '.--', X: '-..-', Y: '-.--', Z: '--..',
+  '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-',
+  '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.',
+  '.': '.-.-.-', ',': '--..--', '?': '..--..', "'": '.----.', '!': '-.-.--', '/': '-..-.',
+  '(': '-.--.', ')': '-.--.-', '&': '.-...', ':': '---...', ';': '-.-.-.', '=': '-...-',
+  '+': '.-.-.', '-': '-....-', _: '..--.-', '"': '.-..-.', $: '...-..-', '@': '.--.-.',
 };
-
-// Reverse mapping for Morse to text
-const MORSE_TO_TEXT_MAP: { [key: string]: string } = Object.fromEntries(
-  Object.entries(MORSE_CODE_MAP).map(([char, code]) => [code, char])
-);
-
-// Common Morse code sequences
-const COMMON_SEQUENCES = {
-  SOS: "... --- ...",
-  OK: "--- -.-",
-  HELP: ".... . .-.. .--.",
-  LOVE: ".-.. --- ...- .",
-  HI: ".... ..",
-};
+const TEXT: Record<string, string> = Object.fromEntries(Object.entries(MORSE).map(([ch, code]) => [code, ch]));
 
 function textToMorse(text: string): string {
-  if (!text.trim()) {
-    return "";
-  }
-
-  // Convert to uppercase and replace multiple spaces with single space
-  const normalizedText = text.toUpperCase().replace(/\s+/g, " ");
-
-  return normalizedText
-    .split(" ")
+  return text
+    .toUpperCase()
+    .split(/\s+/)
     .map((word) =>
-      word
-        .split("")
-        .map((char) => MORSE_CODE_MAP[char] || "")
-        .filter((code) => code)
-        .join(" ")
+      Array.from(word, (ch) => MORSE[ch] ?? '')
+        .filter(Boolean)
+        .join(' ')
     )
-    .filter((word) => word)
-    .join(" / ");
+    .filter(Boolean)
+    .join(' / ');
 }
 
 function morseToText(morse: string): string {
-  if (!morse.trim()) {
-    return "";
-  }
-
-  // Normalize input: replace multiple slashes with single, trim spaces
-  const normalizedMorse = morse
-    .replace(/\/+/g, "/")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!/^[.\-/ ]+$/.test(normalizedMorse)) {
-    throw new Error(
-      "Morse code must contain only dots (.), dashes (-), spaces, and word separators (/)."
-    );
-  }
-
-  const words = normalizedMorse.split(" / ").filter((word) => word);
-
-  return words
-    .map((word) => {
-      const letters = word.split(" ").filter((letter) => letter);
-      return letters
+  const clean = morse.replace(/\/+/g, '/').replace(/\s+/g, ' ').trim();
+  if (!/^[.\-/ ]+$/.test(clean)) throw new Error('Morse code uses only dots, dashes, spaces and / between words.');
+  return clean
+    .split('/')
+    .map((word) =>
+      word
+        .split(' ')
+        .filter(Boolean)
         .map((code) => {
-          const char = MORSE_TO_TEXT_MAP[code];
-          if (!char) {
-            throw new Error(`Invalid Morse code sequence: ${code}`);
-          }
-          return char;
+          const ch = TEXT[code];
+          if (!ch) throw new Error(`"${code}" is not a Morse sequence.`);
+          return ch;
         })
-        .join("");
-    })
-    .join(" ");
+        .join('')
+    )
+    .join(' ')
+    .trim();
 }
 
-function MorseCodeTranslator() {
-  const seo = seoDescriptions.morseCode;
-  const [textInput, setTextInput] = useState("");
-  const [morseInput, setMorseInput] = useState("");
-  const [morseResult, setMorseResult] = useState("");
-  const [textResult, setTextResult] = useState("");
-  const [errorText, setErrorText] = useState("");
-  const [errorMorse, setErrorMorse] = useState("");
-  const [isPlaying, setIsPlaying] = useState(false);
-  const textRef = useRef<HTMLTextAreaElement>(null);
-  const morseRef = useRef<HTMLTextAreaElement>(null);
+// 600 Hz sidetone. Dot = 1 unit, dash = 3, gap inside a letter 1, between
+// letters 3, between words 7.
+function play(morse: string, onEnd: () => void) {
+  const ctx = new AudioContext();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.frequency.value = 600;
+  gain.gain.value = 0;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  const unit = 0.08;
+  let t = ctx.currentTime + 0.05;
+  for (const ch of morse) {
+    if (ch === '.' || ch === '-') {
+      gain.gain.setValueAtTime(1, t);
+      t += ch === '.' ? unit : unit * 3;
+      gain.gain.setValueAtTime(0, t);
+      t += unit;
+    } else if (ch === ' ') t += unit * 2;
+    else if (ch === '/') t += unit * 2;
+  }
+  osc.onended = () => {
+    void ctx.close();
+    onEnd();
+  };
+  osc.start();
+  osc.stop(t);
+}
 
-  const debouncedTextInput = useDebounce(textInput, 300);
-  const debouncedMorseInput = useDebounce(morseInput, 300);
+export default function MorseCodeTranslator() {
+  const [input, setInput] = useState('');
+  const [direction, setDirection] = useState<Direction>('encode');
+  const [playing, setPlaying] = useState(false);
 
-  useEffect(() => {
-    updateToolUsage("morse");
-  }, []);
-
-  // Auto-convert text to Morse when debouncedTextInput changes
-  useEffect(() => {
-    if (debouncedTextInput.trim()) {
-      handleTextToMorse();
-    } else {
-      setMorseResult("");
-      setErrorText("");
-    }
-  }, [debouncedTextInput]);
-
-  // Auto-convert Morse to text when debouncedMorseInput changes
-  useEffect(() => {
-    if (debouncedMorseInput.trim()) {
-      handleMorseToText();
-    } else {
-      setTextResult("");
-      setErrorMorse("");
-    }
-  }, [debouncedMorseInput]);
-
-  const handleTextToMorse = () => {
+  const result = useMemo(() => {
+    if (!input.trim()) return null;
     try {
-      const result = textToMorse(textInput);
-      setMorseResult(result);
-      setErrorText("");
-    } catch (err) {
-      setErrorText(getErrorMessage(err, "Failed to convert text to Morse code"));
-      setMorseResult("");
+      return { out: direction === 'encode' ? textToMorse(input) : morseToText(input), error: '' };
+    } catch (e) {
+      return { out: '', error: getErrorMessage(e, 'Could not translate the input.') };
     }
-  };
+  }, [input, direction]);
 
-  const handleMorseToText = () => {
-    try {
-      const result = morseToText(morseInput);
-      setTextResult(result);
-      setErrorMorse("");
-    } catch (err) {
-      setErrorMorse(getErrorMessage(err, "Failed to convert Morse code to text"));
-      setTextResult("");
-    }
-  };
-
-  const handleClearTexttoMorse = () => {
-    setTextInput("");
-    setMorseResult("");
-    setErrorText("");
-  };
-
-  const handleClearMorsetoText = () => {
-    setMorseInput("");
-    setTextResult("");
-    setErrorMorse("");
-  };
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setTextInput(e.target.value);
-  };
-
-  const handleMorseChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMorseInput(e.target.value);
-  };
-
-  const handleInsertSequence = (sequence: string) => {
-    setMorseInput((prev) => (prev ? `${prev} ${sequence}` : sequence));
-    if (morseRef.current) {
-      morseRef.current.focus();
-    }
-  };
-
-  const playMorseCode = () => {
-    if (!morseResult || isPlaying) return;
-
-    setIsPlaying(true);
-    const AudioContextCtor =
-      window.AudioContext ||
-      (window as Window & { webkitAudioContext?: typeof AudioContext })
-        .webkitAudioContext;
-    const audioContext = new AudioContextCtor();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = 600;
-    gainNode.gain.value = 0;
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    oscillator.start();
-
-    const timeUnit = 0.1; // seconds
-    let time = audioContext.currentTime;
-
-    const morse = morseResult.replace(/\s/g, "");
-    let index = 0;
-
-    const playNext = () => {
-      if (index >= morse.length) {
-        gainNode.gain.value = 0;
-        oscillator.stop();
-        setIsPlaying(false);
-        return;
-      }
-
-      const char = morse[index++];
-      if (char === ".") {
-        gainNode.gain.setValueAtTime(1, time);
-        time += timeUnit;
-        gainNode.gain.setValueAtTime(0, time);
-        time += timeUnit;
-      } else if (char === "-") {
-        gainNode.gain.setValueAtTime(1, time);
-        time += timeUnit * 3;
-        gainNode.gain.setValueAtTime(0, time);
-        time += timeUnit;
-      } else if (char === "/") {
-        time += timeUnit * 2; // Extra space between words
-      }
-
-      setTimeout(playNext, (time - audioContext.currentTime) * 1000);
-    };
-
-    playNext();
-  };
+  const out = result?.out ?? '';
+  const morse = direction === 'encode' ? out : input;
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Text to Morse Code</h3>
-            <div className="flex gap-2">
-              <ClearButton
-                onClick={handleClearTexttoMorse}
-                disabled={
-                  textInput === "" && morseResult === "" && errorText === ""
-                }
-              />
-            </div>
-          </div>
-          <hr className="line-break" />
-          <div className="space-y-4 mb-4">
-            <div>
-              <label className="form-label" htmlFor="text-input">
-                Input Text:
-              </label>
-              <AutoTextarea
-                id="text-input"
-                value={textInput}
-                onChange={handleTextChange}
-                className="input-field w-full"
-                placeholder="hello world"
-                ref={textRef}
-                aria-describedby={errorText ? "morse-text-error" : undefined}
-              />
-            </div>
-          </div>
-
-          {morseResult && (
-            <div className="result-box">
-              <div className="flex justify-between items-center mb-2">
-                <label className="form-label">Morse Code Result</label>
-                <div className="flex gap-2">
-                  <button
-                    onClick={playMorseCode}
-                    disabled={isPlaying || !morseResult}
-                    className="btn-secondary text-sm"
-                    aria-label="Play Morse code as sound"
-                  >
-                    {isPlaying ? (
-                      <AudioLines className="sm:w-5 sm:h-5 w-4 h-4 text-faint" />
-                    ) : (
-                      <Music className="sm:w-5 sm:h-5 w-4 h-4 text-faint" />
-                    )}
-                  </button>
-                  <CopyButton text={morseResult} />
-                </div>
-              </div>
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div className="w-full mono-output">{morseResult}</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <ErrorBox
-            message={errorText}
-            id={errorText ? "morse-text-error" : undefined}
-          />
-        </SectionCard>
-
-        <SectionCard className="mt-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Morse Code to Text</h3>
-            <ClearButton
-              onClick={handleClearMorsetoText}
-              disabled={
-                morseInput === "" && textResult === "" && errorMorse === ""
-              }
+    <ToolPage id="morse">
+      <Panel
+        title="Translate"
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Direction"
+              value={direction}
+              onChange={setDirection}
+              options={[
+                { value: 'encode', label: 'Text → Morse' },
+                { value: 'decode', label: 'Morse → Text' },
+              ]}
             />
-          </div>
-          <hr className="line-break" />
-          <div className="space-y-4 mb-4">
-            <div>
-              <label className="form-label" htmlFor="morse-input">
-                Morse Code:
-              </label>
-              <AutoTextarea
-                id="morse-input"
-                value={morseInput}
-                onChange={handleMorseChange}
-                className="input-field w-full"
-                placeholder=".... . .-.. .-.. --- / .-- --- .-. .-.. -.."
-                ref={morseRef}
-                aria-describedby={errorMorse ? "morse-code-error" : undefined}
-              />
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-sm text-dim">Common sequences:</span>
-              {Object.entries(COMMON_SEQUENCES).map(([text, code]) => (
-                <button
-                  key={text}
-                  onClick={() => handleInsertSequence(code)}
-                  className="btn-secondary text-xs"
-                  aria-label={`Insert ${text} Morse code`}
-                >
-                  {text} ({code})
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {textResult && (
-            <div className="result-box">
-              <div className="flex justify-between items-center mb-2">
-                <label className="form-label">Text Result</label>
-                <CopyButton text={textResult} />
-              </div>
-              <div className="scrollbox mt-2">
-                <div className="inner-result">
-                  <div className="w-full mono-output">{textResult}</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <ErrorBox
-            message={errorMorse}
-            id={errorMorse ? "morse-code-error" : undefined}
+            <ClearButton onClick={() => setInput('')} disabled={!input} />
+          </>
+        }
+      >
+        <TwoPane>
+          <Field
+            label={direction === 'encode' ? 'Text' : 'Morse'}
+            htmlFor="morse-input"
+            hint={direction === 'encode' ? 'Letters, digits and common punctuation. Anything else is skipped.' : 'Space between letters, / between words.'}
+          >
+            <TextArea
+              id="morse-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={direction === 'encode' ? 'Hello world' : '.... . .-.. .-.. --- / .-- --- .-. .-.. -..'}
+              rows={10}
+              stats
+              autoFocus
+              aria-invalid={Boolean(result?.error) || undefined}
+            />
+          </Field>
+          <Output
+            label={direction === 'encode' ? 'Morse' : 'Text'}
+            value={out}
+            rows={10}
+            actions={
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={!out || playing}
+                onClick={() => {
+                  setPlaying(true);
+                  play(morse, () => setPlaying(false));
+                }}
+                icon={<Volume2 className="h-3.5 w-3.5" aria-hidden="true" />}
+              >
+                {playing ? 'Playing' : 'Play'}
+              </Button>
+            }
           />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+        </TwoPane>
+        {result?.error && (
+          <Callout tone="error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default MorseCodeTranslator;

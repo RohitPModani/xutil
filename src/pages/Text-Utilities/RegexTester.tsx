@@ -1,132 +1,133 @@
-import { useEffect, useState } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import LoadingButton from "../../components/LoadingButton";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import ClearButton from "../../components/ClearButton";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import seoDescriptions from "../../data/seoDescriptions";
-import { getErrorMessage } from "../../utils/errors";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
+import { BookOpen } from 'lucide-react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, Checkbox, ClearButton, Field, Input, Output, Panel, Stat, TextArea, Toolbar } from '../../ui';
+import { getErrorMessage } from '../../utils/errors';
 
-function RegexTester() {
-  const seo = seoDescriptions.regexTester;
-  const [regexInput, setRegexInput] = useState("");
-  const [testString, setTestString] = useState("");
-  const [isValidRegex, setIsValidRegex] = useState<boolean | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [matches, setMatches] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+const FLAGS = [
+  { flag: 'g', label: 'g · global' },
+  { flag: 'i', label: 'i · ignore case' },
+  { flag: 'm', label: 'm · multiline' },
+  { flag: 's', label: 's · dot matches newline' },
+  { flag: 'u', label: 'u · unicode' },
+];
 
-  useEffect(() => {
-    updateToolUsage("regex");
-  }, []);
-
-  const handleTestRegex = () => {
-    setIsLoading(true);
-    setError(null);
-    setMatches([]);
-    try {
-      const regex = new RegExp(regexInput, "g");
-      const matchResults = Array.from(testString.matchAll(regex)).map(
-        (m) => m[0]
-      );
-      if (matchResults.length > 0) {
-        setMatches(matchResults);
-        setIsValidRegex(true);
-      } else {
-        setIsValidRegex(false);
-      }
-    } catch (err) {
-      setError("Invalid Regex: " + getErrorMessage(err, "invalid pattern"));
-      setIsValidRegex(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleClear = () => {
-    setRegexInput("");
-    setTestString("");
-    setIsValidRegex(null);
-    setError(null);
-    setMatches([]);
-  };
-
-  return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="section-title">
-                Regex Tester
-              </h3>
-              <ClearButton
-                onClick={handleClear}
-                disabled={!regexInput && !testString}
-              />
-            </div>
-            <hr className="line-break" />
-            <div className="flex flex-col gap-2 mb-4">
-              <label className="form-label mb-0">Regex:</label>
-              <AutoTextarea
-                className="input-field w-full"
-                placeholder="e.g. [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-                value={regexInput}
-                onChange={(e) => setRegexInput(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col gap-2 mb-4">
-              <label className="form-label mb-0">Test String:</label>
-              <AutoTextarea
-                className="input-field w-full"
-                placeholder="e.g. user@example.com, test@domain.org"
-                value={testString}
-                onChange={(e) => setTestString(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-row items-center justify-between mb-4">
-              <LoadingButton isLoading={isLoading} onClick={handleTestRegex}>
-                Test Regex
-              </LoadingButton>
-            </div>
-            <div className="result-box mt-1">
-              <div className="flex justify-between items-center">
-                <label className="form-label sm:text-base">Matches</label>
-                {matches.length > 0 && (
-                  <CopyButton text={matches.join(", ")} className="mb-1" />
-                )}
-              </div>
-              {isValidRegex && matches.length > 0 && (
-                <div className="scrollbox mt-2">
-                  <div className="inner-result">
-                    <ul className="list-disc pl-5">
-                      {matches.map((match, index) => (
-                        <li key={index}>{match}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </div>
-            {error && (
-              <div aria-live="polite">
-                <ErrorBox message={error} />
-              </div>
-            )}
-          </div>
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
-  );
+/** The test text with each match wrapped in <mark>. */
+function highlight(text: string, matches: RegExpMatchArray[]): ReactNode[] {
+  const out: ReactNode[] = [];
+  let cursor = 0;
+  matches.forEach((m, i) => {
+    const start = m.index ?? 0;
+    if (start > cursor) out.push(text.slice(cursor, start));
+    out.push(
+      <mark key={i} className="rounded-sm bg-primary/20 text-ink">
+        {m[0]}
+      </mark>
+    );
+    cursor = start + m[0].length;
+  });
+  if (cursor < text.length) out.push(text.slice(cursor));
+  return out;
 }
 
-export default RegexTester;
+export default function RegexTester() {
+  const [pattern, setPattern] = useState('');
+  const [flags, setFlags] = useState('g');
+  const [text, setText] = useState('');
+
+  const toggle = (f: string, on: boolean) =>
+    setFlags((prev) => FLAGS.map((x) => x.flag).filter((x) => (x === f ? on : prev.includes(x))).join(''));
+
+  const result = useMemo(() => {
+    if (!pattern) return null;
+    try {
+      const re = new RegExp(pattern, flags);
+      let matches: RegExpMatchArray[];
+      if (flags.includes('g')) {
+        matches = [...text.matchAll(re)].filter((m) => m[0] !== '');
+      } else {
+        const m = text.match(re);
+        matches = m && m[0] !== '' ? [m] : [];
+      }
+      return { matches, error: '' };
+    } catch (e) {
+      return { matches: [], error: getErrorMessage(e, 'Invalid pattern.') };
+    }
+  }, [pattern, flags, text]);
+
+  const matches = result?.matches ?? [];
+
+  return (
+    <ToolPage id="regex">
+      <Panel
+        title="Test"
+        actions={
+          <>
+            <Link
+              to="/regex_cheatsheet"
+              className="inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-muted transition-colors duration-150 hover:bg-surface hover:text-ink"
+            >
+              <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+              Cheatsheet
+            </Link>
+            <ClearButton
+              onClick={() => {
+                setPattern('');
+                setText('');
+              }}
+              disabled={!pattern && !text}
+            />
+          </>
+        }
+      >
+        <Field label="Pattern" htmlFor="re-pattern">
+          <Input
+            id="re-pattern"
+            value={pattern}
+            onChange={(e) => setPattern(e.target.value)}
+            placeholder="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}"
+            autoFocus
+            aria-invalid={Boolean(result?.error) || undefined}
+            aria-describedby={result?.error ? 're-error' : undefined}
+          />
+        </Field>
+        <Toolbar className="mt-3 gap-x-5">
+          {FLAGS.map((f) => (
+            <Checkbox key={f.flag} label={f.label} checked={flags.includes(f.flag)} onChange={(e) => toggle(f.flag, e.target.checked)} />
+          ))}
+        </Toolbar>
+
+        <Field label="Test text" htmlFor="re-text" className="mt-4">
+          <TextArea
+            id="re-text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={'user@example.com, test@domain.org'}
+            rows={6}
+            mono={false}
+          />
+        </Field>
+
+        {result?.error && (
+          <Callout tone="error" id="re-error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+
+        {result && !result.error && (
+          <div className="mt-4 space-y-3">
+            <Stat label="Matches" value={matches.length.toLocaleString()} className="sm:max-w-[10rem]" />
+            <Output label="Matches" copyText={matches.map((m) => m[0]).join('\n')} placeholder="Matches are highlighted here">
+              {text && (
+                <div className="thin-scroll max-h-[32rem] overflow-auto whitespace-pre-wrap break-words px-3 py-2 text-sm leading-relaxed text-ink">
+                  {highlight(text, matches)}
+                </div>
+              )}
+            </Output>
+          </div>
+        )}
+      </Panel>
+    </ToolPage>
+  );
+}

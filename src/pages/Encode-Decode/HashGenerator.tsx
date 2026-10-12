@@ -1,236 +1,61 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import ClearButton from "../../components/ClearButton";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import useDebounce from "../../hooks/useDebounce";
-import ToolHeader from "../../components/ToolHeader";
+import { useEffect, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { ClearButton, Field, KeyValueList, Output, Panel, TextArea, TwoPane } from '../../ui';
+import useDebounce from '../../hooks/useDebounce';
 
-type HashAlgorithm = "sha1" | "sha256" | "sha512";
+const ALGORITHMS = ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'] as const;
+type Algorithm = (typeof ALGORITHMS)[number];
+type Hashes = Record<Algorithm, string>;
 
-interface HashResponse {
-  text: string;
-  algorithm: HashAlgorithm;
-  hashedText: string;
-  timestamp: number;
+async function digest(text: string, algorithm: Algorithm): Promise<string> {
+  const buf = await crypto.subtle.digest(algorithm, new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-const ALGORITHM_MAP: Record<HashAlgorithm, string> = {
-  sha1: "SHA-1",
-  sha256: "SHA-256",
-  sha512: "SHA-512",
-};
+export default function HashGenerator() {
+  const [input, setInput] = useState('');
+  const [hashes, setHashes] = useState<Hashes | null>(null);
+  const debounced = useDebounce(input, 150);
 
-const ALGORITHM_OPTIONS: { value: HashAlgorithm; label: string }[] = [
-  { value: "sha1", label: "SHA-1" },
-  { value: "sha256", label: "SHA-256" },
-  { value: "sha512", label: "SHA-512" },
-];
-
-async function generateHash(
-  text: string,
-  algorithm: HashAlgorithm
-): Promise<HashResponse> {
-  const trimmedText = text.trim();
-
-  if (!trimmedText) {
-    throw new Error("Input text cannot be empty");
-  }
-
-  try {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(trimmedText);
-    const hashBuffer = await crypto.subtle.digest(
-      ALGORITHM_MAP[algorithm],
-      data
-    );
-
-    // Convert buffer to hex string more efficiently
-    const hashArray = new Uint8Array(hashBuffer);
-    const hashedText = Array.from(hashArray)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-
-    return {
-      text: trimmedText,
-      algorithm,
-      hashedText,
-      timestamp: Date.now(),
-    };
-  } catch (error) {
-    throw new Error(
-      error instanceof Error
-        ? `Failed to generate hash: ${error.message}`
-        : "Failed to generate hash: Unknown error"
-    );
-  }
-}
-
-function HashGenerator() {
-  const seo = seoDescriptions.hashGenerator;
-  const [inputText, setInputText] = useState("");
-  const [algorithm, setAlgorithm] = useState<HashAlgorithm>("sha256");
-  const [hashResult, setHashResult] = useState<HashResponse | null>(null);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const debouncedInputText = useDebounce(inputText, 300);
-  const hasInput = useMemo(
-    () => debouncedInputText.trim() !== "",
-    [debouncedInputText]
-  );
-
-  // Track tool usage
+  // WebCrypto is async: hash every algorithm at once and keep the previous
+  // result on screen until the new one lands.
   useEffect(() => {
-    updateToolUsage("hash");
-  }, []);
-
-  // Generate hash when input or algorithm changes
-  useEffect(() => {
-    if (!hasInput) {
-      setHashResult(null);
-      setError("");
+    if (!debounced) {
+      setHashes(null);
       return;
     }
-
-    const fetchHash = async () => {
-      setIsLoading(true);
-      try {
-        const result = await generateHash(debouncedInputText, algorithm);
-        setHashResult(result);
-        setError("");
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to generate hash"
-        );
-        setHashResult(null);
-      } finally {
-        setIsLoading(false);
-      }
+    let live = true;
+    Promise.all(ALGORITHMS.map((a) => digest(debounced, a))).then((values) => {
+      if (live) setHashes(Object.fromEntries(ALGORITHMS.map((a, i) => [a, values[i]])) as Hashes);
+    });
+    return () => {
+      live = false;
     };
+  }, [debounced]);
 
-    fetchHash();
-  }, [debouncedInputText, algorithm, hasInput]);
-
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setInputText(e.target.value);
-    },
-    []
-  );
-
-  const handleAlgorithmChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setAlgorithm(e.target.value as HashAlgorithm);
-    },
-    []
-  );
-
-  const handleClearAll = useCallback(() => {
-    setInputText("");
-    setAlgorithm("sha256");
-    setHashResult(null);
-    setError("");
-  }, []);
-
-  const isClearDisabled = useMemo(
-    () => inputText === "" && algorithm === "sha256",
-    [inputText, algorithm]
-  );
+  const items = ALGORITHMS.map((a) => ({ label: a, value: hashes?.[a] ?? '' }));
+  const all = hashes ? ALGORITHMS.map((a) => `${a}: ${hashes[a]}`).join('\n') : '';
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">
-              Generate Cryptographic Hash
-            </h2>
-            <ClearButton
-              onClick={handleClearAll}
-              disabled={isClearDisabled}
-              aria-label="Clear all inputs"
+    <ToolPage id="hash">
+      <Panel title="Hash" actions={<ClearButton onClick={() => setInput('')} disabled={!input} />}>
+        <TwoPane>
+          <Field label="Text" htmlFor="hash-input" hint="Hashed locally as UTF-8. Whitespace counts.">
+            <TextArea
+              id="hash-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="The quick brown fox"
+              rows={10}
+              stats
+              autoFocus
             />
-          </div>
-          <hr className="line-break" />
-          <div className="space-y-4 mb-4">
-            <div>
-              <label className="form-label" htmlFor="hash-input">
-                Input Text:
-              </label>
-              <AutoTextarea
-                id="hash-input"
-                value={inputText}
-                onChange={handleInputChange}
-                className="input-field"
-                disabled={isLoading}
-                placeholder="Enter text to hash"
-                aria-describedby={error ? "hash-error" : undefined}
-                aria-busy={isLoading}
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="w-full sm:w-1/2">
-                <label className="form-label" htmlFor="hash-algorithm">
-                  Algorithm:
-                </label>
-                <select
-                  id="hash-algorithm"
-                  value={algorithm}
-                  onChange={handleAlgorithmChange}
-                  className="input-field w-full h-10"
-                  disabled={isLoading}
-                  aria-label="Select hash algorithm"
-                >
-                  {ALGORITHM_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {isLoading && (
-            <div className="my-4" aria-live="polite">
-              <p className="text-muted">Generating hash...</p>
-            </div>
-          )}
-
-          {hashResult && (
-            <div className="result-box" aria-live="polite">
-              <label className="form-label">Result</label>
-              <div className="inner-result">
-                <div className="w-full mono-output" aria-label="Hashed result">
-                  {hashResult.hashedText}
-                </div>
-                <CopyButton
-                  text={hashResult.hashedText}
-                  aria-label="Copy hash to clipboard"
-                />
-              </div>
-              <p className="text-sm mt-2">
-                Algorithm: {hashResult.algorithm.toUpperCase()}
-              </p>
-            </div>
-          )}
-
-          <ErrorBox message={error} id={error ? "hash-error" : undefined} />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+          </Field>
+          <Output label="Digests" copyText={all} fileName="hashes.txt">
+            <KeyValueList items={items} />
+          </Output>
+        </TwoPane>
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default HashGenerator;

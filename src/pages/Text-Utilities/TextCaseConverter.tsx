@@ -1,167 +1,55 @@
-import { useEffect, useState } from "react";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import CopyButton from "../../components/CopyButton";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { ClearButton, Field, KeyValueList, Output, Panel, TextArea, TwoPane } from '../../ui';
 
-function TextCaseConverter() {
-  const seo = seoDescriptions.textCase || {
-    title: "Text Case Converter",
-    body: "Convert text to various cases such as camel case, snake case, uppercase, lowercase, and more.",
-  };
-  const [text, setText] = useState("");
-  type ResultType = {
-    lowercase: string;
-    uppercase: string;
-    camelCase: string;
-    dotCase: string;
-    capitalCase: string;
-    constantCase: string;
-    headerCase: string;
-    paramCase: string;
-    pathCase: string;
-    pascalCase: string;
-    sentenceCase: string;
-    snakeCase: string;
-    mockingCase: string;
-  };
+const cap = (w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
 
-  const [result, setResult] = useState<ResultType | null>(null);
-
-  const toCamelCase = (str: string) =>
-    str
-      .replace(/(?:^|\s)([a-z])/g, (_m: string, p1: string) => p1.toUpperCase())
-      .replace(/\s+/g, "");
-  const toDotCase = (str: string) => str.replace(/\s+/g, ".").toLowerCase();
-  const toCapitalCase = (str: string) =>
-    str.replace(/\b\w/g, (match: string) => match.toUpperCase());
-  const toConstantCase = (str: string) =>
-    str.replace(/\s+/g, "_").toUpperCase();
-  const toHeaderCase = (str: string) =>
-    str
-      .replace(/\b\w/g, (match: string) => match.toUpperCase())
-      .replace(/\s+/g, "-");
-  const toParamCase = (str: string) => str.replace(/\s+/g, "-").toLowerCase();
-  const toPathCase = (str: string) => str.replace(/\s+/g, "/").toLowerCase();
-  const toPascalCase = (str: string) =>
-    str
-      .replace(/(?:^|\s)([a-z])/g, (_m: string, p1: string) => p1.toUpperCase())
-      .replace(/\s+/g, "");
-  const toSentenceCase = (str: string) =>
-    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  const toSnakeCase = (str: string) => str.replace(/\s+/g, "_").toLowerCase();
-  const toMockingCase = (str: string) =>
-    str
-      .split("")
-      .map((char: string, idx: number) =>
-        idx % 2 === 0 ? char.toLowerCase() : char.toUpperCase()
-      )
-      .join("");
-
-  useEffect(() => {
-    updateToolUsage("text_case");
-  }, []);
-
-  useEffect(() => {
-    if (text) {
-      setResult({
-        lowercase: text.toLowerCase(),
-        uppercase: text.toUpperCase(),
-        camelCase: toCamelCase(text),
-        dotCase: toDotCase(text),
-        capitalCase: toCapitalCase(text),
-        constantCase: toConstantCase(text),
-        headerCase: toHeaderCase(text),
-        paramCase: toParamCase(text),
-        pathCase: toPathCase(text),
-        pascalCase: toPascalCase(text),
-        sentenceCase: toSentenceCase(text),
-        snakeCase: toSnakeCase(text),
-        mockingCase: toMockingCase(text),
-      });
-    } else {
-      setResult(null);
-    }
-  }, [text]);
-
-  const handleClear = () => {
-    setText("");
-    setResult(null);
-  };
-
-  const getResultsText = (result: ResultType | null) => {
-    if (!result) return "";
-    return Object.entries(result)
-      .map(([key, val]) => {
-        const displayLabel = key
-          .replace(/([A-Z])/g, " $1")
-          .replace(/^./, (str) => str.toUpperCase())
-          .trim();
-        return `${displayLabel}: ${val}`;
-      })
-      .join("\n\n");
-  };
-
-  return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="section-title">
-              Text Case Converter
-            </h3>
-            <div className="flex items-center gap-2">
-              {result && (
-                <CopyButton text={getResultsText(result)} copyType="CopyAll" />
-              )}
-              <ClearButton onClick={handleClear} disabled={!text && !result} />
-            </div>
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col gap-6">
-            <AutoTextarea
-              className="input-field w-full"
-              placeholder="Enter your text here..."
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-
-            {result &&
-              Object.entries(result).map(([key, val]) => {
-                const displayLabel = key
-                  .replace(/([A-Z])/g, " $1")
-                  .replace(/^./, (str) => str.toUpperCase())
-                  .trim();
-                return (
-                  <div key={key} className="result-box mt-0">
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="form-label sm:text-base font-semibold">
-                        {displayLabel}
-                      </label>
-                      <CopyButton text={val} />
-                    </div>
-                    <div className="inner-result">
-                      <span className="mono-output text-ink">
-                        {val}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-          </div>
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
-  );
+/** Every variant of `text`. Word-joined cases split on whitespace, "-" and "_". */
+function cases(text: string) {
+  const words = text.trim().split(/[\s_-]+/).filter(Boolean);
+  const lower = words.map((w) => w.toLowerCase());
+  const pascal = words.map(cap).join('');
+  return [
+    { label: 'camelCase', value: pascal.charAt(0).toLowerCase() + pascal.slice(1) },
+    { label: 'PascalCase', value: pascal },
+    { label: 'snake_case', value: lower.join('_') },
+    { label: 'kebab-case', value: lower.join('-') },
+    { label: 'CONSTANT_CASE', value: lower.join('_').toUpperCase() },
+    { label: 'dot.case', value: lower.join('.') },
+    { label: 'path/case', value: lower.join('/') },
+    { label: 'Header-Case', value: words.map(cap).join('-') },
+    { label: 'Title Case', value: text.replace(/\b\w/g, (c) => c.toUpperCase()) },
+    { label: 'Sentence case', value: text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() },
+    { label: 'lowercase', value: text.toLowerCase() },
+    { label: 'UPPERCASE', value: text.toUpperCase() },
+    { label: 'mOcKiNg cAsE', value: [...text].map((c, i) => (i % 2 ? c.toUpperCase() : c.toLowerCase())).join('') },
+  ];
 }
 
-export default TextCaseConverter;
+export default function TextCaseConverter() {
+  const [text, setText] = useState('');
+  const items = useMemo(() => (text.trim() ? cases(text) : []), [text]);
+
+  return (
+    <ToolPage id="text_case">
+      <Panel title="Convert" actions={<ClearButton onClick={() => setText('')} disabled={!text} />}>
+        <TwoPane>
+          <Field label="Text" htmlFor="case-input">
+            <TextArea
+              id="case-input"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="hello world from xutil"
+              rows={6}
+              mono={false}
+              autoFocus
+            />
+          </Field>
+          <Output label="Cases" copyText={items.map((i) => `${i.label}: ${i.value}`).join('\n')} placeholder="Every case appears here">
+            {items.length > 0 && <KeyValueList items={items} />}
+          </Output>
+        </TwoPane>
+      </Panel>
+    </ToolPage>
+  );
+}

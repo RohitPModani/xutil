@@ -1,412 +1,109 @@
-import { useEffect, useState, useCallback } from "react";
-import ToolHeader from "../../components/ToolHeader";
-import ClearButton from "../../components/ClearButton";
-import CopyButton from "../../components/CopyButton";
-import SectionCard from "../../components/SectionCard";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import * as Diff from "diff";
-import LoadingButton from "../../components/LoadingButton";
-import { updateToolUsage } from "../../utils/toolUsage";
-import DOMPurify from "dompurify";
+import { useMemo, useState } from 'react';
+import { createTwoFilesPatch, diffLines } from 'diff';
+import ToolPage from '../../components/ToolPage';
+import { Callout, Checkbox, ClearButton, Field, Output, Panel, Stat, TextArea, Toolbar, TwoPane, cn } from '../../ui';
 
-interface DiffLine {
-  type: "added" | "removed" | "common";
+const MAX_LINES = 10000;
+
+interface Row {
+  kind: 'added' | 'removed' | 'same';
   text: string;
-  /** Always the escaped form of `text`. Required, because it is the only value
-   *  fed to dangerouslySetInnerHTML - an absent one must not fall back to the
-   *  raw text. */
-  html: string;
-  lineNumber: number;
 }
 
-const CHUNK_SIZE = 1000; // Process 1000 lines at a time
-const MAX_LINES = 10000; // Maximum lines to process
-
-const TextCompare: React.FC = () => {
-  const seo = seoDescriptions.textCompare;
-  const [text1, setText1] = useState<string>("");
-  const [text2, setText2] = useState<string>("");
-  const [diffLines, setDiffLines] = useState<
-    { left: DiffLine; right: DiffLine }[]
-  >([]);
-  const [removals, setRemovals] = useState<number>(0);
-  const [additions, setAdditions] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(false);
+export default function TextCompare() {
+  const [a, setA] = useState('');
+  const [b, setB] = useState('');
   const [ignoreWhitespace, setIgnoreWhitespace] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processedChunks, setProcessedChunks] = useState<number>(0);
-  const [totalChunks, setTotalChunks] = useState<number>(0);
+  const [ignoreCase, setIgnoreCase] = useState(false);
 
-  useEffect(() => {
-    updateToolUsage("text_compare");
-  }, []);
-
-  const detectFormat = (text: string): 'json' | 'xml' | 'text' => {
-    const trimmed = text.trim();
-    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-      try {
-        JSON.parse(trimmed);
-        return 'json';
-      } catch {
-        return 'text';
-      }
+  const result = useMemo(() => {
+    if (!a && !b) return null;
+    if (a.split('\n').length > MAX_LINES || b.split('\n').length > MAX_LINES) {
+      return { rows: [], added: 0, removed: 0, patch: '', error: `Each text can be at most ${MAX_LINES.toLocaleString()} lines.` };
     }
-    if (trimmed.startsWith('<') && trimmed.endsWith('>')) {
-      return 'xml';
+    const rows: Row[] = [];
+    let added = 0;
+    let removed = 0;
+    for (const part of diffLines(a, b, { ignoreWhitespace, ignoreCase })) {
+      const kind: Row['kind'] = part.added ? 'added' : part.removed ? 'removed' : 'same';
+      const lines = part.value.replace(/\n$/, '').split('\n');
+      if (kind === 'added') added += lines.length;
+      if (kind === 'removed') removed += lines.length;
+      for (const text of lines) rows.push({ kind, text });
     }
-    return 'text';
-  };
-
-  const escapeXml = (text: string): string => {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
-  };
-
-  // Single-row status message shown in place of a diff. Escaped like any other
-  // row so every value reaching dangerouslySetInnerHTML is escaped by the same
-  // path.
-  const statusRow = (message: string) => {
-    const cell: DiffLine = {
-      type: "common",
-      text: message,
-      html: escapeXml(message),
-      lineNumber: 1,
-    };
-    return { left: cell, right: { ...cell } };
-  };
-
-  const formatText = (text: string, format: 'json' | 'xml' | 'text'): string => {
-    switch (format) {
-      case 'json':
-        try {
-          return JSON.stringify(JSON.parse(text), null, 2);
-        } catch {
-          return text;
-        }
-      case 'xml':
-        // Preserve original XML structure
-        return text;
-      default:
-        return text;
-    }
-  };
-
-  const processChunk = useCallback((lines1: string[], lines2: string[], startIndex: number): { left: DiffLine; right: DiffLine }[] => {
-    const chunkLines: { left: DiffLine; right: DiffLine }[] = [];
-    const endIndex = Math.min(startIndex + CHUNK_SIZE, Math.max(lines1.length, lines2.length));
-
-    for (let i = startIndex; i < endIndex; i++) {
-      const line1 = lines1[i] ?? "";
-      const line2 = lines2[i] ?? "";
-
-      const trimmedLine1 = ignoreWhitespace ? line1.replace(/\s+/g, "").trim() : line1;
-      const trimmedLine2 = ignoreWhitespace ? line2.replace(/\s+/g, "").trim() : line2;
-
-      if (trimmedLine1 === trimmedLine2) {
-        chunkLines.push({
-          left: {
-            type: "common",
-            text: line1,
-            html: escapeXml(line1),
-            lineNumber: i + 1,
-          },
-          right: {
-            type: "common",
-            text: line2,
-            html: escapeXml(line2),
-            lineNumber: i + 1,
-          },
-        });
-      } else {
-        // For XML content, preserve whitespace and do a character-level diff
-        const diff: Diff.Change[] = Diff.diffChars(line1, line2);
-
-        const leftHtml = DOMPurify.sanitize(
-          diff
-            .map((part) => {
-              if (part.removed) {
-                return `<span class="bg-red-300 dark:bg-red-400 dark:text-ink">${escapeXml(part.value)}</span>`;
-              }
-              return part.added ? "" : escapeXml(part.value);
-            })
-            .join("")
-        );
-
-        const rightHtml = DOMPurify.sanitize(
-          diff
-            .map((part) => {
-              if (part.added) {
-                return `<span class="bg-green-300 dark:bg-green-400 dark:text-ink">${escapeXml(part.value)}</span>`;
-              }
-              return part.removed ? "" : escapeXml(part.value);
-            })
-            .join("")
-        );
-
-        chunkLines.push({
-          left: {
-            type: line1 ? "removed" : "common",
-            text: line1,
-            html: leftHtml,
-            lineNumber: i + 1,
-          },
-          right: {
-            type: line2 ? "added" : "common",
-            text: line2,
-            html: rightHtml,
-            lineNumber: i + 1,
-          },
-        });
-      }
-    }
-
-    return chunkLines;
-  }, [ignoreWhitespace]);
-
-  const compareTexts = async (): Promise<void> => {
-    if (!text1.trim() || !text2.trim()) {
-      setDiffLines([statusRow("Please enter text in both fields.")]);
-      setRemovals(0);
-      setAdditions(0);
-      return;
-    }
-
-    setIsLoading(true);
-    setIsProcessing(true);
-    setProcessedChunks(0);
-
-    try {
-      // Detect and format the input texts
-      const format1 = detectFormat(text1);
-      const format2 = detectFormat(text2);
-      const formattedText1 = formatText(text1, format1);
-      const formattedText2 = formatText(text2, format2);
-
-      const lines1 = formattedText1
-        .split("\n")
-        .filter((line, i, arr) => line || i < arr.length - 1);
-      const lines2 = formattedText2
-        .split("\n")
-        .filter((line, i, arr) => line || i < arr.length - 1);
-
-      // Check if text is too large
-      if (lines1.length > MAX_LINES || lines2.length > MAX_LINES) {
-        setDiffLines([statusRow(`Text is too large. Maximum ${MAX_LINES} lines allowed.`)]);
-        return;
-      }
-
-      const maxLines = Math.max(lines1.length, lines2.length);
-      setTotalChunks(Math.ceil(maxLines / CHUNK_SIZE));
-      
-      let allLines: { left: DiffLine; right: DiffLine }[] = [];
-      let removalCount = 0;
-      let additionCount = 0;
-
-      // Process in chunks
-      for (let i = 0; i < maxLines; i += CHUNK_SIZE) {
-        const chunkLines = processChunk(lines1, lines2, i);
-        allLines = [...allLines, ...chunkLines];
-        
-        // Update counts
-        chunkLines.forEach(line => {
-          if (line.left.type === "removed") removalCount++;
-          if (line.right.type === "added") additionCount++;
-        });
-
-        setDiffLines(allLines);
-        setRemovals(removalCount);
-        setAdditions(additionCount);
-        setProcessedChunks(prev => prev + 1);
-
-        // Allow UI to update
-        await new Promise(resolve => setTimeout(resolve, 0));
-      }
-    } catch {
-      setDiffLines([statusRow("Error during comparison")]);
-    } finally {
-      setIsLoading(false);
-      setIsProcessing(false);
-    }
-  };
-
-  const clearTexts = (): void => {
-    setText1("");
-    setText2("");
-    setDiffLines([]);
-    setRemovals(0);
-    setAdditions(0);
-    setIsLoading(false);
-    setIgnoreWhitespace(false);
-  };
-
-  const lineCount1 = text1 ? text1.split("\n").length : 0;
-  const lineCount2 = text2 ? text2.split("\n").length : 0;
+    const patch = createTwoFilesPatch('original', 'changed', a, b, undefined, undefined, { ignoreWhitespace, ignoreCase });
+    return { rows, added, removed, patch, error: '' };
+  }, [a, b, ignoreWhitespace, ignoreCase]);
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
+    <ToolPage id="text_compare">
+      <Panel
+        title="Compare"
+        actions={
+          <ClearButton
+            onClick={() => {
+              setA('');
+              setB('');
+            }}
+            disabled={!a && !b}
+          />
+        }
+      >
+        <TwoPane>
+          <Field label="Original" htmlFor="cmp-a">
+            <TextArea id="cmp-a" value={a} onChange={(e) => setA(e.target.value)} rows={10} stats autoFocus placeholder="The text before" />
+          </Field>
+          <Field label="Changed" htmlFor="cmp-b">
+            <TextArea id="cmp-b" value={b} onChange={(e) => setB(e.target.value)} rows={10} stats placeholder="The text after" />
+          </Field>
+        </TwoPane>
 
-        <SectionCard>
-          <div className="flex sm:items-center sm:flex-row flex-col justify-between mb-4">
-            <h3 className="section-title mb-2 sm:mb-0">Text Compare</h3>
-            <div className="flex gap-2">
-              <label className="flex items-center gap-2 mr-2">
-                <input
-                  type="checkbox"
-                  checked={ignoreWhitespace}
-                  onChange={(e) => setIgnoreWhitespace(e.target.checked)}
-                  className="checkbox-primary mr-1"
-                  aria-label="Ignore whitespace in comparison"
-                />
-                Ignore Whitespace
-              </label>
-              <LoadingButton
-                onClick={compareTexts}
-                isLoading={isLoading}
-                disabled={!text1 || !text2}
-              >
-                {isProcessing ? `Processing... ${Math.round((processedChunks / totalChunks) * 100)}%` : 'Compare'}
-              </LoadingButton>
-              <ClearButton onClick={clearTexts} disabled={!text1 && !text2} />
+        <Toolbar className="mt-4 gap-x-5">
+          <Checkbox label="Ignore whitespace" checked={ignoreWhitespace} onChange={(e) => setIgnoreWhitespace(e.target.checked)} />
+          <Checkbox label="Ignore case" checked={ignoreCase} onChange={(e) => setIgnoreCase(e.target.checked)} />
+        </Toolbar>
+
+        {result?.error && (
+          <Callout tone="error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+
+        {result && !result.error && (
+          <div className="mt-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3 sm:max-w-xs">
+              <Stat label="Added" value={<span className="text-success">+{result.added.toLocaleString()}</span>} />
+              <Stat label="Removed" value={<span className="text-danger">−{result.removed.toLocaleString()}</span>} />
             </div>
-          </div>
-          <hr className="line-break w-full sm:w-auto" />
-          <div className="flex flex-col md:flex-row gap-6 mb-6">
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center justify-between">
-                <label htmlFor="text1" className="form-label mb-0">
-                  Text 1:
-                </label>
-                <CopyButton text={text1} />
-              </div>
-              <AutoTextarea
-                id="text1"
-                value={text1}
-                onChange={(e) => setText1(e.target.value)}
-                className="input-field"
-                placeholder="Enter first text to compare"
-                aria-label="First text input for comparison"
-              />
-            </div>
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center justify-between">
-                <label htmlFor="text2" className="form-label mb-0">
-                  Text 2:
-                </label>
-                <CopyButton text={text2} />
-              </div>
-              <AutoTextarea
-                id="text2"
-                value={text2}
-                onChange={(e) => setText2(e.target.value)}
-                className="input-field"
-                placeholder="Enter second text to compare"
-                aria-label="Second text input for comparison"
-              />
-            </div>
-          </div>
-          {diffLines.length > 0 && (
-            <div className="space-y-4">
-              <label className="form-label mb-0">Differences:</label>
-              <div className="flex items-center justify-between text-sm text-dim mb-2">
-                <div className="flex gap-4">
-                  <span
-                    className="flex items-center"
-                    aria-label={`${removals} removals`}
+            <Output label="Differences" copyText={result.patch} fileName="diff.patch">
+              <pre className="thin-scroll max-h-[32rem] overflow-auto py-1 font-mono text-[13px] leading-relaxed">
+                {result.rows.map((row, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      'flex whitespace-pre-wrap break-all',
+                      row.kind === 'added' && 'bg-success/10',
+                      row.kind === 'removed' && 'bg-danger/10'
+                    )}
                   >
-                    <span className="w-4 h-4 bg-red-500 rounded-full mr-1"></span>
-                    {removals} removal{removals !== 1 ? "s" : ""}
-                  </span>
-                  <span aria-label={`${lineCount1} lines in first text`}>
-                    {lineCount1} line{lineCount1 !== 1 ? "s" : ""}
-                  </span>
-                </div>
-                <div className="flex gap-4">
-                  <span aria-label={`${lineCount2} lines in second text`}>
-                    {lineCount2} line{lineCount2 !== 1 ? "s" : ""}
-                  </span>
-                  <span
-                    className="flex items-center"
-                    aria-label={`${additions} additions`}
-                  >
-                    <span className="w-4 h-4 bg-green-500 rounded-full mr-1"></span>
-                    {additions} addition{additions !== 1 ? "s" : ""}
-                  </span>
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table
-                  className="w-full border-collapse text-sm font-mono"
-                  aria-label="Text comparison differences"
-                >
-                  <tbody>
-                    {diffLines.map((line, index) => (
-                      <tr key={index} className="bg-surface">
-                        <td className="w-12 text-right pr-2 border border-line dark:border-line">
-                          {line.left.lineNumber}
-                        </td>
-                        <td
-                          className={`w-1/2 p-1 text-sm sm:text-base ${
-                            line.left.type === "removed"
-                              ? "bg-red-100 dark:bg-red-200 dark:text-ink"
-                              : line.left.type === "added"
-                              ? "bg-green-100 dark:bg-green-200 dark:text-ink"
-                              : ""
-                          }`}
-                          dangerouslySetInnerHTML={{
-                            __html: line.left.html,
-                          }}
-                          aria-label={
-                            line.left.type === "removed"
-                              ? "Removed text"
-                              : line.left.type === "added"
-                              ? "Added text"
-                              : "Common text"
-                          }
-                        />
-                        <td className="w-12 text-right pr-2 border-r border-line dark:border-line">
-                          {line.right.lineNumber}
-                        </td>
-                        <td
-                          className={`w-1/2 p-1 text-sm sm:text-base ${
-                            line.right.type === "added"
-                              ? "bg-green-100 dark:bg-green-200 dark:text-ink"
-                              : line.right.type === "removed"
-                              ? "bg-red-100 dark:bg-red-200 dark:text-ink"
-                              : ""
-                          }`}
-                          dangerouslySetInnerHTML={{
-                            __html: line.right.html,
-                          }}
-                          aria-label={
-                            line.right.type === "added"
-                              ? "Added text"
-                              : line.right.type === "removed"
-                              ? "Removed text"
-                              : "Common text"
-                          }
-                        />
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+                    <span
+                      className={cn(
+                        'w-7 shrink-0 select-none text-center',
+                        row.kind === 'added' ? 'text-success' : row.kind === 'removed' ? 'text-danger' : 'text-muted'
+                      )}
+                      aria-hidden="true"
+                    >
+                      {row.kind === 'added' ? '+' : row.kind === 'removed' ? '−' : ' '}
+                    </span>
+                    <span className="sr-only">{row.kind === 'added' ? 'Added: ' : row.kind === 'removed' ? 'Removed: ' : ''}</span>
+                    <span className="min-w-0 flex-1 pr-3 text-ink">{row.text}</span>
+                  </div>
+                ))}
+              </pre>
+            </Output>
+          </div>
+        )}
+      </Panel>
+    </ToolPage>
   );
-};
-
-export default TextCompare;
+}

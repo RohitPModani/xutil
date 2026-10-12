@@ -1,220 +1,125 @@
-import { useEffect, useState, useCallback } from "react";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import ErrorBox from "../../components/ErrorBox";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { Upload } from "lucide-react";
-import LoadingButton from "../../components/LoadingButton";
-import ToolHeader from "../../components/ToolHeader";
+import { useEffect, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, DownloadButton, EmptyState, FileDrop, Panel, TwoPane } from '../../ui';
+import { getErrorMessage } from '../../utils/errors';
 
-interface FaviconResult {
-  icoUrl: string;
-  pngUrl: string;
+const SIZES = [16, 32, 48, 180, 192];
+const ICO_SIZES = [16, 32, 48];
+
+interface Icon {
+  size: number;
+  blob: Blob;
+  url: string;
 }
 
-function FaviconGenerator() {
-  const seo = seoDescriptions.faviconGenerator;
+const toBlob = (canvas: HTMLCanvasElement) =>
+  new Promise<Blob>((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Could not encode the image.'))), 'image/png'));
 
-  const [, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [faviconResult, setFaviconResult] = useState<FaviconResult | null>(
-    null
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+/** ICO container holding PNG-encoded frames (supported by every current browser). */
+function buildIco(frames: { size: number; png: ArrayBuffer }[]): Blob {
+  const header = new DataView(new ArrayBuffer(6 + 16 * frames.length));
+  header.setUint16(2, 1, true);
+  header.setUint16(4, frames.length, true);
+  let offset = header.byteLength;
+  frames.forEach((f, i) => {
+    const at = 6 + 16 * i;
+    header.setUint8(at, f.size === 256 ? 0 : f.size);
+    header.setUint8(at + 1, f.size === 256 ? 0 : f.size);
+    header.setUint16(at + 4, 1, true);
+    header.setUint16(at + 6, 32, true);
+    header.setUint32(at + 8, f.png.byteLength, true);
+    header.setUint32(at + 12, offset, true);
+    offset += f.png.byteLength;
+  });
+  return new Blob([header.buffer, ...frames.map((f) => f.png)], { type: 'image/x-icon' });
+}
+
+export default function FaviconGenerator() {
+  const [file, setFile] = useState<File | null>(null);
+  const [icons, setIcons] = useState<Icon[]>([]);
+  const [ico, setIco] = useState<Blob | null>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    updateToolUsage("favicon");
-  }, []);
-
-  const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setError(null);
-      setFaviconResult(null);
-      setImagePreview(null);
-
-      if (e.target.files && e.target.files.length > 0) {
-        const file = e.target.files[0];
-        if (!file.type.startsWith("image/")) {
-          setError("Please upload a valid image file (PNG, JPEG, etc.)");
-          return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-          setError("Image file size must be less than 5MB");
-          return;
-        }
-
-        setImageFile(file);
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          setImagePreview(event.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-      }
-    },
-    []
-  );
-
-  const generateFavicon = useCallback(async () => {
-    if (!imagePreview) {
-      setError("Please upload an image first");
+    if (!file) {
+      setIcons([]);
+      setIco(null);
+      setError('');
       return;
     }
-
-    setIsGenerating(true);
-    setError(null);
-    setFaviconResult(null);
-
-    try {
-      const img = new Image();
-      img.src = imagePreview;
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-
-      const canvas = document.createElement("canvas");
-      canvas.width = 16;
-      canvas.height = 16;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        throw new Error("Canvas context not supported");
+    let live = true;
+    const src = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = async () => {
+      try {
+        const made = await Promise.all(
+          SIZES.map(async (size) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('Canvas is not supported in this browser.');
+            ctx.drawImage(img, 0, 0, size, size);
+            const blob = await toBlob(canvas);
+            return { size, blob, url: URL.createObjectURL(blob) };
+          })
+        );
+        const frames = await Promise.all(made.filter((m) => ICO_SIZES.includes(m.size)).map(async (m) => ({ size: m.size, png: await m.blob.arrayBuffer() })));
+        if (!live) return;
+        setIcons(made);
+        setIco(buildIco(frames));
+        setError('');
+      } catch (e) {
+        if (live) setError(getErrorMessage(e, 'Could not generate the icons.'));
       }
+    };
+    img.onerror = () => live && setError('That file could not be read as an image.');
+    img.src = src;
+    return () => {
+      live = false;
+      URL.revokeObjectURL(src);
+    };
+  }, [file]);
 
-      ctx.drawImage(img, 0, 0, 16, 16);
-
-      // Generate PNG
-      const pngUrl = canvas.toDataURL("image/png");
-
-      // Generate ICO (simplified, using PNG data URL as a placeholder)
-      // Note: True ICO generation typically requires server-side processing
-      const icoUrl = canvas.toDataURL("image/png"); // Placeholder for ICO
-
-      setFaviconResult({ icoUrl, pngUrl });
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to generate favicon"
-      );
-      console.error("Favicon generation error:", err);
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [imagePreview]);
-
-  const handleClear = useCallback(() => {
-    setImageFile(null);
-    setImagePreview(null);
-    setFaviconResult(null);
-    setError(null);
-  }, []);
-
-  const downloadFile = (url: string, filename: string) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  useEffect(() => () => icons.forEach((i) => URL.revokeObjectURL(i.url)), [icons]);
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-3xl mx-auto py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard className="mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Favicon Generator</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={!imagePreview && !faviconResult}
-              aria-label="Clear inputs"
-            />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col space-y-6">
-            <div className="flex flex-col space-y-2">
-              <label className="form-label">Upload Image:</label>
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-raised hover:bg-raised transition-colors">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="w-8 h-8 mb-2 text-faint" />
-                  <p className="text-sm text-faint">
-                    <span className="font-semibold">Click to upload</span> or
-                    drag and drop
-                  </p>
-                </div>
-                <input
-                  id="file-upload"
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </label>
-            </div>
-
-            <div className="flex justify-center">
-              <LoadingButton
-                onClick={generateFavicon}
-                disabled={isGenerating || !imagePreview}
-                isLoading={isGenerating}
-              >
-                Generate Favicon
-              </LoadingButton>
-            </div>
-
-            <div className="flex flex-col items-center">
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Uploaded image for favicon generation"
-                  className="mb-4 border rounded p-2 bg-raised w-full max-h-64 object-contain"
-                />
-              ) : (
-                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-faint">
-                  Image will appear here
-                </div>
-              )}
-            </div>
-
-            {faviconResult && (
-              <div className="result-box">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="section-subtitle">Favicon Files:</h4>
-                </div>
-                <div className="inner-result space-y-2">
-                  <div className="w-full flex flex-col space-y-2">
-                    <button
-                      onClick={() =>
-                        downloadFile(faviconResult.icoUrl, "favicon.ico")
-                      }
-                      className="button-primary text-center"
-                    >
-                      Download ICO (16x16)
-                    </button>
-                    <button
-                      onClick={() =>
-                        downloadFile(faviconResult.pngUrl, "favicon.png")
-                      }
-                      className="button-primary text-center"
-                    >
-                      Download PNG (16x16)
-                    </button>
-                  </div>
-                </div>
-              </div>
+    <ToolPage id="favicon">
+      <Panel title="Generate">
+        <TwoPane>
+          <FileDrop accept="image/*" label="Choose an image" onFile={setFile} onClear={() => setFile(null)} />
+          <div className="rounded-md border border-line bg-surface">
+            {icons.length ? (
+              <ul className="divide-y divide-line">
+                <li className="flex items-center gap-3 px-3 py-2">
+                  <span className="w-12 shrink-0 text-xs text-muted">ICO</span>
+                  <span className="flex-1 text-[13px] text-ink">favicon.ico · 16, 32 and 48 px</span>
+                  {ico && <DownloadButton content={ico} fileName="favicon.ico" compact />}
+                </li>
+                {icons.map((i) => (
+                  <li key={i.size} className="flex items-center gap-3 px-3 py-2">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center">
+                      <img src={i.url} alt={`${i.size} by ${i.size} pixel icon`} width={Math.min(i.size, 48)} height={Math.min(i.size, 48)} />
+                    </span>
+                    <span className="flex-1 font-mono text-[13px] text-ink">
+                      {i.size}×{i.size}
+                      <span className="ml-2 text-muted">{i.size === 180 ? 'apple-touch-icon' : i.size === 192 ? 'android-chrome' : 'favicon'}</span>
+                    </span>
+                    <DownloadButton content={i.blob} fileName={`favicon-${i.size}x${i.size}.png`} compact />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EmptyState>{file ? 'Generating…' : 'Icons at every size appear here'}</EmptyState>
             )}
-
-            <ErrorBox message={error} aria-live="polite" />
           </div>
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+        </TwoPane>
+        {error && (
+          <Callout tone="error" className="mt-4">
+            {error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default FaviconGenerator;

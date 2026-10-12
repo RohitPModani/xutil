@@ -1,510 +1,192 @@
-import { useState, useRef, useEffect } from "react";
-import ErrorBox from "../../components/ErrorBox";
-import LoadingButton from "../../components/LoadingButton";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import ClearButton from "../../components/ClearButton";
-import AutoTextarea from "../../hooks/useAutoSizeTextArea";
-import DownloadButton from "../../components/DownloadButton";
-import SEODescription from "../../components/SEODescription";
-import FileUploader from "../../components/FileUploader";
-import { useFileReset } from "../../hooks/useFileReset";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { useMediaQuery } from "../../hooks/useMediaQuery";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { getErrorMessage } from "../../utils/errors";
-import type { JsonValue } from "../../types/json";
-import ToolHeader from "../../components/ToolHeader";
+import { useMemo, useState } from 'react';
+import ToolPage from '../../components/ToolPage';
+import { Callout, ClearButton, Field, FileDrop, Output, Panel, Segmented, TextArea, TwoPane } from '../../ui';
+import type { JsonObject, JsonValue } from '../../types/json';
+import { getErrorMessage } from '../../utils/errors';
+import { looksLikeJson } from '../../utils/text';
+import { useSourceText } from '../../hooks/useSourceText';
 
-interface ConversionResult {
-  result: string;
-  type: "csv" | "json";
-}
+type Mode = 'auto' | 'csv' | 'json';
 
-enum ConversionType {
-  CSV = "csv",
-  JSON = "json",
-}
+const SEP = '_';
 
-type AnyDict = { [key: string]: JsonValue };
-type AnyList = JsonValue[];
-
-function flattenJson(
-  data: AnyDict | AnyList,
-  _parentKey: string = "",
-  sep: string = "_"
-): { records: AnyDict[]; headers: string[] } {
-  const records: AnyDict[] = [];
+function flattenJson(data: JsonValue): { records: JsonObject[]; headers: string[] } {
+  const records: JsonObject[] = [];
   const headers: string[] = [];
 
-  function flatten(
-    obj: JsonValue,
-    prefix: string = "",
-    currentRecords: AnyDict[] = [{}]
-  ): AnyDict[] {
+  function flatten(obj: JsonValue, prefix = '', current: JsonObject[] = [{}]): JsonObject[] {
     if (Array.isArray(obj)) {
-      const newRecords: AnyDict[] = [];
-      obj.forEach((item) => {
-        const itemRecords = currentRecords.map((rec) => ({ ...rec }));
-        newRecords.push(...flatten(item, prefix, itemRecords));
-      });
-      return newRecords.length > 0 ? newRecords : currentRecords;
-    } else if (obj && typeof obj === "object") {
-      let newRecords = currentRecords;
-      for (const [key, value] of Object.entries(obj)) {
-        const newKey = prefix ? `${prefix}${sep}${key}` : key;
-        newRecords = flatten(value, newKey, newRecords);
-      }
-      return newRecords;
-    } else {
-      if (!headers.includes(prefix)) {
-        headers.push(prefix);
-      }
-      return currentRecords.map((rec) => ({ ...rec, [prefix]: obj }));
+      const next: JsonObject[] = [];
+      for (const item of obj) next.push(...flatten(item, prefix, current.map((rec) => ({ ...rec }))));
+      return next.length > 0 ? next : current;
     }
+    if (obj && typeof obj === 'object') {
+      let next = current;
+      for (const [key, value] of Object.entries(obj)) next = flatten(value, prefix ? `${prefix}${SEP}${key}` : key, next);
+      return next;
+    }
+    if (!headers.includes(prefix)) headers.push(prefix);
+    return current.map((rec) => ({ ...rec, [prefix]: obj }));
   }
 
-  const input = Array.isArray(data) ? data : [data];
-  input.forEach((item) => {
-    const resultRecords = flatten(item);
-    records.push(...resultRecords);
-  });
-
+  for (const item of Array.isArray(data) ? data : [data]) records.push(...flatten(item));
   return { records, headers };
 }
 
-function unflattenDict(d: AnyDict, sep: string = "_"): AnyDict {
-  const result: AnyDict = {};
-  for (const [key, value] of Object.entries(d)) {
-    const parts = key.split(sep);
-    let current: AnyDict = result;
-    for (let i = 0; i < parts.length - 1; i++) {
-      const part = parts[i];
+function unflatten(flat: JsonObject): JsonObject {
+  const result: JsonObject = {};
+  for (const [key, value] of Object.entries(flat)) {
+    const parts = key.split(SEP);
+    let current = result;
+    for (const part of parts.slice(0, -1)) {
       const next = current[part];
-      // Replace a primitive sitting at this level: colliding flat keys such as
-      // "a" and "a_b" would otherwise write onto a non-object and be lost.
-      if (next === null || typeof next !== "object" || Array.isArray(next)) {
-        current[part] = {};
-      }
-      current = current[part] as AnyDict;
+      // Colliding flat keys such as "a" and "a_b" would otherwise write onto a primitive.
+      if (next === null || typeof next !== 'object' || Array.isArray(next)) current[part] = {};
+      current = current[part] as JsonObject;
     }
-    current[parts[parts.length - 1]] = value === null ? null : value;
+    current[parts[parts.length - 1]] = value;
   }
   return result;
 }
 
-function jsonToCsv(jsonData: string, separator: string = "_"): string {
-  try {
-    if (!jsonData.trim()) {
-      throw new Error("JSON data cannot be empty");
-    }
-
-    const data = JSON.parse(jsonData);
-    const { records, headers } = flattenJson(data, "", separator);
-
-    if (records.length === 0) {
-      return "";
-    }
-
-    const rows = records.map((record) =>
-      headers
-        .map((header) => {
-          const value = record[header] ?? "";
-          return typeof value === "string" &&
-            (value.includes(",") || value.includes("\n") || value.includes('"'))
-            ? `"${value.replace(/"/g, '""')}"`
-            : value;
-        })
-        .join(",")
-    );
-
-    return [headers.join(","), ...rows].join("\n");
-  } catch (e) {
-    throw new Error(
-      `JSON to CSV conversion failed: ${getErrorMessage(e, "Invalid format")}`
-    );
-  }
-}
-
-function csvToJson(csvData: string, separator: string = "_"): string {
-  try {
-    if (!csvData.trim()) {
-      throw new Error("CSV data cannot be empty");
-    }
-
-    const lines = csvData.trim().split("\n");
-    if (lines.length < 1) {
-      throw new Error("CSV data must contain at least a header row");
-    }
-
-    const headers = parseCsvLine(lines[0]);
-    const records: AnyDict[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const values = parseCsvLine(lines[i]);
-      const record: AnyDict = {};
-      headers.forEach((header, index) => {
-        record[header] = values[index] || null;
-      });
-      records.push(record);
-    }
-
-    const nestedRecords = records.map((record) =>
-      unflattenDict(record, separator)
-    );
-    return JSON.stringify(nestedRecords, null, 2);
-  } catch (e) {
-    throw new Error(
-      `CSV to JSON conversion failed: ${getErrorMessage(e, "Invalid format")}`
-    );
-  }
+function jsonToCsv(jsonData: string): string {
+  const { records, headers } = flattenJson(JSON.parse(jsonData));
+  if (records.length === 0) return '';
+  const rows = records.map((record) =>
+    headers
+      .map((header) => {
+        const value = record[header] ?? '';
+        return typeof value === 'string' && /[,"\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+      })
+      .join(',')
+  );
+  return [headers.join(','), ...rows].join('\n');
 }
 
 function parseCsvLine(line: string): string[] {
   const result: string[] = [];
-  let current = "";
+  let current = '';
   let inQuotes = false;
-
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    if (char === '"' && line[i - 1] !== "\\") {
+    if (char === '"' && line[i - 1] !== '\\') {
       inQuotes = !inQuotes;
-    } else if (char === "," && !inQuotes) {
+    } else if (char === ',' && !inQuotes) {
       result.push(current.replace(/""/g, '"'));
-      current = "";
+      current = '';
     } else {
       current += char;
     }
   }
-
   result.push(current.replace(/""/g, '"'));
-  return result.map((val) => val.trim().replace(/^"|"$/g, ""));
+  return result.map((val) => val.trim().replace(/^"|"$/g, ''));
 }
 
-function CSVJSONConverter() {
-  const seo = seoDescriptions.csvJson;
-  const [inputText, setInputText] = useState("");
-  const [conversionResult, setConversionResult] =
-    useState<ConversionResult | null>(null);
-  const [fileResult, setFileResult] = useState("");
-  const [error, setError] = useState("");
-  const [fileType, setFileType] = useState<ConversionType | null>(null);
-  const [fileBaseName, setFileBaseName] = useState("");
-  const [fileInputText, setFileInputText] = useState("");
-  const [isConverting, setIsConverting] = useState(false);
-  const textResultRef = useRef<HTMLDivElement | null>(null);
-  const fileResultRef = useRef<HTMLDivElement | null>(null);
-  const inputTextRef = useRef<HTMLTextAreaElement>(null);
-  const isMobile = useMediaQuery("(max-width: 640px)");
-  const fileReset = useFileReset();
+function csvToJson(csvData: string): string {
+  const lines = csvData.trim().split('\n');
+  const headers = parseCsvLine(lines[0]);
+  const records = lines.slice(1).map((line) => {
+    const values = parseCsvLine(line);
+    const record: JsonObject = {};
+    headers.forEach((header, i) => (record[header] = values[i] || null));
+    return unflatten(record);
+  });
+  return JSON.stringify(records, null, 2);
+}
 
-  useEffect(() => {
-    updateToolUsage("csv_json");
-  }, []);
+function convert(input: string, mode: Mode): { out: string; to: 'csv' | 'json' } {
+  const toCsv = mode === 'json' || (mode === 'auto' && looksLikeJson(input));
+  return toCsv ? { out: jsonToCsv(input), to: 'csv' } : { out: csvToJson(input), to: 'json' };
+}
 
-  const scrollToResult = (ref: React.RefObject<HTMLDivElement | null>) => {
-    setTimeout(() => {
-      ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
-  };
+/**
+ * One pane in, one pane out. Direction is detected from the input (JSON
+ * starts with { or [) and can be forced with the switch. Nested keys are
+ * flattened to `a_b` columns and unflattened on the way back.
+ */
+export default function CsvJsonConverter() {
+  const { text: input, setText: setInput, fileBase, loadFile, clear: clearSource } = useSourceText();
+  const [mode, setMode] = useState<Mode>('auto');
 
-  const convertText = async (type: ConversionType) => {
-    if (!inputText.trim()) {
-      setError("Conversion failed: Input text cannot be empty");
-      setConversionResult(null);
-      return;
-    }
-
-    setError("");
-    setIsConverting(true);
-
+  const result = useMemo(() => {
+    if (!input.trim()) return null;
     try {
-      let result: string;
-      if (type === ConversionType.CSV) {
-        result = jsonToCsv(inputText);
-        setConversionResult({ result, type: "csv" });
-      } else {
-        result = csvToJson(inputText);
-        setConversionResult({ result, type: "json" });
-      }
-      scrollToResult(textResultRef);
-    } catch (err) {
-      console.error("Conversion error:", err);
-      setError(`Conversion failed: ${getErrorMessage(err, "Invalid format")}`);
-      setConversionResult(null);
-    } finally {
-      setIsConverting(false);
+      return { ...convert(input, mode), error: '' };
+    } catch (e) {
+      return { out: '', to: null, error: getErrorMessage(e, 'Could not parse the input.') };
     }
-  };
+  }, [input, mode]);
 
-  const handleFileConversion = async (file: File, type: ConversionType) => {
-    if (!file) {
-      setError("File upload failed: No file selected");
-      setFileResult("");
-      setFileType(null);
-      return;
-    }
-
-    const baseName = file.name.replace(/\.[^/.]+$/, "");
-    setFileBaseName(baseName);
-    setIsConverting(true);
-
-    try {
-      const fileText = await file.text();
-      setFileInputText(fileText);
-      let result: string;
-
-      if (type === ConversionType.CSV) {
-        result = jsonToCsv(fileText);
-        setFileType(ConversionType.CSV);
-      } else {
-        result = csvToJson(fileText);
-        setFileType(ConversionType.JSON);
-      }
-
-      setFileResult(result);
-      setError("");
-      scrollToResult(fileResultRef);
-    } catch (err) {
-      console.error("File conversion error:", err);
-      setError(`File conversion failed: ${getErrorMessage(err, "Invalid format")}`);
-      setFileResult("");
-      setFileType(null);
-    } finally {
-      setIsConverting(false);
-    }
-  };
-
-  const clearTextConversion = () => {
-    setInputText("");
-    setConversionResult(null);
-    setError("");
-  };
-
-  const clearFileConversion = () => {
-    setFileResult("");
-    setFileInputText("");
-    setFileType(null);
-    setFileBaseName("");
-    setError("");
-    fileReset.triggerReset();
-  };
-
-  const handleInputTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(e.target.value);
-    if (inputTextRef.current) {
-      inputTextRef.current.focus();
-    }
-  };
+  const to = result?.to ?? null;
+  const fileName = `${fileBase || 'converted'}.${to ?? 'txt'}`;
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        {/* Text Conversion Section */}
-        <SectionCard>
-          {isMobile ? (
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="section-title">Text Conversion</h3>
-              <ClearButton
-                onClick={clearTextConversion}
-                disabled={!inputText && !conversionResult && !error}
-              />
-            </div>
-          ) : (
-            <div
-              className="flex items-center justify-between mb-4"
-              ref={textResultRef}
-            >
-              <h3 className="section-title">Text Conversion</h3>
-              <ClearButton
-                onClick={clearTextConversion}
-                disabled={!inputText && !conversionResult && !error}
-              />
-            </div>
-          )}
-          <hr className="line-break" />
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1 space-y-4">
-              <label className="form-label" htmlFor="input-text">
-                Input Text:
-              </label>
-              <AutoTextarea
-                id="input-text"
-                value={inputText}
-                onChange={handleInputTextChange}
-                className="input-field w-full"
-                placeholder="Enter JSON text to convert"
-                ref={inputTextRef}
-                aria-describedby={error ? "son-text-error" : undefined}
-                aria-label="JSON input text"
-              />
-              <div className="flex flex-wrap gap-2 items-center">
-                <LoadingButton
-                  onClick={() => convertText(ConversionType.CSV)}
-                  isLoading={isConverting}
-                  disabled={!inputText.trim()}
-                >
-                  JSON to CSV
-                </LoadingButton>
-              </div>
-            </div>
-
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="form-label">Converted Result:</label>
-                <div className="flex items-center gap-2">
-                  <CopyButton text={conversionResult?.result || ""} />
-                  <DownloadButton
-                    content={conversionResult?.result || ""}
-                    fileName={`converted_result.${
-                      conversionResult?.type || "txt"
-                    }`}
-                    fileType={conversionResult?.type || "txt"}
-                    disabled={!conversionResult}
-                  />
-                </div>
-              </div>
-              <AutoTextarea
-                value={conversionResult?.result || ""}
-                readOnly
-                disabled={!conversionResult}
-                placeholder="Converted result will appear here..."
-                className={`input-field w-full ${
-                  !conversionResult ? "text-faint" : ""
-                }`}
-                style={{ whiteSpace: "pre" }}
-                aria-label="Converted CSV or JSON result"
-              />
-              {conversionResult && (
-                <p className="text-sm text-muted mt-1">
-                  Converted:{" "}
-                  {conversionResult.type === "json"
-                    ? "CSV to JSON"
-                    : "JSON to CSV"}
-                </p>
-              )}
-            </div>
-          </div>
-          {error && <ErrorBox message={error} id="csv-json-text-error" />}
-        </SectionCard>
-
-        {/* File Conversion Section */}
-        <SectionCard className="mt-6">
-          {isMobile ? (
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="section-title">File Conversion</h3>
-              <ClearButton
-                onClick={clearFileConversion}
-                disabled={!fileInputText && !fileResult && !error}
-              />
-            </div>
-          ) : (
-            <div
-              className="flex items-center justify-between mb-4"
-              ref={fileResultRef}
-            >
-              <h3 className="section-title">File Conversion</h3>
-              <ClearButton
-                onClick={clearFileConversion}
-                disabled={!fileInputText && !fileResult && !error}
-              />
-            </div>
-          )}
-          <hr className="line-break" />
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <div className="flex-1">
-              <label className="form-label" htmlFor="csv-file-upload">
-                Upload CSV File
-              </label>
-              <FileUploader
-                accept=".csv"
-                label="Choose CSV"
-                onFileSelected={(file) =>
-                  handleFileConversion(file, ConversionType.JSON)
-                }
-                onClear={clearFileConversion}
-                resetSignal={fileReset.resetSignal}
-                disabled={isConverting}
-              />
-            </div>
-
-            <div className="flex-1">
-              <label className="form-label" htmlFor="json-file-upload">
-                Upload JSON File
-              </label>
-              <FileUploader
-                accept=".json"
-                label="Choose JSON"
-                onFileSelected={(file) =>
-                  handleFileConversion(file, ConversionType.CSV)
-                }
-                onClear={clearFileConversion}
-                resetSignal={fileReset.resetSignal}
-                disabled={isConverting}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1 space-y-4">
-              <label className="form-label mb-3">Input Text (from file):</label>
-              <AutoTextarea
-                value={fileInputText}
-                readOnly
-                disabled={!fileInputText}
-                placeholder="Input text from file..."
-                className={`input-field w-full h-64 ${
-                  !fileInputText ? "text-faint" : ""
-                }`}
-                aria-label="Input text from uploaded file"
-              />
-            </div>
-
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="form-label">Converted Result:</label>
-                <div>
-                  <CopyButton text={fileResult} className="mr-3" />
-                  <DownloadButton
-                    content={fileResult}
-                    fileName={`${fileBaseName}_converted.${fileType || "txt"}`}
-                    fileType={fileType || "txt"}
-                    disabled={!fileResult}
-                  />
-                </div>
-              </div>
-              <AutoTextarea
-                value={fileResult}
-                readOnly
-                disabled={!fileResult}
-                placeholder="Converted result will appear here after upload..."
-                className={`input-field w-full h-64 ${
-                  !fileResult ? "text-faint" : ""
-                }`}
-                style={{ whiteSpace: "pre" }}
-                aria-label="Converted result from uploaded file"
-              />
-              {fileResult && (
-                <p className="text-sm text-muted mt-1">
-                  Converted:{" "}
-                  {fileType === ConversionType.JSON
-                    ? "CSV to JSON"
-                    : "JSON to CSV"}
-                </p>
-              )}
-            </div>
-          </div>
-          {error && <ErrorBox message={error} id="csv-json-file-error" />}
-        </SectionCard>
-
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+    <ToolPage id="csv_json">
+      <Panel
+        title="Convert"
+        actions={
+          <>
+            <Segmented
+              size="sm"
+              label="Direction"
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: 'auto', label: 'Auto' },
+                { value: 'csv', label: 'CSV → JSON' },
+                { value: 'json', label: 'JSON → CSV' },
+              ]}
+            />
+            <ClearButton
+              onClick={clearSource}
+              disabled={!input}
+            />
+          </>
+        }
+      >
+        <TwoPane>
+          <Field
+            label="Input"
+            htmlFor="cj-input"
+            hint={
+              to
+                ? `Detected ${to === 'json' ? 'CSV' : 'JSON'}; converting to ${to.toUpperCase()}. Nested keys use "_" in column names.`
+                : 'Paste CSV (first row is the header) or JSON. Direction is detected automatically.'
+            }
+          >
+            <TextArea
+              id="cj-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={'id,name,address_city\n1,Ada,London\n2,Grace,Arlington'}
+              rows={12}
+              stats
+              autoFocus
+              aria-invalid={Boolean(result?.error) || undefined}
+            />
+            <FileDrop
+              className="mt-3"
+              accept=".csv,.json"
+              label="Load a file"
+              onFile={loadFile}
+              onClear={clearSource}
+            />
+          </Field>
+          <Output
+            label={to ? `Output · ${to.toUpperCase()}` : 'Output'}
+            value={result?.out ?? ''}
+            rows={12}
+            wrap={to !== 'csv'}
+            fileName={fileName}
+            mime={to === 'json' ? 'application/json' : 'text/csv'}
+          />
+        </TwoPane>
+        {result?.error && (
+          <Callout tone="error" className="mt-4">
+            {result.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default CSVJSONConverter;

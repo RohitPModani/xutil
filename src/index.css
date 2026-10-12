@@ -1,65 +1,85 @@
+/*
+  tastemaker build stamp — XUtil
+  screen-class: app-shell (sidebar + topbar + canvas), no macrostructure/arc (not a marketing page)
+  mood: technical · palette seed 4127 (light + dark from one seed) · contrast: matrix verified, see .tastemaker/style-lock.md
+  type: Inter (UI) + IBM Plex Mono (data) · motion: app-shell track only
+  self-critique: show-don't-tell 4 · philosophy 4 · hierarchy 4 · specificity 4 · restraint 5 · variety 3
+*/
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/*
-  XUtil surface tokens.
-
-  Every tool here does the same thing: takes something in, gives something
-  back. The palette encodes exactly that and nothing else - `source` marks
-  what you provide, `result` marks what you get. Categories are not
-  colour-coded, because their colours would mean nothing a reader could learn.
-
-  Ground is a cool graphite rather than a true black so long sessions stay
-  easy on the eyes, and the light theme is a neutral grey paper rather than a
-  warm cream, which keeps code samples reading as code.
-*/
 @layer base {
   :root {
-    --ground: 239 239 241;
-    --surface: 255 255 255;
-    --raised: 246 246 248;
-    --line: 214 215 220;
-    --ink: 26 28 33;
-    --dim: 92 97 108;
-    --faint: 98 104 116;
-    --source: 150 88 18;
-    --result: 20 116 100;
-    --alert: 176 42 42;
+    --canvas: 247 253 255;
+    --surface: 234 243 248;
+    --panel: 255 255 255;
+    --line: 217 227 231;
+    --control: 127 146 154;
+    --ink: 18 28 33;
+    --muted: 78 95 103;
+    --primary: 5 125 160;
+    --link: 5 125 160;
+    --on-primary: 255 255 255;
+    --danger: 189 76 89;
+    --success: 27 122 78;
+    --ease-out: cubic-bezier(0.2, 0, 0, 1);
+    color-scheme: light;
   }
 
   :root.dark {
-    --ground: 20 22 26;
-    --surface: 27 30 36;
-    --raised: 34 38 45;
-    --line: 47 53 63;
-    --ink: 228 231 236;
-    --dim: 148 156 168;
-    --faint: 140 148 161;
-    --source: 217 140 63;
-    --result: 91 192 168;
-    --alert: 232 106 106;
+    --canvas: 14 21 24;
+    --surface: 25 32 35;
+    --panel: 20 27 30;
+    --line: 37 44 47;
+    --control: 92 110 117;
+    --ink: 230 245 251;
+    --muted: 149 167 174;
+    --primary: 14 128 163;
+    --link: 79 179 214;
+    --on-primary: 255 255 255;
+    --danger: 234 117 127;
+    --success: 79 196 139;
+    color-scheme: dark;
   }
 
   html {
     -webkit-text-size-adjust: 100%;
+    scrollbar-gutter: stable;
   }
 
   body {
-    @apply bg-ground text-ink font-sans antialiased;
-    font-feature-settings: 'kern' 1;
+    @apply bg-canvas text-ink font-sans text-[15px] leading-normal antialiased;
+    font-feature-settings: 'kern' 1, 'cv11' 1, 'ss01' 1;
   }
 
-  /* One visible focus treatment everywhere, so keyboard users always know
-     where they are. */
+  /* One focus treatment everywhere. */
   :focus-visible {
-    @apply outline-none ring-2 ring-offset-2;
-    --tw-ring-color: rgb(var(--result));
-    --tw-ring-offset-color: rgb(var(--ground));
+    outline: 2px solid rgb(var(--primary));
+    outline-offset: 2px;
   }
 
   ::selection {
-    background-color: rgb(var(--result) / 0.25);
+    background-color: rgb(var(--primary) / 0.22);
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    @apply font-mono;
+  }
+
+  kbd {
+    @apply inline-flex items-center rounded border border-line bg-surface px-1 text-[11px] leading-4 text-muted;
+  }
+
+  dialog::backdrop {
+    background: rgb(var(--ink) / 0.35);
+  }
+
+  :root.dark dialog::backdrop {
+    background: rgb(0 0 0 / 0.55);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -75,224 +95,97 @@
 }
 
 @layer components {
-  .section {
-    @apply bg-ground text-ink;
+  /* Route content mounts with a short rise so a tool switch reads as a change
+     of page, not a flicker. Only transform and opacity animate. */
+  .page-enter {
+    animation: page-enter 180ms var(--ease-out) both;
   }
 
-  /* One shell for the header, body and footer so the logo, the search field
-     and the first column of the index all share a left edge. It runs the full
-     width of the viewport - capping it at ~1150px stranded everything in the
-     middle third of a large monitor. */
-  .shell {
-    @apply w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-14;
+  @keyframes page-enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  /* Tool pages opt into a reading width inside that shell. A single input
-     stretched across 2000px is unusable however much room there is. */
-  .shell-reading {
-    @apply w-full max-w-5xl mx-auto;
+  dialog[open] {
+    animation: dialog-enter 160ms var(--ease-out) both;
   }
 
-  /* ---- Structure ------------------------------------------------------ */
-
-  /* Small caps label. Used for eyebrows and field names, never for prose. */
-  .label {
-    @apply font-display text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-faint;
+  @keyframes dialog-enter {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
-  .label-source {
-    @apply label;
-    color: rgb(var(--source));
+  dialog[open].drawer {
+    animation: drawer-enter 180ms var(--ease-out) both;
   }
 
-  .label-result {
-    @apply label;
-    color: rgb(var(--result));
+  @keyframes drawer-enter {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
   }
 
-  .rule {
-    @apply border-0 border-t border-line;
+  /* Form control base. Border is the boundary, so it uses the 3:1 control
+     colour, not the decorative hairline. */
+  .control {
+    @apply w-full rounded-md border border-control bg-panel px-3 text-ink
+           placeholder:text-muted/70 transition-colors duration-150
+           disabled:cursor-not-allowed disabled:opacity-60;
   }
 
-  /* Headings for the sections inside a tool page. One step below the page
-     title; these were spelled five different ways across the pages. */
-  .section-title {
-    @apply font-display text-base font-semibold tracking-tight text-ink;
+  .control:focus {
+    outline: 2px solid rgb(var(--primary));
+    outline-offset: -1px;
+    border-color: rgb(var(--primary));
   }
 
-  .section-subtitle {
-    @apply font-display text-sm font-semibold tracking-tight text-ink;
-  }
-
-  .card {
-    @apply bg-surface border border-line rounded-lg;
-  }
-
-  .text-muted {
-    @apply text-dim;
-  }
-
-  /* ---- Tool index ----------------------------------------------------- */
-
-  /* One row per tool: name on the left, what it does on the right. The whole
-     row is the target, so it stays easy to hit on a phone. */
-  /* Stacked on a phone so neither the name nor the signature has to be
-     truncated; side by side once there is room for both. */
-  .tool-row {
-    @apply flex flex-col sm:flex-row sm:items-baseline sm:justify-between
-           gap-0.5 sm:gap-4 px-3 py-2 rounded-md
-           border border-transparent no-underline
-           transition-colors duration-150;
-  }
-
-  .tool-row:hover,
-  .tool-row[data-active='true'] {
-    @apply bg-raised border-line;
-  }
-
-  .tool-row-name {
-    @apply font-mono text-[0.8125rem] text-ink sm:truncate;
-  }
-
-  .tool-row:hover .tool-row-name,
-  .tool-row[data-active='true'] .tool-row-name {
-    color: rgb(var(--result));
-  }
-
-  /* The transform signature: `jwt -> header . payload`. Reads as data, and
-     tells you what a tool does faster than its name does. */
-  .sig {
-    @apply font-mono text-[0.6875rem] text-faint sm:whitespace-nowrap sm:shrink-0;
-  }
-
-  .sig-in {
-    color: rgb(var(--source));
-  }
-
-  .sig-out {
-    color: rgb(var(--result));
-  }
-
-  .sig-arrow {
-    @apply text-faint px-1;
-  }
-
-  /* ---- Controls ------------------------------------------------------- */
-
-  .button-primary {
-    @apply inline-flex items-center justify-center gap-2
-           font-display text-sm font-semibold uppercase tracking-wider
-           px-4 py-2 rounded-md
-           bg-ink text-ground
-           transition-opacity duration-150
-           hover:opacity-85
-           disabled:opacity-40 disabled:cursor-not-allowed;
-  }
-
-  .button-quiet {
-    @apply inline-flex items-center gap-2
-           font-display text-xs font-semibold uppercase tracking-wider
-           px-3 py-1.5 rounded-md
-           border border-line text-dim bg-surface
-           transition-colors duration-150
-           hover:text-ink hover:border-faint
-           disabled:opacity-40 disabled:cursor-not-allowed;
-  }
-
-  .icon-button {
-    @apply p-1.5 rounded-md text-faint
-           transition-colors duration-150
-           hover:text-ink hover:bg-raised
-           disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent;
-  }
-
-  .input-field {
-    @apply w-full font-mono text-sm
-           px-3 py-2.5 rounded-md
-           bg-surface text-ink border border-line
-           placeholder:text-faint
-           transition-colors duration-150
-           hover:border-faint
-           disabled:opacity-50;
-  }
-
-  .input-field:focus {
-    @apply outline-none border-transparent ring-2;
-    --tw-ring-color: rgb(var(--source));
-  }
-
-  /* Native select arrows differ per platform and ignore the palette, so the
-     control draws its own. Two rules because a data URI cannot read a custom
-     property. */
-  select.input-field {
-    @apply appearance-none pr-9 cursor-pointer bg-no-repeat;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235c616c' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
-    background-position: right 0.75rem center;
+  select.control {
+    @apply cursor-pointer appearance-none bg-no-repeat pr-9;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%234e5f67' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.6rem center;
     background-size: 1rem;
   }
 
-  :root.dark select.input-field {
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23949ca8' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  :root.dark select.control {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2395a7ae' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
   }
 
-  .form-label {
-    @apply label block mb-2;
+  input[type='checkbox'],
+  input[type='radio'] {
+    accent-color: rgb(var(--primary));
   }
 
-  .checkbox-primary {
-    @apply h-4 w-4 rounded border-line mr-2;
-    accent-color: rgb(var(--result));
+  input[type='range'] {
+    accent-color: rgb(var(--primary));
   }
 
-  .checkbox-label {
-    @apply flex items-center text-sm text-dim;
+  input[type='color'] {
+    @apply h-9 w-12 cursor-pointer rounded-md border border-control bg-panel p-0.5;
   }
 
-  .form-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4;
+  .thin-scroll {
+    @apply scrollbar-thin scrollbar-thumb-line scrollbar-track-transparent;
   }
 
-  .toggle-count {
-    @apply flex items-center justify-center w-6 h-5 leading-none
-           bg-raised border border-line text-dim text-xs rounded
-           transition-colors hover:text-ink hover:border-faint
-           disabled:opacity-40 disabled:hover:border-line;
-  }
-
-  /* ---- Output --------------------------------------------------------- */
-
-  /* Results carry a left edge in the result colour, so the answer is
-     findable at a glance on a long page. */
-  .result-box {
-    @apply mt-4 p-3 rounded-md bg-raised border border-line border-l-2;
-    border-left-color: rgb(var(--result));
-  }
-
-  .inner-result {
-    @apply bg-surface border border-line p-3 rounded flex justify-between items-center gap-3;
-  }
-
-  .mono-output {
-    @apply font-mono text-sm text-ink break-all whitespace-pre-wrap;
-  }
-
-  .scrollbox {
-    @apply max-h-[500px] overflow-y-auto space-y-2 pr-1
-           scrollbar-thin scrollbar-thumb-line scrollbar-track-transparent;
-  }
-
-  .line-break {
-    @apply rule mb-4;
-  }
-}
-
-@layer utilities {
-  .animate-spin-slow {
-    animation: spin 3s linear infinite;
-  }
-
-  /* Keeps a focused index row clear of the sticky header when arrowing. */
-  .scroll-below-header {
-    scroll-margin-top: 6rem;
+  /* Long-form explainer prose on tool pages. */
+  .prose-tool {
+    @apply prose prose-sm max-w-none dark:prose-invert
+           prose-headings:font-semibold prose-headings:tracking-tight
+           prose-a:text-link prose-code:font-normal;
   }
 }

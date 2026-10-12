@@ -1,42 +1,32 @@
-import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Moon, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { IconButton } from '../ui';
 
 const getInitialTheme = () => {
   try {
-    const stored = localStorage.getItem("xutil-theme");
-    if (stored) return stored === "dark";
+    const stored = localStorage.getItem('xutil-theme');
+    if (stored) return stored === 'dark';
   } catch {
     // Storage can be unavailable in private mode.
   }
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
-const ThemeToggle = () => {
-  const [darkMode, setDarkMode] = useState(getInitialTheme);
+export default function ThemeToggle() {
+  const [dark, setDark] = useState(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
+    document.documentElement.classList.toggle('dark', dark);
     try {
-      localStorage.setItem("xutil-theme", darkMode ? "dark" : "light");
+      localStorage.setItem('xutil-theme', dark ? 'dark' : 'light');
     } catch {
       // Preference just will not persist.
     }
-  }, [darkMode]);
+  }, [dark]);
 
   return (
-    <button
-      onClick={() => setDarkMode((v) => !v)}
-      className="icon-button"
-      aria-label={darkMode ? "Switch to light theme" : "Switch to dark theme"}
-      title={darkMode ? "Light theme" : "Dark theme"}
-    >
-      {darkMode ? (
-        <Sun className="w-[18px] h-[18px]" aria-hidden="true" />
-      ) : (
-        <Moon className="w-[18px] h-[18px]" aria-hidden="true" />
-      )}
-    </button>
+    <IconButton label={dark ? 'Switch to light theme' : 'Switch to dark theme'} onClick={() => setDark((v) => !v)}>
+      {dark ? <Sun className="h-[18px] w-[18px]" aria-hidden="true" /> : <Moon className="h-[18px] w-[18px]" aria-hidden="true" />}
+    </IconButton>
   );
-};
-
-export default ThemeToggle;
+}

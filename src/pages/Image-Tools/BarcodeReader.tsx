@@ -1,219 +1,78 @@
-import { useEffect, useState, useCallback } from "react";
-import ToolHeader from "../../components/ToolHeader";
-import SectionCard from "../../components/SectionCard";
-import ClearButton from "../../components/ClearButton";
-import ErrorBox from "../../components/ErrorBox";
-import CopyButton from "../../components/CopyButton";
-import SEODescription from "../../components/SEODescription";
-import { PageSEO } from "../../components/PageSEO";
-import seoDescriptions from "../../data/seoDescriptions";
-import { updateToolUsage } from "../../utils/toolUsage";
-import { Upload } from "lucide-react";
-import LoadingButton from "../../components/LoadingButton";
-import {
-  BrowserMultiFormatReader,
-  Result,
-  BarcodeFormat,
-} from "@zxing/library";
+import { useEffect, useRef, useState } from 'react';
+import { BarcodeFormat, BrowserMultiFormatReader } from '@zxing/browser';
+import ToolPage from '../../components/ToolPage';
+import { Callout, EmptyState, FileDrop, KeyValueList, Output, Panel, PreviewBox, TwoPane } from '../../ui';
 
-const BARCODE_FORMATS = [
-  { value: "CODE128", label: "CODE128" },
-  { value: "CODE128A", label: "CODE128 A" },
-  { value: "CODE128B", label: "CODE128 B" },
-  { value: "CODE128C", label: "CODE128 C" },
-  { value: "EAN13", label: "EAN-13" },
-  { value: "EAN8", label: "EAN-8" },
-  { value: "UPC", label: "UPC" },
-  { value: "CODE39", label: "CODE39" },
-  { value: "ITF14", label: "ITF-14" },
-  { value: "codabar", label: "Codabar" },
-  { value: "QR_CODE", label: "QR Code" },
-];
-
-type BarcodeResult = {
+interface Decoded {
   format: string;
-  rawValue: string;
-  timestamp: number;
-};
-
-function BarcodeReader() {
-  const seo = seoDescriptions.barcodeReader;
-
-  const [, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [barcodeResult, setBarcodeResult] = useState<BarcodeResult | null>(
-    null
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [isScanning, setIsScanning] = useState(false);
-  const codeReader = useState(new BrowserMultiFormatReader())[0];
-
-  useEffect(() => {
-    updateToolUsage("barcode_reader");
-  }, []);
-
-  const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setError(null);
-      setBarcodeResult(null);
-
-      if (e.target.files && e.target.files.length > 0) {
-        const file = e.target.files[0];
-        setImageFile(file);
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          setImagePreview(event.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-      }
-    },
-    []
-  );
-
-  const scanBarcode = useCallback(async () => {
-    try {
-      setIsScanning(true);
-      setError(null);
-      setBarcodeResult(null);
-
-      if (!imagePreview) {
-        throw new Error("Please upload an image first");
-      }
-
-      const result = await codeReader.decodeFromImageUrl(imagePreview);
-      handleScanResult(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to scan barcode");
-      console.error("Barcode scanning error:", err);
-    } finally {
-      setIsScanning(false);
-    }
-  }, [imagePreview, codeReader]);
-
-  const handleScanResult = useCallback((result: Result | null) => {
-    if (!result) {
-      setError("No barcode detected");
-      return;
-    }
-
-    const formatMap: { [key: number]: string } = {
-      [BarcodeFormat.CODE_128]: "CODE128",
-      [BarcodeFormat.EAN_13]: "EAN13",
-      [BarcodeFormat.EAN_8]: "EAN8",
-      [BarcodeFormat.UPC_A]: "UPC",
-      [BarcodeFormat.CODE_39]: "CODE39",
-      [BarcodeFormat.ITF]: "ITF14",
-      [BarcodeFormat.CODABAR]: "codabar",
-      [BarcodeFormat.QR_CODE]: "QR_CODE",
-    };
-
-    const format =
-      formatMap[result.getBarcodeFormat()] ||
-      result.getBarcodeFormat().toString();
-
-    setBarcodeResult({
-      format,
-      rawValue: result.getText(),
-      timestamp: Date.now(),
-    });
-  }, []);
-
-  const handleClear = useCallback(() => {
-    setImageFile(null);
-    setImagePreview(null);
-    setBarcodeResult(null);
-    setError(null);
-  }, []);
-
-  return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="max-w-3xl mx-auto py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard className="mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Barcode Reader</h3>
-            <ClearButton
-              onClick={handleClear}
-              disabled={!imagePreview && !barcodeResult}
-              aria-label="Clear inputs"
-            />
-          </div>
-          <hr className="line-break" />
-          <div className="flex flex-col space-y-6">
-            <div className="flex flex-col space-y-2">
-              <label className="form-label">Upload Image:</label>
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-raised hover:bg-raised transition-colors">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="w-8 h-8 mb-2 text-faint" />
-                  <p className="text-sm text-faint">
-                    <span className="font-semibold">Click to upload</span> or
-                    drag and drop
-                  </p>
-                </div>
-                <input
-                  id="file-upload"
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </label>
-            </div>
-
-            <div className="flex justify-center">
-              <LoadingButton
-                onClick={scanBarcode}
-                disabled={isScanning || !imagePreview}
-                isLoading={isScanning}
-              >
-                Scan Barcode
-              </LoadingButton>
-            </div>
-
-            <div className="flex flex-col items-center">
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Uploaded for barcode scanning"
-                  className="mb-4 border rounded p-2 bg-raised w-full max-h-64 object-contain"
-                />
-              ) : (
-                <div className="flex items-center justify-center border-2 border-dashed rounded-lg w-full h-64 text-faint">
-                  Image will appear here
-                </div>
-              )}
-            </div>
-
-            {barcodeResult && (
-              <div className="result-box">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="section-subtitle">Barcode Details:</h4>
-                  <CopyButton text={barcodeResult.rawValue} />
-                </div>
-                <div className="inner-result space-y-2">
-                  <div className="w-full mono-output flex flex-col">
-                    <span>
-                      Format:{" "}
-                      {BARCODE_FORMATS.find(
-                        (f) => f.value === barcodeResult.format
-                      )?.label || barcodeResult.format}
-                    </span>
-                    <span>Value: {barcodeResult.rawValue}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <ErrorBox message={error} aria-live="polite" />
-          </div>
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
-  );
+  value: string;
 }
 
-export default BarcodeReader;
+export default function BarcodeReader() {
+  const reader = useRef<BrowserMultiFormatReader | null>(null);
+  const [image, setImage] = useState<{ url: string; name: string } | null>(null);
+  const [state, setState] = useState<{ result: Decoded | null; error: string; busy: boolean }>({ result: null, error: '', busy: false });
+
+  useEffect(() => {
+    if (!image) return;
+    return () => URL.revokeObjectURL(image.url);
+  }, [image]);
+
+  // Decode as soon as an image is chosen; the result replaces the previous one.
+  useEffect(() => {
+    if (!image) {
+      setState({ result: null, error: '', busy: false });
+      return;
+    }
+    let live = true;
+    setState((s) => ({ ...s, busy: true, error: '' }));
+    reader.current ??= new BrowserMultiFormatReader();
+    reader.current
+      .decodeFromImageUrl(image.url)
+      .then((r) => live && setState({ result: { format: BarcodeFormat[r.getBarcodeFormat()].replace(/_/g, ' '), value: r.getText() }, error: '', busy: false }))
+      .catch(() => live && setState({ result: null, error: 'No barcode or QR code was found in this image. Try a sharper, larger or better-lit picture.', busy: false }));
+    return () => {
+      live = false;
+    };
+  }, [image]);
+
+  return (
+    <ToolPage id="barcode_reader">
+      <Panel title="Read">
+        <TwoPane>
+          <div>
+            <FileDrop
+              accept="image/*"
+              label="Choose an image"
+              maxSizeMB={10}
+              onFile={(file) => setImage({ url: URL.createObjectURL(file), name: file.name })}
+              onClear={() => setImage(null)}
+            />
+            <PreviewBox height="h-64" className="mt-3">
+              {image ? (
+                <img src={image.url} alt={`Uploaded image ${image.name}`} className="max-h-full max-w-full object-contain" />
+              ) : (
+                <EmptyState>Drop a photo or screenshot of a barcode or QR code</EmptyState>
+              )}
+            </PreviewBox>
+          </div>
+          <Output label={state.busy ? 'Reading…' : 'Decoded value'} value={state.result?.value ?? ''} rows={6} placeholder="The decoded value appears here">
+            {state.result ? (
+              <KeyValueList
+                items={[
+                  { label: 'Format', value: state.result.format, mono: false },
+                  { label: 'Value', value: state.result.value },
+                ]}
+              />
+            ) : undefined}
+          </Output>
+        </TwoPane>
+        {state.error && (
+          <Callout tone="error" className="mt-4">
+            {state.error}
+          </Callout>
+        )}
+      </Panel>
+    </ToolPage>
+  );
+}

@@ -1,86 +1,36 @@
-import React from "react";
-import UnitConverter from "./UnitConverter";
-import seoDescriptions from "../../data/seoDescriptions";
+import UnitConverter from './UnitConverter';
 
-type pressureUnit =
-  | "pa"
-  | "kpa"
-  | "atm"
-  | "bar"
-  | "mbar"
-  | "psi"
-  | "mmhg"
-  | "torr";
-type PressureConversionRates = Record<pressureUnit, number>;
+type PressureUnit = 'pa' | 'kpa' | 'atm' | 'bar' | 'mbar' | 'psi' | 'mmhg' | 'torr';
 
-const UNITS: { value: pressureUnit; label: string }[] = [
-  { value: "pa", label: "Pascals (Pa)" },
-  { value: "kpa", label: "Kilopascals (kPa)" },
-  { value: "atm", label: "Atmospheres (atm)" },
-  { value: "bar", label: "Bars (bar)" },
-  { value: "mbar", label: "Millibars (mbar)" },
-  { value: "psi", label: "Pounds per square inch (psi)" },
-  { value: "mmhg", label: "Millimeters of mercury (mmHg)" },
-  { value: "torr", label: "Torr" },
-] as const;
+const UNITS: { value: PressureUnit; label: string }[] = [
+  { value: 'pa', label: 'Pascals (Pa)' },
+  { value: 'kpa', label: 'Kilopascals (kPa)' },
+  { value: 'atm', label: 'Atmospheres (atm)' },
+  { value: 'bar', label: 'Bars (bar)' },
+  { value: 'mbar', label: 'Millibars (mbar)' },
+  { value: 'psi', label: 'Pounds per square inch (psi)' },
+  { value: 'mmhg', label: 'Millimeters of mercury (mmHg)' },
+  { value: 'torr', label: 'Torr' },
+];
 
-const UNIT_TO_PASCALS: PressureConversionRates = {
-  pa: 1, // Pascals
-  kpa: 1000, // Kilopascals
-  atm: 101325, // Atmospheres
-  bar: 100000, // Bars
-  mbar: 100, // Millibars
-  psi: 6894.75729317, // Pounds per square inch
-  mmhg: 133.322387415, // Millimeters of mercury
-  torr: 133.322387415, // Torr (same as mmHg)
+const UNIT_TO_PASCALS: Record<PressureUnit, number> = {
+  pa: 1,
+  kpa: 1000,
+  atm: 101325,
+  bar: 100000,
+  mbar: 100,
+  psi: 6894.75729317,
+  mmhg: 133.322387415,
+  torr: 133.322387415,
 };
 
-const VALIDATION_MESSAGE = "Pressure must be greater than zero.";
-const CONVERTER_NAME = "Pressure Converter";
-
-function PressureConverter() {
-  const convertPressure = (
-    value: number,
-    unit: string
-  ): Record<string, number> => {
-    if (!Object.keys(UNIT_TO_PASCALS).includes(unit)) {
-      throw new Error(
-        `Invalid unit: ${unit}. Supported units: ${Object.keys(
-          UNIT_TO_PASCALS
-        ).join(", ")}`
-      );
-    }
-
-    // Convert to intermediate unit (watts)
-    const intermediateValue = value * UNIT_TO_PASCALS[unit as pressureUnit];
-
-    if (!Number.isFinite(intermediateValue)) {
-      throw new Error(
-        "Conversion resulted in non-finite value (possible overflow)"
-      );
-    }
-
-    // Convert from pascals to all units
-    const convertedValues: Record<string, number> = {};
-    Object.entries(UNIT_TO_PASCALS).forEach(([key, factor]) => {
-      convertedValues[key] = Number((intermediateValue / factor).toFixed(8));
-    });
-
-    return convertedValues;
-  };
-
-  return (
-    <UnitConverter
-      seo={seoDescriptions.pressure}
-      defaultValue="20"
-      defaultUnit="psi"
-      units={UNITS}
-      converterName={CONVERTER_NAME}
-      validationMessage={VALIDATION_MESSAGE}
-      convertFunction={convertPressure}
-      toolName="pressure"
-    />
-  );
+function convert(value: number, unit: string): Record<string, number> {
+  if (!(unit in UNIT_TO_PASCALS)) throw new Error(`Unknown unit: ${unit}`);
+  const pa = value * UNIT_TO_PASCALS[unit as PressureUnit];
+  if (!Number.isFinite(pa)) throw new Error('The value is too large to convert.');
+  return Object.fromEntries(Object.entries(UNIT_TO_PASCALS).map(([k, f]) => [k, Number((pa / f).toFixed(8))]));
 }
 
-export default React.memo(PressureConverter);
+export default function PressureConverter() {
+  return <UnitConverter id="pressure" defaultValue="20" defaultUnit="psi" units={UNITS} validationMessage="Pressure must be greater than zero." convert={convert} />;
+}

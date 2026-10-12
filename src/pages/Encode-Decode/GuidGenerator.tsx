@@ -1,271 +1,113 @@
-import { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import ErrorBox from "../../components/ErrorBox";
-import LoadingButton from "../../components/LoadingButton";
-import SectionCard from "../../components/SectionCard";
-import CopyButton from "../../components/CopyButton";
-import SEODescription from "../../components/SEODescription";
-import seoDescriptions from "../../data/seoDescriptions";
-import { PageSEO } from "../../components/PageSEO";
-import { updateToolUsage } from "../../utils/toolUsage";
-import ToolHeader from "../../components/ToolHeader";
-
-// Utility functions for GUID generation
+import { useCallback, useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import ToolPage from '../../components/ToolPage';
+import { Checkbox, CopyButton, Field, GenerateButton, Input, Output, Panel, Segmented, Toolbar, ValueBlock } from '../../ui';
 
 // Formats 16 bytes as a canonical 8-4-4-4-12 UUID string.
 const formatUuid = (bytes: Uint8Array): string => {
-  const hex = Array.from(bytes)
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-
-  return [
-    hex.substring(0, 8),
-    hex.substring(8, 12),
-    hex.substring(12, 16),
-    hex.substring(16, 20),
-    hex.substring(20, 32),
-  ].join("-");
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return [hex.slice(0, 8), hex.slice(8, 12), hex.slice(12, 16), hex.slice(16, 20), hex.slice(20)].join('-');
 };
 
-// UUID version 7 per RFC 9562: a 48-bit big-endian Unix timestamp in
-// milliseconds, followed by 74 random bits, with the version and variant
-// fields set in place.
-const generateGuidV7 = (): string => {
+// UUID v7 per RFC 9562: 48-bit big-endian Unix ms timestamp, then 74 random
+// bits, with version and variant set in place.
+const uuidv7 = (): string => {
   const bytes = new Uint8Array(16);
-
-  // Bytes 0-5: timestamp, most significant byte first. Divide rather than
-  // shift, since bitwise operators would truncate to 32 bits.
-  let timestamp = Date.now();
+  let ts = Date.now();
   for (let i = 5; i >= 0; i--) {
-    bytes[i] = timestamp % 256;
-    timestamp = Math.floor(timestamp / 256);
+    bytes[i] = ts % 256;
+    ts = Math.floor(ts / 256);
   }
-
-  // Bytes 6-15: random, then overwrite the version and variant nibbles.
   crypto.getRandomValues(bytes.subarray(6));
-  bytes[6] = (bytes[6] & 0x0f) | 0x70; // version 7
-  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 0b10
-
+  bytes[6] = (bytes[6] & 0x0f) | 0x70;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
   return formatUuid(bytes);
 };
 
-const GUID_FORMATS = [
-  { value: "v4", label: "Version 4 (Random)" },
-  { value: "v7", label: "Version 7 (Timestamp)" },
-] as const;
+type Version = 'v4' | 'v7';
 
-type GuidVersion = "v4" | "v7";
+const make = (v: Version) => (v === 'v4' ? uuidv4() : uuidv7());
 
-function GuidGenerator() {
-  const seo = seoDescriptions.guidGenerator;
-  const [singleGuid, setSingleGuid] = useState("");
-  const [bulkGuids, setBulkGuids] = useState<string[]>([]);
-  const [count, setCount] = useState(5);
-  const [errorSingle, setErrorSingle] = useState("");
-  const [errorBulk, setErrorBulk] = useState("");
-  const [isLoadingSingle, setIsLoadingSingle] = useState(false);
-  const [isLoadingBulk, setIsLoadingBulk] = useState(false);
-  const [singleGuidFormat, setSingleGuidFormat] = useState<GuidVersion>("v4");
-  const [bulkGuidFormat, setBulkGuidFormat] = useState<GuidVersion>("v4");
+export default function GuidGenerator() {
+  const [version, setVersion] = useState<Version>('v4');
+  const [count, setCount] = useState('5');
+  const [upper, setUpper] = useState(false);
+  const [braces, setBraces] = useState(false);
+  const [single, setSingle] = useState('');
+  const [bulk, setBulk] = useState<string[]>([]);
 
-  useEffect(() => {
-    updateToolUsage("guid");
-    generateGuids("single", singleGuidFormat);
-    generateGuids("bulk", bulkGuidFormat);
-  }, []);
+  const n = Math.min(1000, Math.max(1, Number(count) || 1));
 
-  useEffect(() => {
-    generateGuids("bulk", bulkGuidFormat);
-  }, [bulkGuidFormat, count]);
+  const style = useCallback(
+    (id: string) => {
+      let s = upper ? id.toUpperCase() : id;
+      if (braces) s = `{${s}}`;
+      return s;
+    },
+    [upper, braces]
+  );
 
-  const generateGuids = (type: "single" | "bulk", format: GuidVersion) => {
-    const isSingle = type === "single";
-    const setLoading = isSingle ? setIsLoadingSingle : setIsLoadingBulk;
-    const setError = isSingle ? setErrorSingle : setErrorBulk;
+  const regenerate = useCallback(() => {
+    setSingle(make(version));
+    setBulk(Array.from({ length: n }, () => make(version)));
+  }, [version, n]);
 
-    if (!isSingle && (!Number.isInteger(count) || count < 1 || count > 1000)) {
-      setError("Count must be an integer between 1 and 1000");
-      return;
-    }
+  // A fresh value on load and whenever the settings change, so there is
+  // always something to copy without pressing a button first.
+  useEffect(regenerate, [regenerate]);
 
-    setLoading(true);
-    try {
-      if (isSingle) {
-        const guid = format === "v4" ? uuidv4() : generateGuidV7();
-        setSingleGuid(guid);
-      } else {
-        const guids = Array.from({ length: count }, () =>
-          format === "v4" ? uuidv4() : generateGuidV7()
-        );
-        setBulkGuids(guids);
-      }
-      setError("");
-    } catch {
-      setError(`Failed to generate ${isSingle ? "GUID" : "bulk GUIDs"}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "" || /^[0-9]+$/.test(value)) {
-      const numValue = value === "" ? 0 : Number(value);
-      setCount(Math.max(0, Math.min(1000, numValue)));
-    }
-  };
-
-  const incrementCount = () => setCount((prev) => Math.min(prev + 1, 1000));
-  const decrementCount = () => setCount((prev) => Math.max(prev - 1, 1));
+  const bulkText = bulk.map(style).join('\n');
 
   return (
-    <>
-      <PageSEO title={seo.seo} description={seo.body} />
-      <div className="py-6 sm:py-8">
-        <ToolHeader title={seo.title} />
-
-        <SectionCard className="mb-6">
-          <h3 className="section-title mb-4">Generate Single GUID</h3>
-          <hr className="line-break" />
-          <div className="flex items-center justify-start mb-4">
-            <label htmlFor="single-guid-format" className="sr-only">
-              GUID Format
-            </label>
-            <select
-              id="single-guid-format"
-              className="input-field w-auto form-select mr-4"
-              value={singleGuidFormat}
-              onChange={(e) => {
-                const format = e.target.value as GuidVersion;
-                setSingleGuidFormat(format);
-                generateGuids("single", format);
-              }}
-            >
-              {GUID_FORMATS.map((format) => (
-                <option key={format.value} value={format.value}>
-                  {format.label}
-                </option>
-              ))}
-            </select>
-            <LoadingButton
-              onClick={() => generateGuids("single", singleGuidFormat)}
-              isLoading={isLoadingSingle}
-            >
-              Generate
-            </LoadingButton>
-          </div>
-          {singleGuid && (
-            <div className="result-box mt-4">
-              <div className="inner-result">
-                <span className="truncate">{singleGuid}</span>
-                <CopyButton text={singleGuid} />
-              </div>
-            </div>
-          )}
-          <ErrorBox message={errorSingle} />
-        </SectionCard>
-
-        <SectionCard>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Generate Bulk GUIDs</h3>
-            <CopyButton text={bulkGuids.join("\n")} copyType="CopyAll" />
-          </div>
-          <hr className="line-break" />
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
-            <div className="flex items-center justify-start sm:flex-row gap-4 flex-col">
-              <div className="flex items-center">
-                <label htmlFor="bulk-guid-format" className="sr-only">
-                  GUID Format
-                </label>
-                <select
-                  id="bulk-guid-format"
-                  className="input-field w-auto form-select sm:mr-4 mr-10"
-                  value={bulkGuidFormat}
-                  onChange={(e) => {
-                    const format = e.target.value as GuidVersion;
-                    setBulkGuidFormat(format);
-                  }}
-                >
-                  {GUID_FORMATS.map((format) => (
-                    <option key={format.value} value={format.value}>
-                      {format.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center">
-                <label
-                  htmlFor="guid-count"
-                  className="form-label mr-2"
-                >
-                  Count (1-1000):
-                </label>
-                <div className="flex items-center">
-                  <input
-                    id="guid-count"
-                    type="text"
-                    value={count}
-                    onChange={handleCountChange}
-                    className="input-field w-20 text-right pr-2"
-                    disabled={isLoadingBulk}
-                    placeholder="1-1000"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={4}
-                    aria-label="Number of GUIDs to generate"
-                    aria-describedby={errorBulk ? "bulk-error" : undefined}
-                  />
-                  <div className="flex flex-col ml-1">
-                    <button
-                      onClick={incrementCount}
-                      disabled={isLoadingBulk || count >= 1000}
-                      className="toggle-count"
-                      aria-label="Increment count"
-                    >
-                      +
-                    </button>
-                    <button
-                      onClick={decrementCount}
-                      disabled={isLoadingBulk || count <= 1}
-                      className="toggle-count"
-                      aria-label="Decrement count"
-                    >
-                      −
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="result-box min-h-[100px] max-h-96 overflow-y-auto scrollbox">
-            {isLoadingBulk ? (
-              <p className="text-muted">Generating {count} GUIDs...</p>
-            ) : bulkGuids.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {bulkGuids.map((guid, index) => (
-                  <div key={index} className="inner-result">
-                    <span className="font-mono text-ink truncate">
-                      {guid}
-                    </span>
-                    <CopyButton text={guid} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted">No GUIDs generated yet.</p>
-            )}
-          </div>
-
-          <ErrorBox
-            message={errorBulk}
-            id={errorBulk ? "bulk-error" : undefined}
+    <ToolPage id="guid">
+      <Panel
+        title="Generate"
+        actions={
+          <Segmented
+            size="sm"
+            label="UUID version"
+            value={version}
+            onChange={setVersion}
+            options={[
+              { value: 'v4', label: 'v4 random' },
+              { value: 'v7', label: 'v7 time-ordered' },
+            ]}
           />
-        </SectionCard>
-        <SEODescription title={`a ${seo.title}`}>{seo.body}</SEODescription>
-      </div>
-    </>
+        }
+      >
+        <ValueBlock
+          value={single ? style(single) : ''}
+          actions={
+            <>
+              <CopyButton text={style(single)} size="md" variant="primary" />
+              <GenerateButton variant="secondary" label="New" onClick={regenerate} />
+            </>
+          }
+        />
+
+        <Toolbar className="mt-4 gap-x-5">
+          <Checkbox label="Uppercase" checked={upper} onChange={(e) => setUpper(e.target.checked)} />
+          <Checkbox label="Braces" checked={braces} onChange={(e) => setBraces(e.target.checked)} />
+        </Toolbar>
+      </Panel>
+
+      <Panel title="Bulk">
+        <div className="grid gap-4 md:grid-cols-[12rem_1fr]">
+          <Field label="How many" htmlFor="guid-count" hint="1 to 1000">
+            <Input
+              id="guid-count"
+              type="number"
+              min={1}
+              max={1000}
+              inputMode="numeric"
+              value={count}
+              onChange={(e) => setCount(e.target.value)}
+              onBlur={() => setCount(String(n))}
+            />
+          </Field>
+          <Output label={`${bulk.length} UUIDs`} value={bulkText} rows={10} fileName={`uuids-${version}.txt`} />
+        </div>
+      </Panel>
+    </ToolPage>
   );
 }
-
-export default GuidGenerator;

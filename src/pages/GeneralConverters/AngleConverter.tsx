@@ -1,78 +1,32 @@
-import React from "react";
-import UnitConverter from "./UnitConverter";
-import seoDescriptions from "../../data/seoDescriptions";
+import UnitConverter from './UnitConverter';
 
-// Define types for better type safety
-type AngleUnit = "deg" | "rad" | "grad" | "arcmin" | "arcsec" | "turn";
-
-interface UnitDefinition {
-  value: AngleUnit;
-  label: string;
-}
+type AngleUnit = 'deg' | 'rad' | 'grad' | 'arcmin' | 'arcsec' | 'turn';
 
 const UNIT_TO_RADIANS: Record<AngleUnit, number> = {
-  deg: Math.PI / 180, // Degrees
-  rad: 1, // Radians
-  grad: Math.PI / 200, // Gradians
-  arcmin: Math.PI / 10800, // Arcminutes
-  arcsec: Math.PI / 648000, // Arcseconds
-  turn: 2 * Math.PI, // Turns
+  deg: Math.PI / 180,
+  rad: 1,
+  grad: Math.PI / 200,
+  arcmin: Math.PI / 10800,
+  arcsec: Math.PI / 648000,
+  turn: 2 * Math.PI,
 };
 
-const UNITS: UnitDefinition[] = [
-  { value: "deg", label: "Degrees (°)" },
-  { value: "rad", label: "Radians (rad)" },
-  { value: "grad", label: "Gradians (grad)" },
-  { value: "arcmin", label: "Minutes (arcmin)" },
-  { value: "arcsec", label: "Seconds (arcsec)" },
-  { value: "turn", label: "Turns" },
+const UNITS: { value: AngleUnit; label: string }[] = [
+  { value: 'deg', label: 'Degrees (°)' },
+  { value: 'rad', label: 'Radians (rad)' },
+  { value: 'grad', label: 'Gradians (grad)' },
+  { value: 'arcmin', label: 'Minutes (arcmin)' },
+  { value: 'arcsec', label: 'Seconds (arcsec)' },
+  { value: 'turn', label: 'Turns' },
 ];
 
-function AngleConverter() {
-  const { angle: seo } = seoDescriptions;
-
-  const convertAngle = (
-    value: number,
-    unit: string
-  ): Record<string, number> => {
-    if (!Object.keys(UNIT_TO_RADIANS).includes(unit)) {
-      throw new Error(
-        `Invalid unit: ${unit}. Supported units: ${Object.keys(
-          UNIT_TO_RADIANS
-        ).join(", ")}`
-      );
-    }
-
-    const angleUnit = unit as AngleUnit;
-
-    // Convert to intermediate unit (radians)
-    const intermediateValue = value * UNIT_TO_RADIANS[angleUnit];
-
-    if (!Number.isFinite(intermediateValue)) {
-      throw new Error(
-        "Conversion resulted in non-finite value (possible overflow)"
-      );
-    }
-
-    // Convert from radians to all units
-    return Object.entries(UNIT_TO_RADIANS).reduce((acc, [key, factor]) => {
-      acc[key as AngleUnit] = Number((intermediateValue / factor).toFixed(8));
-      return acc;
-    }, {} as Record<AngleUnit, number>);
-  };
-
-  return (
-    <UnitConverter
-      seo={seo}
-      defaultValue="90"
-      defaultUnit="deg"
-      units={UNITS}
-      converterName="Angle Converter"
-      validationMessage="Angle must be greater than zero."
-      convertFunction={convertAngle}
-      toolName="angle"
-    />
-  );
+function convert(value: number, unit: string): Record<string, number> {
+  if (!(unit in UNIT_TO_RADIANS)) throw new Error(`Unknown unit: ${unit}`);
+  const radians = value * UNIT_TO_RADIANS[unit as AngleUnit];
+  if (!Number.isFinite(radians)) throw new Error('The value is too large to convert.');
+  return Object.fromEntries(Object.entries(UNIT_TO_RADIANS).map(([k, f]) => [k, Number((radians / f).toFixed(8))]));
 }
 
-export default React.memo(AngleConverter);
+export default function AngleConverter() {
+  return <UnitConverter id="angle" defaultValue="90" defaultUnit="deg" units={UNITS} validationMessage="Angle must be greater than zero." convert={convert} />;
+}
