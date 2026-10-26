@@ -31,7 +31,8 @@ Whether you're debugging JSON at 2AM or whipping up a UUID between meetings, XUt
 
 - **Frontend:** React + TypeScript + Vite  
 - **Styling:** Tailwind CSS, tokens in `src/index.css`  
-- **Hosting:** Vercel (analytics were added for it; no host config lives in the repo)
+- **Hosting:** Vercel (no host config lives in the repo)  
+- **Analytics:** Cloudflare Web Analytics, one beacon tag in `index.html`; visitors and per-tool pageviews at dash.cloudflare.com
 
 ## 🗂️ How the frontend is organised
 
