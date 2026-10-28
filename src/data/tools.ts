@@ -7,7 +7,7 @@ import type { ComponentType } from 'react';
  * `in` / `out` form the tool's signature (`jwt → header · payload`), which
  * says what a tool does faster than its name can. Generators have no `in`.
  */
-export type CategoryId = 'encode' | 'data' | 'units' | 'text' | 'fun' | 'image';
+export type CategoryId = 'encode' | 'data' | 'units' | 'text' | 'fun' | 'image' | 'reference';
 
 export interface Category {
   id: CategoryId;
@@ -35,6 +35,7 @@ export const categories: Category[] = [
   { id: 'text', title: 'Text & code' },
   { id: 'fun', title: 'Word play' },
   { id: 'image', title: 'Images & colour' },
+  { id: 'reference', title: 'Reference' },
 ];
 
 export const tools: Tool[] = [
@@ -49,6 +50,9 @@ export const tools: Tool[] = [
   { id: 'eurl', name: 'URL Encoder / Decoder', category: 'encode', in: 'text', out: 'percent-encoded', dir: 'both', blurb: 'Percent-encode text for URLs, or decode it back.', keywords: 'urlencode escape', seo: 'urlEncoder', load: () => import('../pages/Encode-Decode/URLEncoderDecoder') },
   { id: 'html', name: 'HTML Entities', category: 'encode', in: 'text', out: 'entities', dir: 'both', blurb: 'Escape &, < and > for HTML, or unescape them.', keywords: 'escape unescape', seo: 'htmlEntities', load: () => import('../pages/Encode-Decode/HTMLEntities') },
   { id: 'base64_image', name: 'Base64 Image Encoder', category: 'encode', in: 'image', out: 'data url', dir: 'both', blurb: 'Image to a Base64 data URL for CSS or HTML, or decode one back.', keywords: 'data uri img css base64', seo: 'base64Image', load: () => import('../pages/Encode-Decode/Base64Image') },
+  { id: 'random_number', name: 'Random Number Generator', category: 'encode', out: 'random numbers', blurb: 'Random integers in a range, one or many, with or without repeats.', keywords: 'dice pick lottery rng', seo: 'randomNumber', load: () => import('../pages/Encode-Decode/RandomNumberGenerator') },
+  { id: 'bcrypt', name: 'Bcrypt Generator', category: 'encode', in: 'password', out: 'bcrypt hash', dir: 'both', blurb: 'Hash a password with bcrypt, or check one against a hash.', keywords: 'password hash salt rounds verify', seo: 'bcryptGenerator', load: () => import('../pages/Encode-Decode/BcryptGenerator') },
+  { id: 'aes', name: 'AES Encrypt / Decrypt', category: 'encode', in: 'text', out: 'aes-gcm', dir: 'both', blurb: 'Encrypt text with a passphrase using AES-256-GCM, or decrypt it.', keywords: 'encryption cipher password', seo: 'aesEncrypt', load: () => import('../pages/Encode-Decode/AesEncryptDecrypt') },
   { id: 'morse', name: 'Morse Code Translator', category: 'encode', in: 'text', out: 'morse', dir: 'both', blurb: 'Text to dots and dashes, and back.', keywords: 'dots dashes', seo: 'morseCode', load: () => import('../pages/Encode-Decode/MorseCodeTranslator') },
 
   // Data formats
@@ -58,11 +62,18 @@ export const tools: Tool[] = [
   { id: 'json_ts', name: 'JSON to TypeScript', category: 'data', in: 'json', out: 'interface', blurb: 'Infer TypeScript interfaces from a JSON sample.', keywords: 'types typescript', seo: 'jsonToTs', load: () => import('../pages/Converters/JsonTypescriptConverter') },
   { id: 'json_python', name: 'JSON to Python Dataclass', category: 'data', in: 'json', out: 'dataclass', blurb: 'Infer Python dataclasses from a JSON sample.', keywords: 'python types', seo: 'jsonToPython', load: () => import('../pages/Converters/JsonPythonConverter') },
   { id: 'json_pydantic', name: 'JSON to Pydantic Model', category: 'data', in: 'json', out: 'basemodel', blurb: 'Infer Pydantic models from a JSON sample.', keywords: 'python pydantic', seo: 'jsonToPydantic', load: () => import('../pages/Converters/JsonPydanticConverter') },
+  { id: 'json_go', name: 'JSON to Go Struct', category: 'data', in: 'json', out: 'struct', blurb: 'Infer Go structs with json tags from a JSON sample.', keywords: 'golang types', seo: 'jsonToGo', load: () => import('../pages/Converters/JsonGoConverter') },
+  { id: 'json_rust', name: 'JSON to Rust Struct', category: 'data', in: 'json', out: 'struct', blurb: 'Infer Rust structs with serde derives from a JSON sample.', keywords: 'serde types', seo: 'jsonToRust', load: () => import('../pages/Converters/JsonRustConverter') },
+  { id: 'json_kotlin', name: 'JSON to Kotlin', category: 'data', in: 'json', out: 'data class', blurb: 'Infer Kotlin data classes from a JSON sample.', keywords: 'android types', seo: 'jsonToKotlin', load: () => import('../pages/Converters/JsonKotlinConverter') },
+  { id: 'json_csharp', name: 'JSON to C# Class', category: 'data', in: 'json', out: 'class', blurb: 'Infer C# classes from a JSON sample.', keywords: 'dotnet csharp types', seo: 'jsonToCsharp', load: () => import('../pages/Converters/JsonCsharpConverter') },
   { id: 'base_number', name: 'Base Number Converter', category: 'data', in: 'number', out: 'base 2–36', dir: 'both', blurb: 'Binary, octal, decimal, hex and any base up to 36.', keywords: 'binary hex octal radix', seo: 'baseNumber', load: () => import('../pages/Converters/BaseNumberConverter') },
   { id: 'text_base', name: 'Text ⇄ Binary / Hex', category: 'data', in: 'text', out: 'bin · hex · dec', dir: 'both', blurb: 'Text to binary, hex, octal or decimal, and back.', keywords: 'ascii bytes', seo: 'textBase', load: () => import('../pages/Converters/TextBaseConverter') },
   { id: 'unix_utc', name: 'Unix ⇄ UTC', category: 'data', in: 'epoch', out: 'utc', dir: 'both', blurb: 'Epoch seconds or milliseconds to a readable date, and back.', keywords: 'timestamp epoch date', seo: 'unixUtc', load: () => import('../pages/Converters/UnixUTCTimeConverter') },
   { id: 'timezone', name: 'Timezone Converter', category: 'data', in: 'time', out: 'any zone', blurb: 'Convert a time between cities, with DST handled.', keywords: 'time zone clock meeting', seo: 'timezone', load: () => import('../pages/Converters/TimezoneConverter') },
   { id: 'cron', name: 'Cron Converter', category: 'data', in: 'english', out: 'cron', blurb: 'Describe a schedule in words and get the cron expression.', keywords: 'schedule crontab', seo: 'cronConverter', load: () => import('../pages/Converters/CronConverter') },
+  { id: 'cron_parser', name: 'Cron Expression Parser', category: 'data', in: 'cron', out: 'english · next runs', blurb: 'Explain a cron expression in words and list its next run times.', keywords: 'crontab schedule explain', seo: 'cronParser', load: () => import('../pages/Converters/CronParser') },
+  { id: 'date_difference', name: 'Days Between Dates', category: 'data', in: 'two dates', out: 'days · weeks · months', blurb: 'The exact time between two dates, in days, weeks, months and years.', keywords: 'date difference duration calculator', seo: 'dateDifference', load: () => import('../pages/Converters/DateDifference') },
+  { id: 'age', name: 'Age Calculator', category: 'data', in: 'birth date', out: 'age', blurb: 'Exact age in years, months and days, and the next birthday.', keywords: 'birthday how old', seo: 'ageCalculator', load: () => import('../pages/Converters/AgeCalculator') },
   { id: 'epoch', name: 'Epoch Clock', category: 'data', out: 'current unix time', blurb: 'The current Unix timestamp, live, in seconds and milliseconds.', keywords: 'unix timestamp now current time', seo: 'epochClock', load: () => import('../pages/Converters/EpochClock') },
   { id: 'cidr', name: 'CIDR / Subnet Calculator', category: 'data', in: 'ip/prefix', out: 'range · mask · hosts', blurb: 'Network, broadcast, mask and host count for an IPv4 CIDR block.', keywords: 'ip subnet netmask network', seo: 'cidrCalculator', load: () => import('../pages/Converters/CidrCalculator') },
   { id: 'chmod', name: 'Chmod Calculator', category: 'data', in: 'rwx', out: 'octal · symbolic', dir: 'both', blurb: 'File permissions as octal (755) or symbolic (rwxr-xr-x).', keywords: 'permissions unix linux 755 644', seo: 'chmodCalculator', load: () => import('../pages/Converters/ChmodCalculator') },
@@ -92,12 +103,15 @@ export const tools: Tool[] = [
   { id: 'json_diff', name: 'JSON Diff', category: 'text', in: 'two json', out: 'diff', blurb: 'Compare two JSON documents, ignoring key order and formatting.', keywords: 'compare json', seo: 'jsonDiff', load: () => import('../pages/Text-Utilities/JsonDiff') },
   { id: 'json_path', name: 'JSONPath Tester', category: 'text', in: 'json · path', out: 'matches', blurb: 'Query JSON with a JSONPath expression.', keywords: 'query jq jsonpath', seo: 'jsonPath', load: () => import('../pages/Text-Utilities/JsonPath') },
   { id: 'sql_formatter', name: 'SQL Formatter', category: 'text', in: 'sql', out: 'formatted sql', blurb: 'Format and indent SQL for any dialect.', keywords: 'beautify prettify mysql postgres', seo: 'sqlFormatter', load: () => import('../pages/Text-Utilities/SqlFormatter') },
+  { id: 'js_formatter', name: 'JavaScript Beautifier', category: 'text', in: 'js · json', out: 'formatted js', blurb: 'Format minified or messy JavaScript into readable code.', keywords: 'beautify prettify unminify', seo: 'jsFormatter', load: () => import('../pages/Text-Utilities/JsFormatter') },
+  { id: 'html_formatter', name: 'HTML Formatter', category: 'text', in: 'html', out: 'formatted html', blurb: 'Indent and tidy HTML, or strip it down to one line.', keywords: 'beautify prettify minify', seo: 'htmlFormatter', load: () => import('../pages/Text-Utilities/HtmlFormatter') },
   { id: 'xml_formatter', name: 'XML Formatter', category: 'text', in: 'xml', out: 'formatted · minified', blurb: 'Pretty-print or minify XML, with error positions.', keywords: 'beautify prettify validate', seo: 'xmlFormatter', load: () => import('../pages/Text-Utilities/XmlFormatter') },
   { id: 'css_minifier', name: 'CSS Minifier / Beautifier', category: 'text', in: 'css', out: 'minified · formatted', dir: 'both', blurb: 'Minify CSS, or expand it back to readable rules.', keywords: 'compress beautify prettify', seo: 'cssMinifier', load: () => import('../pages/Text-Utilities/CssMinifier') },
   { id: 'html_to_markdown', name: 'HTML to Markdown', category: 'text', in: 'html', out: 'markdown', blurb: 'Convert HTML to clean Markdown.', keywords: 'md convert', seo: 'htmlToMarkdown', load: () => import('../pages/Text-Utilities/HtmlToMarkdown') },
   { id: 'text_case', name: 'Text Case Converter', category: 'text', in: 'text', out: 'camel · snake · kebab', blurb: 'camelCase, snake_case, kebab-case, Title Case and more.', keywords: 'uppercase lowercase', seo: 'textCase', load: () => import('../pages/Text-Utilities/TextCaseConverter') },
   { id: 'markdown', name: 'Markdown Previewer', category: 'text', in: 'markdown', out: 'preview', blurb: 'Render Markdown as you type.', keywords: 'md', seo: 'markdownPreviewer', load: () => import('../pages/Text-Utilities/MarkdownPreviewer') },
   { id: 'line_break_whitespace_remover', name: 'Whitespace Remover', category: 'text', in: 'text', out: 'cleaned', blurb: 'Strip line breaks, extra spaces or both.', keywords: 'trim newline', seo: 'lineBreakWhitespaceRemover', load: () => import('../pages/Text-Utilities/LineBreakWhiteSpaceRemover') },
+  { id: 'sort_lines', name: 'Sort Lines', category: 'text', in: 'lines', out: 'sorted lines', blurb: 'Sort lines alphabetically, numerically, by length or reversed.', keywords: 'alphabetical order reverse shuffle', seo: 'sortLines', load: () => import('../pages/Text-Utilities/SortLines') },
   { id: 'duplicate_line_remover', name: 'Duplicate Line Remover', category: 'text', in: 'lines', out: 'unique lines', blurb: 'Keep each line once.', keywords: 'dedupe unique', seo: 'duplicateLineRemover', load: () => import('../pages/Text-Utilities/DuplicateLineRemover') },
   { id: 'string_counter', name: 'String Counter', category: 'text', in: 'text', out: 'chars · words · lines', blurb: 'Characters, words, lines and bytes.', keywords: 'count length', seo: 'stringCounter', load: () => import('../pages/Text-Utilities/StringCounter') },
   { id: 'regex', name: 'Regex Tester', category: 'text', in: 'pattern', out: 'matches', blurb: 'Test a pattern against text with live matches.', keywords: 'regular expression', seo: 'regexTester', load: () => import('../pages/Text-Utilities/RegexTester') },
@@ -118,10 +132,18 @@ export const tools: Tool[] = [
   { id: 'barcode_generator', name: 'Barcode Generator', category: 'image', in: 'digits', out: 'barcode svg', blurb: 'EAN, UPC, Code 128 and more as SVG or PNG.', keywords: 'ean upc code128', seo: 'barcodeGenerator', load: () => import('../pages/Image-Tools/BarCodeGenerator') },
   { id: 'barcode_reader', name: 'Barcode / QR Reader', category: 'image', in: 'image', out: 'decoded value', blurb: 'Decode a barcode or QR code from an image.', keywords: 'scan', seo: 'barcodeReader', load: () => import('../pages/Image-Tools/BarcodeReader') },
   { id: 'color_picker', name: 'Color Picker', category: 'image', in: 'colour', out: 'hex · rgb · hsl', blurb: 'Pick a colour and copy it in every format.', keywords: 'hex rgb hsl color', seo: 'colorPicker', load: () => import('../pages/Image-Tools/ColorPicker') },
+  { id: 'image_converter', name: 'Image Converter', category: 'image', in: 'image', out: 'png · jpg · webp', blurb: 'Convert between PNG, JPEG and WebP, and resize on the way.', keywords: 'png to jpg webp to png convert resize', seo: 'imageConverter', load: () => import('../pages/Image-Tools/ImageConverter') },
+  { id: 'contrast_checker', name: 'Contrast Checker', category: 'image', in: 'two colours', out: 'ratio · wcag', blurb: 'Contrast ratio of text on a background, against WCAG AA and AAA.', keywords: 'wcag accessibility a11y colour', seo: 'contrastChecker', load: () => import('../pages/Image-Tools/ContrastChecker') },
   { id: 'favicon', name: 'Favicon Generator', category: 'image', in: 'image', out: 'favicon set', blurb: 'Every favicon size from one image.', keywords: 'icon ico', seo: 'faviconGenerator', load: () => import('../pages/Image-Tools/FaviconGenerator') },
   { id: 'image_compressor', name: 'Image Compressor', category: 'image', in: 'image', out: 'smaller image', blurb: 'Shrink a JPEG, PNG or WebP in the browser.', keywords: 'resize optimize', seo: 'imageCompressor', load: () => import('../pages/Image-Tools/ImageCompressor') },
   { id: 'gradient_generator', name: 'Gradient Generator', category: 'image', out: 'css gradient', blurb: 'Build a CSS gradient and copy the rule.', keywords: 'css linear radial', seo: 'gradientGenerator', load: () => import('../pages/Image-Tools/GradientGenerator') },
   { id: 'box_shadow_generator', name: 'Box Shadow Generator', category: 'image', out: 'css box-shadow', blurb: 'Tune a shadow and copy the CSS.', keywords: 'css shadow', seo: 'boxShadowGenerator', load: () => import('../pages/Image-Tools/BoxShadowGenerator') },
+
+  // Reference
+  { id: 'ascii_table', name: 'ASCII Table', category: 'reference', out: 'codes 0–127', blurb: 'Every ASCII character with its decimal, hex, octal, binary and HTML code.', keywords: 'ascii chart character codes', seo: 'asciiTable', load: () => import('../pages/Reference/AsciiTable') },
+  { id: 'http_status_codes', name: 'HTTP Status Codes', category: 'reference', out: '100–599', blurb: 'Every HTTP status code with what it means and when to use it.', keywords: 'http 404 500 response codes', seo: 'httpStatusCodes', load: () => import('../pages/Reference/HttpStatusCodes') },
+  { id: 'mime_types', name: 'MIME Types', category: 'reference', out: 'type by extension', blurb: 'Common MIME types by file extension, searchable.', keywords: 'content-type media type extension', seo: 'mimeTypes', load: () => import('../pages/Reference/MimeTypes') },
+  { id: 'port_numbers', name: 'Port Numbers', category: 'reference', out: 'well-known ports', blurb: 'Well-known and registered TCP and UDP ports and the services behind them.', keywords: 'tcp udp port list', seo: 'portNumbers', load: () => import('../pages/Reference/PortNumbers') },
 ];
 
 export const toolById = new Map(tools.map((t) => [t.id, t]));

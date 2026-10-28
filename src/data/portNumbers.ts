@@ -1,0 +1,167 @@
+export type PortProtocol = 'TCP' | 'UDP' | 'TCP/UDP';
+export type PortRange = 'system' | 'registered' | 'dynamic';
+
+export interface PortRow {
+  port: number;
+  protocol: PortProtocol;
+  service: string;
+  description: string;
+}
+
+export interface PortGroup {
+  name: string;
+  rows: PortRow[];
+}
+
+/** IANA ranges: system 0–1023, registered 1024–49151, dynamic/private 49152–65535. */
+export const portRange = (port: number): PortRange => (port < 1024 ? 'system' : port < 49152 ? 'registered' : 'dynamic');
+
+export const PORT_GROUPS: PortGroup[] = [
+  {
+    name: 'Core internet and system services',
+    rows: [
+      { port: 20, protocol: 'TCP', service: 'FTP data', description: 'File Transfer Protocol data channel (active mode).' },
+      { port: 21, protocol: 'TCP', service: 'FTP', description: 'File Transfer Protocol control channel.' },
+      { port: 22, protocol: 'TCP', service: 'SSH', description: 'Secure Shell: remote login, plus SFTP and SCP over the same port.' },
+      { port: 23, protocol: 'TCP', service: 'Telnet', description: 'Unencrypted remote terminal. Replaced by SSH.' },
+      { port: 25, protocol: 'TCP', service: 'SMTP', description: 'Mail transfer between servers. Often blocked for home connections.' },
+      { port: 43, protocol: 'TCP', service: 'WHOIS', description: 'Domain and IP registration lookups.' },
+      { port: 53, protocol: 'TCP/UDP', service: 'DNS', description: 'Domain Name System. UDP for ordinary queries, TCP for zone transfers and large answers.' },
+      { port: 67, protocol: 'UDP', service: 'DHCP server', description: 'Dynamic Host Configuration Protocol, server side (BOOTP).' },
+      { port: 68, protocol: 'UDP', service: 'DHCP client', description: 'DHCP client side.' },
+      { port: 69, protocol: 'UDP', service: 'TFTP', description: 'Trivial File Transfer Protocol, used for network boot and firmware.' },
+      { port: 80, protocol: 'TCP', service: 'HTTP', description: 'Plain web traffic.' },
+      { port: 88, protocol: 'TCP/UDP', service: 'Kerberos', description: 'Kerberos authentication (Active Directory).' },
+      { port: 110, protocol: 'TCP', service: 'POP3', description: 'Post Office Protocol, unencrypted mail retrieval.' },
+      { port: 111, protocol: 'TCP/UDP', service: 'rpcbind', description: 'ONC RPC port mapper, used by NFS.' },
+      { port: 119, protocol: 'TCP', service: 'NNTP', description: 'Usenet news.' },
+      { port: 123, protocol: 'UDP', service: 'NTP', description: 'Network Time Protocol clock synchronisation.' },
+      { port: 135, protocol: 'TCP', service: 'MS RPC', description: 'Microsoft RPC endpoint mapper (DCOM, WMI).' },
+      { port: 137, protocol: 'UDP', service: 'NetBIOS name', description: 'NetBIOS name service.' },
+      { port: 138, protocol: 'UDP', service: 'NetBIOS datagram', description: 'NetBIOS datagram service.' },
+      { port: 139, protocol: 'TCP', service: 'NetBIOS session', description: 'NetBIOS session service, SMB over NetBIOS.' },
+      { port: 143, protocol: 'TCP', service: 'IMAP', description: 'Internet Message Access Protocol, unencrypted or STARTTLS.' },
+      { port: 161, protocol: 'UDP', service: 'SNMP', description: 'Simple Network Management Protocol queries.' },
+      { port: 162, protocol: 'UDP', service: 'SNMP trap', description: 'SNMP notifications from devices to the manager.' },
+      { port: 179, protocol: 'TCP', service: 'BGP', description: 'Border Gateway Protocol routing between autonomous systems.' },
+      { port: 194, protocol: 'TCP', service: 'IRC', description: 'Internet Relay Chat (most networks actually use 6667 or 6697).' },
+      { port: 389, protocol: 'TCP/UDP', service: 'LDAP', description: 'Lightweight Directory Access Protocol.' },
+      { port: 443, protocol: 'TCP/UDP', service: 'HTTPS', description: 'HTTP over TLS. UDP 443 carries HTTP/3 over QUIC.' },
+      { port: 445, protocol: 'TCP', service: 'SMB', description: 'Server Message Block file sharing directly over TCP (Windows shares, Samba).' },
+      { port: 465, protocol: 'TCP', service: 'SMTPS', description: 'Mail submission over implicit TLS (RFC 8314).' },
+      { port: 500, protocol: 'UDP', service: 'IKE', description: 'Internet Key Exchange for IPsec VPNs.' },
+      { port: 514, protocol: 'UDP', service: 'syslog', description: 'Syslog messages. TCP 514 is the legacy rsh shell service.' },
+      { port: 515, protocol: 'TCP', service: 'LPD', description: 'Line Printer Daemon printing.' },
+      { port: 520, protocol: 'UDP', service: 'RIP', description: 'Routing Information Protocol.' },
+      { port: 587, protocol: 'TCP', service: 'SMTP submission', description: 'Mail submission from clients, with STARTTLS. The port to use for sending mail.' },
+      { port: 631, protocol: 'TCP/UDP', service: 'IPP', description: 'Internet Printing Protocol (CUPS).' },
+      { port: 636, protocol: 'TCP', service: 'LDAPS', description: 'LDAP over TLS.' },
+      { port: 853, protocol: 'TCP', service: 'DNS over TLS', description: 'Encrypted DNS (DoT).' },
+      { port: 873, protocol: 'TCP', service: 'rsync', description: 'rsync daemon.' },
+      { port: 993, protocol: 'TCP', service: 'IMAPS', description: 'IMAP over implicit TLS.' },
+      { port: 995, protocol: 'TCP', service: 'POP3S', description: 'POP3 over implicit TLS.' },
+    ],
+  },
+  {
+    name: 'Databases',
+    rows: [
+      { port: 1433, protocol: 'TCP', service: 'Microsoft SQL Server', description: 'Default instance.' },
+      { port: 1434, protocol: 'UDP', service: 'SQL Server Browser', description: 'Resolves named instances to their ports.' },
+      { port: 1521, protocol: 'TCP', service: 'Oracle Database', description: 'Oracle TNS listener.' },
+      { port: 3306, protocol: 'TCP', service: 'MySQL / MariaDB', description: 'Classic protocol. MySQL X Protocol uses 33060.' },
+      { port: 5432, protocol: 'TCP', service: 'PostgreSQL', description: 'PostgreSQL server.' },
+      { port: 5984, protocol: 'TCP', service: 'CouchDB', description: 'HTTP API.' },
+      { port: 6379, protocol: 'TCP', service: 'Redis', description: 'Redis server. Also Valkey and KeyDB.' },
+      { port: 7474, protocol: 'TCP', service: 'Neo4j HTTP', description: 'Neo4j browser and HTTP API.' },
+      { port: 7687, protocol: 'TCP', service: 'Neo4j Bolt', description: 'Bolt binary protocol used by drivers.' },
+      { port: 8086, protocol: 'TCP', service: 'InfluxDB', description: 'HTTP API.' },
+      { port: 9042, protocol: 'TCP', service: 'Cassandra', description: 'CQL native transport. Also ScyllaDB.' },
+      { port: 9200, protocol: 'TCP', service: 'Elasticsearch HTTP', description: 'REST API. Also OpenSearch.' },
+      { port: 9300, protocol: 'TCP', service: 'Elasticsearch transport', description: 'Node-to-node cluster traffic.' },
+      { port: 11211, protocol: 'TCP/UDP', service: 'Memcached', description: 'Memcached server.' },
+      { port: 27017, protocol: 'TCP', service: 'MongoDB', description: 'mongod and mongos.' },
+      { port: 5601, protocol: 'TCP', service: 'Kibana', description: 'Kibana and OpenSearch Dashboards.' },
+    ],
+  },
+  {
+    name: 'Message brokers and coordination',
+    rows: [
+      { port: 1883, protocol: 'TCP', service: 'MQTT', description: 'MQTT broker, plain.' },
+      { port: 8883, protocol: 'TCP', service: 'MQTT over TLS', description: 'Secure MQTT.' },
+      { port: 2181, protocol: 'TCP', service: 'ZooKeeper', description: 'Client connections.' },
+      { port: 4222, protocol: 'TCP', service: 'NATS', description: 'Client connections. Cluster routes use 6222, monitoring 8222.' },
+      { port: 4369, protocol: 'TCP', service: 'epmd', description: 'Erlang port mapper, used by RabbitMQ clustering.' },
+      { port: 5671, protocol: 'TCP', service: 'AMQPS', description: 'AMQP over TLS (RabbitMQ).' },
+      { port: 5672, protocol: 'TCP', service: 'AMQP', description: 'RabbitMQ and other AMQP 0-9-1 brokers.' },
+      { port: 15672, protocol: 'TCP', service: 'RabbitMQ management', description: 'Management UI and HTTP API.' },
+      { port: 9092, protocol: 'TCP', service: 'Kafka', description: 'Kafka broker (also Redpanda).' },
+      { port: 61616, protocol: 'TCP', service: 'ActiveMQ', description: 'OpenWire protocol.' },
+    ],
+  },
+  {
+    name: 'Development servers',
+    rows: [
+      { port: 3000, protocol: 'TCP', service: 'Node dev servers', description: 'Express, Next.js, Rails, Create React App, Remix. Also Grafana.' },
+      { port: 3001, protocol: 'TCP', service: 'Dev server fallback', description: 'Where Create React App and similar go when 3000 is busy.' },
+      { port: 4200, protocol: 'TCP', service: 'Angular CLI', description: 'ng serve.' },
+      { port: 5000, protocol: 'TCP', service: 'Flask / ASP.NET Core', description: 'Flask and Kestrel defaults. Taken by AirPlay Receiver on recent macOS.' },
+      { port: 5173, protocol: 'TCP', service: 'Vite', description: 'Vite dev server (4173 for vite preview).' },
+      { port: 8000, protocol: 'TCP', service: 'Django / http.server', description: 'Django runserver, Python http.server, PHP built-in server, FastAPI examples.' },
+      { port: 8080, protocol: 'TCP', service: 'HTTP alternate', description: 'Tomcat, Jenkins, Spring Boot, proxies and anything that cannot bind 80.' },
+      { port: 8081, protocol: 'TCP', service: 'HTTP alternate', description: 'Second alternate HTTP port (Nexus, McAfee, misc dashboards).' },
+      { port: 8443, protocol: 'TCP', service: 'HTTPS alternate', description: 'Tomcat SSL and other non-root HTTPS servers.' },
+      { port: 8888, protocol: 'TCP', service: 'Jupyter', description: 'Jupyter Notebook and JupyterLab.' },
+      { port: 9000, protocol: 'TCP', service: 'Misc web apps', description: 'SonarQube, PHP-FPM, MinIO API, Portainer.' },
+      { port: 4443, protocol: 'TCP', service: 'HTTPS alternate', description: 'Local HTTPS dev servers.' },
+      { port: 5555, protocol: 'TCP', service: 'ADB', description: 'Android Debug Bridge over TCP/IP.' },
+      { port: 50051, protocol: 'TCP', service: 'gRPC', description: 'Conventional gRPC example port (not assigned).' },
+    ],
+  },
+  {
+    name: 'Containers, orchestration and observability',
+    rows: [
+      { port: 2375, protocol: 'TCP', service: 'Docker daemon', description: 'Remote API without TLS. Never expose it.' },
+      { port: 2376, protocol: 'TCP', service: 'Docker daemon TLS', description: 'Remote API with TLS.' },
+      { port: 2379, protocol: 'TCP', service: 'etcd client', description: 'etcd client requests (Kubernetes datastore).' },
+      { port: 2380, protocol: 'TCP', service: 'etcd peer', description: 'etcd cluster peer traffic.' },
+      { port: 6443, protocol: 'TCP', service: 'Kubernetes API', description: 'kube-apiserver.' },
+      { port: 10250, protocol: 'TCP', service: 'kubelet', description: 'kubelet API on every node.' },
+      { port: 10256, protocol: 'TCP', service: 'kube-proxy', description: 'kube-proxy health check.' },
+      { port: 8200, protocol: 'TCP', service: 'Vault', description: 'HashiCorp Vault API and UI.' },
+      { port: 8500, protocol: 'TCP', service: 'Consul', description: 'HashiCorp Consul HTTP API and UI.' },
+      { port: 9090, protocol: 'TCP', service: 'Prometheus', description: 'Prometheus server UI and API.' },
+      { port: 9093, protocol: 'TCP', service: 'Alertmanager', description: 'Prometheus Alertmanager.' },
+      { port: 9100, protocol: 'TCP', service: 'node_exporter', description: 'Prometheus host metrics. Also HP JetDirect printing.' },
+      { port: 3100, protocol: 'TCP', service: 'Loki', description: 'Grafana Loki HTTP API.' },
+      { port: 4317, protocol: 'TCP', service: 'OTLP gRPC', description: 'OpenTelemetry collector, gRPC receiver.' },
+      { port: 4318, protocol: 'TCP', service: 'OTLP HTTP', description: 'OpenTelemetry collector, HTTP receiver.' },
+      { port: 16686, protocol: 'TCP', service: 'Jaeger UI', description: 'Jaeger query service.' },
+    ],
+  },
+  {
+    name: 'Remote access, VPN and file sharing',
+    rows: [
+      { port: 1080, protocol: 'TCP', service: 'SOCKS', description: 'SOCKS4/5 proxy.' },
+      { port: 1194, protocol: 'TCP/UDP', service: 'OpenVPN', description: 'OpenVPN, UDP by default.' },
+      { port: 1701, protocol: 'UDP', service: 'L2TP', description: 'Layer 2 Tunneling Protocol, usually inside IPsec.' },
+      { port: 1723, protocol: 'TCP', service: 'PPTP', description: 'Point-to-Point Tunneling Protocol (obsolete, insecure).' },
+      { port: 1812, protocol: 'UDP', service: 'RADIUS', description: 'RADIUS authentication.' },
+      { port: 1813, protocol: 'UDP', service: 'RADIUS accounting', description: 'RADIUS accounting.' },
+      { port: 2049, protocol: 'TCP/UDP', service: 'NFS', description: 'Network File System.' },
+      { port: 3128, protocol: 'TCP', service: 'Squid', description: 'Squid HTTP proxy.' },
+      { port: 3389, protocol: 'TCP/UDP', service: 'RDP', description: 'Remote Desktop Protocol.' },
+      { port: 3478, protocol: 'TCP/UDP', service: 'STUN / TURN', description: 'NAT traversal for WebRTC and VoIP.' },
+      { port: 4500, protocol: 'UDP', service: 'IPsec NAT-T', description: 'IKE and ESP encapsulated in UDP to pass through NAT.' },
+      { port: 5060, protocol: 'TCP/UDP', service: 'SIP', description: 'Session Initiation Protocol, VoIP signalling.' },
+      { port: 5061, protocol: 'TCP', service: 'SIP over TLS', description: 'Encrypted SIP signalling.' },
+      { port: 5222, protocol: 'TCP', service: 'XMPP', description: 'XMPP (Jabber) client connections.' },
+      { port: 5353, protocol: 'UDP', service: 'mDNS', description: 'Multicast DNS, Bonjour and Avahi.' },
+      { port: 5900, protocol: 'TCP', service: 'VNC', description: 'VNC remote desktop (display :0; display :1 is 5901).' },
+      { port: 1900, protocol: 'UDP', service: 'SSDP', description: 'Simple Service Discovery Protocol (UPnP).' },
+      { port: 9418, protocol: 'TCP', service: 'Git', description: 'git:// protocol daemon.' },
+      { port: 3690, protocol: 'TCP', service: 'Subversion', description: 'svnserve.' },
+      { port: 25565, protocol: 'TCP', service: 'Minecraft', description: 'Minecraft Java Edition server (Bedrock uses UDP 19132).' },
+      { port: 51820, protocol: 'UDP', service: 'WireGuard', description: 'WireGuard VPN default. Any port works; this is the documented example.' },
+    ],
+  },
+];

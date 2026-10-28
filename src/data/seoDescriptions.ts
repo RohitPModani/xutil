@@ -8,6 +8,11 @@ import { imageSeo } from './seo/image';
 import { codeSeo } from './seo/code';
 import { jsonSeo } from './seo/json';
 import { devSeo } from './seo/dev';
+import { calcSeo } from './seo/calc';
+import { formatSeo } from './seo/format';
+import { referenceSeo } from './seo/reference';
+import { cryptoSeo } from './seo/crypto';
+import { codegenSeo } from './seo/codegen';
 
 export type { SEODescriptionContent, FAQ } from './seo/types';
 
@@ -22,6 +27,11 @@ const seoDescriptions: Record<string, SEODescriptionContent> = {
   ...codeSeo,
   ...jsonSeo,
   ...devSeo,
+  ...calcSeo,
+  ...formatSeo,
+  ...referenceSeo,
+  ...cryptoSeo,
+  ...codegenSeo,
 };
 
 export default seoDescriptions;

@@ -1,6 +1,6 @@
 # XUtil
 
-> 73 free developer tools that run entirely in the browser: encoders, decoders, converters, generators, formatters and image utilities. No ads, no accounts, no data leaves the page.
+> 92 free developer tools that run entirely in the browser: encoders, decoders, converters, generators, formatters and image utilities. No ads, no accounts, no data leaves the page.
 
 Every tool is a single page. Paste or type on the left, the result appears on the right as you type, and every result has a Copy button. Each page ends with an explainer and FAQ about the format or conversion it handles.
 
@@ -16,6 +16,9 @@ Every tool is a single page. Paste or type on the left, the result appears on th
 - [URL Encoder / Decoder](https://xutil.in/eurl): Percent-encode text for URLs, or decode it back.
 - [HTML Entities](https://xutil.in/html): Escape &, < and > for HTML, or unescape them.
 - [Base64 Image Encoder](https://xutil.in/base64_image): Image to a Base64 data URL for CSS or HTML, or decode one back.
+- [Random Number Generator](https://xutil.in/random_number): Random integers in a range, one or many, with or without repeats.
+- [Bcrypt Generator](https://xutil.in/bcrypt): Hash a password with bcrypt, or check one against a hash.
+- [AES Encrypt / Decrypt](https://xutil.in/aes): Encrypt text with a passphrase using AES-256-GCM, or decrypt it.
 - [Morse Code Translator](https://xutil.in/morse): Text to dots and dashes, and back.
 
 ## Data formats
@@ -26,11 +29,18 @@ Every tool is a single page. Paste or type on the left, the result appears on th
 - [JSON to TypeScript](https://xutil.in/json_ts): Infer TypeScript interfaces from a JSON sample.
 - [JSON to Python Dataclass](https://xutil.in/json_python): Infer Python dataclasses from a JSON sample.
 - [JSON to Pydantic Model](https://xutil.in/json_pydantic): Infer Pydantic models from a JSON sample.
+- [JSON to Go Struct](https://xutil.in/json_go): Infer Go structs with json tags from a JSON sample.
+- [JSON to Rust Struct](https://xutil.in/json_rust): Infer Rust structs with serde derives from a JSON sample.
+- [JSON to Kotlin](https://xutil.in/json_kotlin): Infer Kotlin data classes from a JSON sample.
+- [JSON to C# Class](https://xutil.in/json_csharp): Infer C# classes from a JSON sample.
 - [Base Number Converter](https://xutil.in/base_number): Binary, octal, decimal, hex and any base up to 36.
 - [Text ⇄ Binary / Hex](https://xutil.in/text_base): Text to binary, hex, octal or decimal, and back.
 - [Unix ⇄ UTC](https://xutil.in/unix_utc): Epoch seconds or milliseconds to a readable date, and back.
 - [Timezone Converter](https://xutil.in/timezone): Convert a time between cities, with DST handled.
 - [Cron Converter](https://xutil.in/cron): Describe a schedule in words and get the cron expression.
+- [Cron Expression Parser](https://xutil.in/cron_parser): Explain a cron expression in words and list its next run times.
+- [Days Between Dates](https://xutil.in/date_difference): The exact time between two dates, in days, weeks, months and years.
+- [Age Calculator](https://xutil.in/age): Exact age in years, months and days, and the next birthday.
 - [Epoch Clock](https://xutil.in/epoch): The current Unix timestamp, live, in seconds and milliseconds.
 - [CIDR / Subnet Calculator](https://xutil.in/cidr): Network, broadcast, mask and host count for an IPv4 CIDR block.
 - [Chmod Calculator](https://xutil.in/chmod): File permissions as octal (755) or symbolic (rwxr-xr-x).
@@ -62,12 +72,15 @@ Every tool is a single page. Paste or type on the left, the result appears on th
 - [JSON Diff](https://xutil.in/json_diff): Compare two JSON documents, ignoring key order and formatting.
 - [JSONPath Tester](https://xutil.in/json_path): Query JSON with a JSONPath expression.
 - [SQL Formatter](https://xutil.in/sql_formatter): Format and indent SQL for any dialect.
+- [JavaScript Beautifier](https://xutil.in/js_formatter): Format minified or messy JavaScript into readable code.
+- [HTML Formatter](https://xutil.in/html_formatter): Indent and tidy HTML, or strip it down to one line.
 - [XML Formatter](https://xutil.in/xml_formatter): Pretty-print or minify XML, with error positions.
 - [CSS Minifier / Beautifier](https://xutil.in/css_minifier): Minify CSS, or expand it back to readable rules.
 - [HTML to Markdown](https://xutil.in/html_to_markdown): Convert HTML to clean Markdown.
 - [Text Case Converter](https://xutil.in/text_case): camelCase, snake_case, kebab-case, Title Case and more.
 - [Markdown Previewer](https://xutil.in/markdown): Render Markdown as you type.
 - [Whitespace Remover](https://xutil.in/line_break_whitespace_remover): Strip line breaks, extra spaces or both.
+- [Sort Lines](https://xutil.in/sort_lines): Sort lines alphabetically, numerically, by length or reversed.
 - [Duplicate Line Remover](https://xutil.in/duplicate_line_remover): Keep each line once.
 - [String Counter](https://xutil.in/string_counter): Characters, words, lines and bytes.
 - [Regex Tester](https://xutil.in/regex): Test a pattern against text with live matches.
@@ -90,10 +103,19 @@ Every tool is a single page. Paste or type on the left, the result appears on th
 - [Barcode Generator](https://xutil.in/barcode_generator): EAN, UPC, Code 128 and more as SVG or PNG.
 - [Barcode / QR Reader](https://xutil.in/barcode_reader): Decode a barcode or QR code from an image.
 - [Color Picker](https://xutil.in/color_picker): Pick a colour and copy it in every format.
+- [Image Converter](https://xutil.in/image_converter): Convert between PNG, JPEG and WebP, and resize on the way.
+- [Contrast Checker](https://xutil.in/contrast_checker): Contrast ratio of text on a background, against WCAG AA and AAA.
 - [Favicon Generator](https://xutil.in/favicon): Every favicon size from one image.
 - [Image Compressor](https://xutil.in/image_compressor): Shrink a JPEG, PNG or WebP in the browser.
 - [Gradient Generator](https://xutil.in/gradient_generator): Build a CSS gradient and copy the rule.
 - [Box Shadow Generator](https://xutil.in/box_shadow_generator): Tune a shadow and copy the CSS.
+
+## Reference
+
+- [ASCII Table](https://xutil.in/ascii_table): Every ASCII character with its decimal, hex, octal, binary and HTML code.
+- [HTTP Status Codes](https://xutil.in/http_status_codes): Every HTTP status code with what it means and when to use it.
+- [MIME Types](https://xutil.in/mime_types): Common MIME types by file extension, searchable.
+- [Port Numbers](https://xutil.in/port_numbers): Well-known and registered TCP and UDP ports and the services behind them.
 
 ## Optional
 
