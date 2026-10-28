@@ -9,6 +9,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // main.tsx registers the worker itself so it can poll for new builds.
+      injectRegister: null,
       includeAssets: ['cog_dark.svg', 'cog_light.svg', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
         name: 'XUtil - Developer Tools',
