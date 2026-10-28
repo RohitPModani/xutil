@@ -5,6 +5,9 @@ import { unitsSeo } from './seo/units';
 import { textSeo } from './seo/text';
 import { funSeo } from './seo/fun';
 import { imageSeo } from './seo/image';
+import { codeSeo } from './seo/code';
+import { jsonSeo } from './seo/json';
+import { devSeo } from './seo/dev';
 
 export type { SEODescriptionContent, FAQ } from './seo/types';
 
@@ -16,6 +19,9 @@ const seoDescriptions: Record<string, SEODescriptionContent> = {
   ...textSeo,
   ...funSeo,
   ...imageSeo,
+  ...codeSeo,
+  ...jsonSeo,
+  ...devSeo,
 };
 
 export default seoDescriptions;

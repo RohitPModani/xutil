@@ -51,6 +51,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://xutil.in/base64_image</loc>
+    <lastmod>2026-10-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://xutil.in/morse</loc>
     <lastmod>2026-10-12</lastmod>
     <priority>0.8</priority>
@@ -107,6 +112,21 @@
   </url>
   <url>
     <loc>https://xutil.in/cron</loc>
+    <lastmod>2026-10-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xutil.in/epoch</loc>
+    <lastmod>2026-10-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xutil.in/cidr</loc>
+    <lastmod>2026-10-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xutil.in/chmod</loc>
     <lastmod>2026-10-12</lastmod>
     <priority>0.8</priority>
   </url>
@@ -202,6 +222,36 @@
   </url>
   <url>
     <loc>https://xutil.in/json_validator</loc>
+    <lastmod>2026-10-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xutil.in/json_diff</loc>
+    <lastmod>2026-10-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xutil.in/json_path</loc>
+    <lastmod>2026-10-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xutil.in/sql_formatter</loc>
+    <lastmod>2026-10-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xutil.in/xml_formatter</loc>
+    <lastmod>2026-10-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xutil.in/css_minifier</loc>
+    <lastmod>2026-10-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xutil.in/html_to_markdown</loc>
     <lastmod>2026-10-12</lastmod>
     <priority>0.8</priority>
   </url>

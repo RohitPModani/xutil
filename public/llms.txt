@@ -1,6 +1,6 @@
 # XUtil
 
-> 63 free developer tools that run entirely in the browser: encoders, decoders, converters, generators, formatters and image utilities. No ads, no accounts, no data leaves the page.
+> 73 free developer tools that run entirely in the browser: encoders, decoders, converters, generators, formatters and image utilities. No ads, no accounts, no data leaves the page.
 
 Every tool is a single page. Paste or type on the left, the result appears on the right as you type, and every result has a Copy button. Each page ends with an explainer and FAQ about the format or conversion it handles.
 
@@ -15,6 +15,7 @@ Every tool is a single page. Paste or type on the left, the result appears on th
 - [JWT Decoder](https://xutil.in/jwt): Read a token’s header and payload without sending it anywhere.
 - [URL Encoder / Decoder](https://xutil.in/eurl): Percent-encode text for URLs, or decode it back.
 - [HTML Entities](https://xutil.in/html): Escape &, < and > for HTML, or unescape them.
+- [Base64 Image Encoder](https://xutil.in/base64_image): Image to a Base64 data URL for CSS or HTML, or decode one back.
 - [Morse Code Translator](https://xutil.in/morse): Text to dots and dashes, and back.
 
 ## Data formats
@@ -30,6 +31,9 @@ Every tool is a single page. Paste or type on the left, the result appears on th
 - [Unix ⇄ UTC](https://xutil.in/unix_utc): Epoch seconds or milliseconds to a readable date, and back.
 - [Timezone Converter](https://xutil.in/timezone): Convert a time between cities, with DST handled.
 - [Cron Converter](https://xutil.in/cron): Describe a schedule in words and get the cron expression.
+- [Epoch Clock](https://xutil.in/epoch): The current Unix timestamp, live, in seconds and milliseconds.
+- [CIDR / Subnet Calculator](https://xutil.in/cidr): Network, broadcast, mask and host count for an IPv4 CIDR block.
+- [Chmod Calculator](https://xutil.in/chmod): File permissions as octal (755) or symbolic (rwxr-xr-x).
 
 ## Units & measures
 
@@ -55,6 +59,12 @@ Every tool is a single page. Paste or type on the left, the result appears on th
 - [Text Compare](https://xutil.in/text_compare): Diff by line, word or character, unified or side by side.
 - [URL Parser](https://xutil.in/url_parser): Break a URL into host, path, query and fragment.
 - [JSON Formatter & Validator](https://xutil.in/json_validator): Validate, pretty-print or minify JSON.
+- [JSON Diff](https://xutil.in/json_diff): Compare two JSON documents, ignoring key order and formatting.
+- [JSONPath Tester](https://xutil.in/json_path): Query JSON with a JSONPath expression.
+- [SQL Formatter](https://xutil.in/sql_formatter): Format and indent SQL for any dialect.
+- [XML Formatter](https://xutil.in/xml_formatter): Pretty-print or minify XML, with error positions.
+- [CSS Minifier / Beautifier](https://xutil.in/css_minifier): Minify CSS, or expand it back to readable rules.
+- [HTML to Markdown](https://xutil.in/html_to_markdown): Convert HTML to clean Markdown.
 - [Text Case Converter](https://xutil.in/text_case): camelCase, snake_case, kebab-case, Title Case and more.
 - [Markdown Previewer](https://xutil.in/markdown): Render Markdown as you type.
 - [Whitespace Remover](https://xutil.in/line_break_whitespace_remover): Strip line breaks, extra spaces or both.
