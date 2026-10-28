@@ -1,39 +1,30 @@
 // Generates public/sitemap.xml and public/llms.txt from the tool registry, so
 // neither can drift out of sync with the actual routes.
-import { readFileSync, writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
-
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SITE_URL = "https://xutil.in";
-
-const source = readFileSync(join(root, "src/data/tools.ts"), "utf8");
-
-// Categories: `{ id: 'encode', title: 'Encode & decode' }`
-const categories = [...source.matchAll(/\{ id: '(\w+)', title: '([^']+)' \}/g)].map((m) => ({
-  id: m[1],
-  title: m[2],
-}));
-
-// Tools: `{ id: 'jwt', name: '…', category: 'encode', …, blurb: '…', …`
-const tools = [...source.matchAll(/\{ id: '([^']+)', name: '([^']+)', category: '(\w+)'.*?blurb: '((?:[^'\\]|\\.)*)'/g)].map(
-  (m) => ({ id: m[1], name: m[2], category: m[3], blurb: m[4].replace(/\\'/g, "'") })
-);
-
-if (tools.length === 0 || categories.length === 0) {
-  throw new Error("No tools found - has src/data/tools.ts changed shape?");
-}
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { execSync } from "node:child_process";
+import { SITE_URL, categories, root, tools } from "./registry.mjs";
 
 const today = new Date().toISOString().split("T")[0];
 
-const entry = (loc, priority) =>
-  `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
+// Last commit that touched a file, so lastmod means something to crawlers
+// instead of being the build date on every URL.
+const lastmod = (...files) => {
+  try {
+    return execSync(`git log -1 --format=%cs -- ${files.map((f) => JSON.stringify(f)).join(" ")}`, { cwd: root, encoding: "utf8" }).trim() || today;
+  } catch {
+    return today;
+  }
+};
+
+const entry = (loc, date, priority) =>
+  `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${date}</lastmod>\n    <priority>${priority}</priority>\n  </url>`;
 
 const xml = [
   '<?xml version="1.0" encoding="UTF-8"?>',
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-  entry(`${SITE_URL}/`, "1.0"),
-  ...tools.map((t) => entry(`${SITE_URL}/${t.id}`, "0.8")),
+  entry(`${SITE_URL}/`, lastmod("src/data/tools.ts", "src/pages/Home.tsx"), "1.0"),
+  ...tools.map((t) => entry(`${SITE_URL}/${t.id}`, lastmod(t.file, "src/data/seo"), "0.8")),
   "</urlset>",
 ].join("\n");
 

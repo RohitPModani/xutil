@@ -5,7 +5,7 @@ import { Button } from '../ui';
 export default function NotFound() {
   return (
     <>
-      <PageSEO title="Page not found | XUtil" description="That page does not exist. Browse the full list of developer tools." />
+      <PageSEO title="Page not found | XUtil" description="That page does not exist. Browse the full list of developer tools." noindex />
       <div className="py-16 text-center">
         <p className="font-mono text-xs text-muted">404</p>
         <h1 className="mt-2 text-xl font-semibold tracking-tight text-ink sm:text-2xl">That page does not exist.</h1>
